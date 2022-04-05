@@ -1,0 +1,13 @@
+aluna:
+  owner-ids: <insert-owner-id>
+  discord:
+    token: <insert-token>
+    application-id: <insert-application-id>
+    gatewayIntents:
+      - GUILD_MEMBERS
+    default-permissions:
+      - VIEW_CHANNEL
+
+logging:
+  level:
+    io.viascom.discord.bot.starter.bot: DEBUG
