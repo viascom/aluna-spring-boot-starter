@@ -85,7 +85,7 @@ dependencies {
     //====== Logging ======
     implementation "org.zalando:logbook-logstash:2.14.0"
     implementation "org.zalando:logbook-spring-boot-starter:2.14.0"
-    implementation "com.datadoghq:dd-trace-api:0.97.0"
+    implementation "com.datadoghq:dd-trace-api:0.98.1"
 
     implementation "de.codecentric:spring-boot-admin-starter-client:2.6.3"
     implementation "org.apache.commons:commons-lang3:3.12.0"
