@@ -1,6 +1,7 @@
 plugins {
     id "idea"
     id "java-library"
+    id "maven-publish"
     id "org.jetbrains.kotlin.jvm" version "1.6.20"
     id "org.jetbrains.kotlin.kapt" version "1.6.20"
     id "org.springframework.boot" version "2.6.6"
@@ -102,5 +103,41 @@ classes {
     doLast {
         // Copy generated spring-configuration-metadata.json into jar resources
         file("build/tmp/kapt3/classes/main/META-INF/spring-configuration-metadata.json").renameTo(file("build/resources/main/META-INF/spring-configuration-metadata.json"))
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                groupId = 'io.viascom.discord.bot'
+                name = 'aluna-spring-boot-starter'
+                description = 'Viascom core library for Discord bots.'
+                url = 'https://github.com/viascom/aluna-spring-boot-starter'
+                packaging = 'jar'
+
+                scm {
+                    url = 'https://github.com/viascom/aluna-spring-boot-starter'
+                    connection = 'scm:git://github.com/viascom/aluna-spring-boot-starter.git'
+                    developerConnection = 'scm:git://github.com/viascom/aluna-spring-boot-starter.git'
+                }
+
+                developers {
+                    developer {
+                        id = 'itsmefox'
+                        name = 'Patrick Bösch'
+                        email = 'patrick.boesch@viascom.email'
+                        organizationUrl = 'https://viascom.io/'
+                    }
+                    developer {
+                        id = 'botscripter'
+                        name = 'Nikola Stankovic'
+                        email = 'nikola.stankovic@viascom.email'
+                        organizationUrl = 'https://viascom.io/'
+                    }
+                }
+            }
+        }
     }
 }
