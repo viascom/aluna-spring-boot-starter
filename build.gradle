@@ -2,8 +2,9 @@ plugins {
     id "idea"
     id "java-library"
     id "org.jetbrains.kotlin.jvm" version "1.6.10"
-    id "org.jetbrains.kotlin.kapt" version "1.5.0"
+    id "org.jetbrains.kotlin.kapt" version "1.6.20"
     id "org.springframework.boot" version "2.6.6"
+    id "org.liquibase.gradle" version "2.1.1"
     id "io.spring.dependency-management" version "1.0.11.RELEASE"
 }
 
@@ -84,9 +85,9 @@ dependencies {
     //====== Logging ======
     implementation "org.zalando:logbook-logstash:2.14.0"
     implementation "org.zalando:logbook-spring-boot-starter:2.14.0"
-    implementation "com.datadoghq:dd-trace-api:0.97.0"
+    implementation "com.datadoghq:dd-trace-api:0.98.1"
 
-    implementation "de.codecentric:spring-boot-admin-starter-client:2.6.3"
+    implementation "de.codecentric:spring-boot-admin-starter-client:2.6.4"
     implementation "org.apache.commons:commons-lang3:3.12.0"
     implementation "com.google.guava:guava:31.1-jre"
 }
