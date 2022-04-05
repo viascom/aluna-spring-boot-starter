@@ -87,7 +87,7 @@ dependencies {
     implementation "org.zalando:logbook-spring-boot-starter:2.14.0"
     implementation "com.datadoghq:dd-trace-api:0.98.1"
 
-    implementation "de.codecentric:spring-boot-admin-starter-client:2.6.3"
+    implementation "de.codecentric:spring-boot-admin-starter-client:2.6.4"
     implementation "org.apache.commons:commons-lang3:3.12.0"
     implementation "com.google.guava:guava:31.1-jre"
 }
