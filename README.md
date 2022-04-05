@@ -18,14 +18,16 @@ class PingCommand: DiscordCommand(
 
 ### Create an EventWaiter
 ```kotlin
-eventWaiter.waitForInteraction("command:ping:" + author.id,
-    ButtonInteractionEvent::class.java,
-    hook = it,
-    action = {
-        if (it.componentId == "hi") {
-            it.editMessage("Oh hi :)").removeActionRows().queue()
-        }
-    })
+event.reply("Pong\nYour locale is:${this.userLocale}").addActionRows(ActionRow.of(Button.primary("hi", "Hi"))).queue {
+    eventWaiter.waitForInteraction("command:ping:" + author.id,
+        ButtonInteractionEvent::class.java,
+        hook = it,
+        action = {
+            if (it.componentId == "hi") {
+                it.editMessage("Oh hi :)").removeActionRows().queue()
+            }
+        })
+}
 ```
 
 ### Properties
