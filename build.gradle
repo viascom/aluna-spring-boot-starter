@@ -50,14 +50,16 @@ repositories {
 dependencies {
 
     //====== Kotlin ======
-    implementation "org.jetbrains.kotlin:kotlin-stdlib"
-    implementation "org.jetbrains.kotlin:kotlin-reflect"
+    api "org.jetbrains.kotlin:kotlin-stdlib"
+    api "org.jetbrains.kotlin:kotlin-reflect"
 
     //====== Spring ======
-    implementation ("org.springframework.boot:spring-boot-starter-web") {
-        exclude group: "org.springframework.boot", module: "spring-boot-starter-json"
+    api ("org.springframework.boot:spring-boot-starter-web") {
+        exclude module: "spring-boot-starter-tomcat"
+        exclude module: "spring-boot-starter-json"
     }
-    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    api "org.springframework.boot:spring-boot-starter-undertow"
+    api "org.springframework.boot:spring-boot-starter-actuator"
     kapt "org.springframework.boot:spring-boot-configuration-processor"
 
     //====== Database ======
@@ -69,28 +71,29 @@ dependencies {
 
     //====== JDA ======
     //implementation "net.dv8tion:JDA:4.4.0_352"
-    implementation "net.dv8tion:JDA:5.0.0-alpha.9"
+    api "net.dv8tion:JDA:5.0.0-alpha.9"
 
     //====== Retrofit2 ======
-    implementation "com.squareup.retrofit2:retrofit:2.9.0"
-    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+    api "com.squareup.retrofit2:retrofit:2.9.0"
+    api "com.squareup.retrofit2:converter-gson:2.9.0"
 
     //====== OpenAPI ======
-    implementation "org.springdoc:springdoc-openapi-kotlin:1.5.12"
-    implementation "org.springdoc:springdoc-openapi-ui:1.5.12"
+    api "org.springdoc:springdoc-openapi-kotlin:1.5.12"
+    api "org.springdoc:springdoc-openapi-ui:1.5.12"
 
     //====== Gson ======
-    implementation "com.google.code.gson:gson:2.9.0"
-    implementation "com.fatboyindustrial.gson-javatime-serialisers:gson-javatime-serialisers:1.1.1"
+    api "com.google.code.gson:gson:2.9.0"
+    api "com.fatboyindustrial.gson-javatime-serialisers:gson-javatime-serialisers:1.1.1"
 
     //====== Logging ======
     implementation "org.zalando:logbook-logstash:2.14.0"
     implementation "org.zalando:logbook-spring-boot-starter:2.14.0"
-    implementation "com.datadoghq:dd-trace-api:0.98.1"
+    api "com.datadoghq:dd-trace-api:0.98.1"
 
     implementation "de.codecentric:spring-boot-admin-starter-client:2.6.4"
-    implementation "org.apache.commons:commons-lang3:3.12.0"
-    implementation "com.google.guava:guava:31.1-jre"
+    api "org.apache.commons:commons-lang3:3.12.0"
+    api "com.google.guava:guava:31.1-jre"
+    api 'com.jayway.jsonpath:json-path:2.7.0'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
