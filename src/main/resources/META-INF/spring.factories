@@ -1,0 +1,8 @@
+# AutoConfigurations
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=io.viascom.discord.bot.starter.AlunaAutoConfiguration
+
+#Listener
+org.springframework.context.ApplicationListener=io.viascom.discord.bot.starter.property.PropertiesListener
+
+# FailureAnalyzer
+org.springframework.boot.diagnostics.FailureAnalyzer=io.viascom.discord.bot.starter.exception.AlunaPropertyExceptionFailureAnalyzer

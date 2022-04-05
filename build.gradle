@@ -1,0 +1,107 @@
+plugins {
+    id "idea"
+    id "java-library"
+    id "org.jetbrains.kotlin.jvm" version "1.6.10"
+    id "org.springframework.boot" version "2.6.6"
+    id "io.spring.dependency-management" version "1.0.11.RELEASE"
+    id "org.liquibase.gradle" version "2.1.1"
+    id "org.jetbrains.kotlin.kapt" version "1.5.0"
+}
+
+group "io.viascom.discord.bot"
+version "5.0.0-alpha.9"
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+tasks.bootJar {enabled = false}
+tasks.jar {enabled = true}
+
+jar {
+    baseName "aluna-spring-boot-starter"
+    archiveClassifier.set("")
+    manifest {
+        attributes "Implementation-Version": "${project.version}"
+    }
+//    into("META-INF/maven/$project.group/discord-bot-spring-boot-starter") {
+//        from { generatePomFileForMavenPublication }
+//        rename ".*", "pom.xml"
+//    }
+}
+
+springBoot {
+    buildInfo()
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+
+repositories {
+    mavenCentral()
+    maven {
+        name "m2-dv8tion"
+        url "https://m2.dv8tion.net/releases"
+    }
+}
+
+dependencies {
+
+    //====== Kotlin ======
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
+
+    //====== Spring ======
+    implementation ("org.springframework.boot:spring-boot-starter-web") {
+        exclude group: "org.springframework.boot", module: "spring-boot-starter-json"
+    }
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    kapt "org.springframework.boot:spring-boot-configuration-processor"
+
+    //====== Database ======
+    implementation "org.postgresql:postgresql:42.3.3"
+    implementation "com.vladmihalcea:hibernate-types-52:2.14.1"
+    implementation "org.liquibase:liquibase-core"
+    liquibaseRuntime "org.liquibase:liquibase-core"
+    liquibaseRuntime "org.postgresql:postgresql"
+
+    //====== JDA ======
+    //implementation "net.dv8tion:JDA:4.4.0_352"
+    implementation "net.dv8tion:JDA:5.0.0-alpha.9"
+
+    //====== Retrofit2 ======
+    implementation "com.squareup.retrofit2:retrofit:2.9.0"
+    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+
+    //====== OpenAPI ======
+    implementation "org.springdoc:springdoc-openapi-kotlin:1.5.12"
+    implementation "org.springdoc:springdoc-openapi-ui:1.5.12"
+
+    //====== Gson ======
+    implementation "com.google.code.gson:gson:2.9.0"
+    implementation "com.fatboyindustrial.gson-javatime-serialisers:gson-javatime-serialisers:1.1.1"
+
+    //====== Logging ======
+    implementation "org.zalando:logbook-logstash:2.14.0"
+    implementation "org.zalando:logbook-spring-boot-starter:2.14.0"
+    implementation "com.datadoghq:dd-trace-api:0.97.0"
+
+    implementation "de.codecentric:spring-boot-admin-starter-client:2.6.3"
+    implementation "org.apache.commons:commons-lang3:3.12.0"
+    implementation "com.google.guava:guava:31.1-jre"
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17
+    }
+}
+
+classes {
+    doLast {
+        // Copy generated spring-configuration-metadata.json into jar resources
+        file("build/tmp/kapt3/classes/main/META-INF/spring-configuration-metadata.json").renameTo(file("build/resources/main/META-INF/spring-configuration-metadata.json"))
+    }
+}

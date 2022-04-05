@@ -1,0 +1,13 @@
+aluna:
+  owner-ids: 172591119912140811
+  discord:
+    token: NTM4MzA0OTYxNTQxMzA4NDE2.XErlkA.Ojcz8w24rS0xAbsN-MWc4Hil92w
+    application-id: 538304961541308416
+    gatewayIntents:
+      - GUILD_MEMBERS
+    default-permissions:
+      - VIEW_CHANNEL
+
+logging:
+  level:
+    io.viascom.discord.bot.starter.bot: DEBUG

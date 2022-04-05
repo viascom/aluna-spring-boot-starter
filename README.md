@@ -1,1 +1,1 @@
-# discord-bot-spring-boot-starter
+# aluna-spring-boot-starter
