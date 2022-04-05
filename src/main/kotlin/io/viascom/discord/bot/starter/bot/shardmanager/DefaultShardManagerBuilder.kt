@@ -4,11 +4,13 @@ import io.viascom.discord.bot.starter.bot.listener.EventWaiter
 import io.viascom.discord.bot.starter.bot.listener.GenericAutoCompleteListener
 import io.viascom.discord.bot.starter.bot.listener.ShardReadyEvent
 import io.viascom.discord.bot.starter.bot.listener.SlashCommandInteractionEventListener
+import io.viascom.discord.bot.starter.property.AlunaDiscordProperties
 import io.viascom.discord.bot.starter.property.AlunaProperties
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
 import net.dv8tion.jda.api.sharding.ShardManager
+import net.dv8tion.jda.api.utils.MemberCachePolicy
 import org.slf4j.LoggerFactory
 
 class DefaultShardManagerBuilder(
@@ -30,7 +32,18 @@ class DefaultShardManagerBuilder(
             .setStatus(OnlineStatus.DO_NOT_DISTURB)
             .setActivity(Activity.playing("loading..."))
             .setBulkDeleteSplittingEnabled(true)
-            .setMemberCachePolicy(alunaProperties.discord.memberCachePolicy)
+            .setMemberCachePolicy(
+                when (alunaProperties.discord.memberCachePolicy) {
+                    AlunaDiscordProperties.MemberCachePolicyType.NONE -> MemberCachePolicy.NONE
+                    AlunaDiscordProperties.MemberCachePolicyType.ALL -> MemberCachePolicy.ALL
+                    AlunaDiscordProperties.MemberCachePolicyType.OWNER -> MemberCachePolicy.OWNER
+                    AlunaDiscordProperties.MemberCachePolicyType.ONLINE -> MemberCachePolicy.ONLINE
+                    AlunaDiscordProperties.MemberCachePolicyType.VOICE -> MemberCachePolicy.VOICE
+                    AlunaDiscordProperties.MemberCachePolicyType.BOOSTER -> MemberCachePolicy.BOOSTER
+                    AlunaDiscordProperties.MemberCachePolicyType.PENDING -> MemberCachePolicy.PENDING
+                    AlunaDiscordProperties.MemberCachePolicyType.DEFAULT -> MemberCachePolicy.DEFAULT
+                }
+            )
             //.setChunkingFilter(ChunkingFilter.ALL)
             //.enableCache(CacheFlag.ACTIVITY)
             .setAutoReconnect(alunaProperties.discord.autoReconnect)
