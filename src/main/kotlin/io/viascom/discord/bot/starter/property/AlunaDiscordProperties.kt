@@ -2,7 +2,6 @@ package io.viascom.discord.bot.starter.property
 
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.requests.GatewayIntent
-import net.dv8tion.jda.api.utils.MemberCachePolicy
 
 class AlunaDiscordProperties {
 
@@ -31,7 +30,7 @@ class AlunaDiscordProperties {
      * using {@link MemberCachePolicy#ALL MemberCachePolicy.ALL} as the members cannot be removed from cache by a leave event without this intent.
      *
      */
-    var memberCachePolicy: MemberCachePolicy = MemberCachePolicy.ALL
+    var memberCachePolicy: MemberCachePolicyType = MemberCachePolicyType.ALL
 
     /**
      * Sets whether or not JDA should try to reconnect if a connection-error is encountered.
@@ -40,4 +39,15 @@ class AlunaDiscordProperties {
 
 
     var defaultPermissions: ArrayList<Permission> = arrayListOf()
+
+    enum class MemberCachePolicyType {
+        NONE,
+        ALL,
+        OWNER,
+        ONLINE,
+        VOICE,
+        BOOSTER,
+        PENDING,
+        DEFAULT
+    }
 }
