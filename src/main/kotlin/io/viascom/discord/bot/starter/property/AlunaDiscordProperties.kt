@@ -6,6 +6,11 @@ import net.dv8tion.jda.api.requests.GatewayIntent
 class AlunaDiscordProperties {
 
     /**
+     * Should Aluna auto create a shard manager
+     */
+    var enableJDA: Boolean = true
+
+    /**
      * Discord Bot Token
      */
     var token: String? = null
@@ -39,6 +44,16 @@ class AlunaDiscordProperties {
 
 
     var defaultPermissions: ArrayList<Permission> = arrayListOf()
+
+    /**
+     * Publish jda events as Spring Boot events.
+     */
+    var publishEvents: Boolean = false
+
+    var publishOnlyFirstEvent: Boolean = true
+    var publishGatePingEvent: Boolean = false
+    var publishGuildReadyEvent: Boolean = false
+    var publishEventInterface: Boolean = false
 
     enum class MemberCachePolicyType {
         NONE,

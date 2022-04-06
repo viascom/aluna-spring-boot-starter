@@ -25,8 +25,10 @@ class ListenerRegistration(private val listeners: List<ListenerAdapter>, private
                 GenericAutoCompleteListener::class.java.canonicalName
             )
         }
-        logger.debug("Register Listeners:\n" + listenersToRegister.joinToString("\n") { "- ${it::class.java.canonicalName}" })
-        shardManager.addEventListener(*listenersToRegister.toTypedArray())
+        if(listenersToRegister.isNotEmpty()) {
+            logger.debug("Register Listeners:\n" + listenersToRegister.joinToString("\n") { "- ${it::class.java.canonicalName}" })
+            shardManager.addEventListener(*listenersToRegister.toTypedArray())
+        }
     }
 
 }

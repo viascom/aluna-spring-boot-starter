@@ -10,7 +10,7 @@ plugins {
 }
 
 group "io.viascom.discord.bot"
-version "5.0.0-alpha.9"
+version "0.0.1_5.0.0-alpha.9"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -93,7 +93,8 @@ dependencies {
     implementation "de.codecentric:spring-boot-admin-starter-client:2.6.4"
     api "org.apache.commons:commons-lang3:3.12.0"
     api "com.google.guava:guava:31.1-jre"
-    api 'com.jayway.jsonpath:json-path:2.7.0'
+    api "com.jayway.jsonpath:json-path:2.7.0"
+    api "com.vdurmont:emoji-java:5.1.1"
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

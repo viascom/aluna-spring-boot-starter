@@ -4,10 +4,12 @@ aluna:
     token: <insert-token>
     application-id: <insert-application-id>
     gatewayIntents:
-      - GUILD_MEMBERS
     default-permissions:
       - VIEW_CHANNEL
+    memberCachePolicy: NONE
+    publish-events: true
 
 logging:
   level:
-    io.viascom.discord.bot.starter.bot: DEBUG
+    io.viascom.discord.bot.starter: DEBUG
+    io.viascom.discord.bot.starter.event.EventPublisher: INFO

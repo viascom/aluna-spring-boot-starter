@@ -14,5 +14,6 @@ open class DiscordBot {
     val commands = hashMapOf<String, Class<DiscordCommand>>()
     val commandsWithAutoComplete = hashMapOf<String, Class<DiscordCommand>>()
     val commandExecutor = AlunaThreadPool.getDynamicThreadPool(100, 30, "Aluna-Command-%d")
+    val asyncExecutor = AlunaThreadPool.getDynamicThreadPool(100, 10, "Aluna-Async-%d")
 
 }
