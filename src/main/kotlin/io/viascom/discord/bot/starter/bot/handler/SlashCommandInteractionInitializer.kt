@@ -2,6 +2,7 @@ package io.viascom.discord.bot.starter.bot.handler
 
 import io.viascom.discord.bot.starter.bot.DiscordBot
 import io.viascom.discord.bot.starter.event.DiscordReadyEvent
+import io.viascom.discord.bot.starter.event.EventPublisher
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
@@ -15,6 +16,7 @@ open class SlashCommandInteractionInitializer(
     private val commands: List<DiscordCommand>,
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
+    private val eventPublisher: EventPublisher
 ) : ApplicationListener<DiscordReadyEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -24,10 +26,9 @@ open class SlashCommandInteractionInitializer(
     }
 
     private fun init() {
-        logger.info("Init slash commands")
-
         //Create global commands
         shardManager.shards.first().retrieveCommands().queue { currentCommands ->
+            logger.debug("Update slash commands if needed")
             commands.forEach {
                 it.initCommandOptions()
                 it.initSubCommands()
@@ -38,7 +39,7 @@ open class SlashCommandInteractionInitializer(
             }
 
             commandsToRemove.forEach {
-                logger.info("Removed unneeded command '/${it.name}'")
+                logger.debug("Removed unneeded command '/${it.name}'")
                 shardManager.shards.first().deleteCommandById(it.id).queue()
             }
 
@@ -69,6 +70,7 @@ open class SlashCommandInteractionInitializer(
                 }
             }
 
+            eventPublisher.publishDiscordSlashCommandInitializedEvent(commandsToUpdateOrAdd.map { it::class }, commandsToRemove.map { it.name })
         }
 
         /*

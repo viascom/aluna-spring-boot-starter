@@ -1,13 +1,16 @@
 aluna:
   owner-ids: 172591119912140811
+  enable-translations: true
   discord:
     token: NTM4MzA0OTYxNTQxMzA4NDE2.XErlkA.Ojcz8w24rS0xAbsN-MWc4Hil92w
     application-id: 538304961541308416
     gatewayIntents:
-      - GUILD_MEMBERS
     default-permissions:
       - VIEW_CHANNEL
+    memberCachePolicy: NONE
+    publish-events: true
 
 logging:
   level:
-    io.viascom.discord.bot.starter.bot: DEBUG
+    io.viascom.discord.bot.starter: DEBUG
+    io.viascom.discord.bot.starter.event.EventPublisher: INFO
