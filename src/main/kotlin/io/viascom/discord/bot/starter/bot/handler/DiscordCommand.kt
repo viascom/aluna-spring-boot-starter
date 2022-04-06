@@ -2,6 +2,7 @@ package io.viascom.discord.bot.starter.bot.handler
 
 import datadog.trace.api.Trace
 import io.viascom.discord.bot.starter.property.AlunaProperties
+import io.viascom.discord.bot.starter.translation.MessageService
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
@@ -237,4 +238,7 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
         val hasMissingPermissions: Boolean
             get() = textChannel.isNotEmpty() || voiceChannel.isNotEmpty() || server.isNotEmpty()
     }
+
+    fun MessageService.getForUser(key: String, vararg args: Any): String = this.get(key, userLocale, args)
+    fun MessageService.getForServer(key: String, vararg args: Any): String = this.get(key, serverLocale, args)
 }
