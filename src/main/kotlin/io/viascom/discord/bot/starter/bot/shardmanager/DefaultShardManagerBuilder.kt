@@ -1,9 +1,6 @@
 package io.viascom.discord.bot.starter.bot.shardmanager
 
-import io.viascom.discord.bot.starter.bot.listener.EventWaiter
-import io.viascom.discord.bot.starter.bot.listener.GenericAutoCompleteListener
-import io.viascom.discord.bot.starter.bot.listener.ShardReadyEvent
-import io.viascom.discord.bot.starter.bot.listener.SlashCommandInteractionEventListener
+import io.viascom.discord.bot.starter.bot.listener.*
 import io.viascom.discord.bot.starter.property.AlunaDiscordProperties
 import io.viascom.discord.bot.starter.property.AlunaProperties
 import net.dv8tion.jda.api.OnlineStatus
@@ -18,6 +15,7 @@ class DefaultShardManagerBuilder(
     private val slashCommandInteractionEventListener: SlashCommandInteractionEventListener,
     private val genericAutoCompleteListener: GenericAutoCompleteListener,
     private val eventWaiter: EventWaiter,
+    private val genericEventPublisher: GenericEventPublisher,
     private val alunaProperties: AlunaProperties
 ) : ShardManagerBuilder {
 
@@ -29,6 +27,7 @@ class DefaultShardManagerBuilder(
             .addEventListeners(slashCommandInteractionEventListener)
             .addEventListeners(genericAutoCompleteListener)
             .addEventListeners(eventWaiter)
+            .addEventListeners(genericEventPublisher)
             .setStatus(OnlineStatus.DO_NOT_DISTURB)
             .setActivity(Activity.playing("loading..."))
             .setBulkDeleteSplittingEnabled(true)
@@ -44,8 +43,6 @@ class DefaultShardManagerBuilder(
                     AlunaDiscordProperties.MemberCachePolicyType.DEFAULT -> MemberCachePolicy.DEFAULT
                 }
             )
-            //.setChunkingFilter(ChunkingFilter.ALL)
-            //.enableCache(CacheFlag.ACTIVITY)
             .setAutoReconnect(alunaProperties.discord.autoReconnect)
 
         alunaProperties.discord.gatewayIntents.forEach {

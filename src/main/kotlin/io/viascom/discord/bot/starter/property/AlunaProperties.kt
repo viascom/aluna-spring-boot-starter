@@ -17,6 +17,12 @@ class AlunaProperties {
     var discord: AlunaDiscordProperties = AlunaDiscordProperties()
 
     /**
+     * Notification settings
+     */
+    @NestedConfigurationProperty
+    var notification: AlunaNotificationProperties = AlunaNotificationProperties()
+
+    /**
      * Is in production mode
      */
     var productionMode: Boolean = false
@@ -31,5 +37,14 @@ class AlunaProperties {
      */
     var ownerIds: ArrayList<Long> = arrayListOf()
 
+    /**
+     * Translation path
+     *
+     * Format: <code>file:/</code>
+     *
+     * If not set, Aluna will fall back to <code>classpath:i18n/messages</code>
+     */
+    var translationPath: String? = null
 
+    var useEnGbForEnInProduction: Boolean = true
 }
