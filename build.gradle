@@ -25,7 +25,7 @@ jar {
         attributes "Implementation-Version": "${project.version}"
     }
     into("META-INF/maven/$project.group/aluna-spring-boot-starter") {
-        from { generatePomFileForMavenPublication }
+        from { generatePomFileForMavenJavaPublication }
         rename ".*", "pom.xml"
     }
 }
