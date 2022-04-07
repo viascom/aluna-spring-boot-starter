@@ -24,10 +24,10 @@ jar {
     manifest {
         attributes "Implementation-Version": "${project.version}"
     }
-//    into("META-INF/maven/$project.group/discord-bot-spring-boot-starter") {
-//        from { generatePomFileForMavenPublication }
-//        rename ".*", "pom.xml"
-//    }
+    into("META-INF/maven/$project.group/aluna-spring-boot-starter") {
+        from { generatePomFileForMavenPublication }
+        rename ".*", "pom.xml"
+    }
 }
 
 springBoot {
