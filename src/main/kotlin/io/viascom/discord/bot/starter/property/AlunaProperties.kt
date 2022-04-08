@@ -46,5 +46,13 @@ class AlunaProperties {
      */
     var translationPath: String? = null
 
-    var useEnGbForEnInProduction: Boolean = true
+    /**
+     * Use en_GB for en in production
+     */
+    var useEnGbForEnInProduction: Boolean = false
+
+    /**
+     * Should Aluna register commands in production mode which are in commandDevelopmentStatus == IN_DEVELOPMENT
+     */
+    var includeInDevelopmentCommands: Boolean = false
 }

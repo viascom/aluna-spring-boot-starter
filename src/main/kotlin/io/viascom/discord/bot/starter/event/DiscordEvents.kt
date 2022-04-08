@@ -196,7 +196,7 @@ class OnEmoteRemovedEvent(source: Any?, @Nonnull val event: EmoteRemovedEvent) :
 class OnEmoteUpdateNameEvent(source: Any?, @Nonnull val event: EmoteUpdateNameEvent) : ApplicationEvent(source)
 class OnEmoteUpdateRolesEvent(source: Any?, @Nonnull val event: EmoteUpdateRolesEvent) : ApplicationEvent(source)
 
-//class source: Any?, OnHttpRequestEvent(@Nonnull val event: HttpRequestEvent):ApplicationEvent(source)
+//class OnHttpRequestEvent(@Nonnull val event: HttpRequestEvent):ApplicationEvent(source)
 class OnGenericInteractionCreateEvent(source: Any?, @Nonnull val event: GenericInteractionCreateEvent) : ApplicationEvent(source)
 class OnGenericAutoCompleteInteractionEvent(source: Any?, @Nonnull val event: GenericAutoCompleteInteractionEvent) : ApplicationEvent(source)
 class OnGenericComponentInteractionCreateEvent(source: Any?, @Nonnull val event: GenericComponentInteractionCreateEvent) : ApplicationEvent(source)
