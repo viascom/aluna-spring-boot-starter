@@ -1,14 +1,19 @@
 package io.viascom.discord.bot.starter.bot.handler
 
 import datadog.trace.api.Trace
+import io.viascom.discord.bot.starter.bot.DiscordBot
 import io.viascom.discord.bot.starter.property.AlunaProperties
 import io.viascom.discord.bot.starter.translation.MessageService
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,6 +21,7 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.util.StopWatch
 import java.util.*
+import java.util.function.Consumer
 
 abstract class DiscordCommand(name: String, description: String, val observeAutoComplete: Boolean = false) : CommandDataImpl(name, description),
     SlashCommandData {
@@ -26,9 +32,10 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
     @Autowired
     lateinit var discordCommandConditions: DiscordCommandConditions
 
-    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    @Autowired
+    lateinit var discordBot: DiscordBot
 
-    lateinit var commandId: String
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     var useScope = UseScope.GLOBAL
 
@@ -38,13 +45,9 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
     var isHidden = false
 
     var commandDevelopmentStatus = DevelopmentStatus.LIVE
-        set(value) {
-            field = value
-            processDevelopmentStatus()
-        }
 
     /**
-     * The [CooldownScope][Command.CooldownScope] of the command. This defines how far of a scope cooldowns have.
+     * The [CooldownScope][Command.CooldownScope] of the command. This defines how far from a scope cooldowns have.
      * <br></br>Default [CooldownScope.USER][Command.CooldownScope.USER].
      */
     var cooldownScope = CooldownScope.USER
@@ -95,7 +98,27 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
     protected abstract fun execute(event: SlashCommandInteractionEvent)
 
     /**
-     * This method gets triggered, as soon as an autocomplete event for this event is called. Spring will create a new instance of the command!
+     * This method gets triggered, as soon as a button event for this command is called.
+     * Make sure that you register your message id: discordBot.registerMessageForButtonEvents(it, this)
+     *
+     * @param event
+     */
+    @Trace
+    open fun onButtonInteraction(event: ButtonInteractionEvent) {
+    }
+
+    /**
+     * This method gets triggered, as soon as a select event for this command is called.
+     * Make sure that you register your message id: discordBot.registerMessageForSelectEvents(it, this)
+     *
+     * @param event
+     */
+    @Trace
+    open fun onSelectMenuInteraction(event: SelectMenuInteractionEvent) {
+    }
+
+    /**
+     * This method gets triggered, as soon as an autocomplete event for this command is called.
      *
      * @param event
      */
@@ -103,11 +126,24 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
     open fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
     }
 
+    /**
+     * This method gets triggered, as soon as a modal event for this command is called.
+     *
+     * @param event
+     */
+    @Trace
+    private fun onModalInteraction(option: String, event: CommandAutoCompleteInteractionEvent) {
+    }
+
     open fun initCommandOptions() {}
     open fun initSubCommands() {}
 
     open fun getServerSpecificData(): HashMap<String, Any> {
         return hashMapOf()
+    }
+
+    fun prepareCommand() {
+        processDevelopmentStatus()
     }
 
     /**
@@ -170,7 +206,7 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
 
         try {
             writeToStats()
-            logger.info("Run command /${event.commandPath}")
+            logger.info("Run command /${event.commandPath} [${this.hashCode()}]")
             execute(event)
             exitCommand(event)
         } catch (t: Throwable) {
@@ -187,7 +223,7 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
 
     }
 
-    private fun exitCommand(event: net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent) {
+    private fun exitCommand(event: SlashCommandInteractionEvent) {
         if (alunaProperties.useStopwatch && stopWatch != null) {
             stopWatch!!.stop()
             println("/${event.commandPath} (${this.author.id}) [${this.hashCode()}] -> ${stopWatch!!.totalTimeMillis}ms")
@@ -241,4 +277,47 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
 
     fun MessageService.getForUser(key: String, vararg args: Any): String = this.get(key, userLocale, args)
     fun MessageService.getForServer(key: String, vararg args: Any): String = this.get(key, serverLocale, args)
+
+    fun ReplyCallbackAction.queueAndRegisterInteraction(
+        command: DiscordCommand,
+        type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
+        persist: Boolean = false,
+        success: Consumer<in InteractionHook>? = null
+    ) {
+        this.queue {
+            it as InteractionHook
+            if (type.contains(EventRegisterType.BUTTON)) {
+                discordBot.registerMessageForButtonEvents(it, command, persist)
+            }
+            if (type.contains(EventRegisterType.SELECT)) {
+                discordBot.registerMessageForSelectEvents(it, command, persist)
+            }
+            success?.accept(it)
+        }
+    }
+
+    fun ReplyCallbackAction.queueAndRegisterInteraction(
+        command: DiscordCommand,
+        type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
+        persist: Boolean = false,
+        success: Consumer<in InteractionHook>? = null,
+        failure: Consumer<in Throwable>? = null
+    ) {
+        this.queue({
+            it as InteractionHook
+            if (type.contains(EventRegisterType.BUTTON)) {
+                discordBot.registerMessageForButtonEvents(it, command, persist)
+            }
+            if (type.contains(EventRegisterType.SELECT)) {
+                discordBot.registerMessageForSelectEvents(it, command, persist)
+            }
+            success?.accept(it)
+        }, {
+            failure?.accept(it)
+        })
+    }
+
+    enum class EventRegisterType {
+        BUTTON, SELECT
+    }
 }

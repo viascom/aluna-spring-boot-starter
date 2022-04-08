@@ -1,6 +1,6 @@
 package io.viascom.discord.bot.starter.bot
 
-import io.viascom.discord.bot.starter.bot.listener.GenericAutoCompleteListener
+import io.viascom.discord.bot.starter.bot.listener.GenericInteractionListener
 import io.viascom.discord.bot.starter.bot.listener.ShardReadyEvent
 import io.viascom.discord.bot.starter.bot.listener.SlashCommandInteractionEventListener
 import net.dv8tion.jda.api.hooks.ListenerAdapter
@@ -22,7 +22,7 @@ class ListenerRegistration(private val listeners: List<ListenerAdapter>, private
             it::class.java.canonicalName in arrayListOf(
                 ShardReadyEvent::class.java.canonicalName,
                 SlashCommandInteractionEventListener::class.java.canonicalName,
-                GenericAutoCompleteListener::class.java.canonicalName
+                GenericInteractionListener::class.java.canonicalName
             )
         }
         if(listenersToRegister.isNotEmpty()) {

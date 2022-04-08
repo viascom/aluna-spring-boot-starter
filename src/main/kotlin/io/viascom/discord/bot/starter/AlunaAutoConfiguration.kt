@@ -37,7 +37,7 @@ open class AlunaAutoConfiguration(
     open fun defaultShardManagerBuilder(
         shardReadyEvent: ShardReadyEvent,
         slashCommandInteractionEventListener: SlashCommandInteractionEventListener,
-        genericAutoCompleteListener: GenericAutoCompleteListener,
+        genericAutoCompleteListener: GenericInteractionListener,
         eventWaiter: EventWaiter,
         genericEventPublisher: GenericEventPublisher,
         alunaProperties: AlunaProperties

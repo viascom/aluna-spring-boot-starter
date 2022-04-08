@@ -1,5 +1,6 @@
 package io.viascom.discord.bot.starter.bot.listener
 
+import io.viascom.discord.bot.starter.configuration.scope.DiscordContext
 import io.viascom.discord.bot.starter.util.AlunaThreadPool
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Message
@@ -8,6 +9,7 @@ import net.dv8tion.jda.api.events.Event
 import net.dv8tion.jda.api.events.GatewayPingEvent
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.ShutdownEvent
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent
 import net.dv8tion.jda.api.hooks.EventListener
 import net.dv8tion.jda.api.interactions.InteractionHook
@@ -21,6 +23,7 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 import java.util.function.Predicate
+import kotlin.reflect.full.isSuperclassOf
 
 @Service
 class EventWaiter : EventListener {
@@ -55,6 +58,10 @@ class EventWaiter : EventListener {
                         if (waitingEvent.attempt(event)) {
                             executorThreadPool.submit {
                                 try {
+                                    if (SlashCommandInteractionEvent::class.isSuperclassOf(event::class)) {
+                                        event as SlashCommandInteractionEvent
+                                        DiscordContext.setDiscordState(event.user.id, event.guild?.id, true)
+                                    }
                                     waitingEvent.execute(event)
                                 } catch (e: Exception) {
                                     e.printStackTrace()

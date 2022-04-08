@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 class DefaultShardManagerBuilder(
     private val shardReadyEvent: ShardReadyEvent,
     private val slashCommandInteractionEventListener: SlashCommandInteractionEventListener,
-    private val genericAutoCompleteListener: GenericAutoCompleteListener,
+    private val genericAutoCompleteListener: GenericInteractionListener,
     private val eventWaiter: EventWaiter,
     private val genericEventPublisher: GenericEventPublisher,
     private val alunaProperties: AlunaProperties
