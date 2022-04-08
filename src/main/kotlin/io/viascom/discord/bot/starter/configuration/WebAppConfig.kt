@@ -35,16 +35,6 @@ open class WebAppConfig(
     override fun configureContentNegotiation(configurer: ContentNegotiationConfigurer) {
         configurer.defaultContentType(MediaType.APPLICATION_JSON)
     }
-//
-//    override fun addArgumentResolvers(argumentResolvers: MutableList<HandlerMethodArgumentResolver>) {
-//        argumentResolvers.add(SpecificationArgumentResolver())
-//    }
-
-//    override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-//        registry
-//            .addResourceHandler("/static/**")
-//            .addResourceLocations("/static/")
-//    }
 
     @Bean
     open fun corsConfigurer(): WebMvcConfigurer? {

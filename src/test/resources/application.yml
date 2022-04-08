@@ -1,4 +1,5 @@
 aluna:
+  production-mode: false
   owner-ids: <insert-owner-id>
   discord:
     token: <insert-token>
@@ -13,3 +14,8 @@ logging:
   level:
     io.viascom.discord.bot.starter: DEBUG
     io.viascom.discord.bot.starter.event.EventPublisher: INFO
+
+management:
+  endpoint:
+    health:
+      show-details: always

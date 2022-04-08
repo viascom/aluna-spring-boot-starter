@@ -3,6 +3,7 @@ package io.viascom.discord.bot.starter.bot.handler
 import io.viascom.discord.bot.starter.bot.DiscordBot
 import io.viascom.discord.bot.starter.event.DiscordReadyEvent
 import io.viascom.discord.bot.starter.event.EventPublisher
+import io.viascom.discord.bot.starter.property.AlunaProperties
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
@@ -16,7 +17,8 @@ open class SlashCommandInteractionInitializer(
     private val commands: List<DiscordCommand>,
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
-    private val eventPublisher: EventPublisher
+    private val eventPublisher: EventPublisher,
+    private val alunaProperties: AlunaProperties
 ) : ApplicationListener<DiscordReadyEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -29,13 +31,23 @@ open class SlashCommandInteractionInitializer(
         //Create global commands
         shardManager.shards.first().retrieveCommands().queue { currentCommands ->
             logger.debug("Update slash commands if needed")
+
+            val filteredCommands = commands.filter {
+                when {
+                    (alunaProperties.includeInDevelopmentCommands) -> true
+                    (alunaProperties.productionMode && it.commandDevelopmentStatus == DiscordCommand.DevelopmentStatus.IN_DEVELOPMENT) -> false
+                    else -> true
+                }
+            }
+
             commands.forEach {
                 it.initCommandOptions()
                 it.initSubCommands()
+                it.prepareCommand()
             }
 
             val commandsToRemove = currentCommands.filter { command ->
-                commands.none { compareCommands(it, command) }
+                filteredCommands.none { compareCommands(it, command) }
             }
 
             commandsToRemove.forEach {
@@ -43,7 +55,7 @@ open class SlashCommandInteractionInitializer(
                 shardManager.shards.first().deleteCommandById(it.id).queue()
             }
 
-            val commandsToUpdateOrAdd = commands
+            val commandsToUpdateOrAdd = filteredCommands
                 .filter { it.useScope in arrayListOf(DiscordCommand.UseScope.GLOBAL, DiscordCommand.UseScope.GUILD_ONLY) }
                 .filter { commandData ->
                     currentCommands.none { compareCommands(commandData, it) }
@@ -53,8 +65,8 @@ open class SlashCommandInteractionInitializer(
                 printCommand(discordCommand)
                 shardManager.shards.first().upsertCommand(discordCommand).queue { command ->
                     discordBot.commands[command.name] = discordCommand.javaClass
-                    if (discordCommand.observeAutoComplete) {
-                        discordBot.commandsWithAutoComplete[command.name] = discordCommand.javaClass
+                    if (discordCommand.observeAutoComplete && command.name !in discordBot.commandsWithAutocomplete) {
+                        discordBot.commandsWithAutocomplete.add(command.name)
                     }
                 }
             }
@@ -62,8 +74,8 @@ open class SlashCommandInteractionInitializer(
             commands.forEach { command ->
                 try {
                     discordBot.commands.computeIfAbsent(command.name) { commands.first { it.name == command.name }.javaClass }
-                    if (command.observeAutoComplete) {
-                        discordBot.commandsWithAutoComplete.computeIfAbsent(command.name) { commands.first { it.name == command.name }.javaClass }
+                    if (command.observeAutoComplete && command.name !in discordBot.commandsWithAutocomplete) {
+                        discordBot.commandsWithAutocomplete.add(command.name)
                     }
                 } catch (e: Exception) {
                     logger.error("Could not add command '${command.name}' to available commands")
