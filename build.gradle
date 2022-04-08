@@ -90,7 +90,7 @@ dependencies {
     implementation "org.zalando:logbook-spring-boot-starter:2.14.0"
     api "com.datadoghq:dd-trace-api:0.98.1"
 
-    implementation "de.codecentric:spring-boot-admin-starter-client:2.6.4"
+    implementation "de.codecentric:spring-boot-admin-starter-client:2.6.5"
     api "org.apache.commons:commons-lang3:3.12.0"
     api "com.google.guava:guava:31.1-jre"
     api "com.jayway.jsonpath:json-path:2.7.0"
