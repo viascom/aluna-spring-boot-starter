@@ -4,7 +4,9 @@ import io.viascom.discord.bot.starter.bot.DiscordBot
 import io.viascom.discord.bot.starter.bot.emotes.DefaultSystemEmoteLoader
 import io.viascom.discord.bot.starter.bot.emotes.SystemEmoteLoader
 import io.viascom.discord.bot.starter.bot.handler.DefaultDiscordCommandConditions
+import io.viascom.discord.bot.starter.bot.handler.DefaultDiscordCommandLoadAdditionalData
 import io.viascom.discord.bot.starter.bot.handler.DiscordCommandConditions
+import io.viascom.discord.bot.starter.bot.handler.DiscordCommandLoadAdditionalData
 import io.viascom.discord.bot.starter.bot.listener.*
 import io.viascom.discord.bot.starter.bot.shardmanager.DefaultShardManagerBuilder
 import io.viascom.discord.bot.starter.property.AlunaProperties
@@ -61,6 +63,13 @@ open class AlunaAutoConfiguration(
     ): DiscordCommandConditions {
         logger.debug("Enable DefaultDiscordCommandConditions")
         return DefaultDiscordCommandConditions(alunaProperties, systemEmoteLoader)
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    open fun discordCommandLoadAdditionalData(): DiscordCommandLoadAdditionalData {
+        logger.debug("Enable DefaultDiscordCommandLoadAdditionalData")
+        return DefaultDiscordCommandLoadAdditionalData()
     }
 
     @Bean

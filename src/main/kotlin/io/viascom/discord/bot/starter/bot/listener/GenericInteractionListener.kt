@@ -21,7 +21,7 @@ class GenericInteractionListener(
             if (event.name == commandId) {
                 discordBot.commands[event.name]?.let { command ->
                     discordBot.commandExecutor.execute {
-                        DiscordContext.setDiscordState(event.user.id, event.guild?.id)
+                        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE)
                         context.getBean(command).onAutoCompleteEvent(event.focusedOption.name, event)
                     }
                 }
@@ -35,10 +35,10 @@ class GenericInteractionListener(
                 discordBot.commandExecutor.execute {
                     DiscordContext.setDiscordState(event.user.id, event.guild?.id)
                     val entry = discordBot.messagesToObserveButton[event.message.id]!!
-                    if (!entry.third) {
+                    val result = context.getBean(entry.command.java).onButtonInteraction(entry.hook, event, entry.additionalData)
+                    if (!entry.stayActive && result) {
                         discordBot.removeMessageForButtonEvents(event.message.id)
                     }
-                    context.getBean(entry.first.java).onButtonInteraction(event)
                 }
             }
         }
@@ -51,10 +51,10 @@ class GenericInteractionListener(
                 discordBot.commandExecutor.execute {
                     DiscordContext.setDiscordState(event.user.id, event.guild?.id)
                     val entry = discordBot.messagesToObserveSelect[event.message.id]!!
-                    if (!entry.third) {
+                    val result = context.getBean(entry.command.java).onSelectMenuInteraction(entry.hook, event, entry.additionalData)
+                    if (!entry.stayActive && result) {
                         discordBot.removeMessageForSelectEvents(event.message.id)
                     }
-                    context.getBean(entry.first.java).onSelectMenuInteraction(event)
                 }
             }
         }

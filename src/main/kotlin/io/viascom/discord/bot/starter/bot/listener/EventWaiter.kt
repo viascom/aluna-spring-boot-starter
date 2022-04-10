@@ -60,7 +60,7 @@ class EventWaiter : EventListener {
                                 try {
                                     if (SlashCommandInteractionEvent::class.isSuperclassOf(event::class)) {
                                         event as SlashCommandInteractionEvent
-                                        DiscordContext.setDiscordState(event.user.id, event.guild?.id, true)
+                                        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.COMMAND)
                                     }
                                     waitingEvent.execute(event)
                                 } catch (e: Exception) {

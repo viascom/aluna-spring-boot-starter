@@ -11,6 +11,11 @@ class ShardReadyEvent(private val discordReadyEventPublisher: EventPublisher) : 
     override fun onReady(event: ReadyEvent) {
         super.onReady(event)
 
+        //If first shard is connected, trigger command update
+        if (event.jda.shardInfo.shardId == 0) {
+            discordReadyEventPublisher.publishDiscordFirstShardReadyEvent(event)
+        }
+
         //Publish DiscordReadyEvent as soon as all shards are connected
         if ((event.jda.shardInfo.shardId + 1) == (event.jda.shardInfo.shardTotal)) {
             discordReadyEventPublisher.publishDiscordReadyEvent(event)
