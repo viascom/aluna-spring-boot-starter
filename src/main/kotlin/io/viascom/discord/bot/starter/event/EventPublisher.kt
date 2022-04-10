@@ -1,10 +1,10 @@
 package io.viascom.discord.bot.starter.event
 
 import io.viascom.discord.bot.starter.bot.DiscordBot
-import io.viascom.discord.bot.starter.bot.handler.DiscordCommand
 import io.viascom.discord.bot.starter.property.AlunaProperties
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.ReadyEvent
+import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
@@ -29,7 +29,15 @@ class EventPublisher(
         }
     }
 
-    fun publishDiscordSlashCommandInitializedEvent(newUpdatedCommands: List<KClass<out DiscordCommand>>, removedCommands: List<String>) {
+    fun publishDiscordFirstShardReadyEvent(jdaEvent: ReadyEvent) {
+        discordBot.asyncExecutor.execute {
+            logger.debug("Publishing DiscordFirstShardReadyEvent")
+            val discordReadyEvent = DiscordFirstShardReadyEvent(this, jdaEvent)
+            applicationEventPublisher.publishEvent(discordReadyEvent)
+        }
+    }
+
+    fun publishDiscordSlashCommandInitializedEvent(newUpdatedCommands: List<KClass<out CommandDataImpl>>, removedCommands: List<String>) {
         discordBot.asyncExecutor.execute {
             logger.debug("Publishing DiscordSlashCommandInitializedEvent")
             val discordSlashCommandInitializedEvent = DiscordSlashCommandInitializedEvent(this, newUpdatedCommands, removedCommands)

@@ -10,13 +10,13 @@ plugins {
 }
 
 group "io.viascom.discord.bot"
-version "0.0.3_5.0.0-alpha.9"
+version "0.0.5_5.0.0-alpha.9"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
-tasks.bootJar {enabled = false}
-tasks.jar {enabled = true}
+tasks.bootJar { enabled = false }
+tasks.jar { enabled = true }
 
 jar {
     baseName "aluna-spring-boot-starter"
@@ -54,7 +54,7 @@ dependencies {
     api "org.jetbrains.kotlin:kotlin-reflect"
 
     //====== Spring ======
-    api ("org.springframework.boot:spring-boot-starter-web") {
+    api("org.springframework.boot:spring-boot-starter-web") {
         exclude module: "spring-boot-starter-tomcat"
         exclude module: "spring-boot-starter-json"
     }
@@ -70,7 +70,6 @@ dependencies {
     liquibaseRuntime "org.postgresql:postgresql"
 
     //====== JDA ======
-    //implementation "net.dv8tion:JDA:4.4.0_352"
     api "net.dv8tion:JDA:5.0.0-alpha.9"
 
     //====== Retrofit2 ======
@@ -89,6 +88,11 @@ dependencies {
     implementation "org.zalando:logbook-logstash:2.14.0"
     implementation "org.zalando:logbook-spring-boot-starter:2.14.0"
     api "com.datadoghq:dd-trace-api:0.98.1"
+
+    //====== Script-Engine ======
+    implementation "org.openjdk.nashorn:nashorn-core:15.3"
+    implementation "org.graalvm.js:js:21.2.0"
+    implementation "org.graalvm.js:js-scriptengine:21.2.0"
 
     implementation "de.codecentric:spring-boot-admin-starter-client:2.6.4"
     api "org.apache.commons:commons-lang3:3.12.0"

@@ -1,7 +1,7 @@
 package io.viascom.discord.bot.starter.bot.handler
 
 import io.viascom.discord.bot.starter.bot.DiscordBot
-import io.viascom.discord.bot.starter.event.DiscordReadyEvent
+import io.viascom.discord.bot.starter.event.DiscordFirstShardReadyEvent
 import io.viascom.discord.bot.starter.event.EventPublisher
 import io.viascom.discord.bot.starter.property.AlunaProperties
 import net.dv8tion.jda.api.interactions.commands.Command
@@ -15,22 +15,25 @@ import org.springframework.stereotype.Service
 @Service
 open class SlashCommandInteractionInitializer(
     private val commands: List<DiscordCommand>,
+    private val contextMenus: List<DiscordContextMenu>,
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
     private val eventPublisher: EventPublisher,
     private val alunaProperties: AlunaProperties
-) : ApplicationListener<DiscordReadyEvent> {
+) : ApplicationListener<DiscordFirstShardReadyEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onApplicationEvent(event: DiscordReadyEvent) {
-        init()
+    override fun onApplicationEvent(event: DiscordFirstShardReadyEvent) {
+        initSlashCommands()
     }
 
-    private fun init() {
+    private fun initSlashCommands() {
         //Create global commands
         shardManager.shards.first().retrieveCommands().queue { currentCommands ->
             logger.debug("Update slash commands if needed")
+
+            val commandDataList = arrayListOf<CommandDataImpl>()
 
             val filteredCommands = commands.filter {
                 when {
@@ -38,16 +41,26 @@ open class SlashCommandInteractionInitializer(
                     (alunaProperties.productionMode && it.commandDevelopmentStatus == DiscordCommand.DevelopmentStatus.IN_DEVELOPMENT) -> false
                     else -> true
                 }
-            }
-
-            commands.forEach {
+            }.map {
                 it.initCommandOptions()
                 it.initSubCommands()
                 it.prepareCommand()
-            }
+                it
+            }.toCollection(arrayListOf())
+
+            val filteredContext = contextMenus.filter {
+                when {
+                    (alunaProperties.includeInDevelopmentCommands) -> true
+                    (alunaProperties.productionMode && it.commandDevelopmentStatus == DiscordCommand.DevelopmentStatus.IN_DEVELOPMENT) -> false
+                    else -> true
+                }
+            }.toCollection(arrayListOf())
+
+            commandDataList.addAll(filteredCommands)
+            commandDataList.addAll(filteredContext)
 
             val commandsToRemove = currentCommands.filter { command ->
-                filteredCommands.none { compareCommands(it, command) }
+                commandDataList.none { compareCommands(it, command) }
             }
 
             commandsToRemove.forEach {
@@ -55,17 +68,23 @@ open class SlashCommandInteractionInitializer(
                 shardManager.shards.first().deleteCommandById(it.id).queue()
             }
 
-            val commandsToUpdateOrAdd = filteredCommands
-                .filter { it.useScope in arrayListOf(DiscordCommand.UseScope.GLOBAL, DiscordCommand.UseScope.GUILD_ONLY) }
+            val commandsToUpdateOrAdd = commandDataList
+                //.filter { it.useScope in arrayListOf(DiscordCommand.UseScope.GLOBAL, DiscordCommand.UseScope.GUILD_ONLY) }
                 .filter { commandData ->
                     currentCommands.none { compareCommands(commandData, it) }
                 }
 
             commandsToUpdateOrAdd.forEach { discordCommand ->
-                printCommand(discordCommand)
                 shardManager.shards.first().upsertCommand(discordCommand).queue { command ->
-                    discordBot.commands[command.name] = discordCommand.javaClass
-                    if (discordCommand.observeAutoComplete && command.name !in discordBot.commandsWithAutocomplete) {
+                    if (discordCommand.type == Command.Type.SLASH) {
+                        printCommand((discordCommand as DiscordCommand))
+                        discordBot.commands[command.name] = (discordCommand as DiscordCommand).javaClass
+                    }
+                    if (discordCommand.type != Command.Type.SLASH) {
+                        logger.debug("Register context menu ${(discordCommand as DiscordContextMenu).name}")
+                        discordBot.contextMenus[command.name] = discordCommand.javaClass
+                    }
+                    if (discordCommand.type == Command.Type.SLASH && (discordCommand as DiscordCommand).observeAutoComplete && command.name !in discordBot.commandsWithAutocomplete) {
                         discordBot.commandsWithAutocomplete.add(command.name)
                     }
                 }
@@ -82,7 +101,17 @@ open class SlashCommandInteractionInitializer(
                 }
             }
 
-            eventPublisher.publishDiscordSlashCommandInitializedEvent(commandsToUpdateOrAdd.map { it::class }, commandsToRemove.map { it.name })
+            contextMenus.forEach { command ->
+                try {
+                    discordBot.contextMenus.computeIfAbsent(command.name) { contextMenus.first { it.name == command.name }.javaClass }
+                } catch (e: Exception) {
+                    logger.error("Could not add context menu '${command.name}' to available menus")
+                }
+            }
+
+            eventPublisher.publishDiscordSlashCommandInitializedEvent(
+                commandsToUpdateOrAdd.filter { it.type == Command.Type.SLASH }.map { it::class },
+                commandsToRemove.map { it.name })
         }
 
         /*

@@ -4,6 +4,7 @@ import datadog.trace.api.Trace
 import io.viascom.discord.bot.starter.bot.DiscordBot
 import io.viascom.discord.bot.starter.property.AlunaProperties
 import io.viascom.discord.bot.starter.translation.MessageService
+import liquibase.pro.packaged.*
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
@@ -13,6 +14,7 @@ import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEve
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
+import net.dv8tion.jda.api.requests.RestAction
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.util.StopWatch
+import java.time.Duration
 import java.util.*
 import java.util.function.Consumer
 
@@ -33,9 +36,15 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
     lateinit var discordCommandConditions: DiscordCommandConditions
 
     @Autowired
+    lateinit var discordCommandLoadAdditionalData: DiscordCommandLoadAdditionalData
+
+    @Autowired
     lateinit var discordBot: DiscordBot
 
-    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    @Autowired
+    lateinit var messageService: MessageService
+
+    val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     var useScope = UseScope.GLOBAL
 
@@ -104,7 +113,17 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
      * @param event
      */
     @Trace
-    open fun onButtonInteraction(event: ButtonInteractionEvent) {
+    open fun onButtonInteraction(hook: InteractionHook? = null, event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+        return true
+    }
+
+    /**
+     * This method gets triggered, as soon as a button event observer duration timeout is reached.
+     *
+     * @param event
+     */
+    @Trace
+    open fun onButtonInteractionTimeout(hook: InteractionHook? = null, additionalData: HashMap<String, Any?>) {
     }
 
     /**
@@ -114,16 +133,28 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
      * @param event
      */
     @Trace
-    open fun onSelectMenuInteraction(event: SelectMenuInteractionEvent) {
+    open fun onSelectMenuInteraction(hook: InteractionHook? = null, event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+        return true
+    }
+
+    /**
+     * This method gets triggered, as soon as a select event observer duration timeout is reached.
+     *
+     * @param event
+     */
+    @Trace
+    open fun onSelectMenuInteractionTimeout(hook: InteractionHook? = null, additionalData: HashMap<String, Any?>) {
     }
 
     /**
      * This method gets triggered, as soon as an autocomplete event for this command is called.
+     * This will always use the same instance if user and server is the same. The command itself will than override this instance.
      *
      * @param event
      */
     @Trace
     open fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
+        discordCommandLoadAdditionalData.loadData(this, event)
     }
 
     /**
@@ -152,7 +183,7 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
      * @param event The CommandEvent that triggered this Command
      */
     @Trace
-    open fun run(event: SlashCommandInteractionEvent) {
+    fun run(event: SlashCommandInteractionEvent) {
         if (alunaProperties.useStopwatch) {
             stopWatch = StopWatch()
             stopWatch!!.start()
@@ -203,6 +234,8 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
         //checkForCommandCooldown(event)
 
         //checkAdditionalRequirements(event)
+
+        discordCommandLoadAdditionalData.loadData(this, event)
 
         try {
             writeToStats()
@@ -278,38 +311,44 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
     fun MessageService.getForUser(key: String, vararg args: Any): String = this.get(key, userLocale, args)
     fun MessageService.getForServer(key: String, vararg args: Any): String = this.get(key, serverLocale, args)
 
-    fun ReplyCallbackAction.queueAndRegisterInteraction(
+    fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
+        hook: InteractionHook,
         command: DiscordCommand,
         type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
         persist: Boolean = false,
-        success: Consumer<in InteractionHook>? = null
+        duration: Duration = Duration.ofMinutes(15),
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        failure: Consumer<in Throwable>? = null,
+        success: Consumer<in T>? = null
     ) {
-        this.queue {
-            it as InteractionHook
+        this.queue({
             if (type.contains(EventRegisterType.BUTTON)) {
-                discordBot.registerMessageForButtonEvents(it, command, persist)
+                discordBot.registerMessageForButtonEvents(hook, command, persist, duration, additionalData)
             }
             if (type.contains(EventRegisterType.SELECT)) {
-                discordBot.registerMessageForSelectEvents(it, command, persist)
+                discordBot.registerMessageForSelectEvents(hook, command, persist, duration, additionalData)
             }
             success?.accept(it)
-        }
+        }, {
+            failure?.accept(it)
+        })
     }
 
     fun ReplyCallbackAction.queueAndRegisterInteraction(
         command: DiscordCommand,
         type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
         persist: Boolean = false,
-        success: Consumer<in InteractionHook>? = null,
-        failure: Consumer<in Throwable>? = null
+        duration: Duration = Duration.ofMinutes(15),
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        failure: Consumer<in Throwable>? = null,
+        success: Consumer<in InteractionHook>? = null
     ) {
         this.queue({
-            it as InteractionHook
             if (type.contains(EventRegisterType.BUTTON)) {
-                discordBot.registerMessageForButtonEvents(it, command, persist)
+                discordBot.registerMessageForButtonEvents(it, command, persist, duration, additionalData)
             }
             if (type.contains(EventRegisterType.SELECT)) {
-                discordBot.registerMessageForSelectEvents(it, command, persist)
+                discordBot.registerMessageForSelectEvents(it, command, persist, duration, additionalData)
             }
             success?.accept(it)
         }, {
