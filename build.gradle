@@ -94,7 +94,7 @@ dependencies {
     implementation "org.graalvm.js:js:21.2.0"
     implementation "org.graalvm.js:js-scriptengine:21.2.0"
 
-    implementation "de.codecentric:spring-boot-admin-starter-client:2.6.4"
+    implementation "de.codecentric:spring-boot-admin-starter-client:2.6.6"
     api "org.apache.commons:commons-lang3:3.12.0"
     api "com.google.guava:guava:31.1-jre"
     api "com.jayway.jsonpath:json-path:2.7.0"
