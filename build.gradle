@@ -10,7 +10,7 @@ plugins {
 }
 
 group "io.viascom.discord.bot"
-version "0.0.4_5.0.0-alpha.9"
+version "0.0.5_5.0.0-alpha.9"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -21,9 +21,11 @@ tasks.jar { enabled = true }
 jar {
     baseName "aluna-spring-boot-starter"
     archiveClassifier.set("")
+
     manifest {
         attributes "Implementation-Version": "${project.version}"
     }
+
     into("META-INF/maven/$project.group/aluna-spring-boot-starter") {
         from { generatePomFileForMavenJavaPublication }
         rename ".*", "pom.xml"
@@ -60,12 +62,13 @@ dependencies {
     }
     api "org.springframework.boot:spring-boot-starter-undertow"
     api "org.springframework.boot:spring-boot-starter-actuator"
+    api "org.springframework.boot:spring-boot-starter-data-jpa"
     kapt "org.springframework.boot:spring-boot-configuration-processor"
 
     //====== Database ======
-    implementation "org.postgresql:postgresql:42.3.3"
-    implementation "com.vladmihalcea:hibernate-types-52:2.15.2"
-    implementation "org.liquibase:liquibase-core"
+    api "org.postgresql:postgresql:42.3.3"
+    api "com.vladmihalcea:hibernate-types-52:2.15.2"
+    api "org.liquibase:liquibase-core"
     liquibaseRuntime "org.liquibase:liquibase-core"
     liquibaseRuntime "org.postgresql:postgresql"
 
@@ -85,16 +88,16 @@ dependencies {
     api "com.fatboyindustrial.gson-javatime-serialisers:gson-javatime-serialisers:1.1.1"
 
     //====== Logging ======
-    implementation "org.zalando:logbook-logstash:2.14.0"
-    implementation "org.zalando:logbook-spring-boot-starter:2.14.0"
+    api "org.zalando:logbook-logstash:2.14.0"
+    api "org.zalando:logbook-spring-boot-starter:2.14.0"
     api "com.datadoghq:dd-trace-api:0.98.1"
 
     //====== Script-Engine ======
-    implementation "org.openjdk.nashorn:nashorn-core:15.3"
-    implementation "org.graalvm.js:js:21.2.0"
-    implementation "org.graalvm.js:js-scriptengine:21.2.0"
+    api "org.openjdk.nashorn:nashorn-core:15.3"
+    api "org.graalvm.js:js:21.2.0"
+    api "org.graalvm.js:js-scriptengine:21.2.0"
 
-    implementation "de.codecentric:spring-boot-admin-starter-client:2.6.6"
+    api "de.codecentric:spring-boot-admin-starter-client:2.6.6"
     api "org.apache.commons:commons-lang3:3.12.0"
     api "com.google.guava:guava:31.1-jre"
     api "com.jayway.jsonpath:json-path:2.7.0"
@@ -129,6 +132,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
+
             pom {
                 groupId = 'io.viascom.discord.bot'
                 name = 'aluna-spring-boot-starter'
