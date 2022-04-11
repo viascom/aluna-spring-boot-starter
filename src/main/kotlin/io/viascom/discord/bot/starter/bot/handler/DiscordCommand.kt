@@ -4,7 +4,6 @@ import datadog.trace.api.Trace
 import io.viascom.discord.bot.starter.bot.DiscordBot
 import io.viascom.discord.bot.starter.property.AlunaProperties
 import io.viascom.discord.bot.starter.translation.MessageService
-import liquibase.pro.packaged.*
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
@@ -41,7 +40,7 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
     @Autowired
     lateinit var discordBot: DiscordBot
 
-    @Autowired
+    @Autowired(required = false)
     lateinit var messageService: MessageService
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -308,8 +307,8 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
             get() = textChannel.isNotEmpty() || voiceChannel.isNotEmpty() || server.isNotEmpty()
     }
 
-    fun MessageService.getForUser(key: String, vararg args: Any): String = this.get(key, userLocale, args)
-    fun MessageService.getForServer(key: String, vararg args: Any): String = this.get(key, serverLocale, args)
+    fun MessageService.getForUser(key: String, vararg args: String): String = this.get(key, userLocale, *args)
+    fun MessageService.getForServer(key: String, vararg args: String): String = this.get(key, serverLocale, *args)
 
     fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
         hook: InteractionHook,

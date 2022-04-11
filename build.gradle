@@ -10,7 +10,7 @@ plugins {
 }
 
 group "io.viascom.discord.bot"
-version "0.0.5_5.0.0-alpha.9"
+version "0.0.6_5.0.0-alpha.9"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -47,6 +47,7 @@ repositories {
         name "m2-dv8tion"
         url "https://m2.dv8tion.net/releases"
     }
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
@@ -62,15 +63,7 @@ dependencies {
     }
     api "org.springframework.boot:spring-boot-starter-undertow"
     api "org.springframework.boot:spring-boot-starter-actuator"
-    api "org.springframework.boot:spring-boot-starter-data-jpa"
     kapt "org.springframework.boot:spring-boot-configuration-processor"
-
-    //====== Database ======
-    api "org.postgresql:postgresql:42.3.3"
-    api "com.vladmihalcea:hibernate-types-52:2.15.2"
-    api "org.liquibase:liquibase-core"
-    liquibaseRuntime "org.liquibase:liquibase-core"
-    liquibaseRuntime "org.postgresql:postgresql"
 
     //====== JDA ======
     api "net.dv8tion:JDA:5.0.0-alpha.9"
@@ -78,10 +71,6 @@ dependencies {
     //====== Retrofit2 ======
     api "com.squareup.retrofit2:retrofit:2.9.0"
     api "com.squareup.retrofit2:converter-gson:2.9.0"
-
-    //====== OpenAPI ======
-    api "org.springdoc:springdoc-openapi-kotlin:1.6.7"
-    api "org.springdoc:springdoc-openapi-ui:1.6.7"
 
     //====== Gson ======
     api "com.google.code.gson:gson:2.9.0"
@@ -97,10 +86,10 @@ dependencies {
     api "org.graalvm.js:js:21.2.0"
     api "org.graalvm.js:js-scriptengine:21.2.0"
 
-    api "de.codecentric:spring-boot-admin-starter-client:2.6.6"
+    implementation "org.discordbots:DBL-Java-Library:2.0.1"
+
     api "org.apache.commons:commons-lang3:3.12.0"
     api "com.google.guava:guava:31.1-jre"
-    api "com.jayway.jsonpath:json-path:2.7.0"
     api "com.vdurmont:emoji-java:5.1.1"
 }
 

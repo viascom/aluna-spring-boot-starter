@@ -11,15 +11,13 @@ class DefaultMessageService(
     private val alunaProperties: AlunaProperties
 ) : MessageService {
 
-    override fun get(key: String, language: String, vararg args: Any): String {
-        val correctLanguage = if (alunaProperties.useEnGbForEnInProduction && language == "en" && alunaProperties.productionMode) "en-GB" else language
-        var message = messageSource.getMessage(key, args, Locale.forLanguageTag(correctLanguage))
+    override fun get(key: String, locale: Locale, vararg args: String): String {
+        val correctLocale = if (alunaProperties.useEnGbForEnInProduction && locale == Locale.ENGLISH && alunaProperties.productionMode) Locale.forLanguageTag("en-GB") else locale
+        var message = messageSource.getMessage(key, args, correctLocale)
         message = message.replace("''", "'")
         message = message.replace("``", "`")
         return EmojiParser.parseToUnicode(message)
     }
-
-    override fun get(key: String, locale: Locale, vararg args: Any): String = get(key, locale.language, args)
 
     override fun formatNumber(number: Double, locale: Locale): String {
         return NumberFormat.getNumberInstance(locale).format(number)

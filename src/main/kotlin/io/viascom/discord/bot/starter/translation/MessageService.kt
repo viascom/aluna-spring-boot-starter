@@ -4,7 +4,6 @@ import java.util.*
 
 interface MessageService {
 
-    fun get(key: String, language: String, vararg args: Any): String
-    fun get(key: String, locale: Locale, vararg args: Any): String
+    fun get(key: String, locale: Locale, vararg args: String): String
     fun formatNumber(number: Double, locale: Locale): String
 }

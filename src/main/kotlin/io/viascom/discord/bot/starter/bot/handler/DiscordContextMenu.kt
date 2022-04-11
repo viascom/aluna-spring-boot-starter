@@ -30,7 +30,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     @Autowired
     lateinit var discordBot: DiscordBot
 
-    @Autowired
+    @Autowired(required = false)
     lateinit var messageService: MessageService
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)

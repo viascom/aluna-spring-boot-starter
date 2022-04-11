@@ -81,7 +81,7 @@ open class AlunaAutoConfiguration(
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(name = ["enable-translations"], prefix = "aluna", matchIfMissing = false)
+    @ConditionalOnProperty(name = ["enable-translation"], prefix = "aluna", matchIfMissing = false)
     open fun defaultMessageService(
         alunaProperties: AlunaProperties,
         messageSource: MessageSource
