@@ -23,6 +23,12 @@ class AlunaProperties {
     var notification: AlunaNotificationProperties = AlunaNotificationProperties()
 
     /**
+     * BotLists settings
+     */
+    @NestedConfigurationProperty
+    var botList: AlunaBotListProperties = AlunaBotListProperties()
+
+    /**
      * Is in production mode
      */
     var productionMode: Boolean = false
@@ -36,6 +42,11 @@ class AlunaProperties {
      * Owner ids
      */
     var ownerIds: ArrayList<Long> = arrayListOf()
+
+    /**
+     * Enable Translation
+     */
+    var enableTranslation: Boolean = false
 
     /**
      * Translation path

@@ -1,7 +1,6 @@
 aluna:
   production-mode: false
   owner-ids: 172591119912140811
-  enable-translations: true
   discord:
     token: NTM4MzA0OTYxNTQxMzA4NDE2.XErlkA.Ojcz8w24rS0xAbsN-MWc4Hil92w
     application-id: 538304961541308416
