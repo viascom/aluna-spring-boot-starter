@@ -24,7 +24,7 @@ class PingCommand(
 ) {
 
     override fun initCommandOptions() {
-        val mapOption = OptionData(OptionType.STRING, "map", "Select a map", false, true)
+        val mapOption = OptionData(OptionType.STRING, "map", "Select a map", true, true)
 
         this.addOptions(mapOption)
     }

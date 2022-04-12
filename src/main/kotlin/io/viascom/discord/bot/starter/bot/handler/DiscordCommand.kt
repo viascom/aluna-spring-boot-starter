@@ -112,7 +112,7 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
      * @param event
      */
     @Trace
-    open fun onButtonInteraction(hook: InteractionHook? = null, event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    open fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return true
     }
 
@@ -122,7 +122,7 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
      * @param event
      */
     @Trace
-    open fun onButtonInteractionTimeout(hook: InteractionHook? = null, additionalData: HashMap<String, Any?>) {
+    open fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
     /**
@@ -132,7 +132,7 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
      * @param event
      */
     @Trace
-    open fun onSelectMenuInteraction(hook: InteractionHook? = null, event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    open fun onSelectMenuInteraction(event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return true
     }
 
@@ -142,7 +142,7 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
      * @param event
      */
     @Trace
-    open fun onSelectMenuInteractionTimeout(hook: InteractionHook? = null, additionalData: HashMap<String, Any?>) {
+    open fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
     /**

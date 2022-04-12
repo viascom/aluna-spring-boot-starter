@@ -49,10 +49,10 @@ open class DiscordBot(
         if (!additionalData.containsKey("message.id")) {
             additionalData["message.id"] = messageId
         }
-        messagesToObserveButton[messageId] = ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, null, additionalData)
+        messagesToObserveButton[messageId] = ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, additionalData)
         messagesToObserveScheduledThreadPool.schedule({
             try {
-                context.getBean(command::class.java).onButtonInteractionTimeout(null, additionalData)
+                context.getBean(command::class.java).onButtonInteractionTimeout(additionalData)
             } catch (e: Exception) {
             }
             removeMessageForButtonEvents(messageId)
@@ -71,10 +71,10 @@ open class DiscordBot(
             if (!additionalData.containsKey("message.id")) {
                 additionalData["message.id"] = message.id
             }
-            messagesToObserveButton[message.id] = ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, hook, additionalData)
+            messagesToObserveButton[message.id] = ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, additionalData)
             messagesToObserveScheduledThreadPool.schedule({
                 try {
-                    context.getBean(command::class.java).onButtonInteractionTimeout(hook, additionalData)
+                    context.getBean(command::class.java).onButtonInteractionTimeout(additionalData)
                 } catch (e: Exception) {
                 }
                 removeMessageForButtonEvents(message.id)
@@ -93,10 +93,10 @@ open class DiscordBot(
         if (!additionalData.containsKey("message.id")) {
             additionalData["message.id"] = messageId
         }
-        messagesToObserveSelect[messageId] = ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, null, additionalData)
+        messagesToObserveSelect[messageId] = ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, additionalData)
         messagesToObserveScheduledThreadPool.schedule({
             try {
-                context.getBean(command::class.java).onSelectMenuInteractionTimeout(null, additionalData)
+                context.getBean(command::class.java).onSelectMenuInteractionTimeout(additionalData)
             } catch (e: Exception) {
             }
             removeMessageForButtonEvents(messageId)
@@ -115,10 +115,10 @@ open class DiscordBot(
             if (!additionalData.containsKey("message.id")) {
                 additionalData["message.id"] = message.id
             }
-            messagesToObserveSelect[message.id] = ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, hook, additionalData)
+            messagesToObserveSelect[message.id] = ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, additionalData)
             messagesToObserveScheduledThreadPool.schedule({
                 try {
-                    context.getBean(command::class.java).onSelectMenuInteractionTimeout(hook, additionalData)
+                    context.getBean(command::class.java).onSelectMenuInteractionTimeout(additionalData)
                 } catch (e: Exception) {
                 }
                 removeMessageForButtonEvents(message.id)

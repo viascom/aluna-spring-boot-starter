@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.command.*
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
-import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
@@ -68,7 +67,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
      * @param event
      */
     @Trace
-    open fun onButtonInteraction(hook: InteractionHook? = null, event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    open fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return true
     }
 
@@ -78,7 +77,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
      * @param event
      */
     @Trace
-    open fun onButtonInteractionTimeout(hook: InteractionHook? = null, additionalData: HashMap<String, Any?>) {
+    open fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
     /**
@@ -88,7 +87,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
      * @param event
      */
     @Trace
-    open fun onSelectMenuInteraction(hook: InteractionHook? = null, event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    open fun onSelectMenuInteraction(event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return true
     }
 
@@ -98,7 +97,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
      * @param event
      */
     @Trace
-    open fun onSelectMenuInteractionTimeout(hook: InteractionHook? = null, additionalData: HashMap<String, Any?>) {
+    open fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
     /**
