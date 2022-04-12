@@ -35,7 +35,7 @@ class GenericInteractionListener(
                 discordBot.commandExecutor.execute {
                     DiscordContext.setDiscordState(event.user.id, event.guild?.id)
                     val entry = discordBot.messagesToObserveButton[event.message.id]!!
-                    val result = context.getBean(entry.command.java).onButtonInteraction(entry.hook, event, entry.additionalData)
+                    val result = context.getBean(entry.command.java).onButtonInteraction(event, entry.additionalData)
                     if (!entry.stayActive && result) {
                         discordBot.removeMessageForButtonEvents(event.message.id)
                     }
@@ -51,7 +51,7 @@ class GenericInteractionListener(
                 discordBot.commandExecutor.execute {
                     DiscordContext.setDiscordState(event.user.id, event.guild?.id)
                     val entry = discordBot.messagesToObserveSelect[event.message.id]!!
-                    val result = context.getBean(entry.command.java).onSelectMenuInteraction(entry.hook, event, entry.additionalData)
+                    val result = context.getBean(entry.command.java).onSelectMenuInteraction(event, entry.additionalData)
                     if (!entry.stayActive && result) {
                         discordBot.removeMessageForSelectEvents(event.message.id)
                     }
