@@ -33,10 +33,9 @@ class GenericInteractionListener(
         discordBot.asyncExecutor.execute {
             if (discordBot.messagesToObserveButton.containsKey(event.message.id)) {
                 discordBot.commandExecutor.execute commandExecutor@{
-                    DiscordContext.setDiscordState(event.user.id, event.guild?.id)
                     val entry = discordBot.messagesToObserveButton[event.message.id]!!
-
-                    if (entry.commandUserOnly && event.user.id in (entry.authorIds ?: arrayListOf())) {
+                    DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
+                    if (entry.commandUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
                         return@commandExecutor
                     }
 
@@ -54,10 +53,9 @@ class GenericInteractionListener(
         discordBot.asyncExecutor.execute {
             if (discordBot.messagesToObserveSelect.containsKey(event.message.id)) {
                 discordBot.commandExecutor.execute commandExecutor@{
-                    DiscordContext.setDiscordState(event.user.id, event.guild?.id)
                     val entry = discordBot.messagesToObserveSelect[event.message.id]!!
-
-                    if (entry.commandUserOnly && event.user.id in (entry.authorIds ?: arrayListOf())) {
+                    DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
+                    if (entry.commandUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
                         return@commandExecutor
                     }
 

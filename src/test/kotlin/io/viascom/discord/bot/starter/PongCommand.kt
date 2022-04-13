@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.buttons.Button
+import java.util.concurrent.TimeUnit
 
 @Command
 class PongCommand : DiscordCommand(
@@ -17,33 +18,31 @@ class PongCommand : DiscordCommand(
 
     init {
         this.commandDevelopmentStatus = DevelopmentStatus.IN_DEVELOPMENT
+        this.beanTimoutDelay = 30L
+        this.beanTimoutDelayUnit = TimeUnit.SECONDS
     }
 
     val lastEmbed = null
 
     override fun execute(event: SlashCommandInteractionEvent) {
         event.deferReply().queue { hook ->
-
-            val emotes =
-                event.guild!!.emotes.sortedBy {
-                    it.name }.joinToString("\n") { "${it.name.uppercase()}(\"${it.id}\",\"${it.name}\"" + (if (it.isAnimated) ", true" else "") + ")," }
-
-            println(emotes)
-
+            logger.debug(this.hashCode().toString())
             hook.editOriginal("I'm currently ${AlunaEmote.ONLINE.asMention()} Online").setActionRows(ActionRow.of(Button.primary("hi", "Hi")))
                 .queueAndRegisterInteraction(hook, this, persist = true, type = arrayListOf(EventRegisterType.BUTTON, EventRegisterType.SELECT))
 
         }
-
-        val action = event.reply("Pong\nYour locale is:${this.userLocale}").addActionRows(ActionRow.of(Button.primary("hi", "Hi")))
-        action.queueAndRegisterInteraction(this)
     }
 
     override fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+        logger.debug(this.hashCode().toString())
         if (event.componentId == "hi") {
             event.editMessage("Oh hi :)").removeActionRows().queue()
         }
 
         return true
+    }
+
+    override fun onDestroy() {
+        logger.debug("/pong got destroyed " + this.hashCode().toString())
     }
 }

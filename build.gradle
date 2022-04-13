@@ -85,6 +85,7 @@ dependencies {
     api "org.graalvm.js:js:21.2.0"
     api "org.graalvm.js:js-scriptengine:21.2.0"
 
+    api 'com.aventrix.jnanoid:jnanoid:2.0.0'
     api "org.apache.commons:commons-lang3:3.12.0"
     api "com.google.guava:guava:31.1-jre"
     api "com.vdurmont:emoji-java:5.1.1"
