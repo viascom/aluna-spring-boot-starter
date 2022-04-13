@@ -43,13 +43,16 @@ open class DiscordBot(
         command: DiscordCommand,
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
-        additionalData: HashMap<String, Any?> = hashMapOf()
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        authorIds: ArrayList<String>? = null,
+        commandUserOnly: Boolean = false
     ) {
-        logger.debug("Register message $messageId for button events to command /${command.name}")
+        logger.debug("Register message $messageId for button events to command /${command.name}" + if (commandUserOnly) " (only specified users can use it)" else "")
         if (!additionalData.containsKey("message.id")) {
             additionalData["message.id"] = messageId
         }
-        messagesToObserveButton[messageId] = ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, additionalData)
+        messagesToObserveButton[messageId] =
+            ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, additionalData, authorIds, commandUserOnly)
         messagesToObserveScheduledThreadPool.schedule({
             try {
                 context.getBean(command::class.java).onButtonInteractionTimeout(additionalData)
@@ -64,14 +67,17 @@ open class DiscordBot(
         command: DiscordCommand,
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
-        additionalData: HashMap<String, Any?> = hashMapOf()
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        authorIds: ArrayList<String>? = null,
+        commandUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal().queue { message ->
-            logger.debug("Register message ${message.id} for button events to command /${command.name}")
+            logger.debug("Register message ${message.id} for button events to command /${command.name}" + if (commandUserOnly) " (only specified users can use it)" else "")
             if (!additionalData.containsKey("message.id")) {
                 additionalData["message.id"] = message.id
             }
-            messagesToObserveButton[message.id] = ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, additionalData)
+            messagesToObserveButton[message.id] =
+                ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, additionalData, authorIds, commandUserOnly)
             messagesToObserveScheduledThreadPool.schedule({
                 try {
                     context.getBean(command::class.java).onButtonInteractionTimeout(additionalData)
@@ -87,13 +93,16 @@ open class DiscordBot(
         command: DiscordCommand,
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
-        additionalData: HashMap<String, Any?> = hashMapOf()
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        authorIds: ArrayList<String>? = null,
+        commandUserOnly: Boolean = false
     ) {
-        logger.debug("Register message $messageId for select events to command /${command.name}")
+        logger.debug("Register message $messageId for select events to command /${command.name}" + if (commandUserOnly) " (only specified users can use it)" else "")
         if (!additionalData.containsKey("message.id")) {
             additionalData["message.id"] = messageId
         }
-        messagesToObserveSelect[messageId] = ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, additionalData)
+        messagesToObserveSelect[messageId] =
+            ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, additionalData, authorIds, commandUserOnly)
         messagesToObserveScheduledThreadPool.schedule({
             try {
                 context.getBean(command::class.java).onSelectMenuInteractionTimeout(additionalData)
@@ -108,14 +117,17 @@ open class DiscordBot(
         command: DiscordCommand,
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
-        additionalData: HashMap<String, Any?> = hashMapOf()
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        authorIds: ArrayList<String>? = null,
+        commandUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal().queue { message ->
-            logger.debug("Register message ${message.id} for select events to command /${command.name}")
+            logger.debug("Register message ${message.id} for select events to command /${command.name}" + if (commandUserOnly) " (only specified users can use it)" else "")
             if (!additionalData.containsKey("message.id")) {
                 additionalData["message.id"] = message.id
             }
-            messagesToObserveSelect[message.id] = ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, additionalData)
+            messagesToObserveSelect[message.id] =
+                ObserveCommandInteraction(command::class, LocalDateTime.now(), duration, persist, additionalData, authorIds, commandUserOnly)
             messagesToObserveScheduledThreadPool.schedule({
                 try {
                     context.getBean(command::class.java).onSelectMenuInteractionTimeout(additionalData)

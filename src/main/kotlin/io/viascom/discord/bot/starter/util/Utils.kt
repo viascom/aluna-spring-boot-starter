@@ -4,6 +4,10 @@ import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionMapping
+import net.dv8tion.jda.api.interactions.components.buttons.Button
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption
 import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
 import java.awt.Color
@@ -46,12 +50,44 @@ fun ShardManager.getServerMessage(serverId: String, channelId: String, messageId
 
 fun SlashCommandInteractionEvent.getOptionAsInt(name: String, default: Int? = null): Int? = this.getOption(name, default, OptionMapping::getAsInt)
 fun SlashCommandInteractionEvent.getOptionAsString(name: String, default: String? = null): String? = this.getOption(name, default, OptionMapping::getAsString)
-fun SlashCommandInteractionEvent.getOptionAsBoolean(name: String, default: Boolean? = null): Boolean? = this.getOption(name, default, OptionMapping::getAsBoolean)
+fun SlashCommandInteractionEvent.getOptionAsBoolean(name: String, default: Boolean? = null): Boolean? =
+    this.getOption(name, default, OptionMapping::getAsBoolean)
+
 fun SlashCommandInteractionEvent.getOptionAsMember(name: String, default: Member? = null): Member? = this.getOption(name, default, OptionMapping::getAsMember)
 fun SlashCommandInteractionEvent.getOptionAsUser(name: String, default: User? = null): User? = this.getOption(name, default, OptionMapping::getAsUser)
 
 fun CommandAutoCompleteInteractionEvent.getOptionAsInt(name: String, default: Int? = null): Int? = this.getOption(name, default, OptionMapping::getAsInt)
-fun CommandAutoCompleteInteractionEvent.getOptionAsString(name: String, default: String? = null): String? = this.getOption(name, default, OptionMapping::getAsString)
-fun CommandAutoCompleteInteractionEvent.getOptionAsBoolean(name: String, default: Boolean? = null): Boolean? = this.getOption(name, default, OptionMapping::getAsBoolean)
-fun CommandAutoCompleteInteractionEvent.getOptionAsMember(name: String, default: Member? = null): Member? = this.getOption(name, default, OptionMapping::getAsMember)
+fun CommandAutoCompleteInteractionEvent.getOptionAsString(name: String, default: String? = null): String? =
+    this.getOption(name, default, OptionMapping::getAsString)
+
+fun CommandAutoCompleteInteractionEvent.getOptionAsBoolean(name: String, default: Boolean? = null): Boolean? =
+    this.getOption(name, default, OptionMapping::getAsBoolean)
+
+fun CommandAutoCompleteInteractionEvent.getOptionAsMember(name: String, default: Member? = null): Member? =
+    this.getOption(name, default, OptionMapping::getAsMember)
+
 fun CommandAutoCompleteInteractionEvent.getOptionAsUser(name: String, default: User? = null): User? = this.getOption(name, default, OptionMapping::getAsUser)
+
+
+fun createSelectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {
+    val option = SelectOption.of(label, value)
+    description?.let { option.withDescription(description) }
+    emoji?.let { option.withEmoji(emoji) }
+    isDefault?.let { option.withDefault(isDefault) }
+
+    return option
+}
+
+fun SelectMenu.Builder.addOption(
+    label: String,
+    value: String,
+    description: String? = null,
+    emoji: Emoji? = null,
+    isDefault: Boolean? = null
+): SelectMenu.Builder = this.addOptions(createSelectOption(label, value, description, emoji, isDefault))
+
+fun Button.primary(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.PRIMARY, id, label, emoji)
+fun Button.secondary(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.SECONDARY, id, label, emoji)
+fun Button.success(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.SUCCESS, id, label, emoji)
+fun Button.danger(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.DANGER, id, label, emoji)
+

@@ -317,15 +317,17 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
         additionalData: HashMap<String, Any?> = hashMapOf(),
+        authorIds: ArrayList<String>? = arrayListOf(author.id),
+        commandUserOnly: Boolean = true,
         failure: Consumer<in Throwable>? = null,
         success: Consumer<in T>? = null
     ) {
         this.queue({
             if (type.contains(EventRegisterType.BUTTON)) {
-                discordBot.registerMessageForButtonEvents(hook, command, persist, duration, additionalData)
+                discordBot.registerMessageForButtonEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
             }
             if (type.contains(EventRegisterType.SELECT)) {
-                discordBot.registerMessageForSelectEvents(hook, command, persist, duration, additionalData)
+                discordBot.registerMessageForSelectEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
             }
             success?.accept(it)
         }, {
@@ -339,15 +341,17 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
         additionalData: HashMap<String, Any?> = hashMapOf(),
+        authorIds: ArrayList<String>? = arrayListOf(author.id),
+        commandUserOnly: Boolean = true,
         failure: Consumer<in Throwable>? = null,
         success: Consumer<in InteractionHook>? = null
     ) {
         this.queue({
             if (type.contains(EventRegisterType.BUTTON)) {
-                discordBot.registerMessageForButtonEvents(it, command, persist, duration, additionalData)
+                discordBot.registerMessageForButtonEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
             }
             if (type.contains(EventRegisterType.SELECT)) {
-                discordBot.registerMessageForSelectEvents(it, command, persist, duration, additionalData)
+                discordBot.registerMessageForSelectEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
             }
             success?.accept(it)
         }, {

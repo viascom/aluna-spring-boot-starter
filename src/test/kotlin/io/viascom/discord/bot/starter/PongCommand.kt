@@ -1,5 +1,6 @@
 package io.viascom.discord.bot.starter
 
+import io.viascom.discord.bot.starter.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.starter.bot.handler.Command
 import io.viascom.discord.bot.starter.bot.handler.DiscordCommand
 import io.viascom.discord.bot.starter.util.removeActionRows
@@ -23,10 +24,16 @@ class PongCommand : DiscordCommand(
     override fun execute(event: SlashCommandInteractionEvent) {
         event.deferReply().queue { hook ->
 
-            hook.editOriginal("").setActionRows(ActionRow.of(Button.primary("hi", "Hi"))).queueAndRegisterInteraction(hook,this, persist = true)
+            val emotes =
+                event.guild!!.emotes.sortedBy {
+                    it.name }.joinToString("\n") { "${it.name.uppercase()}(\"${it.id}\",\"${it.name}\"" + (if (it.isAnimated) ", true" else "") + ")," }
+
+            println(emotes)
+
+            hook.editOriginal("I'm currently ${AlunaEmote.ONLINE.asMention()} Online").setActionRows(ActionRow.of(Button.primary("hi", "Hi")))
+                .queueAndRegisterInteraction(hook, this, persist = true, type = arrayListOf(EventRegisterType.BUTTON, EventRegisterType.SELECT))
 
         }
-
 
         val action = event.reply("Pong\nYour locale is:${this.userLocale}").addActionRows(ActionRow.of(Button.primary("hi", "Hi")))
         action.queueAndRegisterInteraction(this)
