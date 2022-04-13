@@ -1,49 +1,260 @@
 package io.viascom.discord.bot.starter.configuration.scope
 
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils
+import io.viascom.discord.bot.starter.bot.DiscordBot
+import io.viascom.discord.bot.starter.bot.handler.CommandScopedObject
+import io.viascom.discord.bot.starter.bot.listener.EventWaiter
+import io.viascom.discord.bot.starter.util.AlunaThreadPool
+import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.config.Scope
+import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.core.NamedInheritableThreadLocal
+import java.time.LocalDateTime
 import java.util.*
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
-
-class CommandScope : Scope {
+class CommandScope(private val context: ConfigurableApplicationContext) : Scope {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    private val scopedObjects = Collections.synchronizedMap(HashMap<String, HashMap<String, Pair<DiscordContext.Type, Any>>>())
+    private val scopedObjects = Collections.synchronizedMap(HashMap<BeanName, HashMap<DiscordStateId, HashMap<UniqueId, ScopedObjectData>>>())
+    private val scopedObjectsTimeoutScheduler = AlunaThreadPool.getScheduledThreadPool(50, "Aluna-Scoped-Objects-Timeout-Pool-%d")
+    private val scopedObjectsTimeoutScheduledTask = Collections.synchronizedMap(HashMap<UniqueId, ScheduledFuture<*>>())
 
     override fun get(name: String, objectFactory: ObjectFactory<*>): Any {
         //If state id is not set, a new instance is returned
         if (DiscordContext.discordState?.id == null) {
-            return objectFactory.getObject()
+            val newObj = objectFactory.getObject() as CommandScopedObject
+            newObj.uniqueId = ""
+            return newObj
         }
 
-        //Reset current state if a command is requesting it
-        if (scopedObjects.none { it.key == DiscordContext.discordState?.id } || DiscordContext.discordState?.type == DiscordContext.Type.COMMAND) {
-            scopedObjects[DiscordContext.discordState?.id] = hashMapOf()
+        //If bean was never seen
+        val beanData = scopedObjects.getOrElse(name) { null }
+        if (beanData == null) {
+            scopedObjects[name] = hashMapOf()
         }
 
-        //Reset current state if an auto-complete is requesting it and last request was from a command
-        if (scopedObjects.getOrElse(DiscordContext.discordState?.id) { hashMapOf() }?.getOrElse(name) { null }?.first == DiscordContext.Type.COMMAND &&
-            DiscordContext.discordState?.type == DiscordContext.Type.AUTO_COMPLETE
-        ) {
-            scopedObjects[DiscordContext.discordState?.id] = hashMapOf()
+        //If discordState.id was never seen
+        val discordStateIdData = scopedObjects[name]!!.getOrElse(DiscordContext.discordState!!.id) { null }
+        if (discordStateIdData == null) {
+            scopedObjects[name]!![DiscordContext.discordState!!.id] = hashMapOf()
         }
 
-        //Create new instance if no instance got found, or it is a command
-        if (scopedObjects.getOrElse(DiscordContext.discordState?.id) { hashMapOf() }
-                ?.containsKey(name) != true || DiscordContext.discordState?.type == DiscordContext.Type.COMMAND) {
-            scopedObjects[DiscordContext.discordState?.id]!![name] =
-                Pair(DiscordContext.discordState?.type ?: DiscordContext.Type.OTHER, objectFactory.getObject())
+        //If uniqueId is present we return the corresponding bean and reset the timeout
+        if (DiscordContext.discordState?.uniqueId != null && scopedObjects[name]!![DiscordContext.discordState!!.id]!!.containsKey(DiscordContext.discordState?.uniqueId)) {
+            val data = scopedObjects[name]!![DiscordContext.discordState!!.id]!![DiscordContext.discordState!!.uniqueId]!!
+            val timeout = createTimeoutDestroy(
+                name,
+                data.obj,
+                DiscordContext.discordState!!.uniqueId!!,
+                loadTimeoutDelay(data.obj, 15L),
+                loadTimeoutDelayUnit(data.obj, TimeUnit.MINUTES),
+                true
+            )
+            resetTimeoutDestroy(DiscordContext.discordState!!.uniqueId!!, timeout)
+            return data.obj
         }
 
-        return scopedObjects.getOrElse(DiscordContext.discordState?.id) { hashMapOf() }?.getOrElse(name) { null }?.second ?: objectFactory.getObject()
+        //If Autocomplete request, the same instance for this DiscordContext.discordState.id is returned
+        val isAutoComplete = DiscordContext.discordState?.type == DiscordContext.Type.AUTO_COMPLETE
+        if (isAutoComplete) {
+            val hasAutoCompleteBean = scopedObjects[name]!![DiscordContext.discordState!!.id]!!.any { it.value.type == DiscordContext.Type.AUTO_COMPLETE }
+            if (hasAutoCompleteBean) {
+                //Found existing auto complete bean
+                val data = scopedObjects[name]!![DiscordContext.discordState!!.id]!!.entries.first { it.value.type == DiscordContext.Type.AUTO_COMPLETE }
+                val timeout = createTimeoutDestroy(
+                    name,
+                    data.value.obj,
+                    data.key,
+                    5L,
+                    TimeUnit.MINUTES,
+                    false
+                )
+                resetTimeoutDestroy(data.key, timeout)
+                return data.value.obj
+            } else {
+                //No bean exists, so we create one
+                DiscordContext.discordState!!.uniqueId = NanoIdUtils.randomNanoId()
+                val newObj = objectFactory.getObject() as CommandScopedObject
+                newObj.uniqueId = DiscordContext.discordState!!.uniqueId!!
+                scopedObjects[name]!![DiscordContext.discordState!!.id]!![DiscordContext.discordState!!.uniqueId!!] =
+                    ScopedObjectData(DiscordContext.discordState?.type ?: DiscordContext.Type.AUTO_COMPLETE, newObj)
+
+                val timeout = createTimeoutDestroy(
+                    name,
+                    newObj,
+                    DiscordContext.discordState!!.uniqueId!!,
+                    5L,
+                    TimeUnit.MINUTES,
+                    false
+                )
+                resetTimeoutDestroy(DiscordContext.discordState!!.uniqueId!!, timeout)
+
+                return newObj
+            }
+        }
+
+        //If type is Command we create a new instance or use the one from the aut complete if present
+        val autoCompleteForThisCommand =
+            scopedObjects[name]!![DiscordContext.discordState!!.id]!!.entries.firstOrNull { it.value.type == DiscordContext.Type.AUTO_COMPLETE }
+        if (autoCompleteForThisCommand != null && (autoCompleteForThisCommand.value.obj as CommandScopedObject).beanUseAutoCompleteBean) {
+            //Found existing auto complete bean we can use
+            //Change type to COMMAND
+            autoCompleteForThisCommand.value.type = DiscordContext.Type.COMMAND
+            //Remove old timeout
+            scopedObjectsTimeoutScheduledTask[autoCompleteForThisCommand.key]!!.cancel(true)
+
+            val timeout = createTimeoutDestroy(
+                name,
+                autoCompleteForThisCommand.value.obj,
+                autoCompleteForThisCommand.key,
+                loadTimeoutDelay(autoCompleteForThisCommand.value.obj, 15L),
+                loadTimeoutDelayUnit(autoCompleteForThisCommand.value.obj, TimeUnit.MINUTES),
+                true
+            )
+
+            scopedObjectsTimeoutScheduledTask[autoCompleteForThisCommand.key] = timeout
+            return autoCompleteForThisCommand.value.obj
+        } else {
+            //Remove auto complete if not re-use
+            if (autoCompleteForThisCommand?.value?.obj?.let {loadBeanUseAutoCompleteBean(it, true)} == false) {
+                scopedObjectsTimeoutScheduledTask[autoCompleteForThisCommand.key]!!.cancel(true)
+            }
+
+            //No bean exists, so we create one
+            DiscordContext.discordState!!.uniqueId = NanoIdUtils.randomNanoId()
+            val newObj = objectFactory.getObject() as CommandScopedObject
+            newObj.uniqueId = DiscordContext.discordState!!.uniqueId!!
+            scopedObjects[name]!![DiscordContext.discordState!!.id]!![DiscordContext.discordState!!.uniqueId!!] =
+                ScopedObjectData(DiscordContext.discordState?.type ?: DiscordContext.Type.OTHER, newObj)
+
+            val timeout = createTimeoutDestroy(
+                name,
+                newObj,
+                DiscordContext.discordState!!.uniqueId!!,
+                loadTimeoutDelay(newObj, 15L),
+                loadTimeoutDelayUnit(newObj, TimeUnit.MINUTES),
+                true
+            )
+
+            scopedObjectsTimeoutScheduledTask[DiscordContext.discordState!!.uniqueId!!] = timeout
+            return newObj
+        }
+    }
+
+    private fun createTimeoutDestroy(
+        name: String,
+        newObj: Any,
+        uniqueId: String,
+        delay: Long,
+        delayUnit: TimeUnit,
+        executeOnDestroy: Boolean
+    ): ScheduledFuture<*> {
+        return scopedObjectsTimeoutScheduler.schedule({
+            if (executeOnDestroy) {
+                try {
+                    newObj::class.java.getDeclaredMethod("onDestroy").invoke(newObj)
+                } catch (e: Exception) {
+                    //If it fails, just do nothing
+                }
+                try {
+                    if (loadObserverWaiterOnDestroy(newObj, true)) {
+                        logger.debug("Remove observer if existing by this instance.")
+                        val discordBot: DiscordBot = context.getBean(DiscordBot::class.java) as DiscordBot
+                        val eventWaiter: EventWaiter = context.getBean(EventWaiter::class.java) as EventWaiter
+
+                        val buttonMessage = discordBot.messagesToObserveButton.entries.firstOrNull { it.value.uniqueId == uniqueId }
+                        buttonMessage?.let {
+                            it.value.timeoutTask?.cancel(true)
+                            discordBot.messagesToObserveButton.remove(it.key)
+                        }
+
+                        val selectMessage = discordBot.messagesToObserveSelect.entries.firstOrNull { it.value.uniqueId == uniqueId }
+                        selectMessage?.let {
+                            it.value.timeoutTask?.cancel(true)
+                            discordBot.messagesToObserveSelect.remove(it.key)
+                        }
+
+                        eventWaiter.removeEvents(uniqueId)
+                    }
+                } catch (e: Exception) {
+                    //If it fails, just do nothing
+                }
+            }
+            //Remove element from scope cache
+            scopedObjects[name]!![DiscordContext.discordState!!.id]!!.remove(uniqueId)
+            scopedObjectsTimeoutScheduledTask.remove(uniqueId)
+        }, delay, delayUnit)
+    }
+
+    private fun resetTimeoutDestroy(uniqueId: String, newScheduledFuture: ScheduledFuture<*>) {
+        scopedObjectsTimeoutScheduledTask[uniqueId]?.cancel(true)
+        scopedObjectsTimeoutScheduledTask[uniqueId] = newScheduledFuture
+    }
+
+    private fun loadTimeoutDelay(obj: Any, default: Long, clazz: Class<*> = obj::class.java): Long {
+        return try {
+            if (clazz.declaredFields.none { it.name == "beanTimoutDelay" } && clazz != CommandDataImpl::class.java) {
+                loadTimeoutDelay(obj, default, obj::class.java.superclass)
+            } else {
+                val declaredField = clazz.getDeclaredField("beanTimoutDelay")
+                declaredField.isAccessible = true
+                declaredField.get(obj) as Long
+            }
+        } catch (e: Exception) {
+            default
+        }
+    }
+
+    private fun loadTimeoutDelayUnit(obj: Any, default: TimeUnit, clazz: Class<*> = obj::class.java): TimeUnit {
+        return try {
+            if (clazz.declaredFields.none { it.name == "beanTimoutDelayUnit" } && clazz != CommandDataImpl::class.java) {
+                loadTimeoutDelayUnit(obj, default, obj::class.java.superclass)
+            } else {
+                val declaredField = clazz.getDeclaredField("beanTimoutDelayUnit")
+                declaredField.isAccessible = true
+                declaredField.get(obj) as TimeUnit
+            }
+        } catch (e: Exception) {
+            default
+        }
+    }
+
+    private fun loadObserverWaiterOnDestroy(obj: Any, default: Boolean, clazz: Class<*> = obj::class.java): Boolean {
+        return try {
+            if (clazz.declaredFields.none { it.name == "beanRemoveObserverOnDestroy" } && clazz != CommandDataImpl::class.java) {
+                loadObserverWaiterOnDestroy(obj, default, obj::class.java.superclass)
+            } else {
+                val declaredField = clazz.getDeclaredField("beanRemoveObserverOnDestroy")
+                declaredField.isAccessible = true
+                declaredField.get(obj) as Boolean
+            }
+        } catch (e: Exception) {
+            default
+        }
+    }
+    private fun loadBeanUseAutoCompleteBean(obj: Any, default: Boolean, clazz: Class<*> = obj::class.java): Boolean {
+        return try {
+            if (clazz.declaredFields.none { it.name == "beanUseAutoCompleteBean" } && clazz != CommandDataImpl::class.java) {
+                loadBeanUseAutoCompleteBean(obj, default, obj::class.java.superclass)
+            } else {
+                val declaredField = clazz.getDeclaredField("beanUseAutoCompleteBean")
+                declaredField.isAccessible = true
+                declaredField.get(obj) as Boolean
+            }
+        } catch (e: Exception) {
+            default
+        }
     }
 
     override fun remove(name: String): Any? {
-        return scopedObjects.remove(DiscordContext.discordState?.id)
+        DiscordContext.discordState?.uniqueId?.let { scopedObjectsTimeoutScheduledTask[it]!!.cancel(true) }
+        return scopedObjects.getOrElse(name) { null }?.remove(DiscordContext.discordState?.id)
     }
 
     override fun registerDestructionCallback(name: String, callback: Runnable) {
@@ -56,12 +267,20 @@ class CommandScope : Scope {
     override fun getConversationId(): String {
         return DiscordContext.discordState?.id ?: ""
     }
+
+    fun getInstanceCount(): Int {
+        return scopedObjects.entries.sumOf { it.value.entries.sumOf { it.value.size } }
+    }
+
+    fun getTimeoutCount(): Int {
+        return scopedObjectsTimeoutScheduledTask.size
+    }
 }
 
 object DiscordContext {
     private val CONTEXT = NamedInheritableThreadLocal<Data>("discord")
-    fun setDiscordState(userId: String, serverId: String? = null, type: Type = Type.OTHER) {
-        CONTEXT.set(Data(userId + ":" + (serverId ?: ""), type))
+    fun setDiscordState(userId: String, serverId: String? = null, type: Type = Type.OTHER, uniqueId: String? = null) {
+        CONTEXT.set(Data(userId + ":" + (serverId ?: ""), type, uniqueId))
     }
 
     var discordState: Data?
@@ -76,7 +295,8 @@ object DiscordContext {
 
     class Data(
         val id: String,
-        val type: Type = Type.OTHER
+        val type: Type = Type.OTHER,
+        var uniqueId: String? = null
     )
 
     enum class Type {
@@ -84,3 +304,11 @@ object DiscordContext {
     }
 }
 
+private class ScopedObjectData(
+    var type: DiscordContext.Type,
+    val obj: Any,
+    var creationDate: LocalDateTime = LocalDateTime.now()
+)
+private typealias BeanName = String
+private typealias DiscordStateId = String
+private typealias UniqueId = String

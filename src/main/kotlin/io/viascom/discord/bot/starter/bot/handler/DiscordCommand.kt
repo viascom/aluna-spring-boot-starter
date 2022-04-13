@@ -23,10 +23,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 abstract class DiscordCommand(name: String, description: String, val observeAutoComplete: Boolean = false) : CommandDataImpl(name, description),
-    SlashCommandData {
+    SlashCommandData, CommandScopedObject {
 
     @Autowired
     lateinit var alunaProperties: AlunaProperties
@@ -45,6 +46,8 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
+    override lateinit var uniqueId: String
+
     var useScope = UseScope.GLOBAL
 
     var isOwnerCommand = false
@@ -53,6 +56,11 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
     var isHidden = false
 
     var commandDevelopmentStatus = DevelopmentStatus.LIVE
+
+    override var beanTimoutDelay: Long = 15
+    override var beanTimoutDelayUnit: TimeUnit = TimeUnit.MINUTES
+    override var beanUseAutoCompleteBean: Boolean = true
+    override var beanRemoveObserverOnDestroy: Boolean = true
 
     /**
      * The [CooldownScope][Command.CooldownScope] of the command. This defines how far from a scope cooldowns have.
@@ -143,6 +151,10 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
      */
     @Trace
     open fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    }
+
+    @Trace
+    open fun onDestroy() {
     }
 
     /**
