@@ -9,13 +9,18 @@ import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.command.*
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
+import net.dv8tion.jda.api.requests.RestAction
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.util.StopWatch
+import java.time.Duration
 import java.util.*
+import java.util.function.Consumer
 
 
 abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDataImpl(type, name) {
@@ -118,5 +123,54 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
             stopWatch!!.stop()
             println("${event.name} (${this.author.id}) [${this.hashCode()}] -> ${stopWatch!!.totalTimeMillis}ms")
         }
+    }
+
+    fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
+        hook: InteractionHook,
+        command: DiscordCommand,
+        type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
+        persist: Boolean = false,
+        duration: Duration = Duration.ofMinutes(15),
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        authorIds: ArrayList<String>? = arrayListOf(author.id),
+        commandUserOnly: Boolean = true,
+        failure: Consumer<in Throwable>? = null,
+        success: Consumer<in T>? = null
+    ) {
+        this.queue({
+            if (type.contains(DiscordCommand.EventRegisterType.BUTTON)) {
+                discordBot.registerMessageForButtonEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
+            }
+            if (type.contains(DiscordCommand.EventRegisterType.SELECT)) {
+                discordBot.registerMessageForSelectEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
+            }
+            success?.accept(it)
+        }, {
+            failure?.accept(it)
+        })
+    }
+
+    fun ReplyCallbackAction.queueAndRegisterInteraction(
+        command: DiscordCommand,
+        type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
+        persist: Boolean = false,
+        duration: Duration = Duration.ofMinutes(15),
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        authorIds: ArrayList<String>? = arrayListOf(author.id),
+        commandUserOnly: Boolean = true,
+        failure: Consumer<in Throwable>? = null,
+        success: Consumer<in InteractionHook>? = null
+    ) {
+        this.queue({
+            if (type.contains(DiscordCommand.EventRegisterType.BUTTON)) {
+                discordBot.registerMessageForButtonEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
+            }
+            if (type.contains(DiscordCommand.EventRegisterType.SELECT)) {
+                discordBot.registerMessageForSelectEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
+            }
+            success?.accept(it)
+        }, {
+            failure?.accept(it)
+        })
     }
 }
