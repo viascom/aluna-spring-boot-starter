@@ -20,10 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 
-abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDataImpl(type, name) {
+abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDataImpl(type, name), CommandScopedObject {
 
     @Autowired
     lateinit var alunaProperties: AlunaProperties
@@ -39,7 +40,14 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
+    override lateinit var uniqueId: String
+
     var commandDevelopmentStatus = DiscordCommand.DevelopmentStatus.LIVE
+
+    override var beanTimoutDelay: Long = 15
+    override var beanTimoutDelayUnit: TimeUnit = TimeUnit.MINUTES
+    override var beanUseAutoCompleteBean: Boolean = false
+    override var beanRemoveObserverOnDestroy: Boolean = true
 
     /**
      * Any [Permission]s a Member must have to use this command.
@@ -113,6 +121,11 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     @Trace
     private fun onModalInteraction(option: String, event: CommandAutoCompleteInteractionEvent) {
     }
+
+    @Trace
+    open fun onDestroy() {
+    }
+
 
     fun writeToStats() {
 

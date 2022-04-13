@@ -1,9 +1,11 @@
 package io.viascom.discord.bot.starter.configuration
 
 import io.viascom.discord.bot.starter.bot.DiscordBot
+import io.viascom.discord.bot.starter.configuration.scope.CommandScope
 import io.viascom.discord.bot.starter.property.AlunaProperties
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.sharding.ShardManager
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.HealthIndicator
 import org.springframework.stereotype.Component
@@ -12,7 +14,8 @@ import org.springframework.stereotype.Component
 class AlunaHealthIndicator(
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
-    private val alunaProperties: AlunaProperties
+    private val alunaProperties: AlunaProperties,
+    private val configurableListableBeanFactory: ConfigurableListableBeanFactory
 ) : HealthIndicator {
     override fun health(): Health {
         val status = Health.unknown()
@@ -23,6 +26,8 @@ class AlunaHealthIndicator(
             status.up()
         }
 
+        val commandScope = configurableListableBeanFactory.getRegisteredScope("command") as CommandScope
+
         shardManager.shards.first().status
         status.withDetail("clientId", alunaProperties.discord.applicationId)
         status.withDetail("commandsTotal", discordBot.commands.size)
@@ -30,6 +35,8 @@ class AlunaHealthIndicator(
         status.withDetail("productionMode", alunaProperties.productionMode)
         status.withDetail("commandThreads", discordBot.commandExecutor.activeCount)
         status.withDetail("asyncThreads", discordBot.asyncExecutor.activeCount)
+        status.withDetail("currentActiveInstances", commandScope.getInstanceCount())
+        status.withDetail("currentActiveInstanceTimeouts", commandScope.getTimeoutCount())
         status.withDetail("shardsTotal", shardManager.shardsTotal)
 
         val shards = arrayListOf<ShardDetail>()
