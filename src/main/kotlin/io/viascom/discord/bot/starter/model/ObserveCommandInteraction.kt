@@ -10,6 +10,8 @@ class ObserveCommandInteraction(
     val startTime: LocalDateTime,
     val duration: Duration,
     val stayActive: Boolean = false,
-    val additionalData: HashMap<String, Any?> = hashMapOf()
+    val additionalData: HashMap<String, Any?> = hashMapOf(),
+    val authorIds: ArrayList<String>? = null,
+    val commandUserOnly: Boolean = false
 ) {
 }
