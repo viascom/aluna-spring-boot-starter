@@ -4,7 +4,6 @@ import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import io.viascom.discord.bot.starter.bot.DiscordBot
 import io.viascom.discord.bot.starter.bot.handler.CommandScopedObject
 import io.viascom.discord.bot.starter.bot.listener.EventWaiter
-import io.viascom.discord.bot.starter.property.AlunaProperties
 import io.viascom.discord.bot.starter.util.AlunaThreadPool
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
@@ -16,16 +15,22 @@ import org.springframework.core.NamedInheritableThreadLocal
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
-class CommandScope(private val context: ConfigurableApplicationContext, private val alunaProperties: AlunaProperties) : Scope {
+class CommandScope(private val context: ConfigurableApplicationContext) : Scope {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     private val scopedObjects = Collections.synchronizedMap(HashMap<BeanName, HashMap<DiscordStateId, HashMap<UniqueId, ScopedObjectData>>>())
-    private val scopedObjectsTimeoutScheduler =
-        AlunaThreadPool.getScheduledThreadPool(alunaProperties.thread.scopedObjectsTimeoutScheduler, "Aluna-Scoped-Objects-Timeout-Pool-%d", true)
+    private var scopedObjectsTimeoutScheduler: ScheduledThreadPoolExecutor
+
     private val scopedObjectsTimeoutScheduledTask = Collections.synchronizedMap(HashMap<UniqueId, ScheduledFuture<*>>())
+
+    init {
+        val scopedObjectsTimeoutScheduler = context.environment.getProperty("aluna.thread.scoped-objects-timeout-scheduler", Int::class.java, 2)
+        this.scopedObjectsTimeoutScheduler = AlunaThreadPool.getScheduledThreadPool(scopedObjectsTimeoutScheduler, "Aluna-Scoped-Objects-Timeout-Pool-%d", true)
+    }
 
     override fun get(name: String, objectFactory: ObjectFactory<*>): Any {
         //If state id is not set, a new instance is returned
