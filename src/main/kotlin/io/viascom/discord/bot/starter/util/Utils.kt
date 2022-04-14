@@ -77,10 +77,10 @@ fun SelectMenuInteractionEvent.getSelections(): List<String> = this.values
 
 fun EmbedBuilder.setColor(red: Int, green: Int, blue: Int): EmbedBuilder = this.setColor(Color(red, green, blue))
 fun createSelectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {
-    val option = SelectOption.of(label, value)
-    description?.let { option.withDescription(description) }
-    emoji?.let { option.withEmoji(emoji) }
-    isDefault?.let { option.withDefault(isDefault) }
+    var option = SelectOption.of(label, value)
+    description?.let { option = option.withDescription(description) }
+    emoji?.let { option = option.withEmoji(emoji) }
+    isDefault?.let { option = option.withDefault(isDefault) }
 
     return option
 }
