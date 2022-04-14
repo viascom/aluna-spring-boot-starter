@@ -1,6 +1,8 @@
 package io.viascom.discord.bot.starter.bot.listener
 
+import io.viascom.discord.bot.starter.bot.DiscordBot
 import io.viascom.discord.bot.starter.configuration.scope.DiscordContext
+import io.viascom.discord.bot.starter.property.AlunaProperties
 import io.viascom.discord.bot.starter.util.AlunaThreadPool
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Message
@@ -26,13 +28,16 @@ import java.util.function.Predicate
 import kotlin.reflect.full.isSuperclassOf
 
 @Service
-class EventWaiter : EventListener {
+class EventWaiter(
+    private val discordBot: DiscordBot,
+    private val alunaProperties: AlunaProperties
+) : EventListener {
 
     private var logger = LoggerFactory.getLogger(javaClass)
 
     private val waitingEvents: ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, ArrayList<WaitingEvent<GenericEvent>>>> = ConcurrentHashMap()
-    private val executorThreadPool: ExecutorService = AlunaThreadPool.getDynamicThreadPool(100, 30, "Aluna-Waiter-Pool-%d")
-    private val scheduledThreadPool: ScheduledExecutorService = AlunaThreadPool.getScheduledThreadPool(50, "Aluna-Waiter-Timeout-Pool-%d")
+    private val executorThreadPool: ExecutorService = AlunaThreadPool.getDynamicThreadPool(alunaProperties.thread.eventWaiterThreadPoolCount, alunaProperties.thread.eventWaiterThreadPoolTtl, "Aluna-Waiter-Pool-%d")
+    private val scheduledThreadPool: ScheduledExecutorService = AlunaThreadPool.getScheduledThreadPool(alunaProperties.thread.eventWaiterTimeoutScheduler, "Aluna-Waiter-Timeout-Pool-%d", true)
 
     override fun onEvent(event: GenericEvent) {
         var eventClass: Class<*>? = event.javaClass
@@ -197,9 +202,12 @@ class EventWaiter : EventListener {
 
         if (timeout > 0 && unit != null) {
             scheduledThreadPool.schedule({
-                if (waitingEvents.containsKey(classType) && waitingEvents[classType]!!.containsKey(id))
-                    if (waitingEvents[classType]!![id]!!.remove(we) && timeoutAction != null)
-                        timeoutAction.run()
+                discordBot.asyncExecutor.execute {
+                    if (waitingEvents.containsKey(classType) && waitingEvents[classType]!!.containsKey(id))
+                        if (waitingEvents[classType]!![id]!!.remove(we) && timeoutAction != null)
+                            timeoutAction.run()
+                }
+
             }, timeout, unit)
         }
     }
