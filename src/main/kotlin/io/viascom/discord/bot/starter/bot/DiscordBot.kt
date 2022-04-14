@@ -3,6 +3,7 @@ package io.viascom.discord.bot.starter.bot
 import io.viascom.discord.bot.starter.bot.handler.DiscordCommand
 import io.viascom.discord.bot.starter.bot.handler.DiscordContextMenu
 import io.viascom.discord.bot.starter.model.ObserveCommandInteraction
+import io.viascom.discord.bot.starter.property.AlunaProperties
 import io.viascom.discord.bot.starter.util.AlunaThreadPool
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -17,7 +18,8 @@ import java.util.concurrent.TimeUnit
 
 @Service
 open class DiscordBot(
-    private val context: ConfigurableApplicationContext
+    private val context: ConfigurableApplicationContext,
+    private val alunaProperties: AlunaProperties
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -34,10 +36,13 @@ open class DiscordBot(
     var messagesToObserveSelect: MutableMap<String, ObserveCommandInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveCommandInteraction>())
         private set
 
-    val messagesToObserveScheduledThreadPool = AlunaThreadPool.getScheduledThreadPool(50, "Aluna-Message-Observer-Timeout-Pool-%d")
+    private val messagesToObserveScheduledThreadPool =
+        AlunaThreadPool.getScheduledThreadPool(alunaProperties.thread.messagesToObserveScheduledThreadPool, "Aluna-Message-Observer-Timeout-Pool-%d", true)
 
-    val commandExecutor = AlunaThreadPool.getDynamicThreadPool(100, 30, "Aluna-Command-%d")
-    val asyncExecutor = AlunaThreadPool.getDynamicThreadPool(100, 10, "Aluna-Async-%d")
+    val commandExecutor =
+        AlunaThreadPool.getDynamicThreadPool(alunaProperties.thread.commandExecutorCount, alunaProperties.thread.commandExecutorTtl, "Aluna-Command-%d")
+    val asyncExecutor =
+        AlunaThreadPool.getDynamicThreadPool(alunaProperties.thread.asyncExecutorCount, alunaProperties.thread.asyncExecutorTtl, "Aluna-Async-%d")
 
     fun registerMessageForButtonEvents(
         messageId: String,
@@ -62,7 +67,17 @@ open class DiscordBot(
         }, duration.seconds, TimeUnit.SECONDS)
 
         messagesToObserveButton[messageId] =
-            ObserveCommandInteraction(command::class, command.uniqueId, LocalDateTime.now(), duration, persist, additionalData, authorIds, commandUserOnly, timeoutTask)
+            ObserveCommandInteraction(
+                command::class,
+                command.uniqueId,
+                LocalDateTime.now(),
+                duration,
+                persist,
+                additionalData,
+                authorIds,
+                commandUserOnly,
+                timeoutTask
+            )
     }
 
     fun registerMessageForButtonEvents(
@@ -88,7 +103,17 @@ open class DiscordBot(
             }, duration.seconds, TimeUnit.SECONDS)
 
             messagesToObserveButton[message.id] =
-                ObserveCommandInteraction(command::class, command.uniqueId, LocalDateTime.now(), duration, persist, additionalData, authorIds, commandUserOnly, timeoutTask)
+                ObserveCommandInteraction(
+                    command::class,
+                    command.uniqueId,
+                    LocalDateTime.now(),
+                    duration,
+                    persist,
+                    additionalData,
+                    authorIds,
+                    commandUserOnly,
+                    timeoutTask
+                )
         }
     }
 
@@ -114,7 +139,17 @@ open class DiscordBot(
         }, duration.seconds, TimeUnit.SECONDS)
 
         messagesToObserveSelect[messageId] =
-            ObserveCommandInteraction(command::class, command.uniqueId, LocalDateTime.now(), duration, persist, additionalData, authorIds, commandUserOnly, timeoutTask)
+            ObserveCommandInteraction(
+                command::class,
+                command.uniqueId,
+                LocalDateTime.now(),
+                duration,
+                persist,
+                additionalData,
+                authorIds,
+                commandUserOnly,
+                timeoutTask
+            )
     }
 
     fun registerMessageForSelectEvents(
@@ -140,7 +175,17 @@ open class DiscordBot(
             }, duration.seconds, TimeUnit.SECONDS)
 
             messagesToObserveSelect[message.id] =
-                ObserveCommandInteraction(command::class, command.uniqueId, LocalDateTime.now(), duration, persist, additionalData, authorIds, commandUserOnly, timeoutTask)
+                ObserveCommandInteraction(
+                    command::class,
+                    command.uniqueId,
+                    LocalDateTime.now(),
+                    duration,
+                    persist,
+                    additionalData,
+                    authorIds,
+                    commandUserOnly,
+                    timeoutTask
+                )
         }
     }
 
