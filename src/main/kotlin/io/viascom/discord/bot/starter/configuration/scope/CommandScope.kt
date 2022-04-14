@@ -209,7 +209,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
     private fun loadTimeoutDelay(obj: Any, default: Long, clazz: Class<*> = obj::class.java): Long {
         return try {
             if (clazz.declaredFields.none { it.name == "beanTimoutDelay" } && clazz != CommandDataImpl::class.java) {
-                loadTimeoutDelay(obj, default, obj::class.java.superclass)
+                loadTimeoutDelay(obj, default, clazz.superclass)
             } else {
                 val declaredField = clazz.getDeclaredField("beanTimoutDelay")
                 declaredField.isAccessible = true
@@ -223,7 +223,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
     private fun loadTimeoutDelayUnit(obj: Any, default: TimeUnit, clazz: Class<*> = obj::class.java): TimeUnit {
         return try {
             if (clazz.declaredFields.none { it.name == "beanTimoutDelayUnit" } && clazz != CommandDataImpl::class.java) {
-                loadTimeoutDelayUnit(obj, default, obj::class.java.superclass)
+                loadTimeoutDelayUnit(obj, default, clazz.superclass)
             } else {
                 val declaredField = clazz.getDeclaredField("beanTimoutDelayUnit")
                 declaredField.isAccessible = true
@@ -237,7 +237,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
     private fun loadObserverWaiterOnDestroy(obj: Any, default: Boolean, clazz: Class<*> = obj::class.java): Boolean {
         return try {
             if (clazz.declaredFields.none { it.name == "beanRemoveObserverOnDestroy" } && clazz != CommandDataImpl::class.java) {
-                loadObserverWaiterOnDestroy(obj, default, obj::class.java.superclass)
+                loadObserverWaiterOnDestroy(obj, default, clazz.superclass)
             } else {
                 val declaredField = clazz.getDeclaredField("beanRemoveObserverOnDestroy")
                 declaredField.isAccessible = true
@@ -251,7 +251,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
     private fun loadBeanUseAutoCompleteBean(obj: Any, default: Boolean, clazz: Class<*> = obj::class.java): Boolean {
         return try {
             if (clazz.declaredFields.none { it.name == "beanUseAutoCompleteBean" } && clazz != CommandDataImpl::class.java) {
-                loadBeanUseAutoCompleteBean(obj, default, obj::class.java.superclass)
+                loadBeanUseAutoCompleteBean(obj, default, clazz.superclass)
             } else {
                 val declaredField = clazz.getDeclaredField("beanUseAutoCompleteBean")
                 declaredField.isAccessible = true
