@@ -1,13 +1,16 @@
 package io.viascom.discord.bot.starter.util
 
+import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionMapping
 import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageUpdateAction
 import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
 import java.awt.Color
@@ -41,6 +44,7 @@ fun String.hashSHA1(): String = MessageDigest
 fun Color.toHex(): String = String.format("#%02x%02x%02x", this.red, this.green, this.blue)
 
 fun MessageEditCallbackAction.removeActionRows() = this.setActionRows(arrayListOf())
+fun WebhookMessageUpdateAction<Message>.removeActionRows() = this.setActionRows(arrayListOf())
 
 fun ShardManager.getServer(serverId: String): Guild? = this.getGuildById(serverId)
 fun ShardManager.getServerTextChannel(serverId: String, channelId: String): MessageChannel? = this.getServer(serverId)?.getTextChannelById(channelId)
@@ -68,7 +72,10 @@ fun CommandAutoCompleteInteractionEvent.getOptionAsMember(name: String, default:
 
 fun CommandAutoCompleteInteractionEvent.getOptionAsUser(name: String, default: User? = null): User? = this.getOption(name, default, OptionMapping::getAsUser)
 
+fun SelectMenuInteractionEvent.getSelection(): String = this.values.first()
+fun SelectMenuInteractionEvent.getSelections(): List<String> = this.values
 
+fun EmbedBuilder.setColor(red: Int, green: Int, blue: Int): EmbedBuilder = this.setColor(Color(red, green, blue))
 fun createSelectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {
     val option = SelectOption.of(label, value)
     description?.let { option.withDescription(description) }
@@ -86,8 +93,8 @@ fun SelectMenu.Builder.addOption(
     isDefault: Boolean? = null
 ): SelectMenu.Builder = this.addOptions(createSelectOption(label, value, description, emoji, isDefault))
 
-fun Button.primary(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.PRIMARY, id, label, emoji)
-fun Button.secondary(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.SECONDARY, id, label, emoji)
-fun Button.success(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.SUCCESS, id, label, emoji)
-fun Button.danger(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.DANGER, id, label, emoji)
+fun createPrimaryButton(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.PRIMARY, id, label, emoji)
+fun createSecondaryButton(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.SECONDARY, id, label, emoji)
+fun createSuccessButton(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.SUCCESS, id, label, emoji)
+fun createDangerButton(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.DANGER, id, label, emoji)
 

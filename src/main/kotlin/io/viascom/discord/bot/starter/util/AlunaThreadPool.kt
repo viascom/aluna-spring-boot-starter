@@ -36,10 +36,10 @@ object AlunaThreadPool {
         return threadPoolUtil
     }
 
-    fun getScheduledThreadPool(nThreads: Int, name: String): ScheduledThreadPoolExecutor {
+    fun getScheduledThreadPool(nThreads: Int, name: String, removeTaskOnCancelPolicy: Boolean = false): ScheduledThreadPoolExecutor {
         val threadPoolUtil = AlunaScheduledThreadPoolExecutor(nThreads, ThreadFactoryBuilder().setNameFormat(name).setUncaughtExceptionHandler { t, e ->
             logger.warn("Uncaught Exception in Thread: ${t.name} - ${e.message}\n${e.stackTraceToString()}")
-        }.build())
+        }.build(), removeTaskOnCancelPolicy)
 
         return threadPoolUtil
     }
@@ -104,21 +104,23 @@ object AlunaThreadPool {
     class AlunaScheduledThreadPoolExecutor(
         corePoolSize: Int,
         threadFactory: ThreadFactory,
+        val removeTaskOnCancelPolicy: Boolean = false,
         val fixedContext: Map<String?, String?>? = null,
     ) : ScheduledThreadPoolExecutor(corePoolSize, threadFactory) {
 
         private val useFixedContext = (fixedContext != null)
 
+        init {
+            this.removeOnCancelPolicy = removeTaskOnCancelPolicy
+        }
+
         companion object {
             fun newWithCurrentMdc(
                 corePoolSize: Int,
-                maximumPoolSize: Int,
-                keepAliveTime: Long,
-                unit: TimeUnit,
-                workQueue: BlockingQueue<Runnable>,
-                threadFactory: ThreadFactory
-            ): AlunaThreadPoolExecutor =
-                AlunaThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, MDC.getCopyOfContextMap())
+                threadFactory: ThreadFactory,
+                removeTaskOnCancelPolicy: Boolean = false,
+            ): AlunaScheduledThreadPoolExecutor =
+                AlunaScheduledThreadPoolExecutor(corePoolSize, threadFactory, removeTaskOnCancelPolicy, MDC.getCopyOfContextMap())
         }
 
         private fun getContextForTask(): Map<String?, String?>? {

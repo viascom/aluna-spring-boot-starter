@@ -29,6 +29,12 @@ class AlunaProperties {
     var botList: AlunaBotListProperties = AlunaBotListProperties()
 
     /**
+     * BotLists settings
+     */
+    @NestedConfigurationProperty
+    var thread: AlunaThreadProperties = AlunaThreadProperties()
+
+    /**
      * Is in production mode
      */
     var productionMode: Boolean = false
