@@ -7,8 +7,6 @@ on:
     paths-ignore:
       - '**.md'
       - '.github/**'
-    tags:
-      - '*'
   workflow_dispatch:
 
 jobs:
