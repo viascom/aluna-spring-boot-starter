@@ -18,6 +18,11 @@ class AlunaBotListProperties {
     var discordBotListToken: String? = null
 
     /**
+     * discord-botlist.eu token
+     */
+    var discordBotListEuToken: String? = null
+
+    /**
      * Top.gg token
      */
     var topggToken: String? = null
