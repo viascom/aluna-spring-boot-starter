@@ -2,7 +2,7 @@ plugins {
     id "idea"
     id "java-library"
     id "maven-publish"
-    id "org.jetbrains.kotlin.jvm" version "1.6.20"
+    id "org.jetbrains.kotlin.jvm" version "1.6.21"
     id "org.jetbrains.kotlin.kapt" version "1.6.20"
     id "org.springframework.boot" version "2.6.6"
     id "org.liquibase.gradle" version "2.1.1"
