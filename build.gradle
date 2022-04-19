@@ -10,7 +10,7 @@ plugins {
 }
 
 group "io.viascom.discord.bot"
-version "0.0.15_5.0.0-alpha.9"
+version "0.0.15_5.0.0-alpha.10"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -65,7 +65,7 @@ dependencies {
     kapt "org.springframework.boot:spring-boot-configuration-processor"
 
     //====== JDA ======
-    api("net.dv8tion:JDA:5.0.0-alpha.9"){
+    api("net.dv8tion:JDA:5.0.0-alpha.10"){
         exclude group: "org.apache.commons", module: "commons-collections4" //Because of https://advisory.checkmarx.net/advisory/vulnerability/Cx78f40514-81ff/
     }
     implementation 'org.apache.commons:commons-collections4:4.4'

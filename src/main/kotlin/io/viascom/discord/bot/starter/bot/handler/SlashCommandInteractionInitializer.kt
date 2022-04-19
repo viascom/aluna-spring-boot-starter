@@ -155,32 +155,9 @@ open class SlashCommandInteractionInitializer(
     private fun compareCommands(commandData: CommandDataImpl, command: Command): Boolean {
         return commandData.name == command.name &&
                 commandData.description == command.description &&
-                compareOptions(commandData.options.map { Command.Option(it.toData()) }, command.options) &&
+                commandData.options.map { Command.Option(it.toData()) } == command.options &&
                 commandData.subcommandGroups.map { Command.SubcommandGroup(it.toData()) } == command.subcommandGroups &&
                 commandData.subcommands.map { Command.Subcommand(it.toData()) } == command.subcommands
-    }
-
-    //This can be removed as soon as https://github.com/DV8FromTheWorld/JDA/pull/2086 is merged
-    private fun compareOptions(obj1: List<Command.Option>, obj2: List<Command.Option>): Boolean {
-        if (obj1 === obj2) return true
-        if (obj1.size != obj2.size) return false
-
-        obj1.forEachIndexed { index, option ->
-            if (!(option.name == obj2[index].name
-                        && option.description == obj2[index].description
-                        && option.choices == obj2[index].choices
-                        && option.channelTypes == obj2[index].channelTypes
-                        && option.minValue == obj2[index].minValue
-                        && option.maxValue == obj2[index].maxValue
-                        && option.type == obj2[index].type
-                        && option.isRequired == obj2[index].isRequired
-                        && option.isAutoComplete == obj2[index].isAutoComplete)
-            ) {
-                return false
-            }
-        }
-
-        return true
     }
 
 }
