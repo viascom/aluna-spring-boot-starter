@@ -4,6 +4,7 @@ import io.viascom.discord.bot.starter.bot.DiscordBot
 import io.viascom.discord.bot.starter.event.DiscordFirstShardReadyEvent
 import io.viascom.discord.bot.starter.event.EventPublisher
 import io.viascom.discord.bot.starter.property.AlunaProperties
+import io.viascom.discord.bot.starter.util.getServer
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
@@ -29,24 +30,24 @@ open class SlashCommandInteractionInitializer(
     }
 
     private fun initSlashCommands() {
+        logger.debug("Update slash commands if needed")
+
+        val filteredCommands = commands.filter {
+            when {
+                (alunaProperties.includeInDevelopmentCommands) -> true
+                (alunaProperties.productionMode && it.commandDevelopmentStatus == DiscordCommand.DevelopmentStatus.IN_DEVELOPMENT) -> false
+                else -> true
+            }
+        }.map {
+            it.initCommandOptions()
+            it.initSubCommands()
+            it.prepareCommand()
+            it
+        }.toCollection(arrayListOf())
+
         //Create global commands
         shardManager.shards.first().retrieveCommands().queue { currentCommands ->
-            logger.debug("Update slash commands if needed")
-
             val commandDataList = arrayListOf<CommandDataImpl>()
-
-            val filteredCommands = commands.filter {
-                when {
-                    (alunaProperties.includeInDevelopmentCommands) -> true
-                    (alunaProperties.productionMode && it.commandDevelopmentStatus == DiscordCommand.DevelopmentStatus.IN_DEVELOPMENT) -> false
-                    else -> true
-                }
-            }.map {
-                it.initCommandOptions()
-                it.initSubCommands()
-                it.prepareCommand()
-                it
-            }.toCollection(arrayListOf())
 
             val filteredContext = contextMenus.filter {
                 when {
@@ -60,7 +61,13 @@ open class SlashCommandInteractionInitializer(
             commandDataList.addAll(filteredContext)
 
             val commandsToRemove = currentCommands.filter { command ->
-                commandDataList.none { compareCommands(it, command) }
+                commandDataList.filter {
+                    if (it.type == Command.Type.SLASH) {
+                        (it as DiscordCommand).useScope in arrayListOf(DiscordCommand.UseScope.GLOBAL, DiscordCommand.UseScope.GUILD_ONLY)
+                    } else {
+                        true
+                    }
+                }.none { compareCommands(it, command) }
             }
 
             commandsToRemove.forEach {
@@ -69,7 +76,13 @@ open class SlashCommandInteractionInitializer(
             }
 
             val commandsToUpdateOrAdd = commandDataList
-                //.filter { it.useScope in arrayListOf(DiscordCommand.UseScope.GLOBAL, DiscordCommand.UseScope.GUILD_ONLY) }
+                .filter {
+                    if (it.type == Command.Type.SLASH) {
+                        (it as DiscordCommand).useScope in arrayListOf(DiscordCommand.UseScope.GLOBAL, DiscordCommand.UseScope.GUILD_ONLY)
+                    } else {
+                        true
+                    }
+                }
                 .filter { commandData ->
                     currentCommands.none { compareCommands(commandData, it) }
                 }
@@ -114,25 +127,117 @@ open class SlashCommandInteractionInitializer(
                 commandsToRemove.map { it.name })
         }
 
-        /*
+        //Register internal commands
+        if (filteredCommands.any { it.name == "system-command" }) {
+            val command = filteredCommands.first { it.name == "system-command" }
+            val server = command.specificServer?.let { shardManager.getServer(it) }
+            val serverCommands = server?.retrieveCommands()?.complete()
+
+            if (!command.alunaProperties.command.systemCommand.enable) {
+                if (serverCommands != null && serverCommands.any { it.name == "system-command" }) {
+                    val serverCommand = serverCommands.first { it.name == "system-command" }
+                    logger.debug("Removed unneeded specific command '/${serverCommand.name}'")
+                    server.deleteCommandById(serverCommand.id).queue()
+                }
+            } else {
+                var upsert = serverCommands != null && serverCommands.none { it.name == "system-command" }
+
+                if (!upsert) {
+                    val serverCommand = serverCommands?.firstOrNull { it.name == "system-command" }
+                    if (serverCommand == null) {
+                        upsert = true
+                    } else {
+                        upsert = !compareCommands(command, serverCommand)
+                    }
+                }
+
+                if (upsert) {
+                    server?.upsertCommand(command)?.queue { discordCommand ->
+                        printCommand(command, true)
+                        discordBot.commands[command.name] = command.javaClass
+                        discordBot.commandsWithAutocomplete.add(command.name)
+                    }
+                }
+            }
+
+
+        }
+
+        /* This does currently not work for 100% as if a command is chnaged to another server, Aluna has no idea
+        where to removed the old command as this information can only be obtained by checking every server individually.
+
+
         //Create per guild Commands
-        commands.filter { it.useScope == AleevaCommand.UseScope.PER_GUILD_ONLY }.map {
-            logger.info("\t-> init command '${it.name}'")
-            it.initCommandOptions()
-            it.initSubCommands()
-            printCommand(it)
-            val server = shardManager.getGuildById(Environment.aleevaServerId)!!
-            server.upsertCommand(it).queue { command ->
-                Environment.commands[command.name] = it.javaClass
+        val commandDataList = arrayListOf<CommandDataImpl>()
+        commandDataList.addAll(filteredCommands)
+
+        val specificCommands = commandDataList
+            .filter { it.type == Command.Type.SLASH }
+            .filter { (it as DiscordCommand).useScope in arrayListOf(DiscordCommand.UseScope.GUILD_SPECIFIC) }
+            .filter { (it as DiscordCommand).specificServer != null }
+
+        val serverCommands = specificCommands
+            .distinctBy { (it as DiscordCommand).specificServer }
+            .associate {
+                Pair((it as DiscordCommand).specificServer, shardManager.getServer(it.specificServer!!)?.retrieveCommands()?.complete() ?: arrayListOf())
+            }
+
+        val commandsToRemove = arrayListOf<Command>()
+        serverCommands.forEach { commands ->
+            if (specificCommands.none { (it as DiscordCommand).specificServer == commands.key }) {
+                commandsToRemove.addAll(commands.value)
+                return@forEach
+            }
+
+            serverCommands[commands.key]?.forEach { command ->
+                if (commandDataList.none { compareCommands(it, command) }) {
+                    commandsToRemove.addAll(commands.value)
+                }
             }
         }
-         */
 
+        commandsToRemove.forEach {
+            logger.debug("Removed unneeded specific command '/${it.name}'")
+            shardManager.shards.first().deleteCommandById(it.id).queue()
+        }
+
+        var commandsToUpdateOrAdd: HashMap<String, ArrayList<CommandData>> = hashMapOf()
+        specificCommands.forEach { command ->
+            val commandDatas = serverCommands[(command as DiscordCommand).specificServer!!]
+
+            if (commandDatas?.isNotEmpty() == true) {
+                commandDatas.forEach { commandData ->
+                    if (!compareCommands(command, commandData)) {
+                        if (commandsToUpdateOrAdd.containsKey(command.specificServer!!)) {
+                            commandsToUpdateOrAdd[command.specificServer!!]!!.add(command)
+                        } else {
+                            commandsToUpdateOrAdd[command.specificServer!!] = arrayListOf(command)
+                        }
+                    }
+                }
+            } else {
+                if (commandsToUpdateOrAdd.containsKey(command.specificServer!!)) {
+                    commandsToUpdateOrAdd[command.specificServer!!]!!.add(command)
+                } else {
+                    commandsToUpdateOrAdd[command.specificServer!!] = arrayListOf(command)
+                }
+            }
+        }
+
+        commandsToUpdateOrAdd.forEach {
+            val server = shardManager.getGuildById(it.key)
+            it.value.forEach {
+                server?.upsertCommand(it)?.queue { discordCommand ->
+                    printCommand((it as DiscordCommand), true)
+                    discordBot.commands[it.name] = it.javaClass
+                }
+            }
+        }*/
     }
 
-    private fun printCommand(command: DiscordCommand) {
+    private fun printCommand(command: DiscordCommand, isSpecific: Boolean = false) {
         var commandText = ""
-        commandText += "\t-> init command '/${command.name}'"
+        commandText += "\t-> init${if (isSpecific) " server specific" else ""} command '/${command.name}'"
         when {
             (command.subcommandGroups.isNotEmpty()) -> {
                 commandText += "\n" + command.subcommandGroups.joinToString("\n") {

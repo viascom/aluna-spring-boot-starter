@@ -35,6 +35,12 @@ class AlunaProperties {
     var thread: AlunaThreadProperties = AlunaThreadProperties()
 
     /**
+     * Command settings
+     */
+    @NestedConfigurationProperty
+    var command: AlunaCommandProperties = AlunaCommandProperties()
+
+    /**
      * Is in production mode
      */
     var productionMode: Boolean = false
@@ -48,6 +54,11 @@ class AlunaProperties {
      * Owner ids
      */
     var ownerIds: ArrayList<Long> = arrayListOf()
+
+    /**
+     * Moderator ids
+     */
+    var modIds: ArrayList<Long> = arrayListOf()
 
     /**
      * Enable Translation
