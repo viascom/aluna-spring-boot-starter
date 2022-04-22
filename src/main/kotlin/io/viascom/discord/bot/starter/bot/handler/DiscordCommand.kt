@@ -49,6 +49,7 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
     override lateinit var uniqueId: String
 
     var useScope = UseScope.GLOBAL
+    var specificServer: String? = null
 
     var isOwnerCommand = false
     var isAdministratorOnlyCommand = false
@@ -322,56 +323,56 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
     fun MessageService.getForUser(key: String, vararg args: String): String = this.get(key, userLocale, *args)
     fun MessageService.getForServer(key: String, vararg args: String): String = this.get(key, serverLocale, *args)
 
-    fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
-        hook: InteractionHook,
-        command: DiscordCommand,
-        type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
-        persist: Boolean = false,
-        duration: Duration = Duration.ofMinutes(15),
-        additionalData: HashMap<String, Any?> = hashMapOf(),
-        authorIds: ArrayList<String>? = arrayListOf(author.id),
-        commandUserOnly: Boolean = true,
-        failure: Consumer<in Throwable>? = null,
-        success: Consumer<in T>? = null
-    ) {
-        this.queue({
-            if (type.contains(EventRegisterType.BUTTON)) {
-                discordBot.registerMessageForButtonEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
-            }
-            if (type.contains(EventRegisterType.SELECT)) {
-                discordBot.registerMessageForSelectEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
-            }
-            success?.accept(it)
-        }, {
-            failure?.accept(it)
-        })
-    }
-
-    fun ReplyCallbackAction.queueAndRegisterInteraction(
-        command: DiscordCommand,
-        type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
-        persist: Boolean = false,
-        duration: Duration = Duration.ofMinutes(15),
-        additionalData: HashMap<String, Any?> = hashMapOf(),
-        authorIds: ArrayList<String>? = arrayListOf(author.id),
-        commandUserOnly: Boolean = true,
-        failure: Consumer<in Throwable>? = null,
-        success: Consumer<in InteractionHook>? = null
-    ) {
-        this.queue({
-            if (type.contains(EventRegisterType.BUTTON)) {
-                discordBot.registerMessageForButtonEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
-            }
-            if (type.contains(EventRegisterType.SELECT)) {
-                discordBot.registerMessageForSelectEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
-            }
-            success?.accept(it)
-        }, {
-            failure?.accept(it)
-        })
-    }
-
     enum class EventRegisterType {
         BUTTON, SELECT
     }
+}
+
+fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
+    hook: InteractionHook,
+    command: DiscordCommand,
+    type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
+    persist: Boolean = false,
+    duration: Duration = Duration.ofMinutes(15),
+    additionalData: HashMap<String, Any?> = hashMapOf(),
+    authorIds: ArrayList<String>? = arrayListOf(command.author.id),
+    commandUserOnly: Boolean = true,
+    failure: Consumer<in Throwable>? = null,
+    success: Consumer<in T>? = null
+) {
+    this.queue({
+        if (type.contains(DiscordCommand.EventRegisterType.BUTTON)) {
+            command.discordBot.registerMessageForButtonEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
+        }
+        if (type.contains(DiscordCommand.EventRegisterType.SELECT)) {
+            command.discordBot.registerMessageForSelectEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
+        }
+        success?.accept(it)
+    }, {
+        failure?.accept(it)
+    })
+}
+
+fun ReplyCallbackAction.queueAndRegisterInteraction(
+    command: DiscordCommand,
+    type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
+    persist: Boolean = false,
+    duration: Duration = Duration.ofMinutes(15),
+    additionalData: HashMap<String, Any?> = hashMapOf(),
+    authorIds: ArrayList<String>? = arrayListOf(command.author.id),
+    commandUserOnly: Boolean = true,
+    failure: Consumer<in Throwable>? = null,
+    success: Consumer<in InteractionHook>? = null
+) {
+    this.queue({
+        if (type.contains(DiscordCommand.EventRegisterType.BUTTON)) {
+            command.discordBot.registerMessageForButtonEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
+        }
+        if (type.contains(DiscordCommand.EventRegisterType.SELECT)) {
+            command.discordBot.registerMessageForSelectEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
+        }
+        success?.accept(it)
+    }, {
+        failure?.accept(it)
+    })
 }

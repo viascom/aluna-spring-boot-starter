@@ -10,7 +10,7 @@ plugins {
 }
 
 group "io.viascom.discord.bot"
-version "0.0.15_5.0.0-alpha.10"
+version "0.0.16_5.0.0-alpha.10"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
