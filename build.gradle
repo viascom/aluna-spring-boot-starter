@@ -84,7 +84,7 @@ dependencies {
     api "com.datadoghq:dd-trace-api:0.99.0"
 
     //====== Script-Engine ======
-    api "org.openjdk.nashorn:nashorn-core:15.3"
+    api "org.openjdk.nashorn:nashorn-core:15.4"
     api "org.graalvm.js:js:22.0.0.2"
     api "org.graalvm.js:js-scriptengine:22.0.0.2"
 
