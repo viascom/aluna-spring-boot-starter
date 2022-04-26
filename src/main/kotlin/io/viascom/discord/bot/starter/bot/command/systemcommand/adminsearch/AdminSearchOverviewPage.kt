@@ -10,6 +10,7 @@ import io.viascom.discord.bot.starter.util.toHex
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.springframework.stereotype.Component
 
@@ -66,7 +67,9 @@ class AdminSearchOverviewPage(
             "${discordServer.owner?.asMention} | ${discordServer.owner?.effectiveName} (`${discordServer.ownerId}`)\n" +
                     "Owner on Support Server: " + (if (discordServer.owner?.user?.mutualGuilds?.any { it.id == alunaProperties.command.systemCommand.supportServer } == true) AlunaEmote.SMALL_TICK.asMention() + " Yes" else AlunaEmote.SMALL_CROSS.asMention() + " No"),
             false)
-        embedBuilder.addField("Members", discordServer.memberCount.toString(), true)
+        if(alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
+            embedBuilder.addField("Members", discordServer.memberCount.toString(), true)
+        }
         embedBuilder.addField("Channels", discordServer.channels.size.toString(), true)
         embedBuilder.addField("Roles", discordServer.roles.size.toString(), true)
         if (discordServer.vanityCode != null) {
@@ -80,7 +83,9 @@ class AdminSearchOverviewPage(
         )
         embedBuilder.addField("In-Server-Name", discordServer.selfMember.effectiveName, true)
         embedBuilder.addField("Features", discordServer.features.joinToString(" | "), false)
-        embedBuilder.addField("Other Bots", discordServer.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }, false)
+        if(alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
+            embedBuilder.addField("Other Bots", discordServer.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }, false)
+        }
     }
 
     override fun onRoleRequest(discordRole: Role, embedBuilder: EmbedBuilder) {
@@ -128,8 +133,14 @@ class AdminSearchOverviewPage(
             embedBuilder.addBlankField(true)
         }
         embedBuilder.addField("Color", (if (discordRole.color != null) "`${discordRole.color!!.toHex()}`" else "n/a"), true)
-        val memberCount = discordRole.guild.members.count { it.roles.contains(discordRole) }
-        embedBuilder.addField("Member-Count", memberCount.toString() + " (${(memberCount.toDouble() / discordRole.guild.members.size * 100).round(2)}%)", false)
+        if(alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
+            val memberCount = discordRole.guild.members.count { it.roles.contains(discordRole) }
+            embedBuilder.addField(
+                "Member-Count",
+                memberCount.toString() + " (${(memberCount.toDouble() / discordRole.guild.members.size * 100).round(2)}%)",
+                false
+            )
+        }
     }
 
     override fun onChannelRequest(discordChannel: Channel, embedBuilder: EmbedBuilder) {
