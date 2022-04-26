@@ -23,6 +23,7 @@ import net.dv8tion.jda.api.events.guild.update.*
 import net.dv8tion.jda.api.events.guild.voice.*
 import net.dv8tion.jda.api.events.interaction.GenericAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.*
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent
@@ -225,3 +226,4 @@ class OnGenericEmoteEvent(source: Any?, @Nonnull val event: GenericEmoteEvent) :
 class OnGenericEmoteUpdateEvent(source: Any?, @Nonnull val event: GenericEmoteUpdateEvent<*>) : ApplicationEvent(source)
 class OnGenericPermissionOverrideEvent(source: Any?, @Nonnull val event: GenericPermissionOverrideEvent) : ApplicationEvent(source)
 class OnEvent(source: Any?, @Nonnull val event: Event) : ApplicationEvent(source)
+class OnModalInteractionEvent(source: Any?, @Nonnull event: ModalInteractionEvent) : ApplicationEvent(source)

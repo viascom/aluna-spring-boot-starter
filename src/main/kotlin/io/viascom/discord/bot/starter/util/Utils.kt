@@ -5,11 +5,14 @@ import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.interactions.ModalInteraction
 import net.dv8tion.jda.api.interactions.commands.OptionMapping
 import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
+import net.dv8tion.jda.api.interactions.components.text.TextInput
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageUpdateAction
 import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -23,6 +26,12 @@ object Utils {
 }
 
 fun LocalDateTime.toDate(): Date = Date.from(this.atZone(ZoneId.systemDefault()).toInstant())
+
+fun Double.round(decimals: Int): Double {
+    var multiplier = 1.0
+    repeat(decimals) { multiplier *= 10 }
+    return kotlin.math.round(this * multiplier) / multiplier
+}
 
 fun String.toUUID(): UUID = UUID.fromString(this)
 
@@ -75,6 +84,8 @@ fun CommandAutoCompleteInteractionEvent.getOptionAsUser(name: String, default: U
 fun SelectMenuInteractionEvent.getSelection(): String = this.values.first()
 fun SelectMenuInteractionEvent.getSelections(): List<String> = this.values
 
+fun ModalInteraction.getValueAsString(name: String, default: String? = null): String? = this.getValue(name)?.asString ?: default
+
 fun EmbedBuilder.setColor(red: Int, green: Int, blue: Int): EmbedBuilder = this.setColor(Color(red, green, blue))
 fun createSelectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {
     var option = SelectOption.of(label, value)
@@ -92,6 +103,19 @@ fun SelectMenu.Builder.addOption(
     emoji: Emoji? = null,
     isDefault: Boolean? = null
 ): SelectMenu.Builder = this.addOptions(createSelectOption(label, value, description, emoji, isDefault))
+
+fun createTextInput(
+    id: String,
+    label: String,
+    style: TextInputStyle = TextInputStyle.SHORT,
+    placeholder: String? = null,
+    min: Int = -1,
+    max: Int = -1
+): TextInput = TextInput.create(id, label, style)
+    .setPlaceholder(placeholder)
+    .setMinLength(min)
+    .setMaxLength(max)
+    .build()
 
 fun createPrimaryButton(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.PRIMARY, id, label, emoji)
 fun createSecondaryButton(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.SECONDARY, id, label, emoji)

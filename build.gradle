@@ -2,15 +2,15 @@ plugins {
     id "idea"
     id "java-library"
     id "maven-publish"
-    id "org.jetbrains.kotlin.jvm" version "1.6.20"
-    id "org.jetbrains.kotlin.kapt" version "1.6.20"
-    id "org.springframework.boot" version "2.6.6"
+    id "org.jetbrains.kotlin.jvm" version "1.6.21"
+    id "org.jetbrains.kotlin.kapt" version "1.6.21"
+    id "org.springframework.boot" version "2.6.7"
     id "org.liquibase.gradle" version "2.1.1"
     id "io.spring.dependency-management" version "1.0.11.RELEASE"
 }
 
 group "io.viascom.discord.bot"
-version "0.0.16_5.0.0-alpha.10"
+version "0.0.16_5.0.0-alpha.11"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -65,7 +65,7 @@ dependencies {
     kapt "org.springframework.boot:spring-boot-configuration-processor"
 
     //====== JDA ======
-    api("net.dv8tion:JDA:5.0.0-alpha.10"){
+    api("net.dv8tion:JDA:5.0.0-alpha.11"){
         exclude group: "org.apache.commons", module: "commons-collections4" //Because of https://advisory.checkmarx.net/advisory/vulnerability/Cx78f40514-81ff/
     }
     implementation 'org.apache.commons:commons-collections4:4.4'
@@ -81,10 +81,10 @@ dependencies {
     //====== Logging ======
     api "org.zalando:logbook-logstash:2.14.0"
     api "org.zalando:logbook-spring-boot-starter:2.14.0"
-    api "com.datadoghq:dd-trace-api:0.99.0"
+    api "com.datadoghq:dd-trace-api:0.100.0"
 
     //====== Script-Engine ======
-    api "org.openjdk.nashorn:nashorn-core:15.3"
+    api "org.openjdk.nashorn:nashorn-core:15.4"
     api "org.graalvm.js:js:22.0.0.2"
     api "org.graalvm.js:js-scriptengine:22.0.0.2"
 

@@ -6,6 +6,7 @@ import io.viascom.discord.bot.starter.property.AlunaProperties
 import io.viascom.discord.bot.starter.translation.MessageService
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.*
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
@@ -119,7 +120,15 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
      * @param event
      */
     @Trace
-    private fun onModalInteraction(option: String, event: CommandAutoCompleteInteractionEvent) {
+    open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+        return true
+    }
+
+    /**
+     * This method gets triggered, as soon as a modal event observer duration timeout is reached.
+     */
+    @Trace
+    open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
     @Trace
@@ -134,7 +143,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     fun exitCommand(event: GenericCommandInteractionEvent) {
         if (alunaProperties.useStopwatch && stopWatch != null) {
             stopWatch!!.stop()
-            println("${event.name} (${this.author.id}) [${this.hashCode()}] -> ${stopWatch!!.totalTimeMillis}ms")
+            println("${event.name} (${this.author.id})${if (alunaProperties.showHashCode) " [${this.hashCode()}]" else ""} -> ${stopWatch!!.totalTimeMillis}ms")
         }
     }
 

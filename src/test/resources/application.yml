@@ -1,14 +1,21 @@
 aluna:
   production-mode: false
   owner-ids: 172591119912140811
+  mod-ids: 537250690482044958
   discord:
-    token: NTM4MzA0OTYxNTQxMzA4NDE2.XErlkA.Ojcz8w24rS0xAbsN-MWc4Hil92w
-    application-id: 538304961541308416
-    gatewayIntents:
+    token: OTI4Mjg3ODY0NTE1NTkyMjUz.YdWlcQ.nS4qeYoVVnUhYzK0dLsKReRQmw4
+    application-id: 928287864515592253
     default-permissions:
       - VIEW_CHANNEL
-    memberCachePolicy: NONE
+    gateway-intents: GUILD_MEMBERS,GUILD_PRESENCES,DIRECT_MESSAGE_REACTIONS,DIRECT_MESSAGES
+    memberCachePolicy: ALL
     publish-events: true
+  thread:
+    scoped-objects-timeout-scheduler: 5
+  command:
+    system-command:
+      enable: true
+      support-server: 562533026135932949
 
 logging:
   level:
