@@ -195,7 +195,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
                     }
                 }
                 //Remove element from scope cache
-                scopedObjects[name]!![DiscordContext.discordState!!.id]!!.remove(uniqueId)
+                scopedObjects.getOrElse(name) { null }?.getOrElse(DiscordContext.discordState!!.id) { null }?.remove(uniqueId)
                 scopedObjectsTimeoutScheduledTask.remove(uniqueId)
             }
         }, delay, delayUnit)

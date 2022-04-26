@@ -24,10 +24,6 @@ class SystemCommand(
 
     private var selectedProvider: SystemCommandDataProvider? = null
 
-    init {
-        useScope = UseScope.GUILD_SPECIFIC
-    }
-
     override fun initCommandOptions() {
         specificServer = alunaProperties.command.systemCommand.server
         addOption(OptionType.STRING, "command", "System command to execute", true, true)

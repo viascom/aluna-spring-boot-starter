@@ -49,7 +49,7 @@ abstract class DiscordMessageContextMenu(name: String) : DiscordContextMenu(Comm
 
         try {
             writeToStats()
-            logger.info("Run context menu ${event.commandPath} [${this.hashCode()}]")
+            logger.info("Run context menu ${event.commandPath}" + if (alunaProperties.showHashCode) " [${this.hashCode()}]" else "")
             execute(event)
             exitCommand(event)
         } catch (t: Throwable) {

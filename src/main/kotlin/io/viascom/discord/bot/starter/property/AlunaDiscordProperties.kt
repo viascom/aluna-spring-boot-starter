@@ -38,6 +38,13 @@ class AlunaDiscordProperties {
     var memberCachePolicy: MemberCachePolicyType = MemberCachePolicyType.ALL
 
     /**
+     * Flags used to enable cache services for JDA.
+     * <br>Check the flag descriptions to see which {@link net.dv8tion.jda.api.requests.GatewayIntent intents} are required to use them.
+     *
+     */
+    var cacheFlags: ArrayList<CacheFlag> = arrayListOf()
+
+    /**
      * Sets whether or not JDA should try to reconnect if a connection-error is encountered.
      */
     var autoReconnect: Boolean = true
@@ -64,5 +71,15 @@ class AlunaDiscordProperties {
         BOOSTER,
         PENDING,
         DEFAULT
+    }
+
+    enum class CacheFlag {
+        ACTIVITY,
+        VOICE_STATE,
+        EMOTE,
+        CLIENT_STATUS,
+        MEMBER_OVERRIDES,
+        ROLE_TAGS,
+        ONLINE_STATUS
     }
 }

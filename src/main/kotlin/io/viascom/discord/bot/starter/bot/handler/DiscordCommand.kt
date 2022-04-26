@@ -6,6 +6,7 @@ import io.viascom.discord.bot.starter.property.AlunaProperties
 import io.viascom.discord.bot.starter.translation.MessageService
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
@@ -147,8 +148,6 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
-     *
-     * @param event
      */
     @Trace
     open fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {
@@ -175,7 +174,15 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
      * @param event
      */
     @Trace
-    private fun onModalInteraction(option: String, event: CommandAutoCompleteInteractionEvent) {
+    open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+        return true
+    }
+
+    /**
+     * This method gets triggered, as soon as a modal event observer duration timeout is reached.
+     */
+    @Trace
+    open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
     open fun initCommandOptions() {}
@@ -251,7 +258,7 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
 
         try {
             writeToStats()
-            logger.info("Run command /${event.commandPath} [${this.hashCode()}]")
+            logger.info("Run command /${event.commandPath}" + if (alunaProperties.showHashCode) " [${this.hashCode()}]" else "")
             execute(event)
             exitCommand(event)
         } catch (t: Throwable) {
@@ -271,7 +278,7 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
     private fun exitCommand(event: SlashCommandInteractionEvent) {
         if (alunaProperties.useStopwatch && stopWatch != null) {
             stopWatch!!.stop()
-            println("/${event.commandPath} (${this.author.id}) [${this.hashCode()}] -> ${stopWatch!!.totalTimeMillis}ms")
+            println("/${event.commandPath} (${this.author.id})${if (alunaProperties.showHashCode) " [${this.hashCode()}]" else ""} -> ${stopWatch!!.totalTimeMillis}ms")
         }
     }
 
@@ -324,7 +331,7 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
     fun MessageService.getForServer(key: String, vararg args: String): String = this.get(key, serverLocale, *args)
 
     enum class EventRegisterType {
-        BUTTON, SELECT
+        BUTTON, SELECT, MODAL
     }
 }
 
@@ -346,6 +353,27 @@ fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
         }
         if (type.contains(DiscordCommand.EventRegisterType.SELECT)) {
             command.discordBot.registerMessageForSelectEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
+        }
+        if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
+            command.discordBot.registerMessageForModalEvents(command.author.id, command, duration, additionalData)
+        }
+        success?.accept(it)
+    }, {
+        failure?.accept(it)
+    })
+}
+
+fun RestAction<Void>.queueAndRegisterInteraction(
+    command: DiscordCommand,
+    type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.MODAL),
+    duration: Duration = Duration.ofMinutes(15),
+    additionalData: HashMap<String, Any?> = hashMapOf(),
+    failure: Consumer<in Throwable>? = null,
+    success: Consumer<in Void>? = null
+) {
+    this.queue({
+        if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
+            command.discordBot.registerMessageForModalEvents(command.author.id, command, duration, additionalData)
         }
         success?.accept(it)
     }, {
