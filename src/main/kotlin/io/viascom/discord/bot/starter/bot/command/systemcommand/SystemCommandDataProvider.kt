@@ -2,6 +2,7 @@ package io.viascom.discord.bot.starter.bot.command.systemcommand
 
 import io.viascom.discord.bot.starter.bot.command.SystemCommand
 import io.viascom.discord.bot.starter.bot.handler.CommandScopedObject
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
@@ -15,6 +16,7 @@ abstract class SystemCommandDataProvider(
     var ephemeral: Boolean = true,
     var allowMods: Boolean = false,
     var supportArgsAutoComplete: Boolean = false,
+    var keepCommandOpen: Boolean = false
 ) : CommandScopedObject {
 
     override lateinit var uniqueId: String
@@ -23,7 +25,7 @@ abstract class SystemCommandDataProvider(
     override var beanUseAutoCompleteBean: Boolean = true
     override var beanRemoveObserverOnDestroy: Boolean = false
 
-    abstract fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook, command: SystemCommand)
+    abstract fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand)
     open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return true
     }
@@ -36,4 +38,9 @@ abstract class SystemCommandDataProvider(
     open fun onSelectMenuInteractionTimeout() {}
     open fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent) {}
 
+
+    open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+        return true
+    }
+    open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {}
 }

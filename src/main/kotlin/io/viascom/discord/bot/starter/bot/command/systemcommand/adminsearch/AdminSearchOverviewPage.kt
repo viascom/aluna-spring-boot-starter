@@ -67,7 +67,7 @@ class AdminSearchOverviewPage(
             "${discordServer.owner?.asMention} | ${discordServer.owner?.effectiveName} (`${discordServer.ownerId}`)\n" +
                     "Owner on Support Server: " + (if (discordServer.owner?.user?.mutualGuilds?.any { it.id == alunaProperties.command.systemCommand.supportServer } == true) AlunaEmote.SMALL_TICK.asMention() + " Yes" else AlunaEmote.SMALL_CROSS.asMention() + " No"),
             false)
-        if(alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
+        if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
             embedBuilder.addField("Members", discordServer.memberCount.toString(), true)
         }
         embedBuilder.addField("Channels", discordServer.channels.size.toString(), true)
@@ -83,7 +83,7 @@ class AdminSearchOverviewPage(
         )
         embedBuilder.addField("In-Server-Name", discordServer.selfMember.effectiveName, true)
         embedBuilder.addField("Features", discordServer.features.joinToString(" | "), false)
-        if(alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
+        if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
             embedBuilder.addField("Other Bots", discordServer.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }, false)
         }
     }
@@ -133,14 +133,12 @@ class AdminSearchOverviewPage(
             embedBuilder.addBlankField(true)
         }
         embedBuilder.addField("Color", (if (discordRole.color != null) "`${discordRole.color!!.toHex()}`" else "n/a"), true)
-        if(alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
-            val memberCount = discordRole.guild.members.count { it.roles.contains(discordRole) }
-            embedBuilder.addField(
-                "Member-Count",
-                memberCount.toString() + " (${(memberCount.toDouble() / discordRole.guild.members.size * 100).round(2)}%)",
-                false
-            )
-        }
+        val memberCount = discordRole.guild.members.count { it.roles.contains(discordRole) }
+        embedBuilder.addField(
+            "Member-Count",
+            memberCount.toString() + " (${(memberCount.toDouble() / discordRole.guild.members.size * 100).round(2)}%)",
+            false
+        )
     }
 
     override fun onChannelRequest(discordChannel: Channel, embedBuilder: EmbedBuilder) {
