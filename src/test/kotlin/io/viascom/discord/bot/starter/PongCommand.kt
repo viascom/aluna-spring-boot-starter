@@ -3,6 +3,7 @@ package io.viascom.discord.bot.starter
 import io.viascom.discord.bot.starter.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.starter.bot.handler.Command
 import io.viascom.discord.bot.starter.bot.handler.DiscordCommand
+import io.viascom.discord.bot.starter.bot.handler.queueAndRegisterInteraction
 import io.viascom.discord.bot.starter.util.removeActionRows
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
