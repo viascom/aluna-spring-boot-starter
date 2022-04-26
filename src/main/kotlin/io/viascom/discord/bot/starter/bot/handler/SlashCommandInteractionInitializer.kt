@@ -143,10 +143,13 @@ open class SlashCommandInteractionInitializer(
 
                 //Check if system command should be global
                 if (server == null) {
-                    shardManager.shards.first().upsertCommand(command)?.queue { discordCommand ->
-                        printCommand(command)
-                        discordBot.commands[command.name] = command.javaClass
-                        discordBot.commandsWithAutocomplete.add(command.name)
+                    val serverCommand = shardManager.shards.first().retrieveCommands().complete().first { it.name == command.name }
+                    if(!compareCommands(command, serverCommand)) {
+                        shardManager.shards.first().upsertCommand(command)?.queue { discordCommand ->
+                            printCommand(command)
+                            discordBot.commands[command.name] = command.javaClass
+                            discordBot.commandsWithAutocomplete.add(command.name)
+                        }
                     }
                 } else {
                     var upsert = serverCommands != null && serverCommands.none { it.name == "system-command" }

@@ -43,8 +43,8 @@ class AdminSearchDataProvider(
     lateinit var discordChannel: Channel
     lateinit var discordEmote: Emote
 
-    override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook, command: SystemCommand) {
-        lastHook = hook
+    override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
+        lastHook = hook!!
 
         val id = event.getOptionAsString("args", "")!!
         if (id.isEmpty()) {
@@ -278,7 +278,8 @@ class AdminSearchDataProvider(
 
         val emotes = checkForEmote(arg)
         if (emotes != null && emotes.isNotEmpty()) {
-            event.replyChoices(emotes.map { net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name + " (Emote) (${it.guild?.name ?: ""})", it.id) }).queue()
+            event.replyChoices(emotes.map { net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name + " (Emote) (${it.guild?.name ?: ""})", it.id) })
+                .queue()
             return
         }
 
