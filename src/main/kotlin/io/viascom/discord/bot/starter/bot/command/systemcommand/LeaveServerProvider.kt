@@ -34,8 +34,8 @@ class LeaveServerProvider(
     lateinit var lastEmbed: EmbedBuilder
     lateinit var selectedServer: Guild
 
-    override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook, command: SystemCommand) {
-        lastHook = hook
+    override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
+        lastHook = hook!!
 
         val id = event.getOptionAsString("args", "")!!
         if (id.isEmpty()) {

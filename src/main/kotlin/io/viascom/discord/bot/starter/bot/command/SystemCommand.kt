@@ -5,6 +5,7 @@ import io.viascom.discord.bot.starter.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.starter.bot.handler.Command
 import io.viascom.discord.bot.starter.bot.handler.DiscordCommand
 import io.viascom.discord.bot.starter.util.getOptionAsString
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
@@ -44,14 +45,18 @@ class SystemCommand(
             return
         }
 
-        val ephemeral = if (event.user.idLong in alunaProperties.modIds){
+        val ephemeral = if (event.user.idLong in alunaProperties.modIds) {
             false
         } else {
             selectedProvider!!.ephemeral
         }
 
-        val hook = event.deferReply(ephemeral).complete()
-        selectedProvider!!.execute(event, hook, this)
+        if(selectedProvider!!.keepCommandOpen){
+            selectedProvider!!.execute(event, null, this)
+        } else{
+            val hook = event.deferReply(ephemeral).complete()
+            selectedProvider!!.execute(event, hook, this)
+        }
     }
 
     override fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
@@ -68,6 +73,14 @@ class SystemCommand(
 
     override fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {
         selectedProvider?.onSelectMenuInteractionTimeout()
+    }
+
+    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+        return selectedProvider?.onModalInteraction(event, additionalData) ?: true
+    }
+
+    override fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
+        selectedProvider?.onModalInteractionTimeout(additionalData)
     }
 
     override fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
@@ -90,10 +103,10 @@ class SystemCommand(
         }
 
         if (option == "args") {
-            val possibleProvider = dataProviders.firstOrNull { it.id ==  event.getOptionAsString("command", "")!! && it.supportArgsAutoComplete}
-            if(possibleProvider != null){
+            val possibleProvider = dataProviders.firstOrNull { it.id == event.getOptionAsString("command", "")!! && it.supportArgsAutoComplete }
+            if (possibleProvider != null) {
                 possibleProvider.onArgsAutoComplete(event)
-            }else {
+            } else {
                 event.replyChoices().queue()
             }
         }

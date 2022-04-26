@@ -111,11 +111,20 @@ fun createTextInput(
     placeholder: String? = null,
     min: Int = -1,
     max: Int = -1
-): TextInput = TextInput.create(id, label, style)
-    .setPlaceholder(placeholder)
-    .setMinLength(min)
-    .setMaxLength(max)
-    .build()
+): TextInput {
+    val builder = TextInput.create(id, label, style)
+        .setPlaceholder(placeholder)
+
+    if (min != -1) {
+        builder.minLength = min
+    }
+
+    if (max != -1) {
+        builder.maxLength = max
+    }
+
+    return builder.build()
+}
 
 fun createPrimaryButton(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.PRIMARY, id, label, emoji)
 fun createSecondaryButton(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.SECONDARY, id, label, emoji)
