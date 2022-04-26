@@ -1,15 +1,21 @@
 aluna:
   production-mode: false
   owner-ids: <insert-owner-id>
-  enable-translations: true
+  mod-ids: <insert-mod-ids>
   discord:
     token: <insert-token>
     application-id: <insert-application-id>
-    gatewayIntents:
     default-permissions:
       - VIEW_CHANNEL
-    memberCachePolicy: NONE
+    gateway-intents: GUILD_MEMBERS,GUILD_PRESENCES,DIRECT_MESSAGE_REACTIONS,DIRECT_MESSAGES
+    memberCachePolicy: ALL
     publish-events: true
+  thread:
+    scoped-objects-timeout-scheduler: 5
+  command:
+    system-command:
+      enable: true
+      support-server: <insert-support-server>
 
 logging:
   level:

@@ -35,6 +35,8 @@ open class DiscordBot(
         private set
     var messagesToObserveSelect: MutableMap<String, ObserveCommandInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveCommandInteraction>())
         private set
+    var messagesToObserveModal: MutableMap<String, ObserveCommandInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveCommandInteraction>())
+        private set
 
     private val messagesToObserveScheduledThreadPool =
         AlunaThreadPool.getScheduledThreadPool(alunaProperties.thread.messagesToObserveScheduledThreadPool, "Aluna-Message-Observer-Timeout-Pool-%d", true)
@@ -135,7 +137,7 @@ open class DiscordBot(
                 context.getBean(command::class.java).onSelectMenuInteractionTimeout(additionalData)
             } catch (e: Exception) {
             }
-            removeMessageForButtonEvents(messageId)
+            removeMessageForSelectEvents(messageId)
         }, duration.seconds, TimeUnit.SECONDS)
 
         messagesToObserveSelect[messageId] =
@@ -171,7 +173,7 @@ open class DiscordBot(
                     context.getBean(command::class.java).onSelectMenuInteractionTimeout(additionalData)
                 } catch (e: Exception) {
                 }
-                removeMessageForButtonEvents(message.id)
+                removeMessageForSelectEvents(message.id)
             }, duration.seconds, TimeUnit.SECONDS)
 
             messagesToObserveSelect[message.id] =
@@ -189,8 +191,37 @@ open class DiscordBot(
         }
     }
 
-    fun removeMessageForButtonEvents(messageId: String) = messagesToObserveButton.remove(messageId)
+    fun registerMessageForModalEvents(
+        authorId: String,
+        command: DiscordCommand,
+        duration: Duration = Duration.ofMinutes(15),
+        additionalData: HashMap<String, Any?> = hashMapOf()
+    ) {
+        logger.debug("Register user $authorId for modal events to command /${command.name}")
+        val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
+            try {
+                context.getBean(command::class.java).onModalInteractionTimeout(additionalData)
+            } catch (e: Exception) {
+            }
+            removeMessageForModalEvents(authorId)
+        }, duration.seconds, TimeUnit.SECONDS)
 
+        messagesToObserveModal[authorId] =
+            ObserveCommandInteraction(
+                command::class,
+                command.uniqueId,
+                LocalDateTime.now(),
+                duration,
+                false,
+                additionalData,
+                arrayListOf(authorId),
+                true,
+                timeoutTask
+            )
+    }
+
+    fun removeMessageForButtonEvents(messageId: String) = messagesToObserveButton.remove(messageId)
     fun removeMessageForSelectEvents(messageId: String) = messagesToObserveSelect.remove(messageId)
+    fun removeMessageForModalEvents(userId: String) = messagesToObserveModal.remove(userId)
 
 }

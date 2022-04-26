@@ -2,6 +2,7 @@ package io.viascom.discord.bot.starter.bot.listener
 
 import io.viascom.discord.bot.starter.bot.DiscordBot
 import io.viascom.discord.bot.starter.configuration.scope.DiscordContext
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
@@ -62,6 +63,25 @@ class GenericInteractionListener(
                     val result = context.getBean(entry.command.java).onSelectMenuInteraction(event, entry.additionalData)
                     if (!entry.stayActive && result) {
                         discordBot.removeMessageForSelectEvents(event.message.id)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onModalInteraction(event: ModalInteractionEvent) {
+        discordBot.asyncExecutor.execute {
+            if (discordBot.messagesToObserveModal.containsKey(event.user.id)) {
+                discordBot.commandExecutor.execute commandExecutor@{
+                    val entry = discordBot.messagesToObserveModal[event.user.id]!!
+                    DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
+                    if (entry.commandUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
+                        return@commandExecutor
+                    }
+
+                    val result = context.getBean(entry.command.java).onModalInteraction(event, entry.additionalData)
+                    if (!entry.stayActive && result) {
+                        discordBot.removeMessageForSelectEvents(event.user.id)
                     }
                 }
             }

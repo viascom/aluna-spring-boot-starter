@@ -51,6 +51,11 @@ class AlunaProperties {
     var useStopwatch: Boolean = false
 
     /**
+     * Show hash code for commands
+     */
+    var showHashCode: Boolean = false
+
+    /**
      * Owner ids
      */
     var ownerIds: ArrayList<Long> = arrayListOf()

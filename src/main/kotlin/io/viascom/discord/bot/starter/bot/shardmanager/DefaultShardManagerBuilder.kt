@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.api.utils.MemberCachePolicy
+import net.dv8tion.jda.api.utils.cache.CacheFlag
 import org.slf4j.LoggerFactory
 
 class DefaultShardManagerBuilder(
@@ -44,6 +45,21 @@ class DefaultShardManagerBuilder(
                 }
             )
             .setAutoReconnect(alunaProperties.discord.autoReconnect)
+
+        alunaProperties.discord.cacheFlags.forEach {
+            logger.debug("Enable CacheFlags: ${it.name}")
+            shardManagerBuilder.enableCache(
+                when (it) {
+                    AlunaDiscordProperties.CacheFlag.ACTIVITY -> CacheFlag.ACTIVITY
+                    AlunaDiscordProperties.CacheFlag.VOICE_STATE -> CacheFlag.VOICE_STATE
+                    AlunaDiscordProperties.CacheFlag.EMOTE -> CacheFlag.EMOTE
+                    AlunaDiscordProperties.CacheFlag.CLIENT_STATUS -> CacheFlag.CLIENT_STATUS
+                    AlunaDiscordProperties.CacheFlag.MEMBER_OVERRIDES -> CacheFlag.MEMBER_OVERRIDES
+                    AlunaDiscordProperties.CacheFlag.ROLE_TAGS -> CacheFlag.ROLE_TAGS
+                    AlunaDiscordProperties.CacheFlag.ONLINE_STATUS -> CacheFlag.ONLINE_STATUS
+                }
+            )
+        }
 
         alunaProperties.discord.gatewayIntents.forEach {
             logger.debug("Enable Intent: ${it.name}")

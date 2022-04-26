@@ -15,7 +15,7 @@ class SystemCommandProperties {
     var enable: Boolean = true
 
     /**
-     * Server id on which this command can be used. If set to 0 the command will be removed completly.
+     * Server id on which this command can be used. If set to 0 the command will be removed completely.
      */
     var server: String? = null
 

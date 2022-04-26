@@ -140,22 +140,32 @@ open class SlashCommandInteractionInitializer(
                     server.deleteCommandById(serverCommand.id).queue()
                 }
             } else {
-                var upsert = serverCommands != null && serverCommands.none { it.name == "system-command" }
 
-                if (!upsert) {
-                    val serverCommand = serverCommands?.firstOrNull { it.name == "system-command" }
-                    if (serverCommand == null) {
-                        upsert = true
-                    } else {
-                        upsert = !compareCommands(command, serverCommand)
-                    }
-                }
-
-                if (upsert) {
-                    server?.upsertCommand(command)?.queue { discordCommand ->
-                        printCommand(command, true)
+                //Check if system command should be global
+                if (server == null) {
+                    shardManager.shards.first().upsertCommand(command)?.queue { discordCommand ->
+                        printCommand(command)
                         discordBot.commands[command.name] = command.javaClass
                         discordBot.commandsWithAutocomplete.add(command.name)
+                    }
+                } else {
+                    var upsert = serverCommands != null && serverCommands.none { it.name == "system-command" }
+
+                    if (!upsert) {
+                        val serverCommand = serverCommands?.firstOrNull { it.name == "system-command" }
+                        if (serverCommand == null) {
+                            upsert = true
+                        } else {
+                            upsert = !compareCommands(command, serverCommand)
+                        }
+                    }
+
+                    if (upsert) {
+                        server?.upsertCommand(command)?.queue { discordCommand ->
+                            printCommand(command, true)
+                            discordBot.commands[command.name] = command.javaClass
+                            discordBot.commandsWithAutocomplete.add(command.name)
+                        }
                     }
                 }
             }
