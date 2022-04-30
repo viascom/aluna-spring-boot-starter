@@ -42,6 +42,7 @@ open class SlashCommandInteractionInitializer(
             it.initCommandOptions()
             it.initSubCommands()
             it.prepareCommand()
+            it.prepareLocalization()
             it
         }.toCollection(arrayListOf())
 
@@ -91,34 +92,36 @@ open class SlashCommandInteractionInitializer(
                 shardManager.shards.first().upsertCommand(discordCommand).queue { command ->
                     if (discordCommand.type == Command.Type.SLASH) {
                         printCommand((discordCommand as DiscordCommand))
-                        discordBot.commands[command.name] = (discordCommand as DiscordCommand).javaClass
+                        discordBot.commands[command.id] = (discordCommand as DiscordCommand).javaClass
                     }
                     if (discordCommand.type != Command.Type.SLASH) {
                         logger.debug("Register context menu ${(discordCommand as DiscordContextMenu).name}")
-                        discordBot.contextMenus[command.name] = discordCommand.javaClass
+                        discordBot.contextMenus[command.id] = discordCommand.javaClass
                     }
                     if (discordCommand.type == Command.Type.SLASH && (discordCommand as DiscordCommand).observeAutoComplete && command.name !in discordBot.commandsWithAutocomplete) {
-                        discordBot.commandsWithAutocomplete.add(command.name)
+                        discordBot.commandsWithAutocomplete.add(command.id)
                     }
                 }
             }
 
-            commands.forEach { command ->
-                try {
-                    discordBot.commands.computeIfAbsent(command.name) { commands.first { it.name == command.name }.javaClass }
-                    if (command.observeAutoComplete && command.name !in discordBot.commandsWithAutocomplete) {
-                        discordBot.commandsWithAutocomplete.add(command.name)
+            shardManager.shards.first().retrieveCommands().queue {
+                it.filter { it.type == Command.Type.SLASH }.filter { it.name in commands.map { it.name } }.forEach { command ->
+                    try {
+                        discordBot.commands.computeIfAbsent(command.id) { commands.first { it.name == command.name }?.javaClass }
+                        if (commands.first { it.name == command.name }.observeAutoComplete && command.id !in discordBot.commandsWithAutocomplete) {
+                            discordBot.commandsWithAutocomplete.add(command.id)
+                        }
+                    } catch (e: Exception) {
+                        logger.error("Could not add command '${command.name}' to available commands")
                     }
-                } catch (e: Exception) {
-                    logger.error("Could not add command '${command.name}' to available commands")
                 }
-            }
 
-            contextMenus.forEach { command ->
-                try {
-                    discordBot.contextMenus.computeIfAbsent(command.name) { contextMenus.first { it.name == command.name }.javaClass }
-                } catch (e: Exception) {
-                    logger.error("Could not add context menu '${command.name}' to available menus")
+                it.filter { it.type != Command.Type.SLASH }.filter { it.name in contextMenus.map { it.name } }.forEach { command ->
+                    try {
+                        discordBot.contextMenus.computeIfAbsent(command.id) { contextMenus.first { it.name == command.name }?.javaClass }
+                    } catch (e: Exception) {
+                        logger.error("Could not add context menu '${command.name}' to available commands")
+                    }
                 }
             }
 
@@ -143,8 +146,8 @@ open class SlashCommandInteractionInitializer(
 
                 //Check if system command should be global
                 if (server == null) {
-                    val serverCommand = shardManager.shards.first().retrieveCommands().complete().first { it.name == command.name }
-                    if(!compareCommands(command, serverCommand)) {
+                    val serverCommand = shardManager.shards.first().retrieveCommands().complete().firstOrNull { it.name == command.name }
+                    if (serverCommand != null && !compareCommands(command, serverCommand)) {
                         shardManager.shards.first().upsertCommand(command)?.queue { discordCommand ->
                             printCommand(command)
                             discordBot.commands[command.name] = command.javaClass
@@ -166,8 +169,8 @@ open class SlashCommandInteractionInitializer(
                     if (upsert) {
                         server?.upsertCommand(command)?.queue { discordCommand ->
                             printCommand(command, true)
-                            discordBot.commands[command.name] = command.javaClass
-                            discordBot.commandsWithAutocomplete.add(command.name)
+                            discordBot.commands[discordCommand.id] = command.javaClass
+                            discordBot.commandsWithAutocomplete.add(discordCommand.id)
                         }
                     }
                 }
@@ -275,7 +278,9 @@ open class SlashCommandInteractionInitializer(
                 commandData.description == command.description &&
                 commandData.options.map { Command.Option(it.toData()) } == command.options &&
                 commandData.subcommandGroups.map { Command.SubcommandGroup(it.toData()) } == command.subcommandGroups &&
-                commandData.subcommands.map { Command.Subcommand(it.toData()) } == command.subcommands
+                commandData.subcommands.map { Command.Subcommand(it.toData()) } == command.subcommands &&
+                commandData.nameLocalizations.toMap() == command.nameLocalizations.toMap() &&
+                commandData.descriptionLocalizations.toMap() == command.descriptionLocalizations.toMap()
     }
 
 }

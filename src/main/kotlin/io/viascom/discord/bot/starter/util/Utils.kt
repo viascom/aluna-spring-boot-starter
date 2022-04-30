@@ -86,6 +86,8 @@ fun SelectMenuInteractionEvent.getSelections(): List<String> = this.values
 
 fun ModalInteraction.getValueAsString(name: String, default: String? = null): String? = this.getValue(name)?.asString ?: default
 
+fun User.probableLocale(): Locale? = mutualGuilds.groupBy { it.locale }.maxByOrNull { it.value.size }?.value?.firstOrNull()?.locale
+
 fun EmbedBuilder.setColor(red: Int, green: Int, blue: Int): EmbedBuilder = this.setColor(Color(red, green, blue))
 fun createSelectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {
     var option = SelectOption.of(label, value)

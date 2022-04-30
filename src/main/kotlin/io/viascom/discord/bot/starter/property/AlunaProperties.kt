@@ -2,6 +2,7 @@ package io.viascom.discord.bot.starter.property
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.NestedConfigurationProperty
+import java.util.*
 
 @ConfigurationProperties(AlunaProperties.PREFIX)
 class AlunaProperties {
@@ -78,6 +79,11 @@ class AlunaProperties {
      * If not set, Aluna will fall back to <code>classpath:i18n/messages</code>
      */
     var translationPath: String? = null
+
+    /**
+     * Default locale for commands
+     */
+    var defaultCommandLocale: Locale = Locale.ENGLISH
 
     /**
      * Use en_GB for en in production

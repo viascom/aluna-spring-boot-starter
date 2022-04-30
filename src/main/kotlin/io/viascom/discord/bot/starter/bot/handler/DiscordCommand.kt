@@ -4,6 +4,7 @@ import datadog.trace.api.Trace
 import io.viascom.discord.bot.starter.bot.DiscordBot
 import io.viascom.discord.bot.starter.property.AlunaProperties
 import io.viascom.discord.bot.starter.translation.MessageService
+import io.viascom.discord.bot.starter.util.DiscordLocalization
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -21,13 +22,21 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.MessageSource
+import org.springframework.context.NoSuchMessageException
+import org.springframework.context.support.MessageSourceAccessor
 import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
-abstract class DiscordCommand(name: String, description: String, val observeAutoComplete: Boolean = false) : CommandDataImpl(name, description),
+abstract class DiscordCommand(
+    name: String,
+    description: String,
+    val localizations: HashMap<Locale, Pair<String, String>> = hashMapOf(),
+    val observeAutoComplete: Boolean = false
+) : CommandDataImpl(name, description),
     SlashCommandData, CommandScopedObject {
 
     @Autowired
@@ -44,6 +53,9 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
 
     @Autowired(required = false)
     lateinit var messageService: MessageService
+
+    @Autowired(required = false)
+    private lateinit var messageSource: MessageSource
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
@@ -194,6 +206,48 @@ abstract class DiscordCommand(name: String, description: String, val observeAuto
 
     fun prepareCommand() {
         processDevelopmentStatus()
+    }
+
+    fun prepareLocalization() {
+        if (alunaProperties.enableTranslation) {
+            val default = if (alunaProperties.defaultCommandLocale == Locale.ENGLISH) {
+                Locale.forLanguageTag("en-GB")
+            } else {
+                alunaProperties.defaultCommandLocale
+            }
+
+            nameLocalizations.setTranslations(name, default)
+            descriptionLocalizations.setTranslations(description, default)
+
+            val messageSourceAccessor = MessageSourceAccessor(messageSource)
+
+            if (localizations.isEmpty()) {
+                DiscordLocalization.values().forEach {
+                    val i18nName = try {
+                        messageSourceAccessor.getMessage("command.${getName()}.name", it.locale)
+                    } catch (e: NoSuchMessageException) {
+                        null
+                    }
+                    if (i18nName != null && i18nName != "command.${getName()}.name") {
+                        nameLocalizations.setTranslations(i18nName, it.locale)
+                        val i18nDescription = try {
+                            messageSourceAccessor.getMessage("command.${getName()}.description", it.locale)
+                        } catch (e: NoSuchMessageException) {
+                            null
+                        }
+                        if (i18nDescription != null && i18nDescription != "command.${getName()}.description") {
+                            descriptionLocalizations.setTranslations(i18nDescription, it.locale)
+                        }
+                    }
+                }
+                null
+            } else {
+                localizations.forEach { (locale, values) ->
+                    nameLocalizations.setTranslations(values.first, locale)
+                    descriptionLocalizations.setTranslations(values.second, locale)
+                }
+            }
+        }
     }
 
     /**

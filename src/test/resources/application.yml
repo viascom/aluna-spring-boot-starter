@@ -16,6 +16,7 @@ aluna:
     system-command:
       enable: true
       support-server: <insert-support-server>
+  enable-translation: true
 
 logging:
   level:

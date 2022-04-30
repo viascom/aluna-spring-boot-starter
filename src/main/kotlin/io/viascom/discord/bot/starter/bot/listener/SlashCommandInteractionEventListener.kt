@@ -20,14 +20,14 @@ class SlashCommandInteractionEventListener(
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
         discordBot.asyncExecutor.execute {
             DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.COMMAND)
-            discordBot.commands[event.name]?.let { command -> discordBot.commandExecutor.execute { context.getBean(command).run(event) } }
+            discordBot.commands[event.commandId]?.let { command -> discordBot.commandExecutor.execute { context.getBean(command).run(event) } }
         }
     }
 
     override fun onUserContextInteraction(event: UserContextInteractionEvent) {
         discordBot.asyncExecutor.execute {
             DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.COMMAND)
-            discordBot.contextMenus[event.name]?.let { command ->
+            discordBot.contextMenus[event.commandId]?.let { command ->
                 discordBot.commandExecutor.execute {
                     (context.getBean(command) as DiscordUserContextMenu).run(
                         event
