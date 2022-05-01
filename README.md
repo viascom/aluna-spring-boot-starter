@@ -16,17 +16,19 @@ class PingCommand: DiscordCommand(
 ```
 
 
-### Create an EventWaiter
+### React to Button
 ```kotlin
-event.reply("Pong\nYour locale is:${this.userLocale}").addActionRows(ActionRow.of(Button.primary("hi", "Hi"))).queue {
-    eventWaiter.waitForInteraction("command:ping:" + author.id,
-        ButtonInteractionEvent::class.java,
-        hook = it,
-        action = {
-            if (it.componentId == "hi") {
-                it.editMessage("Oh hi :)").removeActionRows().queue()
-            }
-        })
+event.reply("Pong\nYour locale is:${this.userLocale}").addActionRows(ActionRow.of(Button.primary("hi", "Hi")))
+    .queueAndRegisterInteraction(hook, this)
+
+
+override fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    logger.debug(this.hashCode().toString())
+    if (event.componentId == "hi") {
+        event.editMessage("Oh hi :)").removeActionRows().queue()
+    }
+
+    return true
 }
 ```
 
@@ -42,5 +44,7 @@ aluna:
 
 logging:
   level:
-    io.viascom.discord.bot.starter.bot: DEBUG
+    io.viascom.discord.bot.starter: DEBUG
+    io.viascom.discord.bot.starter.event.EventPublisher: INFO #Set to DEBUG to show al published events
+    io.viascom.discord.bot.starter.bot.handler.AlunaLocalizationFunction: INFO #Set to DEBUG to show translation keys for interactions
 ```
