@@ -3,7 +3,7 @@ package io.viascom.discord.bot.starter.bot.command.systemcommand.adminsearch
 import io.viascom.discord.bot.starter.bot.command.systemcommand.AdminSearchDataProvider
 import io.viascom.discord.bot.starter.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.starter.property.AlunaProperties
-import io.viascom.discord.bot.starter.util.DiscordFormatUtil
+import io.viascom.discord.bot.starter.util.TimestampFormat
 import io.viascom.discord.bot.starter.util.round
 import io.viascom.discord.bot.starter.util.toDiscordTimestamp
 import io.viascom.discord.bot.starter.util.toHex
@@ -37,7 +37,7 @@ class AdminSearchOverviewPage(
             .addField("Discord-Tag", discordUser.asTag, true)
             .addField("Is Bot", (if (discordUser.isBot) AlunaEmote.SMALL_TICK else AlunaEmote.SMALL_CROSS).asMention(), true)
             .addField("Flags", discordUser.flags.joinToString(", ") { it.getName() }, true)
-            .addField("Time Created", discordUser.timeCreated.toDiscordTimestamp(DiscordFormatUtil.TimestampFormat.SHORT_DATE_TIME), true)
+            .addField("Time Created", discordUser.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
             .addField(
                 "On Support Server",
                 (if (mutualServers.any { it.id == alunaProperties.command.systemCommand.supportServer }) AlunaEmote.SMALL_TICK else AlunaEmote.SMALL_CROSS).asMention(),
@@ -75,10 +75,10 @@ class AdminSearchOverviewPage(
         if (discordServer.vanityCode != null) {
             embedBuilder.addField("Vanity-Code", "${discordServer.vanityCode} | `${discordServer.vanityUrl}`", true)
         }
-        embedBuilder.addField("Time Created", discordServer.timeCreated.toDiscordTimestamp(DiscordFormatUtil.TimestampFormat.SHORT_DATE_TIME), true)
+        embedBuilder.addField("Time Created", discordServer.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
         embedBuilder.addField(
             "Bot join-time",
-            discordServer.selfMember.timeJoined.toDiscordTimestamp(DiscordFormatUtil.TimestampFormat.SHORT_DATE_TIME),
+            discordServer.selfMember.timeJoined.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME),
             true
         )
         embedBuilder.addField("In-Server-Name", discordServer.selfMember.effectiveName, true)
@@ -91,7 +91,7 @@ class AdminSearchOverviewPage(
     override fun onRoleRequest(discordRole: Role, embedBuilder: EmbedBuilder) {
         embedBuilder.addField("ID", discordRole.id, true)
         embedBuilder.addField("Name", discordRole.name, true)
-        embedBuilder.addField("Time Created", discordRole.timeCreated.toDiscordTimestamp(DiscordFormatUtil.TimestampFormat.SHORT_DATE_TIME), true)
+        embedBuilder.addField("Time Created", discordRole.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
         embedBuilder.addField("Server", "${discordRole.guild.name} (`${discordRole.guild.id}`)", false)
         embedBuilder.addField(
             "Is below Bot",
@@ -159,7 +159,7 @@ class AdminSearchOverviewPage(
                 ChannelType.UNKNOWN -> "Unknown"
             }, true
         )
-        embedBuilder.addField("Time Created", discordChannel.timeCreated.toDiscordTimestamp(DiscordFormatUtil.TimestampFormat.SHORT_DATE_TIME), true)
+        embedBuilder.addField("Time Created", discordChannel.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
         if (discordChannel.type in ChannelType.values().filter { it.isGuild }) {
             val channel = discordChannel as GuildChannel
             embedBuilder.addField("Server", "${channel.guild.name} (`${channel.guild.id}`)", false)
@@ -242,7 +242,7 @@ class AdminSearchOverviewPage(
         embedBuilder.addField("ID", discordEmote.id, true)
         embedBuilder.addField("Name", discordEmote.name, true)
         embedBuilder.addField("Mention", "`${discordEmote.asMention}`", true)
-        embedBuilder.addField("Time Created", discordEmote.timeCreated.toDiscordTimestamp(DiscordFormatUtil.TimestampFormat.SHORT_DATE_TIME), true)
+        embedBuilder.addField("Time Created", discordEmote.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
         discordEmote.guild?.let { embedBuilder.addField("Server", "${it.name} (`${it.id}`)", false) }
         embedBuilder.addField("Url", "`${discordEmote.imageUrl}`", false)
         embedBuilder.addField("Is Animated", (if (discordEmote.isAnimated) AlunaEmote.SMALL_TICK else AlunaEmote.SMALL_CROSS).asMention(), true)
