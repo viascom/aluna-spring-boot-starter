@@ -72,7 +72,7 @@ open class SlashCommandInteractionInitializer(
             }
 
             commandsToRemove.forEach {
-                logger.debug("Removed unneeded command '/${it.name}'")
+                logger.debug("Removed unneeded/changed command '/${it.name}'")
                 shardManager.shards.first().deleteCommandById(it.id).queue()
             }
 

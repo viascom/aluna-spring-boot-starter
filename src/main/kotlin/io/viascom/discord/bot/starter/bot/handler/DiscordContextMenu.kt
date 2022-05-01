@@ -143,7 +143,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     fun exitCommand(event: GenericCommandInteractionEvent) {
         if (alunaProperties.useStopwatch && stopWatch != null) {
             stopWatch!!.stop()
-            println("${event.name} (${this.author.id})${if (alunaProperties.showHashCode) " [${this.hashCode()}]" else ""} -> ${stopWatch!!.totalTimeMillis}ms")
+            logger.info("${event.name} (${this.author.id})${if (alunaProperties.showHashCode) " [${this.hashCode()}]" else ""} -> ${stopWatch!!.totalTimeMillis}ms")
         }
     }
 

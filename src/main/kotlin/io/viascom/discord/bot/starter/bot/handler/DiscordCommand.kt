@@ -4,7 +4,6 @@ import datadog.trace.api.Trace
 import io.viascom.discord.bot.starter.bot.DiscordBot
 import io.viascom.discord.bot.starter.property.AlunaProperties
 import io.viascom.discord.bot.starter.translation.MessageService
-import io.viascom.discord.bot.starter.util.DiscordLocalization
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -14,6 +13,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
+import net.dv8tion.jda.api.interactions.commands.LocalizationMapper
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 import net.dv8tion.jda.api.requests.RestAction
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
@@ -23,8 +23,6 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.MessageSource
-import org.springframework.context.NoSuchMessageException
-import org.springframework.context.support.MessageSourceAccessor
 import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
@@ -56,6 +54,9 @@ abstract class DiscordCommand(
 
     @Autowired(required = false)
     private lateinit var messageSource: MessageSource
+
+    @Autowired(required = false)
+    private lateinit var alunaLocalizationFunction: AlunaLocalizationFunction
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
@@ -210,43 +211,8 @@ abstract class DiscordCommand(
 
     fun prepareLocalization() {
         if (alunaProperties.enableTranslation) {
-            val default = if (alunaProperties.defaultCommandLocale == Locale.ENGLISH) {
-                Locale.forLanguageTag("en-GB")
-            } else {
-                alunaProperties.defaultCommandLocale
-            }
-
-            nameLocalizations.setTranslations(name, default)
-            descriptionLocalizations.setTranslations(description, default)
-
-            val messageSourceAccessor = MessageSourceAccessor(messageSource)
-
-            if (localizations.isEmpty()) {
-                DiscordLocalization.values().forEach {
-                    val i18nName = try {
-                        messageSourceAccessor.getMessage("command.${getName()}.name", it.locale)
-                    } catch (e: NoSuchMessageException) {
-                        null
-                    }
-                    if (i18nName != null && i18nName != "command.${getName()}.name") {
-                        nameLocalizations.setTranslations(i18nName, it.locale)
-                        val i18nDescription = try {
-                            messageSourceAccessor.getMessage("command.${getName()}.description", it.locale)
-                        } catch (e: NoSuchMessageException) {
-                            null
-                        }
-                        if (i18nDescription != null && i18nDescription != "command.${getName()}.description") {
-                            descriptionLocalizations.setTranslations(i18nDescription, it.locale)
-                        }
-                    }
-                }
-                null
-            } else {
-                localizations.forEach { (locale, values) ->
-                    nameLocalizations.setTranslations(values.first, locale)
-                    descriptionLocalizations.setTranslations(values.second, locale)
-                }
-            }
+            this.setLocalizationMapper(LocalizationMapper.fromFunction(alunaLocalizationFunction))
+            this.toData()
         }
     }
 
@@ -332,7 +298,7 @@ abstract class DiscordCommand(
     private fun exitCommand(event: SlashCommandInteractionEvent) {
         if (alunaProperties.useStopwatch && stopWatch != null) {
             stopWatch!!.stop()
-            println("/${event.commandPath} (${this.author.id})${if (alunaProperties.showHashCode) " [${this.hashCode()}]" else ""} -> ${stopWatch!!.totalTimeMillis}ms")
+            logger.info("/${event.commandPath} (${this.author.id})${if (alunaProperties.showHashCode) " [${this.hashCode()}]" else ""} -> ${stopWatch!!.totalTimeMillis}ms")
         }
     }
 

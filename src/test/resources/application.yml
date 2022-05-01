@@ -22,6 +22,8 @@ logging:
   level:
     io.viascom.discord.bot.starter: DEBUG
     io.viascom.discord.bot.starter.event.EventPublisher: INFO
+    io.viascom.discord.bot.starter.bot.handler.AlunaLocalizationFunction: INFO #Set to DEBUG to show translation keys for interactions
+
 
 management:
   endpoint:

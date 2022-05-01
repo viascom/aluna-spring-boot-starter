@@ -3,10 +3,7 @@ package io.viascom.discord.bot.starter
 import io.viascom.discord.bot.starter.bot.DiscordBot
 import io.viascom.discord.bot.starter.bot.emotes.DefaultSystemEmoteLoader
 import io.viascom.discord.bot.starter.bot.emotes.SystemEmoteLoader
-import io.viascom.discord.bot.starter.bot.handler.DefaultDiscordCommandConditions
-import io.viascom.discord.bot.starter.bot.handler.DefaultDiscordCommandLoadAdditionalData
-import io.viascom.discord.bot.starter.bot.handler.DiscordCommandConditions
-import io.viascom.discord.bot.starter.bot.handler.DiscordCommandLoadAdditionalData
+import io.viascom.discord.bot.starter.bot.handler.*
 import io.viascom.discord.bot.starter.bot.listener.*
 import io.viascom.discord.bot.starter.bot.shardmanager.DefaultShardManagerBuilder
 import io.viascom.discord.bot.starter.property.AlunaProperties
@@ -105,5 +102,12 @@ open class AlunaAutoConfiguration(
         messageSource.setUseCodeAsDefaultMessage(true)
         messageSource.setFallbackToSystemLocale(false)
         return messageSource
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = ["enable-translation"], prefix = "aluna", matchIfMissing = false)
+    open fun alunaLocalizationFunction(messageSource: MessageSource): AlunaLocalizationFunction {
+        return AlunaLocalizationFunction(messageSource)
     }
 }
