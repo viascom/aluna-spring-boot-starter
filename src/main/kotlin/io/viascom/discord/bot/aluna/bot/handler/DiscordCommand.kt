@@ -133,6 +133,7 @@ abstract class DiscordCommand(
      * Make sure that you register your message id: discordBot.registerMessageForButtonEvents(it, this)
      *
      * @param event
+     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
     @Trace
     open fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
@@ -153,6 +154,7 @@ abstract class DiscordCommand(
      * Make sure that you register your message id: discordBot.registerMessageForSelectEvents(it, this)
      *
      * @param event
+     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
     @Trace
     open fun onSelectMenuInteraction(event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
@@ -185,6 +187,7 @@ abstract class DiscordCommand(
      * This method gets triggered, as soon as a modal event for this command is called.
      *
      * @param event
+     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
     @Trace
     open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {

@@ -4,6 +4,7 @@ import io.viascom.discord.bot.aluna.bot.handler.Command
 import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
 import io.viascom.discord.bot.aluna.scriptengine.KotlinScriptService
+import io.viascom.discord.bot.aluna.util.createPrimaryButton
 import io.viascom.discord.bot.aluna.util.getOptionAsString
 import io.viascom.discord.bot.aluna.util.removeActionRows
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
@@ -12,7 +13,6 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.components.ActionRow
-import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.sharding.ShardManager
 import java.util.concurrent.TimeUnit
 
@@ -46,7 +46,7 @@ class PingCommand(
         var eval = kotlinScriptService.eval("shardManager.shards.first().guilds.size") as Int
         logger.info("Guilds: $eval")
 
-        event.reply("Pong\nYour locale is:${this.userLocale}").addActionRows(ActionRow.of(Button.primary("hi", "Hi"))).queue {
+        event.reply("Pong\nYour locale is:${this.userLocale}").addActionRows(ActionRow.of(createPrimaryButton("hi", "Hi"))).queue {
             eventWaiter.waitForInteraction(this.uniqueId,
                 ButtonInteractionEvent::class.java,
                 hook = it,
