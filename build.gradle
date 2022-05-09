@@ -138,8 +138,8 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/viascom/aluna-spring-boot-starter")
             credentials {
-                username = findProperty("github_actor") ?: System.getenv("GITHUB_ACTOR")
-                password = findProperty("github_token") ?: System.getenv("GITHUB_TOKEN")
+                username = findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+                password = findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
             }
         }
     }
