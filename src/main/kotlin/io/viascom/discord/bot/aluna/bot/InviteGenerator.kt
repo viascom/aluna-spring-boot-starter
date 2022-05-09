@@ -3,11 +3,13 @@ package io.viascom.discord.bot.aluna.bot
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 
 @Service
+@ConditionalOnProperty(name = ["enable-debug-configuration-log"], prefix = "aluna", matchIfMissing = true)
 class InviteGenerator(private val alunaProperties: AlunaProperties) : ApplicationListener<ApplicationStartedEvent> {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)

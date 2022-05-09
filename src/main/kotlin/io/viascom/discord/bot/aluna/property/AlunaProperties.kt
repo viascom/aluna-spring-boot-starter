@@ -66,6 +66,11 @@ class AlunaProperties {
     var modIds: ArrayList<Long> = arrayListOf()
 
     /**
+     * Enable Debug Configuration Log
+     */
+    var enableDebugConfigurationLog: Boolean = true
+
+    /**
      * Enable Translation
      */
     var enableTranslation: Boolean = false
