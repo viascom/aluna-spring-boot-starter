@@ -17,11 +17,13 @@
 
 ## Versions
 
+*These are the versions of all exposed dependencies.*
+
 | Library     |                                         Version                                          |
 |-------------|:----------------------------------------------------------------------------------------:|
 | JDA         | <img src="https://img.shields.io/badge/5.0.0--alpha.11-orange.svg" alt="5.0.0-alpha.11"> |
 | Spring Boot |        <img src="https://img.shields.io/badge/2.6.7-brightgreen.svg" alt="2.6.7">        |
-| kotlin      |       <img src="https://img.shields.io/badge/1.6.21-brightgreen.svg" alt="1.6.21">       |
+| Kotlin      |       <img src="https://img.shields.io/badge/1.6.21-brightgreen.svg" alt="1.6.21">       |
 | gson        |        <img src="https://img.shields.io/badge/2.9.0-brightgreen.svg" alt="2.9.0">        |
 | jnanoid     |        <img src="https://img.shields.io/badge/2.0.0-brightgreen.svg" alt="2.0.0">        |
 | emoji-java  |        <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1">        |
