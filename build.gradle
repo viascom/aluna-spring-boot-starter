@@ -9,7 +9,7 @@ plugins {
 }
 
 group "io.viascom.discord.bot"
-version "0.0.18_5.0.0-alpha.11"
+version "0.0.19_5.0.0-alpha.11_DEV"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -138,8 +138,8 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/viascom/aluna-spring-boot-starter")
             credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
+                username = findProperty("github_actor") ?: System.getenv("GITHUB_ACTOR")
+                password = findProperty("github_token") ?: System.getenv("GITHUB_TOKEN")
             }
         }
     }
