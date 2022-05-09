@@ -1,0 +1,10 @@
+
+${AnsiColor.MAGENTA}     _    _                    ${AnsiColor.BLUE} ____  _                       _  ${AnsiColor.DEFAULT} ____        _
+${AnsiColor.MAGENTA}    / \  | |_   _ _ __   __ _  ${AnsiColor.BLUE}|  _ \(_)___  ___ ___  _ __ __| | ${AnsiColor.DEFAULT}| __ )  ___ | |_
+${AnsiColor.MAGENTA}   / _ \ | | | | | '_ \ / _` | ${AnsiColor.BLUE}| | | | / __|/ __/ _ \| '__/ _` | ${AnsiColor.DEFAULT}|  _ \ / _ \| __|
+${AnsiColor.MAGENTA}  / ___ \| | |_| | | | | (_| | ${AnsiColor.BLUE}| |_| | \__ \ (_| (_) | | | (_| | ${AnsiColor.DEFAULT}| |_) | (_) | |_
+${AnsiColor.MAGENTA} /_/   \_\_|\__,_|_| |_|\__,_| ${AnsiColor.BLUE}|____/|_|___/\___\___/|_|  \__,_| ${AnsiColor.DEFAULT}|____/ \___/ \__|
+
+  Aluna:       ${AnsiColor.BRIGHT_YELLOW}aluna.version${AnsiColor.DEFAULT}
+  Spring-Boot: ${AnsiColor.BRIGHT_GREEN}${spring-boot.version}${AnsiColor.DEFAULT}
+  JDA:         ${AnsiColor.BRIGHT_YELLOW}jda.version${AnsiColor.DEFAULT}

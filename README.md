@@ -44,7 +44,7 @@ aluna:
 
 logging:
   level:
-    io.viascom.discord.bot.starter: DEBUG
-    io.viascom.discord.bot.starter.event.EventPublisher: INFO #Set to DEBUG to show al published events
-    io.viascom.discord.bot.starter.bot.handler.AlunaLocalizationFunction: INFO #Set to DEBUG to show translation keys for interactions
+    io.viascom.discord.bot.aluna: DEBUG
+    io.viascom.discord.bot.aluna.event.EventPublisher: INFO #Set to DEBUG to show al published events
+    io.viascom.discord.bot.aluna.bot.handler.AlunaLocalizationFunction: INFO #Set to DEBUG to show translation keys for interactions
 ```
