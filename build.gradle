@@ -50,6 +50,11 @@ repositories {
     }
 }
 
+ext {
+    jdaVersion="5.0.0-alpha.11_DEV"
+}
+
+
 dependencies {
 
     //====== Kotlin ======
@@ -73,7 +78,7 @@ dependencies {
     kapt "org.springframework.boot:spring-boot-configuration-processor"
 
     //====== JDA ======
-    api("net.dv8tion:JDA:5.0.0-alpha.11_DEV"){
+    api("net.dv8tion:JDA:$jdaVersion"){
         exclude group: "org.apache.commons", module: "commons-collections4" //Because of https://advisory.checkmarx.net/advisory/vulnerability/Cx78f40514-81ff/
     }
     implementation 'org.apache.commons:commons-collections4:4.4'
@@ -123,7 +128,7 @@ classes {
 processResources {
     filesMatching('banner.txt') {
         filter {
-            it.replace('jda.version', '5.0.0-alpha.11').replace('aluna.version', "${project.version}")
+            it.replace('jda.version', "${jdaVersion}").replace('aluna.version', "${project.version}")
         }
     }
 }

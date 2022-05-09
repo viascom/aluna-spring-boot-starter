@@ -1,11 +1,11 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
-import io.viascom.discord.bot.aluna.bot.emotes.SystemEmoteLoader
+import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
-class DefaultDiscordCommandConditions(private val alunaProperties: AlunaProperties, private val systemEmoteLoader: SystemEmoteLoader) :
+class DefaultDiscordCommandConditions(private val alunaProperties: AlunaProperties) :
     DiscordCommandConditions {
 
     override fun checkUseScope(
@@ -16,12 +16,12 @@ class DefaultDiscordCommandConditions(private val alunaProperties: AlunaProperti
         val server = event.guild
 
         if (useScope != DiscordCommand.UseScope.GLOBAL && server == null) {
-            event.deferReply(true).setContent("${systemEmoteLoader.getCross().asMention} This command can only be used on a server directly.").queue()
+            event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} This command can only be used on a server directly.").queue()
             return false
         }
 
         if (subCommandUseScope.getOrDefault(event.commandPath, DiscordCommand.UseScope.GLOBAL) != DiscordCommand.UseScope.GLOBAL && server == null) {
-            event.deferReply(true).setContent("${systemEmoteLoader.getCross().asMention} This command can only be used on a server directly.").queue()
+            event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} This command can only be used on a server directly.").queue()
             return false
         }
 
@@ -51,7 +51,7 @@ class DefaultDiscordCommandConditions(private val alunaProperties: AlunaProperti
             val voiceChannelPermissions = missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" }
             val serverPermissions = missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
             event.deferReply(true).setContent(
-                "${systemEmoteLoader.getCross().asMention} You are missing the following permission to execute this command:\n" +
+                "${AlunaEmote.SMALL_CROSS.asMention()} You are missing the following permission to execute this command:\n" +
                         (if (textChannelPermissions.isNotBlank()) textChannelPermissions + "\n" else "") +
                         (if (voiceChannelPermissions.isNotBlank()) voiceChannelPermissions + "\n" else "") +
                         (if (serverPermissions.isNotBlank()) serverPermissions + "\n" else "")
@@ -79,7 +79,7 @@ class DefaultDiscordCommandConditions(private val alunaProperties: AlunaProperti
                     if (voiceChannel == null) {
                         missingPermissions.notInVoice = true
                         event.deferReply(true)
-                            .setContent("${systemEmoteLoader.getCross().asMention} You need to be in a voice channel yourself to execute this command").queue()
+                            .setContent("${AlunaEmote.SMALL_CROSS.asMention()} You need to be in a voice channel yourself to execute this command").queue()
                         return missingPermissions
                     }
 
@@ -99,7 +99,7 @@ class DefaultDiscordCommandConditions(private val alunaProperties: AlunaProperti
         }
 
         if (missingPermissions.hasMissingPermissions) {
-            event.deferReply(true).setContent("${systemEmoteLoader.getCross().asMention} I'm missing the following permission to execute this command:\n" +
+            event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} I'm missing the following permission to execute this command:\n" +
                     missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
                     missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
                     missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }

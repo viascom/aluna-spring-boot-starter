@@ -26,7 +26,7 @@ class AdminSearchDataProvider(
     private val shardManager: ShardManager,
     private val adminSearchPageDataProviders: List<AdminSearchPageDataProvider>
 ) : SystemCommandDataProvider(
-    "adminsearch",
+    "admin_search",
     "Admin Search",
     true,
     false,

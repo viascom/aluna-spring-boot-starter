@@ -6,27 +6,20 @@ class AlunaCommandProperties {
 
     @NestedConfigurationProperty
     var systemCommand: SystemCommandProperties = SystemCommandProperties()
-
-    @NestedConfigurationProperty
-    var helpCommand: CommandProperties = CommandProperties()
 }
 
 class SystemCommandProperties {
     var enable: Boolean = false
 
     /**
-     * Server id on which this command can be used. If set to 0 the command will be removed completely.
+     * Server id on which this command can be used.
+     * If set to 0 the command will be removed completely.
+     * If set to null, the command can be used on every server and in DMs.
      */
     var server: String? = null
-
-    var supportServer: String? = null
-}
-
-class CommandProperties {
-    var enable: Boolean = false
 
     /**
-     * Server id on which this command can be used. If set to 0 the command will be removed completly.
+     * Defines the support server which will be used for certain information..
      */
-    var server: String? = null
+    var supportServer: String? = null
 }

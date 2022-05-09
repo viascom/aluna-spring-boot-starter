@@ -1,8 +1,6 @@
 package io.viascom.discord.bot.aluna
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.emotes.DefaultSystemEmoteLoader
-import io.viascom.discord.bot.aluna.bot.emotes.SystemEmoteLoader
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.bot.listener.*
 import io.viascom.discord.bot.aluna.bot.shardmanager.DefaultShardManagerBuilder
@@ -57,11 +55,10 @@ open class AlunaAutoConfiguration(
     @Bean
     @ConditionalOnMissingBean
     open fun defaultDiscordCommandConditions(
-        alunaProperties: AlunaProperties,
-        systemEmoteLoader: SystemEmoteLoader
+        alunaProperties: AlunaProperties
     ): DiscordCommandConditions {
         logger.debug("Enable DefaultDiscordCommandConditions")
-        return DefaultDiscordCommandConditions(alunaProperties, systemEmoteLoader)
+        return DefaultDiscordCommandConditions(alunaProperties)
     }
 
     @Bean
@@ -71,12 +68,6 @@ open class AlunaAutoConfiguration(
         return DefaultDiscordCommandLoadAdditionalData()
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    open fun defaultSystemEmoteLoader(): SystemEmoteLoader {
-        logger.debug("Enable DefaultSystemEmoteLoader")
-        return DefaultSystemEmoteLoader()
-    }
 
     @Bean
     @ConditionalOnMissingBean
