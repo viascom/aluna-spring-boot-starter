@@ -15,9 +15,9 @@ jobs:
 
     steps:
       - name: Setup timezone
-        uses: zcong1993/setup-timezone@master
-        with:
-          timezone: Europe/Zurich
+        run: |
+          sudo timedatectl set-timezone Europe/Zurich
+          timedatectl
 
       - name: Check out the repo
         uses: actions/checkout@v3
