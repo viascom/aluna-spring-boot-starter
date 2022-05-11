@@ -68,11 +68,9 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect"
 
     //====== Spring ======
-    compileOnly("org.springframework.boot:spring-boot-starter-web") {
-        exclude module: "spring-boot-starter-tomcat"
+    compileOnly("org.springframework.boot:spring-boot-starter") {
         exclude module: "spring-boot-starter-json"
     }
-    compileOnly "org.springframework.boot:spring-boot-starter-undertow"
     compileOnly "org.springframework.boot:spring-boot-starter-actuator"
     kapt "org.springframework.boot:spring-boot-configuration-processor"
 

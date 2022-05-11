@@ -2,6 +2,9 @@ package io.viascom.discord.bot.aluna.util
 
 import java.util.*
 
+/**
+ * Discord localization based on [discord docs](https://discord.com/developers/docs/reference#locales)
+ */
 enum class DiscordLocalization(val id: String, val locale: Locale, val languageName: String, val nativeName: String) {
     DA("da", Locale.forLanguageTag("da"), "Danish", "Dansk"),
     DE("de", Locale.forLanguageTag("de"), "German", "Deutsch"),

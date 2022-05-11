@@ -37,10 +37,10 @@ class EventPublisher(
         }
     }
 
-    fun publishDiscordSlashCommandInitializedEvent(newUpdatedCommands: List<KClass<out CommandDataImpl>>, removedCommands: List<String>) {
+    fun publishDiscordSlashCommandInitializedEvent(newCommands: List<KClass<out CommandDataImpl>>, updatedCommands: List<KClass<out CommandDataImpl>>, removedCommands: List<String>) {
         discordBot.asyncExecutor.execute {
             logger.debug("Publishing DiscordSlashCommandInitializedEvent")
-            val discordSlashCommandInitializedEvent = DiscordSlashCommandInitializedEvent(this, newUpdatedCommands, removedCommands)
+            val discordSlashCommandInitializedEvent = DiscordSlashCommandInitializedEvent(this, newCommands, updatedCommands, removedCommands)
             applicationEventPublisher.publishEvent(discordSlashCommandInitializedEvent)
         }
     }

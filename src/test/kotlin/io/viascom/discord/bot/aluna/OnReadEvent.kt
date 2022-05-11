@@ -6,7 +6,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import java.util.*
 
 @Component
 class OnReadEvent(
@@ -17,9 +16,7 @@ class OnReadEvent(
 
     @EventListener
     fun onShardReadyEvent(event: DiscordFirstShardReadyEvent) {
-        logger.info(messageService.get("command.key.description", Locale.ENGLISH))
-        logger.info(messageService.get("command.key.description", Locale.GERMAN))
-        logger.info(messageService.get("command.key.description", Locale.TAIWAN))
+
     }
 
 }

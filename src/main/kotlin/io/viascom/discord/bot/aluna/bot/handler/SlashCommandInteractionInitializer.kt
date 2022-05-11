@@ -32,6 +32,7 @@ open class SlashCommandInteractionInitializer(
     private fun initSlashCommands() {
         logger.debug("Update slash commands if needed")
 
+        //Get all commands, filter not needed commands and call init methods
         val filteredCommands = commands.filter {
             when {
                 (alunaProperties.includeInDevelopmentCommands) -> true
@@ -44,7 +45,7 @@ open class SlashCommandInteractionInitializer(
                 it.initSubCommands()
                 it.prepareCommand()
                 it.prepareLocalization()
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 logger.warn("Was not able to initialize command ${it.name}\n${e.stackTraceToString()}")
             }
             it
@@ -65,7 +66,23 @@ open class SlashCommandInteractionInitializer(
             commandDataList.addAll(filteredCommands)
             commandDataList.addAll(filteredContext)
 
+
             val commandsToRemove = currentCommands.filter { command ->
+                commandDataList.filter {
+                    if (it.type == Command.Type.SLASH) {
+                        (it as DiscordCommand).useScope in arrayListOf(DiscordCommand.UseScope.GLOBAL, DiscordCommand.UseScope.GUILD_ONLY)
+                    } else {
+                        true
+                    }
+                }.none { command.name == it.name }
+            }
+
+            commandsToRemove.forEach {
+                logger.debug("Removed unneeded command '/${it.name}'")
+                shardManager.shards.first().deleteCommandById(it.id).queue()
+            }
+
+            val commandsToUpdate = currentCommands.filter { it.name !in commandsToRemove.map { it.name } }.filter { command ->
                 commandDataList.filter {
                     if (it.type == Command.Type.SLASH) {
                         (it as DiscordCommand).useScope in arrayListOf(DiscordCommand.UseScope.GLOBAL, DiscordCommand.UseScope.GUILD_ONLY)
@@ -75,12 +92,14 @@ open class SlashCommandInteractionInitializer(
                 }.none { compareCommands(it, command) }
             }
 
-            commandsToRemove.forEach {
-                logger.debug("Removed unneeded/changed command '/${it.name}'")
-                shardManager.shards.first().deleteCommandById(it.id).queue()
+            commandsToUpdate.forEach { discordCommand ->
+                logger.debug("Update command '/${discordCommand.name}'")
+                val editCommand = shardManager.shards.first().editCommandById(discordCommand.id)
+                editCommand.clearOptions()
+                editCommand.apply(commandDataList.first { it.name == discordCommand.name }).queue()
             }
 
-            val commandsToUpdateOrAdd = commandDataList
+            val commandsToAdd = commandDataList
                 .filter {
                     if (it.type == Command.Type.SLASH) {
                         (it as DiscordCommand).useScope in arrayListOf(DiscordCommand.UseScope.GLOBAL, DiscordCommand.UseScope.GUILD_ONLY)
@@ -89,10 +108,16 @@ open class SlashCommandInteractionInitializer(
                     }
                 }
                 .filter { commandData ->
-                    currentCommands.none { compareCommands(commandData, it) }
+                    commandData.name !in commandsToUpdate.map { it.name }
+                }
+                .filter { commandData ->
+                    commandData.name !in commandsToRemove.map { it.name }
+                }
+                .filter { commandData ->
+                    commandData.name !in currentCommands.map { it.name }
                 }
 
-            commandsToUpdateOrAdd.forEach { discordCommand ->
+            commandsToAdd.forEach { discordCommand ->
                 shardManager.shards.first().upsertCommand(discordCommand).queue { command ->
                     if (discordCommand.type == Command.Type.SLASH) {
                         printCommand((discordCommand as DiscordCommand))
@@ -130,7 +155,10 @@ open class SlashCommandInteractionInitializer(
             }
 
             eventPublisher.publishDiscordSlashCommandInitializedEvent(
-                commandsToUpdateOrAdd.filter { it.type == Command.Type.SLASH }.map { it::class },
+                commandsToAdd.filter { it.type == Command.Type.SLASH }.map { it::class },
+                commandsToUpdate.filter { it.type == Command.Type.SLASH }
+                    .map { discordCommand -> commandDataList.first { it.name == discordCommand.name } }
+                    .map { it::class },
                 commandsToRemove.map { it.name })
         }
 
@@ -257,24 +285,24 @@ open class SlashCommandInteractionInitializer(
 
     private fun printCommand(command: DiscordCommand, isSpecific: Boolean = false) {
         var commandText = ""
-        commandText += "\t-> init${if (isSpecific) " server specific" else ""} command '/${command.name}'"
+        commandText += "Add${if (isSpecific) " server specific" else ""} command '/${command.name}'"
         when {
             (command.subcommandGroups.isNotEmpty()) -> {
                 commandText += "\n" + command.subcommandGroups.joinToString("\n") {
-                    "\t\t--> ${it.name}\n" +
+                    "\t--> ${it.name}\n" +
                             it.subcommands.joinToString("\n") {
-                                "\t\t\t---> ${it.name}"
+                                "\t\t---> ${it.name}"
                             }
                 }
             }
             (command.subcommands.isNotEmpty()) -> {
                 commandText += "\n" + command.subcommands.joinToString("\n") {
-                    "\t\t--> ${it.name}"
+                    "\t--> ${it.name}"
                 }
             }
         }
 
-        logger.info(commandText)
+        logger.debug(commandText)
     }
 
     private fun compareCommands(commandData: CommandDataImpl, command: Command): Boolean {

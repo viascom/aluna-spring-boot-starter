@@ -8,13 +8,13 @@ import net.dv8tion.jda.api.sharding.ShardManager
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.HealthIndicator
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.stereotype.Component
 
 @Component
 @ConditionalOnWebApplication
-@ConditionalOnMissingBean(HealthIndicator::class)
+@ConditionalOnClass(HealthIndicator::class)
 class AlunaHealthIndicator(
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
@@ -35,7 +35,9 @@ class AlunaHealthIndicator(
         shardManager.shards.first().status
         status.withDetail("clientId", alunaProperties.discord.applicationId)
         status.withDetail("commandsTotal", discordBot.commands.size)
-        status.withDetail("commands", discordBot.commands.map { it.key })
+        status.withDetail("commands", discordBot.commands.mapValues { it.value.name })
+        status.withDetail("contextMenuTotal", discordBot.contextMenus.size)
+        status.withDetail("contextMenus", discordBot.contextMenus.mapValues { it.value.name })
         status.withDetail("productionMode", alunaProperties.productionMode)
         status.withDetail("commandThreads", discordBot.commandExecutor.activeCount)
         status.withDetail("asyncThreads", discordBot.asyncExecutor.activeCount)
