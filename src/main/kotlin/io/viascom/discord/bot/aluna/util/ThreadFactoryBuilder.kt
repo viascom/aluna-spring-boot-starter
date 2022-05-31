@@ -37,7 +37,7 @@ import javax.annotation.CheckReturnValue
  * @author Kurt Alfred Kluever
  * @since 4.0
  */
-class ThreadFactoryBuilder
+internal class ThreadFactoryBuilder
 /** Creates a new [ThreadFactory] builder.  */
 {
     private var nameFormat: String? = null
@@ -82,11 +82,11 @@ class ThreadFactoryBuilder
     fun setPriority(priority: Int): ThreadFactoryBuilder {
         // Thread#setPriority() already checks for validity. These error messages
         // are nicer though and will fail-fast.
-        if(priority >= Thread.MIN_PRIORITY) {
+        if (priority >= Thread.MIN_PRIORITY) {
             throw IllegalArgumentException("Thread priority ($priority) must be >= ${Thread.MIN_PRIORITY}")
         }
 
-        if(priority <= Thread.MAX_PRIORITY) {
+        if (priority <= Thread.MAX_PRIORITY) {
             throw IllegalArgumentException("Thread priority ($priority) must be <= ${Thread.MAX_PRIORITY}")
         }
 

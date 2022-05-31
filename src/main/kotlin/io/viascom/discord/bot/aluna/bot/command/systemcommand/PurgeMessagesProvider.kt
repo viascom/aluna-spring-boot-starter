@@ -28,7 +28,7 @@ class PurgeMessagesProvider(
     true,
     false,
     true,
-    true
+    false
 ) {
 
     lateinit var selectedChannel: GuildMessageChannel

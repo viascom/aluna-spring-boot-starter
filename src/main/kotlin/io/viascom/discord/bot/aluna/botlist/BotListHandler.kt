@@ -14,7 +14,7 @@ open class BotListHandler(
     private val alunaProperties: AlunaProperties,
 ) {
 
-    val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @Scheduled(fixedRate = 600_000, initialDelay = 600_000) //Send updates every 10 minutes
     open fun sendStats() {

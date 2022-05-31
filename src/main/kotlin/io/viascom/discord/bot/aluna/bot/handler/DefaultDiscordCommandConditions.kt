@@ -1,34 +1,36 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
-import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
-import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
-class DefaultDiscordCommandConditions(private val alunaProperties: AlunaProperties) :
-    DiscordCommandConditions {
+class DefaultDiscordCommandConditions : DiscordCommandConditions {
 
     override fun checkUseScope(
         event: SlashCommandInteractionEvent,
         useScope: DiscordCommand.UseScope,
-        subCommandUseScope: HashMap<String, DiscordCommand.UseScope>
-    ): Boolean {
+        subCommandUseScope: HashMap<String, DiscordCommand.UseScope>,
+        discordCommand: DiscordCommand
+    ): DiscordCommand.WrongUseScope {
+        val wrongUseScope = DiscordCommand.WrongUseScope()
+
         val server = event.guild
 
         if (useScope != DiscordCommand.UseScope.GLOBAL && server == null) {
-            event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} This command can only be used on a server directly.").queue()
-            return false
+            wrongUseScope.serverOnly = true
         }
 
         if (subCommandUseScope.getOrDefault(event.commandPath, DiscordCommand.UseScope.GLOBAL) != DiscordCommand.UseScope.GLOBAL && server == null) {
-            event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} This command can only be used on a server directly.").queue()
-            return false
+            wrongUseScope.subCommandServerOnly = true
         }
 
-        return true
+        return wrongUseScope
     }
 
-    override fun checkForNeededUserPermissions(event: SlashCommandInteractionEvent, userPermissions: ArrayList<Permission>): DiscordCommand.MissingPermissions {
+    override fun checkForNeededUserPermissions(
+        event: SlashCommandInteractionEvent,
+        userPermissions: ArrayList<Permission>,
+        discordCommand: DiscordCommand
+    ): DiscordCommand.MissingPermissions {
         val missingPermissions = DiscordCommand.MissingPermissions()
         val server = event.guild ?: return missingPermissions
         val serverChannel = event.guildChannel
@@ -46,31 +48,20 @@ class DefaultDiscordCommandConditions(private val alunaProperties: AlunaProperti
             }
         }
 
-        if (missingPermissions.hasMissingPermissions) {
-            val textChannelPermissions = missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" }
-            val voiceChannelPermissions = missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" }
-            val serverPermissions = missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
-            event.deferReply(true).setContent(
-                "${AlunaEmote.SMALL_CROSS.asMention()} You are missing the following permission to execute this command:\n" +
-                        (if (textChannelPermissions.isNotBlank()) textChannelPermissions + "\n" else "") +
-                        (if (voiceChannelPermissions.isNotBlank()) voiceChannelPermissions + "\n" else "") +
-                        (if (serverPermissions.isNotBlank()) serverPermissions + "\n" else "")
-            ).queue()
-        }
-
         return missingPermissions
     }
 
-    override fun checkForNeededAleevaPermissions(
+    override fun checkForNeededBotPermissions(
         event: SlashCommandInteractionEvent,
-        botPermissions: ArrayList<Permission>
+        botPermissions: ArrayList<Permission>,
+        discordCommand: DiscordCommand
     ): DiscordCommand.MissingPermissions {
         val missingPermissions = DiscordCommand.MissingPermissions()
         val server = event.guild ?: return missingPermissions
         val serverChannel = event.guildChannel
         val member = server.getMember(event.user)
 
-        val selfMember = server.getMemberById(alunaProperties.discord.applicationId!!)!!
+        val selfMember = server.getMemberById(event.jda.selfUser.id)!!
 
         botPermissions.forEach { permission ->
             if (permission.isChannel) {
@@ -78,8 +69,6 @@ class DefaultDiscordCommandConditions(private val alunaProperties: AlunaProperti
                     val voiceChannel = member?.voiceState?.channel
                     if (voiceChannel == null) {
                         missingPermissions.notInVoice = true
-                        event.deferReply(true)
-                            .setContent("${AlunaEmote.SMALL_CROSS.asMention()} You need to be in a voice channel yourself to execute this command").queue()
                         return missingPermissions
                     }
 
@@ -98,14 +87,10 @@ class DefaultDiscordCommandConditions(private val alunaProperties: AlunaProperti
             }
         }
 
-        if (missingPermissions.hasMissingPermissions) {
-            event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} I'm missing the following permission to execute this command:\n" +
-                    missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
-                    missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
-                    missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
-            ).queue()
-        }
-
         return missingPermissions
+    }
+
+    override fun checkForAdditionalRequirements(event: SlashCommandInteractionEvent, discordCommand: DiscordCommand): DiscordCommand.AdditionalRequirements {
+        return DiscordCommand.AdditionalRequirements()
     }
 }

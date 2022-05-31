@@ -9,7 +9,7 @@ plugins {
 }
 
 group "io.viascom.discord.bot"
-version "0.0.19_5.0.0-alpha.11_DEV"
+version "0.0.19_5.0.0-alpha.12_DEV"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -50,7 +50,7 @@ repositories {
 }
 
 ext {
-    jdaVersion="5.0.0-alpha.11_DEV"
+    jdaVersion="5.0.0-alpha.12"
 }
 
 
@@ -106,7 +106,8 @@ dependencies {
     implementation 'org.json:json:20220320'
 
 
-    testImplementation "org.springframework.boot:spring-boot-starter"
+    testImplementation "org.springframework.boot:spring-boot-starter-web"
+    testImplementation "org.springframework.boot:spring-boot-starter-actuator"
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

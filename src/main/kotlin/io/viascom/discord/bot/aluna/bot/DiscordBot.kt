@@ -25,25 +25,31 @@ open class DiscordBot(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     var shardManager: ShardManager? = null
-        private set
 
     val commands = hashMapOf<String, Class<DiscordCommand>>()
     val contextMenus = hashMapOf<String, Class<DiscordContextMenu>>()
     val commandsWithAutocomplete = arrayListOf<String>()
 
-    var messagesToObserveButton: MutableMap<String, ObserveCommandInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveCommandInteraction>())
+    internal var messagesToObserveButton: MutableMap<String, ObserveCommandInteraction> =
+        Collections.synchronizedMap(hashMapOf<String, ObserveCommandInteraction>())
         private set
-    var messagesToObserveSelect: MutableMap<String, ObserveCommandInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveCommandInteraction>())
+    internal var messagesToObserveSelect: MutableMap<String, ObserveCommandInteraction> =
+        Collections.synchronizedMap(hashMapOf<String, ObserveCommandInteraction>())
         private set
-    var messagesToObserveModal: MutableMap<String, ObserveCommandInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveCommandInteraction>())
+    internal var messagesToObserveModal: MutableMap<String, ObserveCommandInteraction> =
+        Collections.synchronizedMap(hashMapOf<String, ObserveCommandInteraction>())
         private set
 
-    private val messagesToObserveScheduledThreadPool =
-        AlunaThreadPool.getScheduledThreadPool(alunaProperties.thread.messagesToObserveScheduledThreadPool, "Aluna-Message-Observer-Timeout-Pool-%d", true)
+    internal val messagesToObserveScheduledThreadPool =
+        AlunaThreadPool.getFixedScheduledThreadPool(
+            alunaProperties.thread.messagesToObserveScheduledThreadPool,
+            "Aluna-Message-Observer-Timeout-Pool-%d",
+            true
+        )
 
-    val commandExecutor =
+    internal val commandExecutor =
         AlunaThreadPool.getDynamicThreadPool(alunaProperties.thread.commandExecutorCount, alunaProperties.thread.commandExecutorTtl, "Aluna-Command-%d")
-    val asyncExecutor =
+    internal val asyncExecutor =
         AlunaThreadPool.getDynamicThreadPool(alunaProperties.thread.asyncExecutorCount, alunaProperties.thread.asyncExecutorTtl, "Aluna-Async-%d")
 
     fun registerMessageForButtonEvents(

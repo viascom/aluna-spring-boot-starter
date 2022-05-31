@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
+import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,7 +18,7 @@ import java.awt.Color
 
 @Component
 @Conditional(SendServerNotificationCondition::class)
-open class ServerNotificationEvent(private val discordBot: DiscordBot, private val shardManager: ShardManager, private val alunaProperties: AlunaProperties) :
+internal open class ServerNotificationEvent(private val discordBot: DiscordBot, private val shardManager: ShardManager, private val alunaProperties: AlunaProperties) :
     ListenerAdapter() {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -38,7 +39,9 @@ open class ServerNotificationEvent(private val discordBot: DiscordBot, private v
                 .addField("» Owner", "Name: ${server.owner?.effectiveName}\nId: ${server.ownerId}", false)
                 .addField("» Locale", "Name: ${server.locale.displayName}", false)
                 .addField("» Members", "Total: ${server.memberCount}", false)
-                .addField("» Other Bots", server.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }, false)
+            if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
+                embedMessage.addField("» Other Bots", server.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }, false)
+            }
 
             val channel = shardManager.getServerTextChannel(
                 alunaProperties.notification.serverJoin.server.toString(),
@@ -70,11 +73,13 @@ open class ServerNotificationEvent(private val discordBot: DiscordBot, private v
                 .addField("» Owner", "Name: ${server.owner?.effectiveName}\nId: ${server.ownerId}", false)
                 .addField("» Locale", "Name: ${server.locale.displayName}", false)
                 .addField("» Members", "Total: ${server.memberCount}", false)
-                .addField(
+            if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
+                embedMessage.addField(
                     "» Other Bots",
                     server.loadMembers().get().filter { it.user.isBot && it.user.id != server.jda.selfUser.id }.joinToString(", ") { it.user.asTag },
                     false
                 )
+            }
 
             val channel = shardManager.getServerTextChannel(
                 alunaProperties.notification.serverLeave.server.toString(),

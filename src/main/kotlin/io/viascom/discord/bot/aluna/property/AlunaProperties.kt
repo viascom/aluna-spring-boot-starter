@@ -56,17 +56,18 @@ class AlunaProperties {
     var showHashCode: Boolean = false
 
     /**
-     * Owner ids
+     * Owner ids. This is used by the DefaultOwnerIdProvider.
      */
     var ownerIds: ArrayList<Long> = arrayListOf()
 
     /**
-     * Moderator ids
+     * Moderator ids. This is used by the DefaultModeratorIdProvider.
      */
     var modIds: ArrayList<Long> = arrayListOf()
 
     /**
-     * Enable Debug Configuration Log
+     * Enable Debug Configuration Log.
+     * If enabled, Aluna will print a configuration block in the log which contains some selected settings and an invitation link for the bot itself.
      */
     var enableDebugConfigurationLog: Boolean = true
 

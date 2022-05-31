@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 interface DiscordCommandLoadAdditionalData {
 
-    fun loadData(command: DiscordCommand, event: SlashCommandInteractionEvent)
-    fun loadData(command: DiscordCommand, event: CommandAutoCompleteInteractionEvent)
+    fun loadData(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent)
+    fun loadData(discordCommand: DiscordCommand, event: CommandAutoCompleteInteractionEvent)
 
 }

@@ -1,5 +1,6 @@
 package io.viascom.discord.bot.aluna.scriptengine.internal
 
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import javax.script.Bindings
 import javax.script.ScriptContext
@@ -7,7 +8,7 @@ import javax.script.ScriptEngine
 import javax.script.ScriptException
 
 class EvaluateOperation(val js: String, scriptContext: ScriptContext?, bindings: Bindings?) : ScriptEngineOperation {
-    val logger = LoggerFactory.getLogger(javaClass)
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     private val scriptContext: ScriptContext?
     private val bindings: Bindings?

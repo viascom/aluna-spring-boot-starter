@@ -4,8 +4,6 @@ import com.google.gson.Gson
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
 
-class GsonUtil
-
 fun <T> Gson.fromJson(value: ByteArray, type: Class<T>): T = this.fromJson(String(value), type)
 fun Gson.toJsonByteArray(value: Any?): ByteArray = this.toJson(value).toByteArray()
 fun <T : Any> Gson.convertValue(value: Any?, type: KClass<T>): T = fromJson(toJsonByteArray(value), type.java)

@@ -11,7 +11,7 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.stereotype.Component
 
 @Component
-class GenericInteractionListener(
+open class GenericInteractionListener(
     private val discordBot: DiscordBot,
     private val context: ConfigurableApplicationContext
 ) : ListenerAdapter() {
@@ -81,7 +81,7 @@ class GenericInteractionListener(
 
                     val result = context.getBean(entry.command.java).onModalInteraction(event, entry.additionalData)
                     if (!entry.stayActive && result) {
-                        discordBot.removeMessageForSelectEvents(event.user.id)
+                        discordBot.removeMessageForModalEvents(event.user.id)
                     }
                 }
             }

@@ -4,9 +4,9 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
 class DefaultDiscordCommandLoadAdditionalData : DiscordCommandLoadAdditionalData {
-    override fun loadData(command: DiscordCommand, event: SlashCommandInteractionEvent) {
+    override fun loadData(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent) {
     }
 
-    override fun loadData(command: DiscordCommand, event: CommandAutoCompleteInteractionEvent) {
+    override fun loadData(discordCommand: DiscordCommand, event: CommandAutoCompleteInteractionEvent) {
     }
 }

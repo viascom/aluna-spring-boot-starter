@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
-import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 
@@ -45,10 +44,10 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
 
     var commandDevelopmentStatus = DiscordCommand.DevelopmentStatus.LIVE
 
-    override var beanTimoutDelay: Long = 15
-    override var beanTimoutDelayUnit: TimeUnit = TimeUnit.MINUTES
+    override var beanTimoutDelay: Duration = Duration.ofMinutes(15)
     override var beanUseAutoCompleteBean: Boolean = false
     override var beanRemoveObserverOnDestroy: Boolean = true
+    override var beanCallOnDestroy: Boolean = true
 
     /**
      * Any [Permission]s a Member must have to use this command.

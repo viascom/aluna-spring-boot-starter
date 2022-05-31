@@ -12,7 +12,7 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.stereotype.Component
 
 @Component
-class SlashCommandInteractionEventListener(
+open class SlashCommandInteractionEventListener(
     private val discordBot: DiscordBot,
     private val context: ConfigurableApplicationContext
 ) : ListenerAdapter() {

@@ -6,14 +6,18 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 import net.dv8tion.jda.api.interactions.ModalInteraction
+import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.OptionMapping
+import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
 import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
+import net.dv8tion.jda.api.requests.restaction.MessageAction
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageUpdateAction
+import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction
 import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
 import java.awt.Color
@@ -21,9 +25,6 @@ import java.security.MessageDigest
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
-
-object Utils {
-}
 
 fun LocalDateTime.toDate(): Date = Date.from(this.atZone(ZoneId.systemDefault()).toInstant())
 
@@ -54,12 +55,31 @@ fun Color.toHex(): String = String.format("#%02x%02x%02x", this.red, this.green,
 
 fun MessageEditCallbackAction.removeActionRows() = this.setActionRows(arrayListOf())
 fun WebhookMessageUpdateAction<Message>.removeActionRows() = this.setActionRows(arrayListOf())
+fun MessageAction.removeActionRows() = this.setActionRows(arrayListOf())
 
 fun ShardManager.getServer(serverId: String): Guild? = this.getGuildById(serverId)
 fun ShardManager.getServerTextChannel(serverId: String, channelId: String): MessageChannel? = this.getServer(serverId)?.getTextChannelById(channelId)
 fun ShardManager.getServerVoiceChannel(serverId: String, channelId: String): VoiceChannel? = this.getServer(serverId)?.getVoiceChannelById(channelId)
 fun ShardManager.getServerMessage(serverId: String, channelId: String, messageId: String): Message? =
     this.getServerTextChannel(serverId, channelId)?.retrieveMessageById(messageId)?.complete()
+
+fun ShardManager.getPrivateChannelByUser(userId: String): MessageChannel? = this.retrieveUserById(userId).complete()?.openPrivateChannel()?.complete()
+fun ShardManager.getPrivateChannel(channelId: String): MessageChannel? = this.getPrivateChannelById(channelId)
+fun ShardManager.getPrivateMessageByUser(userId: String, messageId: String): Message? {
+    return try {
+        getPrivateChannelByUser(userId)?.retrieveMessageById(messageId)?.complete()
+    } catch (e: Exception) {
+        null
+    }
+}
+
+fun ShardManager.getPrivateMessage(channelId: String, messageId: String): Message? {
+    return try {
+        getPrivateChannel(channelId)?.retrieveMessageById(messageId)?.complete()
+    } catch (e: Exception) {
+        null
+    }
+}
 
 fun SlashCommandInteractionEvent.getOptionAsInt(name: String, default: Int? = null): Int? = this.getOption(name, default, OptionMapping::getAsInt)
 fun SlashCommandInteractionEvent.getOptionAsString(name: String, default: String? = null): String? = this.getOption(name, default, OptionMapping::getAsString)
@@ -68,6 +88,8 @@ fun SlashCommandInteractionEvent.getOptionAsBoolean(name: String, default: Boole
 
 fun SlashCommandInteractionEvent.getOptionAsMember(name: String, default: Member? = null): Member? = this.getOption(name, default, OptionMapping::getAsMember)
 fun SlashCommandInteractionEvent.getOptionAsUser(name: String, default: User? = null): User? = this.getOption(name, default, OptionMapping::getAsUser)
+fun SlashCommandInteractionEvent.getOptionAsGuildChannel(name: String, default: GuildChannel? = null): GuildChannel? =
+    this.getOption(name, default, OptionMapping::getAsGuildChannel)
 
 fun CommandAutoCompleteInteractionEvent.getOptionAsInt(name: String, default: Int? = null): Int? = this.getOption(name, default, OptionMapping::getAsInt)
 fun CommandAutoCompleteInteractionEvent.getOptionAsString(name: String, default: String? = null): String? =
@@ -81,14 +103,57 @@ fun CommandAutoCompleteInteractionEvent.getOptionAsMember(name: String, default:
 
 fun CommandAutoCompleteInteractionEvent.getOptionAsUser(name: String, default: User? = null): User? = this.getOption(name, default, OptionMapping::getAsUser)
 
+fun CommandAutoCompleteInteractionEvent.replyStringChoices(choices: Map<String, String>): AutoCompleteCallbackAction =
+    this.replyChoices(choices.entries.map { Command.Choice(it.key, it.value) })
+
+fun CommandAutoCompleteInteractionEvent.replyLongChoices(choices: Map<String, Long>): AutoCompleteCallbackAction =
+    this.replyChoices(choices.entries.map { Command.Choice(it.key, it.value) })
+
+fun CommandAutoCompleteInteractionEvent.replyDoubleChoices(choices: Map<String, Double>): AutoCompleteCallbackAction =
+    this.replyChoices(choices.entries.map { Command.Choice(it.key, it.value) })
+
 fun SelectMenuInteractionEvent.getSelection(): String = this.values.first()
 fun SelectMenuInteractionEvent.getSelections(): List<String> = this.values
 
+fun Modal.Builder.addTextField(
+    id: String,
+    label: String,
+    style: TextInputStyle = TextInputStyle.SHORT,
+    placeholder: String? = null,
+    min: Int = -1,
+    max: Int = -1,
+    value: String? = null,
+    required: Boolean = true
+): Modal.Builder = this.addActionRow(createTextInput(id, label, style, placeholder, min, max, value, required))
+
 fun ModalInteraction.getValueAsString(name: String, default: String? = null): String? = this.getValue(name)?.asString ?: default
 
+/**
+ * Get the probable locale of a user based on the most common locale of the mutual servers.
+ *
+ * !! This will only work if your bot has access to mutualGuilds which is bound to the GUILD_MEMBERS intent !!
+ *
+ * @return probable Locale
+ */
 fun User.probableLocale(): Locale? = mutualGuilds.groupBy { it.locale }.maxByOrNull { it.value.size }?.value?.firstOrNull()?.locale
 
+fun User.getMessage(messageId: String): Message? = try {
+    this.openPrivateChannel().complete().retrieveMessageById(messageId).complete()
+} catch (e: Exception) {
+    null
+}
+
+/**
+ * Get the probable locale of a user based on the most common locale of the mutual servers.
+ *
+ * !! This will only work if your bot has access to mutualGuilds which is bound to the GUILD_MEMBERS intent !!
+ *
+ * @return probable Locale
+ */
+fun Member.probableLocale(): Locale? = user.probableLocale()
+
 fun EmbedBuilder.setColor(red: Int, green: Int, blue: Int): EmbedBuilder = this.setColor(Color(red, green, blue))
+fun EmbedBuilder.setColor(hexColor: String): EmbedBuilder = this.setColor(Color.getColor(hexColor))
 fun createSelectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {
     var option = SelectOption.of(label, value)
     description?.let { option = option.withDescription(description) }
@@ -127,7 +192,7 @@ fun createTextInput(
         builder.maxLength = max
     }
 
-    if(value != null && value.isNotBlank()){
+    if (value != null && value.isNotBlank()) {
         builder.value = value
     }
 
@@ -136,8 +201,17 @@ fun createTextInput(
     return builder.build()
 }
 
-fun createPrimaryButton(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.PRIMARY, id, label, emoji)
-fun createSecondaryButton(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.SECONDARY, id, label, emoji)
-fun createSuccessButton(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.SUCCESS, id, label, emoji)
-fun createDangerButton(id: String, label: String? = null, emoji: Emoji? = null): Button = Button.of(ButtonStyle.DANGER, id, label, emoji)
+fun createPrimaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+    Button.of(ButtonStyle.PRIMARY, id, label, emoji).withDisabled(disabled)
 
+fun createSecondaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+    Button.of(ButtonStyle.SECONDARY, id, label, emoji).withDisabled(disabled)
+
+fun createSuccessButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+    Button.of(ButtonStyle.SUCCESS, id, label, emoji).withDisabled(disabled)
+
+fun createDangerButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+    Button.of(ButtonStyle.DANGER, id, label, emoji).withDisabled(disabled)
+
+fun createLinkButton(url: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+    Button.of(ButtonStyle.LINK, url, label, emoji).withDisabled(disabled)

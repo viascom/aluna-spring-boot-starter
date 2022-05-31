@@ -6,6 +6,7 @@ import io.viascom.discord.bot.aluna.event.DiscordReadyEvent
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.getServerTextChannel
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service
 import java.awt.Color
 
 @Service
-open class DiscordReadyEventListener(
+internal open class DiscordReadyEventListener(
     private val commands: List<DiscordCommand>,
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
@@ -24,6 +25,12 @@ open class DiscordReadyEventListener(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onApplicationEvent(event: DiscordReadyEvent) {
+        if(alunaProperties.discord.setStatusToOnlineWhenReady){
+            //Set status to online and remove activity
+            shardManager.setStatus(OnlineStatus.ONLINE)
+            shardManager.setActivity(null)
+        }
+
         discordBot.asyncExecutor.execute {
             if (alunaProperties.notification.botReady.enable) {
                 val embedMessage = EmbedBuilder()

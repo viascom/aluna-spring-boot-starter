@@ -35,7 +35,17 @@ class AdminSearchOverviewPage(
 
         embedBuilder.addField("Discord-ID", discordUser.id, true)
             .addField("Discord-Tag", discordUser.asTag, true)
-            .addField("Is Bot", (if (discordUser.isBot) AlunaEmote.SMALL_TICK else AlunaEmote.SMALL_CROSS).asMention(), true)
+        if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
+            val localeMap = discordUser.mutualGuilds.groupBy { it.locale }
+            val probableLocales = localeMap.entries.sortedByDescending { it.value.size }.take(3)
+
+            embedBuilder.addField(
+                "Probable Locale",
+                probableLocales.joinToString("\n") { "${it.key.displayLanguage} - ${((0.0 + it.value.size) / localeMap.values.flatten().size * 100).round(1)}%" },
+                true
+            )
+        }
+        embedBuilder.addField("Is Bot", (if (discordUser.isBot) AlunaEmote.SMALL_TICK else AlunaEmote.SMALL_CROSS).asMention(), true)
             .addField("Flags", discordUser.flags.joinToString(", ") { it.getName() }, true)
             .addField("Time Created", discordUser.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
             .addField(
@@ -67,6 +77,7 @@ class AdminSearchOverviewPage(
             "${discordServer.owner?.asMention} | ${discordServer.owner?.effectiveName} (`${discordServer.ownerId}`)\n" +
                     "Owner on Support Server: " + (if (discordServer.owner?.user?.mutualGuilds?.any { it.id == alunaProperties.command.systemCommand.supportServer } == true) AlunaEmote.SMALL_TICK.asMention() + " Yes" else AlunaEmote.SMALL_CROSS.asMention() + " No"),
             false)
+        embedBuilder.addField("Locale", discordServer.locale.displayLanguage, true)
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
             embedBuilder.addField("Members", discordServer.memberCount.toString(), true)
         }

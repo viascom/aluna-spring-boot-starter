@@ -19,7 +19,7 @@ class TopGGBotListSender(
     private val gson: Gson
 ) : BotListSender {
 
-    val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun sendStats(totalServer: Int, totalShards: Int) {
         val topGGToken = alunaProperties.botList.topggToken

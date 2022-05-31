@@ -12,6 +12,7 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.config.Scope
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.core.NamedInheritableThreadLocal
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.ScheduledFuture
@@ -20,7 +21,7 @@ import java.util.concurrent.TimeUnit
 
 class CommandScope(private val context: ConfigurableApplicationContext) : Scope {
 
-    val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     private val scopedObjects = Collections.synchronizedMap(HashMap<BeanName, HashMap<DiscordStateId, HashMap<UniqueId, ScopedObjectData>>>())
     private var scopedObjectsTimeoutScheduler: ScheduledThreadPoolExecutor
@@ -29,7 +30,9 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
 
     init {
         val scopedObjectsTimeoutScheduler = context.environment.getProperty("aluna.thread.scoped-objects-timeout-scheduler", Int::class.java, 2)
-        this.scopedObjectsTimeoutScheduler = AlunaThreadPool.getScheduledThreadPool(scopedObjectsTimeoutScheduler, "Aluna-Scoped-Objects-Timeout-Pool-%d", true)
+        this.scopedObjectsTimeoutScheduler = AlunaThreadPool.getFixedScheduledThreadPool(
+            scopedObjectsTimeoutScheduler, "Aluna-Scoped-Objects-Timeout-Pool-%d", true
+        )
     }
 
     override fun get(name: String, objectFactory: ObjectFactory<*>): Any {
@@ -59,9 +62,8 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
                 name,
                 data.obj,
                 DiscordContext.discordState!!.uniqueId!!,
-                loadTimeoutDelay(data.obj, 15L),
-                loadTimeoutDelayUnit(data.obj, TimeUnit.MINUTES),
-                true
+                loadTimeoutDelay(data.obj, Duration.ofMinutes(15)),
+                loadBeanCallOnDestroy(data.obj, true)
             )
             resetTimeoutDestroy(DiscordContext.discordState!!.uniqueId!!, timeout)
             return data.obj
@@ -78,8 +80,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
                     name,
                     data.value.obj,
                     data.key,
-                    5L,
-                    TimeUnit.MINUTES,
+                    Duration.ofMinutes(5),
                     false
                 )
                 resetTimeoutDestroy(data.key, timeout)
@@ -96,8 +97,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
                     name,
                     newObj,
                     DiscordContext.discordState!!.uniqueId!!,
-                    5L,
-                    TimeUnit.MINUTES,
+                    Duration.ofMinutes(5),
                     false
                 )
                 resetTimeoutDestroy(DiscordContext.discordState!!.uniqueId!!, timeout)
@@ -106,10 +106,10 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
             }
         }
 
-        //If type is Command we create a new instance or use the one from the aut complete if present
+        //If type is Command we create a new instance or use the one from the auto complete if present
         val autoCompleteForThisCommand =
             scopedObjects[name]!![DiscordContext.discordState!!.id]!!.entries.firstOrNull { it.value.type == DiscordContext.Type.AUTO_COMPLETE }
-        if (autoCompleteForThisCommand != null && (autoCompleteForThisCommand.value.obj as CommandScopedObject).beanUseAutoCompleteBean) {
+        if (autoCompleteForThisCommand != null && loadBeanUseAutoCompleteBean(autoCompleteForThisCommand.value.obj, false)) {
             //Found existing auto complete bean we can use
             //Change type to COMMAND
             autoCompleteForThisCommand.value.type = DiscordContext.Type.COMMAND
@@ -120,9 +120,8 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
                 name,
                 autoCompleteForThisCommand.value.obj,
                 autoCompleteForThisCommand.key,
-                loadTimeoutDelay(autoCompleteForThisCommand.value.obj, 15L),
-                loadTimeoutDelayUnit(autoCompleteForThisCommand.value.obj, TimeUnit.MINUTES),
-                true
+                loadTimeoutDelay(autoCompleteForThisCommand.value.obj, Duration.ofMinutes(15)),
+                loadBeanCallOnDestroy(autoCompleteForThisCommand.value.obj, true)
             )
 
             scopedObjectsTimeoutScheduledTask[autoCompleteForThisCommand.key] = timeout
@@ -144,9 +143,8 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
                 name,
                 newObj,
                 DiscordContext.discordState!!.uniqueId!!,
-                loadTimeoutDelay(newObj, 15L),
-                loadTimeoutDelayUnit(newObj, TimeUnit.MINUTES),
-                true
+                loadTimeoutDelay(newObj, Duration.ofMinutes(15)),
+                loadBeanCallOnDestroy(newObj, true)
             )
 
             scopedObjectsTimeoutScheduledTask[DiscordContext.discordState!!.uniqueId!!] = timeout
@@ -158,8 +156,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
         name: String,
         newObj: Any,
         uniqueId: String,
-        delay: Long,
-        delayUnit: TimeUnit,
+        delay: Duration,
         executeOnDestroy: Boolean
     ): ScheduledFuture<*> {
         return scopedObjectsTimeoutScheduler.schedule({
@@ -168,12 +165,14 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
                 if (executeOnDestroy) {
                     try {
                         newObj::class.java.getDeclaredMethod("onDestroy").invoke(newObj)
+                    } catch (e: NoSuchMethodException) {
+                        logger.debug("onDestroy does not exist for $newObj")
                     } catch (e: Exception) {
-                        logger.debug("Could not invoke onDestroy for ${newObj}\"\n${e.stackTraceToString()}")
+                        logger.debug("Could not invoke onDestroy for ${newObj}\n${e.stackTraceToString()}")
                     }
                     try {
                         if (loadObserverWaiterOnDestroy(newObj, true)) {
-                            logger.debug("Remove observer if existing by this instance.")
+                            logger.debug("Remove observer & eventWaiters if existing for this instance.")
                             val eventWaiter: EventWaiter = context.getBean(EventWaiter::class.java) as EventWaiter
 
                             val buttonMessage = discordBot.messagesToObserveButton.entries.firstOrNull { it.value.uniqueId == uniqueId }
@@ -188,7 +187,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
                                 discordBot.messagesToObserveSelect.remove(it.key)
                             }
 
-                            eventWaiter.removeEvents(uniqueId)
+                            eventWaiter.removeEvents(uniqueId, true)
                         }
                     } catch (e: Exception) {
                         logger.debug("Could not remove observer for ${newObj}\"\n${e.stackTraceToString()}")
@@ -196,9 +195,16 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
                 }
                 //Remove element from scope cache
                 scopedObjects.getOrElse(name) { null }?.getOrElse(DiscordContext.discordState!!.id) { null }?.remove(uniqueId)
+                if(scopedObjects.getOrElse(name) { null }?.getOrElse(DiscordContext.discordState!!.id) { null }?.isEmpty() == true){
+                    scopedObjects.getOrElse(name) { null }?.remove(DiscordContext.discordState!!.id)
+                }
+                if(scopedObjects.getOrElse(name) { null }?.isEmpty() == true){
+                    scopedObjects.remove(name)
+                }
+
                 scopedObjectsTimeoutScheduledTask.remove(uniqueId)
             }
-        }, delay, delayUnit)
+        }, delay.seconds, TimeUnit.SECONDS)
     }
 
     private fun resetTimeoutDestroy(uniqueId: String, newScheduledFuture: ScheduledFuture<*>) {
@@ -206,28 +212,14 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
         scopedObjectsTimeoutScheduledTask[uniqueId] = newScheduledFuture
     }
 
-    private fun loadTimeoutDelay(obj: Any, default: Long, clazz: Class<*> = obj::class.java): Long {
+    private fun loadTimeoutDelay(obj: Any, default: Duration, clazz: Class<*> = obj::class.java): Duration {
         return try {
             if (clazz.declaredFields.none { it.name == "beanTimoutDelay" } && clazz != CommandDataImpl::class.java) {
                 loadTimeoutDelay(obj, default, clazz.superclass)
             } else {
                 val declaredField = clazz.getDeclaredField("beanTimoutDelay")
                 declaredField.isAccessible = true
-                declaredField.get(obj) as Long
-            }
-        } catch (e: Exception) {
-            default
-        }
-    }
-
-    private fun loadTimeoutDelayUnit(obj: Any, default: TimeUnit, clazz: Class<*> = obj::class.java): TimeUnit {
-        return try {
-            if (clazz.declaredFields.none { it.name == "beanTimoutDelayUnit" } && clazz != CommandDataImpl::class.java) {
-                loadTimeoutDelayUnit(obj, default, clazz.superclass)
-            } else {
-                val declaredField = clazz.getDeclaredField("beanTimoutDelayUnit")
-                declaredField.isAccessible = true
-                declaredField.get(obj) as TimeUnit
+                declaredField.get(obj) as Duration
             }
         } catch (e: Exception) {
             default
@@ -254,6 +246,20 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
                 loadBeanUseAutoCompleteBean(obj, default, clazz.superclass)
             } else {
                 val declaredField = clazz.getDeclaredField("beanUseAutoCompleteBean")
+                declaredField.isAccessible = true
+                declaredField.get(obj) as Boolean
+            }
+        } catch (e: Exception) {
+            default
+        }
+    }
+
+    private fun loadBeanCallOnDestroy(obj: Any, default: Boolean, clazz: Class<*> = obj::class.java): Boolean {
+        return try {
+            if (clazz.declaredFields.none { it.name == "beanCallOnDestroy" } && clazz != CommandDataImpl::class.java) {
+                loadBeanCallOnDestroy(obj, default, clazz.superclass)
+            } else {
+                val declaredField = clazz.getDeclaredField("beanCallOnDestroy")
                 declaredField.isAccessible = true
                 declaredField.get(obj) as Boolean
             }

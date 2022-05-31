@@ -4,6 +4,8 @@ import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandDataP
 import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.bot.handler.Command
 import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
+import io.viascom.discord.bot.aluna.property.ModeratorIdProvider
+import io.viascom.discord.bot.aluna.property.OwnerIdProvider
 import io.viascom.discord.bot.aluna.util.getOptionAsString
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
@@ -11,17 +13,21 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
-import net.dv8tion.jda.api.sharding.ShardManager
 
 @Command
 class SystemCommand(
     private val dataProviders: List<SystemCommandDataProvider>,
-    private val shardManager: ShardManager
+    private val ownerIdProvider: OwnerIdProvider,
+    private val moderatorIdProvider: ModeratorIdProvider
 ) : DiscordCommand(
     "system-command",
     "Runs a system command.",
     observeAutoComplete = true
 ) {
+
+    init {
+        this.beanCallOnDestroy = false
+    }
 
     private var selectedProvider: SystemCommandDataProvider? = null
 
@@ -32,7 +38,10 @@ class SystemCommand(
     }
 
     override fun execute(event: SlashCommandInteractionEvent) {
-        selectedProvider = dataProviders.firstOrNull { it.id == event.getOptionAsString("command", "") }
+        selectedProvider = dataProviders.filter {
+            it.id in (alunaProperties.command.systemCommand.enabledFunctions ?: arrayListOf()) || alunaProperties.command.systemCommand.enabledFunctions == null
+        }
+            .firstOrNull { it.id == event.getOptionAsString("command", "") }
 
         if (selectedProvider == null) {
             event.reply("Command not found!").setEphemeral(true).queue()
@@ -40,20 +49,23 @@ class SystemCommand(
         }
 
         //Check if it is an owner or (mod and mod is allowed)
-        if (event.user.idLong !in alunaProperties.ownerIds && !(selectedProvider!!.allowMods && event.user.idLong in alunaProperties.modIds)) {
+        if (event.user.idLong !in ownerIdProvider.getOwnerIds() && !(isModAllowed(selectedProvider!!) && event.user.idLong in moderatorIdProvider.getModeratorIdsForCommandPath(
+                "system-command/${selectedProvider!!.id}"
+            ))
+        ) {
             event.deferReply(true).setContent("${AlunaEmote.BOT_CROSS.asMention()} This command is to powerful for you.").queue()
             return
         }
 
-        val ephemeral = if (event.user.idLong in alunaProperties.modIds) {
+        val ephemeral = if (event.user.idLong in moderatorIdProvider.getModeratorIdsForCommandPath("system-command/${selectedProvider!!.id}")) {
             false
         } else {
             selectedProvider!!.ephemeral
         }
 
-        if(selectedProvider!!.keepCommandOpen){
+        if (!selectedProvider!!.autoAcknowledgeEvent) {
             selectedProvider!!.execute(event, null, this)
-        } else{
+        } else {
             val hook = event.deferReply(ephemeral).complete()
             selectedProvider!!.execute(event, hook, this)
         }
@@ -89,10 +101,23 @@ class SystemCommand(
         if (option == "command") {
             val input = event.getOptionAsString(option, "")!!
 
+            val filteredDataProviders = dataProviders.filter {
+                it.id in (alunaProperties.command.systemCommand.enabledFunctions
+                    ?: arrayListOf()) || alunaProperties.command.systemCommand.enabledFunctions == null
+            }
+
             val options = if (input.isEmpty()) {
-                dataProviders.filter { event.user.idLong in alunaProperties.ownerIds || (it.allowMods && event.user.idLong in alunaProperties.modIds) }
+                filteredDataProviders.filter {
+                    event.user.idLong in ownerIdProvider.getOwnerIds() || (isModAllowed(it) && event.user.idLong in moderatorIdProvider.getModeratorIdsForCommandPath(
+                        "system-command/${it.id}"
+                    ))
+                }
             } else {
-                dataProviders.filter { event.user.idLong in alunaProperties.ownerIds || (it.allowMods && event.user.idLong in alunaProperties.modIds) }
+                filteredDataProviders.filter {
+                    event.user.idLong in ownerIdProvider.getOwnerIds() || (isModAllowed(it) && event.user.idLong in moderatorIdProvider.getModeratorIdsForCommandPath(
+                        "system-command/${it.id}"
+                    ))
+                }
                     .filter { it.name.lowercase().contains(input.lowercase()) }
             }.take(25).map {
                 net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name, it.id)
@@ -110,5 +135,16 @@ class SystemCommand(
                 event.replyChoices().queue()
             }
         }
+    }
+
+    private fun isModAllowed(selectedProvider: SystemCommandDataProvider): Boolean {
+        val propertiesOverride = alunaProperties.command.systemCommand.allowedForModeratorsFunctions?.firstOrNull { it == selectedProvider.id }
+
+        return when {
+            (propertiesOverride != null) -> true
+            else -> selectedProvider.allowMods
+        }
+
+
     }
 }

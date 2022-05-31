@@ -12,7 +12,7 @@ class OnReadEvent(
     private val messageService: MessageService
 ) {
 
-    val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @EventListener
     fun onShardReadyEvent(event: DiscordFirstShardReadyEvent) {

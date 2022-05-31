@@ -14,7 +14,7 @@ import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 
 @Service
-open class SlashCommandInteractionInitializer(
+internal open class SlashCommandInteractionInitializer(
     private val commands: List<DiscordCommand>,
     private val contextMenus: List<DiscordContextMenu>,
     private val shardManager: ShardManager,
@@ -30,7 +30,7 @@ open class SlashCommandInteractionInitializer(
     }
 
     private fun initSlashCommands() {
-        logger.debug("Update slash commands if needed")
+        logger.debug("Check slash commands to update")
 
         //Get all commands, filter not needed commands and call init methods
         val filteredCommands = commands.filter {
@@ -52,7 +52,8 @@ open class SlashCommandInteractionInitializer(
         }.toCollection(arrayListOf())
 
         //Create global commands
-        shardManager.shards.first().retrieveCommands(true).queue { currentCommands ->
+        //shardManager.shards.first().retrieveCommands(true).queue { currentCommands ->
+        shardManager.shards.first().retrieveCommands().queue { currentCommands ->
             val commandDataList = arrayListOf<CommandDataImpl>()
 
             val filteredContext = contextMenus.filter {
@@ -133,7 +134,8 @@ open class SlashCommandInteractionInitializer(
                 }
             }
 
-            shardManager.shards.first().retrieveCommands(true).queue {
+            //shardManager.shards.first().retrieveCommands(true).queue {
+            shardManager.shards.first().retrieveCommands().queue {
                 it.filter { it.type == Command.Type.SLASH }.filter { it.name in commands.map { it.name } }.forEach { command ->
                     try {
                         discordBot.commands.computeIfAbsent(command.id) { commands.first { it.name == command.name }?.javaClass }
@@ -178,7 +180,8 @@ open class SlashCommandInteractionInitializer(
 
                 //Check if system command should be global
                 if (server == null) {
-                    val serverCommand = shardManager.shards.first().retrieveCommands(true).complete().firstOrNull { it.name == command.name }
+                    //val serverCommand = shardManager.shards.first().retrieveCommands(true).complete().firstOrNull { it.name == command.name }
+                    val serverCommand = shardManager.shards.first().retrieveCommands().complete().firstOrNull { it.name == command.name }
                     if (serverCommand != null && !compareCommands(command, serverCommand)) {
                         shardManager.shards.first().upsertCommand(command)?.queue { discordCommand ->
                             printCommand(command)
@@ -310,9 +313,9 @@ open class SlashCommandInteractionInitializer(
                 commandData.description == command.description &&
                 commandData.options.map { Command.Option(it.toData()) } == command.options &&
                 commandData.subcommandGroups.map { Command.SubcommandGroup(it.toData()) } == command.subcommandGroups &&
-                commandData.subcommands.map { Command.Subcommand(it.toData()) } == command.subcommands &&
-                commandData.nameLocalizations.toMap() == command.nameLocalizations.toMap() &&
-                commandData.descriptionLocalizations.toMap() == command.descriptionLocalizations.toMap()
+                commandData.subcommands.map { Command.Subcommand(it.toData()) } == command.subcommands
+                //commandData.nameLocalizations.toMap() == command.nameLocalizations.toMap() &&
+                //commandData.descriptionLocalizations.toMap() == command.descriptionLocalizations.toMap()
     }
 
 }

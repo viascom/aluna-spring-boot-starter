@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.buttons.Button
-import java.util.concurrent.TimeUnit
+import java.time.Duration
 
 @Command
 class PongCommand : DiscordCommand(
@@ -19,8 +19,7 @@ class PongCommand : DiscordCommand(
 
     init {
         this.commandDevelopmentStatus = DevelopmentStatus.IN_DEVELOPMENT
-        this.beanTimoutDelay = 30L
-        this.beanTimoutDelayUnit = TimeUnit.SECONDS
+        this.beanTimoutDelay = Duration.ofSeconds(30)
     }
 
     val lastEmbed = null

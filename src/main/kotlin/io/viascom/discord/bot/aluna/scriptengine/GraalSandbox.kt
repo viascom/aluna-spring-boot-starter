@@ -8,6 +8,7 @@ import org.graalvm.polyglot.Context
 import org.graalvm.polyglot.Engine
 import org.graalvm.polyglot.HostAccess
 import org.graalvm.polyglot.PolyglotAccess
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.Writer
 import java.util.concurrent.ExecutorService
@@ -16,7 +17,7 @@ import javax.script.*
 
 class GraalSandbox(vararg params: String) {
 
-    val logger = LoggerFactory.getLogger(javaClass)
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     val scriptEngine: ScriptEngine = GraalJSScriptEngine.create(
         Engine.newBuilder().option("engine.WarnInterpreterOnly", "false").build(), Context.newBuilder()

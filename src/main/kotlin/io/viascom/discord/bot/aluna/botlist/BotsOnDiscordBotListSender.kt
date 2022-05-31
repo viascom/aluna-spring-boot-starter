@@ -17,7 +17,7 @@ class BotsOnDiscordBotListSender(
     private val shardManager: ShardManager
 ) : BotListSender {
 
-    val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun sendStats(totalServer: Int, totalShards: Int) {
         val botsOnDiscordToken = alunaProperties.botList.botsOnDiscordToken

@@ -29,7 +29,7 @@ class AdminSearchDataProvider(
     "admin_search",
     "Admin Search",
     true,
-    false,
+    true,
     true
 ) {
 

@@ -8,22 +8,28 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import java.util.concurrent.TimeUnit
+import java.time.Duration
 
 abstract class SystemCommandDataProvider(
     val id: String,
     val name: String,
     var ephemeral: Boolean = true,
     var allowMods: Boolean = false,
+    /**
+     * Should Aluna call the onArgsAutoComplete method when the user focusing the args field.
+     */
     var supportArgsAutoComplete: Boolean = false,
-    var keepCommandOpen: Boolean = false
+    /**
+     * Should Aluna keep the event open or not. If not, Aluna will acknowledge the event before calling execute() and hook is in this case null.
+     */
+    var autoAcknowledgeEvent: Boolean = true
 ) : CommandScopedObject {
 
     override lateinit var uniqueId: String
-    override var beanTimoutDelay: Long = 15
-    override var beanTimoutDelayUnit: TimeUnit = TimeUnit.MINUTES
+    override var beanTimoutDelay: Duration = Duration.ofMinutes(15)
     override var beanUseAutoCompleteBean: Boolean = true
     override var beanRemoveObserverOnDestroy: Boolean = false
+    override var beanCallOnDestroy: Boolean = false
 
     abstract fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand)
     open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {

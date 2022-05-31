@@ -8,10 +8,21 @@ interface DiscordCommandConditions {
     fun checkUseScope(
         event: SlashCommandInteractionEvent,
         useScope: DiscordCommand.UseScope,
-        subCommandUseScope: HashMap<String, DiscordCommand.UseScope>
-    ): Boolean
+        subCommandUseScope: HashMap<String, DiscordCommand.UseScope>,
+        discordCommand: DiscordCommand
+    ): DiscordCommand.WrongUseScope
 
-    fun checkForNeededUserPermissions(event: SlashCommandInteractionEvent, userPermissions: ArrayList<Permission>): DiscordCommand.MissingPermissions
-    fun checkForNeededAleevaPermissions(event: SlashCommandInteractionEvent, botPermissions: ArrayList<Permission>): DiscordCommand.MissingPermissions
+    fun checkForNeededUserPermissions(
+        event: SlashCommandInteractionEvent,
+        userPermissions: ArrayList<Permission>,
+        discordCommand: DiscordCommand
+    ): DiscordCommand.MissingPermissions
 
+    fun checkForNeededBotPermissions(
+        event: SlashCommandInteractionEvent,
+        botPermissions: ArrayList<Permission>,
+        discordCommand: DiscordCommand
+    ): DiscordCommand.MissingPermissions
+
+    fun checkForAdditionalRequirements(event: SlashCommandInteractionEvent, discordCommand: DiscordCommand): DiscordCommand.AdditionalRequirements
 }

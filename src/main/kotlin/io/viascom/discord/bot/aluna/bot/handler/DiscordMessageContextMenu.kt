@@ -11,7 +11,7 @@ abstract class DiscordMessageContextMenu(name: String) : DiscordContextMenu(Comm
     /**
      * The main body method of a [DiscordContextMenu].
      * <br></br>This is the "response" for a successful
-     * [#run(DiscordaCommand)][DiscordContextMenu.execute].
+     * [#run(DiscordCommand)][DiscordContextMenu.execute].
      *
      * @param event The [MessageContextInteractionEvent] that triggered this Command
      */

@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.sharding.ShardManager
-import java.util.concurrent.TimeUnit
+import java.time.Duration
 
 
 @Command
@@ -29,8 +29,7 @@ class PingCommand(
 ) {
 
     init {
-        this.beanTimoutDelay = 20L
-        this.beanTimoutDelayUnit = TimeUnit.SECONDS
+        this.beanTimoutDelay = Duration.ofSeconds(20)
     }
 
     override fun initCommandOptions() {

@@ -71,7 +71,7 @@ class KotlinScriptService(
             engine.eval(imports + additionalImports + variables + script)
         } catch (throwable: Throwable) {
             throw throwable
-        }
+        } ?: "n/a - no return value"
     }
 
     private companion object {

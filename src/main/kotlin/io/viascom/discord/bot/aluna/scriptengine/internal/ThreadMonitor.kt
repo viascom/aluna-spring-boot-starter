@@ -1,5 +1,6 @@
 package io.viascom.discord.bot.aluna.scriptengine.internal
 
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.lang.management.ManagementFactory
 import java.lang.management.ThreadMXBean
@@ -22,7 +23,7 @@ class ThreadMonitor internal constructor(maxCPUTime: Long, private val maxMemory
     lateinit var threadBean: ThreadMXBean
     var memoryCounter: com.sun.management.ThreadMXBean?
 
-    val logger = LoggerFactory.getLogger(javaClass)
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
 
     private fun reset() {

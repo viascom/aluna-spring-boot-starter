@@ -2,6 +2,8 @@ package io.viascom.discord.bot.aluna.bot.handler
 
 import datadog.trace.api.Trace
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
+import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.translation.MessageService
 import net.dv8tion.jda.api.Permission
@@ -13,7 +15,6 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
-import net.dv8tion.jda.api.interactions.commands.LocalizationMapper
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 import net.dv8tion.jda.api.requests.RestAction
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
@@ -26,13 +27,12 @@ import org.springframework.context.MessageSource
 import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
-import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 abstract class DiscordCommand(
     name: String,
     description: String,
-    val localizations: HashMap<Locale, Pair<String, String>> = hashMapOf(),
+    //val localizations: HashMap<Locale, Pair<String, String>> = hashMapOf(),
     val observeAutoComplete: Boolean = false
 ) : CommandDataImpl(name, description),
     SlashCommandData, CommandScopedObject {
@@ -47,6 +47,12 @@ abstract class DiscordCommand(
     lateinit var discordCommandLoadAdditionalData: DiscordCommandLoadAdditionalData
 
     @Autowired
+    lateinit var discordCommandMetaDataHandler: DiscordCommandMetaDataHandler
+
+    @Autowired
+    lateinit var eventPublisher: EventPublisher
+
+    @Autowired
     lateinit var discordBot: DiscordBot
 
     @Autowired(required = false)
@@ -55,11 +61,12 @@ abstract class DiscordCommand(
     @Autowired(required = false)
     private lateinit var messageSource: MessageSource
 
-    @Autowired(required = false)
-    private lateinit var alunaLocalizationFunction: AlunaLocalizationFunction
+//    @Autowired(required = false)
+//    private lateinit var localizationFunction: LocalizationFunction
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
+    //This gets set by the CommandContext automatically
     override lateinit var uniqueId: String
 
     var useScope = UseScope.GLOBAL
@@ -72,10 +79,10 @@ abstract class DiscordCommand(
 
     var commandDevelopmentStatus = DevelopmentStatus.LIVE
 
-    override var beanTimoutDelay: Long = 15
-    override var beanTimoutDelayUnit: TimeUnit = TimeUnit.MINUTES
+    override var beanTimoutDelay: Duration = Duration.ofMinutes(15)
     override var beanUseAutoCompleteBean: Boolean = true
     override var beanRemoveObserverOnDestroy: Boolean = true
+    override var beanCallOnDestroy: Boolean = true
 
     /**
      * The [CooldownScope][Command.CooldownScope] of the command. This defines how far from a scope cooldowns have.
@@ -96,14 +103,6 @@ abstract class DiscordCommand(
      */
     var botPermissions = arrayListOf<Permission>()
 
-    /**
-     * `true` if this command checks a channel topic for topic-tags.
-     * <br></br>This means that putting `{-commandname}`, `{-command category}`, `{-all}` in a channel topic
-     * will cause this command to terminate.
-     * <br></br>Default `true`.
-     */
-    protected var usesTopicTags = true
-
     var subCommandUseScope = hashMapOf<String, UseScope>()
 
     lateinit var channel: MessageChannel
@@ -121,7 +120,7 @@ abstract class DiscordCommand(
     /**
      * The main body method of a [DiscordCommand].
      * <br></br>This is the "response" for a successful
-     * [#run(DiscordaCommand)][DiscordCommand.execute].
+     * [#run(DiscordCommand)][DiscordCommand.run].
      *
      * @param event The [DiscordCommandEvent] that triggered this Command
      */
@@ -168,6 +167,10 @@ abstract class DiscordCommand(
     open fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
+    /**
+     * On destroy gets called, when the object gets destroyed after the defined beanTimoutDelay.
+     *
+     */
     @Trace
     open fun onDestroy() {
     }
@@ -201,6 +204,54 @@ abstract class DiscordCommand(
     open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
+    open fun onWrongUseScope(event: SlashCommandInteractionEvent, wrongUseScope: WrongUseScope) {
+        when {
+            wrongUseScope.serverOnly -> {
+                event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} This command can only be used on a server directly.").queue()
+            }
+            wrongUseScope.subCommandServerOnly -> {
+                event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} This command can only be used on a server directly.").queue()
+            }
+        }
+    }
+
+    open fun onMissingUserPermission(event: SlashCommandInteractionEvent, missingPermissions: MissingPermissions) {
+        val textChannelPermissions = missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" }
+        val voiceChannelPermissions = missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" }
+        val serverPermissions = missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
+        event.deferReply(true).setContent(
+            "${AlunaEmote.SMALL_CROSS.asMention()} You are missing the following permission to execute this command:\n" +
+                    (if (textChannelPermissions.isNotBlank()) textChannelPermissions + "\n" else "") +
+                    (if (voiceChannelPermissions.isNotBlank()) voiceChannelPermissions + "\n" else "") +
+                    (if (serverPermissions.isNotBlank()) serverPermissions + "\n" else "")
+        ).queue()
+    }
+
+    open fun onMissingBotPermission(event: SlashCommandInteractionEvent, missingPermissions: MissingPermissions) {
+        when {
+            missingPermissions.notInVoice -> {
+                event.deferReply(true)
+                    .setContent("${AlunaEmote.SMALL_CROSS.asMention()} You need to be in a voice channel yourself to execute this command").queue()
+
+            }
+            (missingPermissions.hasMissingPermissions) -> {
+                event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} I'm missing the following permission to execute this command:\n" +
+                        missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
+                        missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
+                        missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
+                ).queue()
+            }
+        }
+    }
+
+    open fun onFailedAdditionalRequirements(event: SlashCommandInteractionEvent, additionalRequirements: AdditionalRequirements) {
+        event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} Additional requirements for this command failed.").queue()
+    }
+
+    open fun onExecutionException(event: SlashCommandInteractionEvent, exception: Exception) {
+        throw exception
+    }
+
     open fun initCommandOptions() {}
     open fun initSubCommands() {}
 
@@ -214,7 +265,7 @@ abstract class DiscordCommand(
 
     fun prepareLocalization() {
         if (alunaProperties.enableTranslation) {
-            this.setLocalizationMapper(LocalizationMapper.fromFunction(alunaLocalizationFunction))
+//            this.setLocalizationMapper(LocalizationMapper.fromFunction(localizationFunction))
             this.toData()
         }
     }
@@ -252,48 +303,58 @@ abstract class DiscordCommand(
         //checkIfLocalDevelopment(event)
         //checkCommandStatus(event)
 
-        if (!discordCommandConditions.checkUseScope(event, useScope, subCommandUseScope)) {
+        val wrongUseScope = discordCommandConditions.checkUseScope(event, useScope, subCommandUseScope, this)
+        if (wrongUseScope.wrongUseScope) {
+            onWrongUseScope(event, wrongUseScope)
             return
         }
-
-        //addOrUpdateUserInDatabase(event)
-        //loadProperties(event)
-
-        //checkForNeededBotPermissions(event)
 
         //executeCategoryChecks(event)
 
         //checkChannelTopics(event)
 
-        if (discordCommandConditions.checkForNeededUserPermissions(event, userPermissions).hasMissingPermissions) {
+        val missingUserPermissions = discordCommandConditions.checkForNeededUserPermissions(event, userPermissions, this)
+        if (missingUserPermissions.hasMissingPermissions) {
+            onMissingUserPermission(event, missingUserPermissions)
             return
         }
 
-        if (discordCommandConditions.checkForNeededAleevaPermissions(event, botPermissions).hasMissingPermissions) {
+        val missingBotPermissions = discordCommandConditions.checkForNeededBotPermissions(event, botPermissions, this)
+        if (missingBotPermissions.hasMissingPermissions) {
+            onMissingBotPermission(event, missingBotPermissions)
             return
         }
 
         //checkForCommandCooldown(event)
 
         //checkAdditionalRequirements(event)
+        val additionalRequirements = discordCommandConditions.checkForAdditionalRequirements(event, this)
+        if (additionalRequirements.failed) {
+            onFailedAdditionalRequirements(event, additionalRequirements)
+            return
+        }
 
+        //Load additional data for this command
         discordCommandLoadAdditionalData.loadData(this, event)
 
         try {
-            writeToStats()
+            //Run onCommandExecution in asyncExecutor to ensure it is not blocking the execution of the command itself
+            discordBot.asyncExecutor.execute {
+                discordCommandMetaDataHandler.onCommandExecution(event, this)
+            }
+            if (alunaProperties.discord.publishDiscordCommandEvent) {
+                eventPublisher.publishDiscordCommandEvent(author, channel, server, event.commandPath, this)
+            }
             logger.info("Run command /${event.commandPath}" + if (alunaProperties.showHashCode) " [${this.hashCode()}]" else "")
             execute(event)
+        } catch (e: Exception) {
+            try {
+                onExecutionException(event, e)
+            } catch (exceptionError: Exception) {
+                discordCommandMetaDataHandler.onGenericExecutionException(event, e, exceptionError, this)
+            }
+        } finally {
             exitCommand(event)
-        } catch (t: Throwable) {
-            //ExceptionUtil.sendExceptionToAleevaServer(t, memberEntity.id.toString(), guildEntity?.id.toString(), if (parentName != "") "$parentName $name" else name)
-            //if (event.client.listener != null) {
-            //    event.client.listener!!.onCommandException(event, this, t)
-            //
-            //    return
-            //}
-            // otherwise we rethrow
-            exitCommand(event)
-            throw t
         }
 
     }
@@ -302,11 +363,14 @@ abstract class DiscordCommand(
         if (alunaProperties.useStopwatch && stopWatch != null) {
             stopWatch!!.stop()
             logger.info("/${event.commandPath} (${this.author.id})${if (alunaProperties.showHashCode) " [${this.hashCode()}]" else ""} -> ${stopWatch!!.totalTimeMillis}ms")
+            when {
+                (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the command /${event.commandPath} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
+                (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the command /${event.commandPath} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
+            }
         }
-    }
-
-    private fun writeToStats() {
-
+        discordBot.asyncExecutor.execute {
+            discordCommandMetaDataHandler.onExitCommand(event, stopWatch, this)
+        }
     }
 
     private fun processDevelopmentStatus() {
@@ -348,6 +412,21 @@ abstract class DiscordCommand(
     ) {
         val hasMissingPermissions: Boolean
             get() = textChannel.isNotEmpty() || voiceChannel.isNotEmpty() || server.isNotEmpty()
+    }
+
+    class WrongUseScope(
+        var serverOnly: Boolean = false,
+        var subCommandServerOnly: Boolean = false
+    ) {
+        val wrongUseScope: Boolean
+            get() = serverOnly || subCommandServerOnly
+    }
+
+    class AdditionalRequirements(
+        val failedRequirements: HashMap<String, Any> = hashMapOf<String, Any>()
+    ) {
+        val failed: Boolean
+            get() = failedRequirements.isNotEmpty()
     }
 
     fun MessageService.getForUser(key: String, vararg args: String): String = this.get(key, userLocale, *args)

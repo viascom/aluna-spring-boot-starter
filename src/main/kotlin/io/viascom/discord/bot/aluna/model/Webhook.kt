@@ -54,7 +54,7 @@ data class Webhook(
 
     fun toMessage(): Message {
         val message = MessageBuilder()
-        content?.let { message.setContent(it) }
+        content?.let { message.setContent(it) } ?: message.setContent("")
 
         val messageEmbeds = arrayListOf<MessageEmbed>()
         embeds?.let { embeds ->
@@ -72,6 +72,7 @@ data class Webhook(
                 messageEmbeds.add(embed.build())
             }
         }
+        message.setEmbeds(messageEmbeds)
 
         return message.build()
     }
@@ -80,7 +81,7 @@ data class Webhook(
         fun fromMessage(message: Message): Webhook {
             val embeds = message.embeds.map { embed ->
                 val author = embed.author?.let { Author(it.iconUrl, it.name, it.url) }
-                val fields = embed.fields.map { Field(it.isInline, it.name ?: "", it.value ?: "") }
+                val fields = embed.fields.ifEmpty { null }?.map { Field(it.isInline, it.name ?: "", it.value ?: "") }
                 val footer = embed.footer?.let { Footer(it.iconUrl, it.text ?: "") }
                 val image = embed.image?.url?.let { Image(it) }
                 val thumbnail = embed.thumbnail?.url?.let { Thumbnail(it) }
@@ -88,7 +89,7 @@ data class Webhook(
                 Embed(author, embed.colorRaw, embed.description, fields, footer, image, thumbnail, embed.timestamp, embed.title, embed.url)
             }
 
-            return Webhook(message.contentRaw, embeds)
+            return Webhook(message.contentRaw.ifEmpty { null }, embeds)
         }
     }
 

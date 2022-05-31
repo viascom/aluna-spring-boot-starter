@@ -25,7 +25,7 @@ class KotlinEvaluateProvider(
     true,
     false,
     false,
-    true
+    false
 ) {
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
@@ -56,12 +56,20 @@ class KotlinEvaluateProvider(
 
             }
 
-            it.editOriginal(
-                "Script:\n```kotlin\n" +
-                        "$script```\n" +
-                        "Result:\n" +
-                        "```$result```"
-            ).queue()
+            if (result.toString().length < 1000) {
+                it.editOriginal(
+                    "Script:\n```kotlin\n" +
+                            "$script```\n" +
+                            "Result:\n" +
+                            "```$result```"
+                ).queue()
+            } else {
+                it.editOriginal(
+                    "Script:\n```kotlin\n" +
+                            "$script```\n" +
+                            "Result:"
+                ).addFile(result.toString().encodeToByteArray(), "result.txt").queue()
+            }
 
         }
         return true

@@ -1,8 +1,8 @@
 package io.viascom.discord.bot.aluna.bot
 
-import io.viascom.discord.bot.aluna.bot.listener.GenericInteractionListener
-import io.viascom.discord.bot.aluna.bot.listener.ShardReadyEvent
-import io.viascom.discord.bot.aluna.bot.listener.SlashCommandInteractionEventListener
+import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
+import io.viascom.discord.bot.aluna.bot.listener.GenericEventPublisher
+import io.viascom.discord.bot.aluna.bot.listener.ServerNotificationEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
@@ -20,14 +20,18 @@ class ListenerRegistration(private val listeners: List<ListenerAdapter>, private
     override fun onApplicationEvent(event: ApplicationStartedEvent) {
         val listenersToRegister = listeners.filterNot {
             //Filter out static registered listeners
-            it::class.java.canonicalName in arrayListOf(
-                ShardReadyEvent::class.java.canonicalName,
-                SlashCommandInteractionEventListener::class.java.canonicalName,
-                GenericInteractionListener::class.java.canonicalName
-            )
+            it::class.java.canonicalName.startsWith("io.viascom.discord.bot.aluna.bot.listener") &&
+                    it::class.java.canonicalName != ServerNotificationEvent::class.java.canonicalName
         }
-        if(listenersToRegister.isNotEmpty()) {
-            logger.debug("Register Listeners:\n" + listenersToRegister.joinToString("\n") { "- ${it::class.java.canonicalName}" })
+        val internalListeners = listeners.filter {
+            it::class.java.canonicalName.startsWith("io.viascom.discord.bot.aluna.bot.listener") &&
+                    it::class.java.canonicalName != ServerNotificationEvent::class.java.canonicalName
+        }
+        logger.debug(
+            "Register internal listeners: [${GenericEventPublisher::class.java.canonicalName}, ${EventWaiter::class.java.canonicalName}, " +
+                    internalListeners.joinToString(", ") { it::class.java.canonicalName } + "]")
+        if (listenersToRegister.isNotEmpty()) {
+            logger.debug("Register listeners:\n" + listenersToRegister.joinToString("\n") { "- ${it::class.java.canonicalName}" })
             shardManager.addEventListener(*listenersToRegister.toTypedArray())
         }
     }

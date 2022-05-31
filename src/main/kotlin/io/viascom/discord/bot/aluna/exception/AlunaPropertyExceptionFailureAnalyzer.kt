@@ -3,7 +3,7 @@ package io.viascom.discord.bot.aluna.exception
 import org.springframework.boot.diagnostics.AbstractFailureAnalyzer
 import org.springframework.boot.diagnostics.FailureAnalysis
 
-class AlunaPropertyExceptionFailureAnalyzer : AbstractFailureAnalyzer<AlunaPropertiesException>() {
+internal class AlunaPropertyExceptionFailureAnalyzer : AbstractFailureAnalyzer<AlunaPropertiesException>() {
     override fun analyze(rootFailure: Throwable, cause: AlunaPropertiesException): FailureAnalysis {
         val description = "${cause.description}\n\n" +
                 "\tProperty: ${cause.property}\n" +

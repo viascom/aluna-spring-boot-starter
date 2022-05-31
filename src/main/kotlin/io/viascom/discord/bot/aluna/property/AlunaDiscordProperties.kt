@@ -45,11 +45,13 @@ class AlunaDiscordProperties {
     var cacheFlags: ArrayList<CacheFlag> = arrayListOf()
 
     /**
-     * Sets whether or not JDA should try to reconnect if a connection-error is encountered.
+     * Sets whether JDA should try to reconnect if a connection-error is encountered.
      */
     var autoReconnect: Boolean = true
 
-
+    /**
+     * Default permissions which are used for /system-command and invite generation
+     */
     var defaultPermissions: ArrayList<Permission> = arrayListOf()
 
     /**
@@ -57,10 +59,30 @@ class AlunaDiscordProperties {
      */
     var publishEvents: Boolean = false
 
+    /**
+     * Publish only first event and don't publish parent events
+     */
     var publishOnlyFirstEvent: Boolean = true
+
+    /**
+     * Publish gate ping event. This may cause a lot of events!
+     */
     var publishGatePingEvent: Boolean = false
+
+    /**
+     * Publish guild ready event. This may cause a lot of events!
+     */
     var publishGuildReadyEvent: Boolean = false
-    var publishEventInterface: Boolean = false
+
+    /**
+     * Publish Aluna discord command event. This event should not be used to answer the command!
+     */
+    var publishDiscordCommandEvent: Boolean = false
+
+    /**
+     * Set status to online and remove activity as soon as Aluna is finished with the startup process and is connected to Discord.
+     */
+    var setStatusToOnlineWhenReady: Boolean = true
 
     enum class MemberCachePolicyType {
         NONE,
