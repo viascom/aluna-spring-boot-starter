@@ -5,12 +5,11 @@ plugins {
     id "org.jetbrains.kotlin.jvm" version "1.6.21"
     id "org.jetbrains.kotlin.kapt" version "1.6.21"
     id "org.springframework.boot" version "2.6.7"
-    id "org.liquibase.gradle" version "2.1.1"
     id "io.spring.dependency-management" version "1.0.11.RELEASE"
 }
 
 group "io.viascom.discord.bot"
-version "0.0.18_5.0.0-alpha.11"
+version "0.0.19_5.0.0-alpha.12_DEV"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -42,6 +41,7 @@ java {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         name "m2-dv8tion"
@@ -49,52 +49,65 @@ repositories {
     }
 }
 
+ext {
+    jdaVersion="5.0.0-alpha.12"
+}
+
+
 dependencies {
 
     //====== Kotlin ======
-    api "org.jetbrains.kotlin:kotlin-stdlib"
-    api "org.jetbrains.kotlin:kotlin-reflect"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
+
+    implementation "org.jetbrains.kotlin:kotlin-script-util"
+    implementation "org.jetbrains.kotlin:kotlin-script-runtime"
+    implementation "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable"
+    implementation "org.jetbrains.kotlin:kotlin-compiler-embeddable"
+
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
 
     //====== Spring ======
-    api("org.springframework.boot:spring-boot-starter-web") {
-        exclude module: "spring-boot-starter-tomcat"
+    compileOnly("org.springframework.boot:spring-boot-starter") {
         exclude module: "spring-boot-starter-json"
     }
-    api "org.springframework.boot:spring-boot-starter-undertow"
-    api "org.springframework.boot:spring-boot-starter-actuator"
+    compileOnly "org.springframework.boot:spring-boot-starter-actuator"
     kapt "org.springframework.boot:spring-boot-configuration-processor"
 
     //====== JDA ======
-    api("net.dv8tion:JDA:5.0.0-alpha.11"){
+    api("net.dv8tion:JDA:$jdaVersion"){
         exclude group: "org.apache.commons", module: "commons-collections4" //Because of https://advisory.checkmarx.net/advisory/vulnerability/Cx78f40514-81ff/
     }
     implementation 'org.apache.commons:commons-collections4:4.4'
 
     //====== Retrofit2 ======
-    api "com.squareup.retrofit2:retrofit:2.9.0"
-    api "com.squareup.retrofit2:converter-gson:2.9.0"
+    compileOnly "com.squareup.retrofit2:retrofit:2.9.0"
+    compileOnly "com.squareup.retrofit2:converter-gson:2.9.0"
 
     //====== Gson ======
     api "com.google.code.gson:gson:2.9.0"
     api "com.fatboyindustrial.gson-javatime-serialisers:gson-javatime-serialisers:1.1.1"
 
     //====== Logging ======
-    api "org.zalando:logbook-logstash:2.14.0"
-    api "org.zalando:logbook-spring-boot-starter:2.14.0"
-    api "com.datadoghq:dd-trace-api:0.100.0"
+    compileOnly "org.zalando:logbook-logstash:2.14.0"
+    compileOnly "org.zalando:logbook-spring-boot-starter:2.14.0"
+    compileOnly "com.datadoghq:dd-trace-api:0.100.0"
 
     //====== Script-Engine ======
-    api "org.openjdk.nashorn:nashorn-core:15.4"
-    api "org.graalvm.js:js:22.1.0"
-    api "org.graalvm.js:js-scriptengine:22.1.0"
+    compileOnly "org.openjdk.nashorn:nashorn-core:15.4"
+    compileOnly "org.graalvm.js:js:22.1.0"
+    compileOnly "org.graalvm.js:js-scriptengine:22.1.0"
 
-    api 'com.aventrix.jnanoid:jnanoid:2.0.0'
-    api "org.apache.commons:commons-lang3:3.12.0"
-    api "com.google.guava:guava:31.1-jre"
+    api "com.aventrix.jnanoid:jnanoid:2.0.0"
+    compileOnly "org.apache.commons:commons-lang3:3.12.0"
     api("com.vdurmont:emoji-java:5.1.1") {
         exclude group: "org.json", module: "json" //Because of https://advisory.checkmarx.net/advisory/vulnerability/Cx08fcacc9-cb99/
     }
     implementation 'org.json:json:20220320'
+
+
+    testImplementation "org.springframework.boot:spring-boot-starter-web"
+    testImplementation "org.springframework.boot:spring-boot-starter-actuator"
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -110,14 +123,22 @@ classes {
     }
 }
 
+processResources {
+    filesMatching('banner.txt') {
+        filter {
+            it.replace('jda.version', "${jdaVersion}").replace('aluna.version', "${project.version}")
+        }
+    }
+}
+
 publishing {
     repositories {
         maven {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/viascom/aluna-spring-boot-starter")
             credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
+                username = findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+                password = findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
             }
         }
     }
@@ -129,7 +150,7 @@ publishing {
             pom {
                 groupId = 'io.viascom.discord.bot'
                 name = 'aluna-spring-boot-starter'
-                description = 'Viascom core library for Discord bots.'
+                description = 'Spring Boot Starter for JDA Discord bots.'
                 url = 'https://github.com/viascom/aluna-spring-boot-starter'
                 packaging = 'jar'
 
