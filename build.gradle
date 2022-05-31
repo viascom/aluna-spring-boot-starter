@@ -91,7 +91,7 @@ dependencies {
     //====== Logging ======
     compileOnly "org.zalando:logbook-logstash:2.14.0"
     compileOnly "org.zalando:logbook-spring-boot-starter:2.14.0"
-    compileOnly "com.datadoghq:dd-trace-api:0.100.0"
+    compileOnly "com.datadoghq:dd-trace-api:0.102.0"
 
     //====== Script-Engine ======
     compileOnly "org.openjdk.nashorn:nashorn-core:15.4"
