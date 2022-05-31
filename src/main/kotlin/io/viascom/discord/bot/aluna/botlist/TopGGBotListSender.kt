@@ -3,10 +3,10 @@ package io.viascom.discord.bot.aluna.botlist
 import com.google.gson.Gson
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.sharding.ShardManager
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -37,7 +37,7 @@ class TopGGBotListSender(
             .build()
 
         val request = Request.Builder().url("https://top.gg/api/bots/${alunaProperties.discord.applicationId}/stats").post(
-            RequestBody.create(MediaType.get("application/json"), gson.toJson(TopGGData(shardManager.shards.map { it.guilds.size })))
+            gson.toJson(TopGGData(shardManager.shards.map { it.guilds.size })).toRequestBody("application/json".toMediaType())
         ).header("Authorization", topGGToken).build()
 
         httpClient.newCall(request).execute()

@@ -2,10 +2,10 @@ package io.viascom.discord.bot.aluna.botlist
 
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.sharding.ShardManager
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -35,7 +35,7 @@ class DiscordBotListEuBotListSender(
             .build()
 
         val request = Request.Builder().url("https://api.discord-botlist.eu/v1/update").post(
-            RequestBody.create(MediaType.get("application/json"), "{\"serverCount\": ${shardManager.guilds.size}}")
+            "{\"serverCount\": ${shardManager.guilds.size}}".toRequestBody("application/json".toMediaType())
         ).header("Authorization", discordBotListEuToken).build()
 
         httpClient.newCall(request).execute()

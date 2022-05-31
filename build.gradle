@@ -4,7 +4,7 @@ plugins {
     id "maven-publish"
     id "org.jetbrains.kotlin.jvm" version "1.6.21"
     id "org.jetbrains.kotlin.kapt" version "1.6.21"
-    id "org.springframework.boot" version "2.6.7"
+    id "org.springframework.boot" version "2.7.0"
     id "io.spring.dependency-management" version "1.0.11.RELEASE"
 }
 
@@ -91,12 +91,12 @@ dependencies {
     //====== Logging ======
     compileOnly "org.zalando:logbook-logstash:2.14.0"
     compileOnly "org.zalando:logbook-spring-boot-starter:2.14.0"
-    compileOnly "com.datadoghq:dd-trace-api:0.100.0"
+    compileOnly "com.datadoghq:dd-trace-api:0.102.0"
 
     //====== Script-Engine ======
     compileOnly "org.openjdk.nashorn:nashorn-core:15.4"
-    compileOnly "org.graalvm.js:js:22.1.0"
-    compileOnly "org.graalvm.js:js-scriptengine:22.1.0"
+    compileOnly "org.graalvm.js:js:22.1.0.1"
+    compileOnly "org.graalvm.js:js-scriptengine:22.1.0.1"
 
     api "com.aventrix.jnanoid:jnanoid:2.0.0"
     compileOnly "org.apache.commons:commons-lang3:3.12.0"
