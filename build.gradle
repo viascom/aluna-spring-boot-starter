@@ -95,7 +95,7 @@ dependencies {
 
     //====== Script-Engine ======
     compileOnly "org.openjdk.nashorn:nashorn-core:15.4"
-    compileOnly "org.graalvm.js:js:22.1.0"
+    compileOnly "org.graalvm.js:js:22.1.0.1"
     compileOnly "org.graalvm.js:js-scriptengine:22.1.0"
 
     api "com.aventrix.jnanoid:jnanoid:2.0.0"
