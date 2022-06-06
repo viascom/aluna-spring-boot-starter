@@ -1,5 +1,6 @@
 package io.viascom.discord.bot.aluna.bot.listener
 
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.handler.DiscordMessageContextMenu
 import io.viascom.discord.bot.aluna.bot.handler.DiscordUserContextMenu
@@ -19,7 +20,7 @@ open class SlashCommandInteractionEventListener(
 
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
         discordBot.asyncExecutor.execute {
-            DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.COMMAND)
+            DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.COMMAND, NanoIdUtils.randomNanoId())
             discordBot.commands[event.commandId]?.let { command -> discordBot.commandExecutor.execute { context.getBean(command).run(event) } }
         }
     }

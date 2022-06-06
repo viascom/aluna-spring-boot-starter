@@ -4,7 +4,7 @@ import io.viascom.discord.bot.aluna.bot.handler.Command
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
 @Command
-class BoxedSubCommand(
+class BoxedSubCommand2(
 
 ) : ExtendedSubCommand() {
 

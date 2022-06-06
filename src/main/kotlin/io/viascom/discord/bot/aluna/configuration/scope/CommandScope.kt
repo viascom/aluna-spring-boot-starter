@@ -23,7 +23,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    private val scopedObjects = Collections.synchronizedMap(HashMap<BeanName, HashMap<DiscordStateId, HashMap<UniqueId, ScopedObjectData>>>())
+    internal val scopedObjects = Collections.synchronizedMap(HashMap<BeanName, HashMap<DiscordStateId, HashMap<UniqueId, ScopedObjectData>>>())
     private var scopedObjectsTimeoutScheduler: ScheduledThreadPoolExecutor
 
     private val scopedObjectsTimeoutScheduledTask = Collections.synchronizedMap(HashMap<UniqueId, ScheduledFuture<*>>())
@@ -38,6 +38,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
     override fun get(name: String, objectFactory: ObjectFactory<*>): Any {
         //If state id is not set, a new instance is returned
         if (DiscordContext.discordState?.id == null) {
+            logger.debug("[$name]\t- ${DiscordContext.discordState} -> new instance (because id is null)")
             val newObj = objectFactory.getObject() as CommandScopedObject
             newObj.uniqueId = ""
             return newObj
@@ -57,6 +58,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
 
         //If uniqueId is present we return the corresponding bean and reset the timeout
         if (DiscordContext.discordState?.uniqueId != null && scopedObjects[name]!![DiscordContext.discordState!!.id]!!.containsKey(DiscordContext.discordState?.uniqueId)) {
+            logger.debug("[$name]\t- ${DiscordContext.discordState} -> found uniqueId and return")
             val data = scopedObjects[name]!![DiscordContext.discordState!!.id]!![DiscordContext.discordState!!.uniqueId]!!
             val timeout = createTimeoutDestroy(
                 name,
@@ -74,8 +76,13 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
         if (isAutoComplete) {
             val hasAutoCompleteBean = scopedObjects[name]!![DiscordContext.discordState!!.id]!!.any { it.value.type == DiscordContext.Type.AUTO_COMPLETE }
             if (hasAutoCompleteBean) {
+
                 //Found existing auto complete bean
                 val data = scopedObjects[name]!![DiscordContext.discordState!!.id]!!.entries.first { it.value.type == DiscordContext.Type.AUTO_COMPLETE }
+
+                DiscordContext.discordState!!.uniqueId = data.key
+                logger.debug("[$name]\t- ${DiscordContext.discordState} -> found auto-complete instance by uniqueId and return")
+
                 val timeout = createTimeoutDestroy(
                     name,
                     data.value.obj,
@@ -87,10 +94,11 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
                 return data.value.obj
             } else {
                 //No bean exists, so we create one
-                DiscordContext.discordState!!.uniqueId = NanoIdUtils.randomNanoId()
+                DiscordContext.discordState!!.uniqueId = DiscordContext.discordState!!.uniqueId ?: NanoIdUtils.randomNanoId()
                 val newObj = objectFactory.getObject() as CommandScopedObject
                 newObj.uniqueId = DiscordContext.discordState!!.uniqueId!!
-                scopedObjects[name]!![DiscordContext.discordState!!.id]!![DiscordContext.discordState!!.uniqueId!!] =
+                logger.debug("[$name]\t- ${DiscordContext.discordState} -> new instance (for auto-complete)")
+                scopedObjects[name]!![DiscordContext.discordState!!.id]!![newObj.uniqueId] =
                     ScopedObjectData(DiscordContext.discordState?.type ?: DiscordContext.Type.AUTO_COMPLETE, newObj)
 
                 val timeout = createTimeoutDestroy(
@@ -110,9 +118,32 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
         val autoCompleteForThisCommand =
             scopedObjects[name]!![DiscordContext.discordState!!.id]!!.entries.firstOrNull { it.value.type == DiscordContext.Type.AUTO_COMPLETE }
         if (autoCompleteForThisCommand != null && loadBeanUseAutoCompleteBean(autoCompleteForThisCommand.value.obj, false)) {
+            DiscordContext.discordState!!.uniqueId = autoCompleteForThisCommand.key
+            logger.debug("[$name]\t- ${DiscordContext.discordState} -> found auto-complete (use for command)")
             //Found existing auto complete bean we can use
+
             //Change type to COMMAND
-            autoCompleteForThisCommand.value.type = DiscordContext.Type.COMMAND
+            val newScopedObjectData = ScopedObjectData(
+                DiscordContext.Type.COMMAND,
+                scopedObjects[name]!![DiscordContext.discordState!!.id]!![autoCompleteForThisCommand.key]!!.obj,
+                scopedObjects[name]!![DiscordContext.discordState!!.id]!![autoCompleteForThisCommand.key]!!.creationDate
+            )
+            scopedObjects[name]!![DiscordContext.discordState!!.id]!![autoCompleteForThisCommand.key] = newScopedObjectData
+
+            //Search for other beans with same uniqueId and AUTO_COMPLETE
+            scopedObjects.filter { it.value.any { it.value.containsKey(autoCompleteForThisCommand.key) } }.forEach { beanEntry ->
+                beanEntry.value.filter { it.value.containsKey(autoCompleteForThisCommand.key) }.forEach { stateEntry ->
+                    stateEntry.value.forEach { scopedObject ->
+                        val newSubScopedObjectData = ScopedObjectData(
+                            DiscordContext.Type.COMMAND,
+                            scopedObjects[beanEntry.key]!![stateEntry.key]!![scopedObject.key]!!.obj,
+                            scopedObjects[beanEntry.key]!![stateEntry.key]!![scopedObject.key]!!.creationDate
+                        )
+                        scopedObjects[beanEntry.key]!![stateEntry.key]!![scopedObject.key] = newSubScopedObjectData
+                    }
+                }
+            }
+
             //Remove old timeout
             scopedObjectsTimeoutScheduledTask[autoCompleteForThisCommand.key]!!.cancel(true)
 
@@ -133,7 +164,8 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
             }
 
             //No bean exists, so we create one
-            DiscordContext.discordState!!.uniqueId = NanoIdUtils.randomNanoId()
+            DiscordContext.discordState!!.uniqueId = DiscordContext.discordState!!.uniqueId ?: NanoIdUtils.randomNanoId()
+            logger.debug("[$name]\t- ${DiscordContext.discordState} -> new instance")
             val newObj = objectFactory.getObject() as CommandScopedObject
             newObj.uniqueId = DiscordContext.discordState!!.uniqueId!!
             scopedObjects[name]!![DiscordContext.discordState!!.id]!![DiscordContext.discordState!!.uniqueId!!] =
@@ -195,10 +227,10 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
                 }
                 //Remove element from scope cache
                 scopedObjects.getOrElse(name) { null }?.getOrElse(DiscordContext.discordState!!.id) { null }?.remove(uniqueId)
-                if(scopedObjects.getOrElse(name) { null }?.getOrElse(DiscordContext.discordState!!.id) { null }?.isEmpty() == true){
+                if (scopedObjects.getOrElse(name) { null }?.getOrElse(DiscordContext.discordState!!.id) { null }?.isEmpty() == true) {
                     scopedObjects.getOrElse(name) { null }?.remove(DiscordContext.discordState!!.id)
                 }
-                if(scopedObjects.getOrElse(name) { null }?.isEmpty() == true){
+                if (scopedObjects.getOrElse(name) { null }?.isEmpty() == true) {
                     scopedObjects.remove(name)
                 }
 
@@ -313,18 +345,26 @@ object DiscordContext {
         val id: String,
         val type: Type = Type.OTHER,
         var uniqueId: String? = null
-    )
+    ) {
+        override fun toString(): String {
+            return "[id='$id', uniqueId='$uniqueId', type='$type']"
+        }
+    }
 
     enum class Type {
         COMMAND, AUTO_COMPLETE, OTHER
     }
 }
 
-private class ScopedObjectData(
+internal class ScopedObjectData(
     var type: DiscordContext.Type,
     val obj: Any,
     var creationDate: LocalDateTime = LocalDateTime.now()
-)
+) {
+    override fun toString(): String {
+        return "[type='$type', creationDate='$creationDate', obj='$obj']"
+    }
+}
 private typealias BeanName = String
 private typealias DiscordStateId = String
 private typealias UniqueId = String

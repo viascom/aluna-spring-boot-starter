@@ -18,6 +18,7 @@ aluna:
       support-server: <insert-support-server>
   enable-translation: true
   use-stopwatch: true
+  show-hash-code: true
 
 logging:
   level:

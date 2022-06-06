@@ -155,6 +155,10 @@ class EventWaiter(
         }
     }
 
+    private fun <T : GenericComponentInteractionCreateEvent> overrideTimeOut(uniqueId: String, type: Class<T>) {
+        TODO()
+    }
+
     fun isShutdown(): Boolean = executorThreadPool.isShutdown
 
     inner class WaitingEvent<in T : GenericEvent>(

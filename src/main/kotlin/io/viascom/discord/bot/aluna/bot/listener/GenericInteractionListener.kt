@@ -1,5 +1,6 @@
 package io.viascom.discord.bot.aluna.bot.listener
 
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -22,7 +23,7 @@ open class GenericInteractionListener(
             if (commandId != null) {
                 discordBot.commands[commandId]?.let { command ->
                     discordBot.commandExecutor.execute {
-                        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE)
+                        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, NanoIdUtils.randomNanoId())
                         context.getBean(command).onAutoCompleteEvent(event.focusedOption.name, event)
                     }
                 }
