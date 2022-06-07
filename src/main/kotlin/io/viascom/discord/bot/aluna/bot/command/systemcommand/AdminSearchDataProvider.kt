@@ -19,9 +19,11 @@ import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
 import net.dv8tion.jda.api.sharding.ShardManager
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import java.awt.Color
 
 @Command
+@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
 class AdminSearchDataProvider(
     private val shardManager: ShardManager,
     private val adminSearchPageDataProviders: List<AdminSearchPageDataProvider>

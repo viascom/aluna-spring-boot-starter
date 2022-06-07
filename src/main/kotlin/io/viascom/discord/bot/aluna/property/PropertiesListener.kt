@@ -15,6 +15,11 @@ class PropertiesListener : ApplicationListener<ApplicationContextInitializedEven
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onApplicationEvent(event: ApplicationContextInitializedEvent) {
+        //Check if jda is disabled
+        if((event.applicationContext.environment.getProperty("aluna.discord.enable-jda", Boolean::class.java) ?: true) == false){
+            return
+        }
+
         //check bot token
         val token = event.applicationContext.environment.getProperty("aluna.discord.token") ?: ""
         if (token.isEmpty()) {

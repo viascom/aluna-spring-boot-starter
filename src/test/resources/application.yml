@@ -3,6 +3,7 @@ aluna:
   owner-ids: <insert-owner-id>
   mod-ids: <insert-mod-ids>
   discord:
+    enable-jda: true
     token: <insert-token>
     application-id: <insert-application-id>
     default-permissions:

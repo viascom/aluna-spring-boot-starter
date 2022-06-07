@@ -3,9 +3,11 @@ package io.viascom.discord.bot.aluna.bot.command.systemcommand.adminsearch
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.AdminSearchDataProvider
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.Guild
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
+@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
 class AdminSearchServerEmotesPage : AdminSearchPageDataProvider(
     "EMOTES",
     "Emotes",

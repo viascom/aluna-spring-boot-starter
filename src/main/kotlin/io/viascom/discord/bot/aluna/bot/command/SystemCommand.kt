@@ -13,8 +13,10 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 
 @Command
+@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
 class SystemCommand(
     private val dataProviders: List<SystemCommandDataProvider>,
     private val ownerIdProvider: OwnerIdProvider,

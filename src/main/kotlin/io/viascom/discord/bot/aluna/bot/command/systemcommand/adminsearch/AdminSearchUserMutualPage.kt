@@ -5,9 +5,11 @@ import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.sharding.ShardManager
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
+@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
 class AdminSearchUserMutualPage(
     private val shardManager: ShardManager
 ) : AdminSearchPageDataProvider(

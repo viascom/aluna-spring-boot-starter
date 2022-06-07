@@ -5,6 +5,7 @@ import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
 import org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.stereotype.Service
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service
  *
  */
 @Service
+@ConditionalOnExpression("\${aluna.discord.enable-jda:true} && \${aluna.command.system-command.enable-kotlin-script-evaluate:false}")
 class KotlinScriptService(
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,

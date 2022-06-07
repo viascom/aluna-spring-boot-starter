@@ -16,10 +16,12 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.sharding.ShardManager
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import java.awt.Color
 import java.time.Duration
 
 @Command
+@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
 class LeaveServerProvider(
     private val shardManager: ShardManager
 ) : SystemCommandDataProvider(

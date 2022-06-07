@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -17,6 +18,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 @Service
+@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
 open class DiscordBot(
     private val context: ConfigurableApplicationContext,
     private val alunaProperties: AlunaProperties

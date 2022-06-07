@@ -36,4 +36,9 @@ class SystemCommandProperties {
      * Define which system command features are allowed for moderators. If not defined, Aluna will use what is defined in the feature or the default which is false
      */
     var allowedForModeratorsFunctions: ArrayList<String>? = null
+
+    /**
+     * Enable kotlin script evaluation feature. If this is enabled, you need to run your application with a JDK.
+     */
+    var enableKotlinScriptEvaluate: Boolean = false
 }

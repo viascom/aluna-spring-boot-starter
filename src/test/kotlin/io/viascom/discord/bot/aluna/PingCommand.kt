@@ -3,7 +3,6 @@ package io.viascom.discord.bot.aluna
 import io.viascom.discord.bot.aluna.bot.handler.Command
 import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
-import io.viascom.discord.bot.aluna.scriptengine.KotlinScriptService
 import io.viascom.discord.bot.aluna.util.createPrimaryButton
 import io.viascom.discord.bot.aluna.util.getOptionAsString
 import io.viascom.discord.bot.aluna.util.removeActionRows
@@ -20,8 +19,7 @@ import java.time.Duration
 @Command
 class PingCommand(
     private val eventWaiter: EventWaiter,
-    private val shardManager: ShardManager,
-    private val kotlinScriptService: KotlinScriptService
+    private val shardManager: ShardManager
 ) : DiscordCommand(
     "ping",
     "Send a ping",
@@ -41,9 +39,6 @@ class PingCommand(
     override fun execute(event: SlashCommandInteractionEvent) {
         logger.debug("command: " + this.hashCode().toString())
         val selectedMap = event.getOptionAsString("map", "all")
-
-        var eval = kotlinScriptService.eval("shardManager.shards.first().guilds.size") as Int
-        logger.info("Guilds: $eval")
 
         event.reply("Pong\nYour locale is:${this.userLocale}").addActionRows(ActionRow.of(createPrimaryButton("hi", "Hi"))).queue {
             eventWaiter.waitForInteraction(this.uniqueId,

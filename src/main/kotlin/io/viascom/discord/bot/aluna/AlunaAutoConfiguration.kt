@@ -1,7 +1,6 @@
 package io.viascom.discord.bot.aluna
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandDataProvider
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.bot.listener.*
 import io.viascom.discord.bot.aluna.bot.shardmanager.DefaultShardManagerBuilder
@@ -11,6 +10,8 @@ import io.viascom.discord.bot.aluna.translation.MessageService
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.event.ApplicationStartedEvent
@@ -26,16 +27,17 @@ import org.springframework.core.env.Environment
 @Configuration
 @EnableConfigurationProperties(AlunaProperties::class)
 @ComponentScan(basePackages = ["io.viascom.discord.bot.aluna.*"])
-open class AlunaAutoConfiguration(
-    private val discordBot: DiscordBot
-) {
+open class AlunaAutoConfiguration {
+
+    @Autowired(required = false)
+    lateinit var discordBot: DiscordBot
 
     //Has to be AlunaAutoConfiguration::class.java as otherwise it is shown as SpringProxy!
     private val logger: Logger = LoggerFactory.getLogger(AlunaAutoConfiguration::class.java)
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(name = ["enable-jda"], prefix = "aluna", matchIfMissing = true)
+    @ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true)
     open fun defaultShardManagerBuilder(
         shardReadyEvent: ShardReadyEvent,
         slashCommandInteractionEventListener: SlashCommandInteractionEventListener,
@@ -47,12 +49,12 @@ open class AlunaAutoConfiguration(
         logger.debug("Enable DefaultShardManagerBuilder")
 
         discordBot.shardManager = discordBot.shardManager ?: DefaultShardManagerBuilder(
-        shardReadyEvent,
-        slashCommandInteractionEventListener,
-        genericAutoCompleteListener,
-        eventWaiter,
-        genericEventPublisher,
-        alunaProperties
+            shardReadyEvent,
+            slashCommandInteractionEventListener,
+            genericAutoCompleteListener,
+            eventWaiter,
+            genericEventPublisher,
+            alunaProperties
         ).build()
 
         return discordBot.shardManager!!
@@ -60,6 +62,7 @@ open class AlunaAutoConfiguration(
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true)
     open fun defaultDiscordCommandConditions(): DiscordCommandConditions {
         logger.debug("Enable DefaultDiscordCommandConditions")
         return DefaultDiscordCommandConditions()
@@ -67,6 +70,7 @@ open class AlunaAutoConfiguration(
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true)
     open fun discordCommandLoadAdditionalData(): DiscordCommandLoadAdditionalData {
         logger.debug("Enable DefaultDiscordCommandLoadAdditionalData")
         return DefaultDiscordCommandLoadAdditionalData()
@@ -74,6 +78,7 @@ open class AlunaAutoConfiguration(
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true)
     open fun discordCommandMetaDataHandler(): DiscordCommandMetaDataHandler {
         logger.debug("Enable DefaultDiscordCommandMetaDataHandler")
         return DefaultDiscordCommandMetaDataHandler()
@@ -81,6 +86,7 @@ open class AlunaAutoConfiguration(
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true)
     open fun ownerIdProvider(alunaProperties: AlunaProperties): OwnerIdProvider {
         logger.debug("Enable DefaultOwnerIdProvider")
         return DefaultOwnerIdProvider(alunaProperties)
@@ -88,6 +94,7 @@ open class AlunaAutoConfiguration(
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true)
     open fun moderatorIdProvider(alunaProperties: AlunaProperties): ModeratorIdProvider {
         logger.debug("Enable DefaultModeratorIdProvider")
         return DefaultModeratorIdProvider(alunaProperties)
@@ -95,7 +102,7 @@ open class AlunaAutoConfiguration(
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(name = ["enable-translation"], prefix = "aluna", matchIfMissing = false)
+    @ConditionalOnExpression("\${aluna.discord.enable-jda:true} && \${aluna.enable-translation:false}")
     open fun defaultMessageService(
         alunaProperties: AlunaProperties,
         reloadableMessageSource: ReloadableResourceBundleMessageSource,
@@ -107,7 +114,7 @@ open class AlunaAutoConfiguration(
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(name = ["enable-translation"], prefix = "aluna", matchIfMissing = false)
+    @ConditionalOnExpression("\${aluna.discord.enable-jda:true} && \${aluna.enable-translation:false}")
     open fun messageSource(environment: Environment): MessageSource {
         val translationPath = environment.getProperty("aluna.translation-path") ?: "classpath:i18n/messages"
         val messageSource = ReloadableResourceBundleMessageSource()
@@ -128,30 +135,7 @@ open class AlunaAutoConfiguration(
 
 
     @EventListener
-    open fun printSystemCommandFeatureOverview(event: ApplicationStartedEvent) {
-        val systemCommand = event.applicationContext.environment.getProperty("aluna.command.system-command.enable", Boolean::class.java) ?: false
-        //Print enabled /system-command features
-        if (systemCommand) {
-            val allFunctions = event.applicationContext.getBeansOfType(SystemCommandDataProvider::class.java)
-            val enabledFunctionsDefinition = event.applicationContext.environment.getProperty("aluna.command.system-command.enabled-functions", ArrayList::class.java)
-                    ?: arrayListOf<String>()
-
-            val  enabledFunctions = allFunctions.values.filter { it.id in enabledFunctionsDefinition || enabledFunctionsDefinition.isEmpty() }
-
-            if (enabledFunctions.size == allFunctions.size) {
-                logger.debug("Enabled /system-command functions: [" + allFunctions.values.joinToString(", ") { it.id } + "]")
-            } else {
-                logger.debug("Enabled /system-command functions: [" + enabledFunctions.joinToString(", ") { it.id } + "]")
-                logger.debug("Disabled /system-command functions: [" + allFunctions.values.filter { it.id !in enabledFunctionsDefinition }
-                    .joinToString(", ") { it.id } + "]")
-            }
-
-            val allowedModFunctionsDefinition = event.applicationContext.environment.getProperty("aluna.command.system-command.allowed-for-moderators-functions", ArrayList::class.java)
-                ?: arrayListOf<String>()
-
-            val allowedModFunctions = allFunctions.filter { it.value.id in allowedModFunctionsDefinition || allowedModFunctionsDefinition.isEmpty() }.filter { it.value.allowMods }
-
-            logger.debug("Allowed for moderators /system-command functions: [" + allowedModFunctions.values.joinToString(", ") { it.id } + "]")
-        }
+    open fun printVersion(event: ApplicationStartedEvent) {
+        logger.info("Running with Aluna 0.0.21_5.0.0-alpha.12, JDA 5.0.0-alpha.12")
     }
 }

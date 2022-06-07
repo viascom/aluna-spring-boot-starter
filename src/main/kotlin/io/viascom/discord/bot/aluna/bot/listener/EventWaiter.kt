@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.hooks.EventListener
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.internal.utils.Checks
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
@@ -29,6 +30,7 @@ import java.util.function.Predicate
 import kotlin.reflect.full.isSuperclassOf
 
 @Service
+@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
 class EventWaiter(
     private val discordBot: DiscordBot,
     private val alunaProperties: AlunaProperties

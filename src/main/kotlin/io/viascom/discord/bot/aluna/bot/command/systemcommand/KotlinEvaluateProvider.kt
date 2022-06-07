@@ -14,9 +14,11 @@ import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import kotlin.math.min
 
 @Command
+@ConditionalOnExpression("\${aluna.discord.enable-jda:true} && \${aluna.command.system-command.enable-kotlin-script-evaluate:false}")
 class KotlinEvaluateProvider(
     private val kotlinScriptService: KotlinScriptService
 ) : SystemCommandDataProvider(

@@ -8,7 +8,7 @@ class AlunaDiscordProperties {
     /**
      * Should Aluna auto create a shard manager
      */
-    var enableJDA: Boolean = true
+    var enableJda: Boolean = true
 
     /**
      * Discord Bot Token

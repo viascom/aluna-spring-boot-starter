@@ -5,13 +5,13 @@ import io.viascom.discord.bot.aluna.property.ModeratorIdProvider
 import io.viascom.discord.bot.aluna.property.OwnerIdProvider
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 
 @Service
-@ConditionalOnProperty(name = ["enable-debug-configuration-log"], prefix = "aluna", matchIfMissing = true)
+@ConditionalOnExpression("\${aluna.discord.enable-jda:true} && \${aluna.enable-debug-configuration-log:true}")
 class InviteGenerator(
     private val alunaProperties: AlunaProperties,
     private val ownerIdProvider: OwnerIdProvider,

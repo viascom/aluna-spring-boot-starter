@@ -10,8 +10,10 @@ import io.viascom.discord.bot.aluna.util.getServerMessage
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.sharding.ShardManager
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 
 @Command
+@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
 class ExtractMessageProvider(
     private val shardManager: ShardManager,
     private val gson: Gson

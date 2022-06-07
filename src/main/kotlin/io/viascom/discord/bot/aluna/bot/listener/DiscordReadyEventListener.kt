@@ -10,11 +10,13 @@ import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 import java.awt.Color
 
 @Service
+@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
 internal open class DiscordReadyEventListener(
     private val commands: List<DiscordCommand>,
     private val shardManager: ShardManager,
