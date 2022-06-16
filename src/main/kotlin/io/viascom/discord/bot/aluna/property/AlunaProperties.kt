@@ -46,16 +46,6 @@ class AlunaProperties {
     var productionMode: Boolean = false
 
     /**
-     * Show time elapsed for commands
-     */
-    var useStopwatch: Boolean = true
-
-    /**
-     * Show hash code for commands
-     */
-    var showHashCode: Boolean = false
-
-    /**
      * Owner ids. This is used by the DefaultOwnerIdProvider.
      */
     var ownerIds: ArrayList<Long> = arrayListOf()
@@ -65,30 +55,9 @@ class AlunaProperties {
      */
     var modIds: ArrayList<Long> = arrayListOf()
 
-    /**
-     * Enable Debug Configuration Log.
-     * If enabled, Aluna will print a configuration block in the log which contains some selected settings and an invitation link for the bot itself.
-     */
-    var enableDebugConfigurationLog: Boolean = true
+    var debug: AlunaDebugProperties = AlunaDebugProperties()
 
-    /**
-     * Enable Translation
-     */
-    var enableTranslation: Boolean = false
-
-    /**
-     * Translation path
-     *
-     * Format: <code>file:/</code>
-     *
-     * If not set, Aluna will fall back to <code>classpath:i18n/messages</code>
-     */
-    var translationPath: String? = null
-
-    /**
-     * Use en_GB for en in production
-     */
-    var useEnGbForEnInProduction: Boolean = false
+    var translation: AlunaTranslationProperties = AlunaTranslationProperties()
 
     /**
      * Should Aluna register commands in production mode which are in commandDevelopmentStatus == IN_DEVELOPMENT

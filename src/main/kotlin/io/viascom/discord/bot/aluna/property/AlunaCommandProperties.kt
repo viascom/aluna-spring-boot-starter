@@ -12,7 +12,7 @@ class SystemCommandProperties {
     /**
      * Enable /system-command
      */
-    var enable: Boolean = false
+    var enabled: Boolean = false
 
     /**
      * Server id on which this command can be used.

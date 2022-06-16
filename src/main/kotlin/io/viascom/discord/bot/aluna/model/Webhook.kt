@@ -1,17 +1,21 @@
 package io.viascom.discord.bot.aluna.model
 
-import com.google.gson.annotations.SerializedName
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonInclude.Include
+import com.fasterxml.jackson.annotation.JsonProperty
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.MessageBuilder
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed
 import java.time.OffsetDateTime
 
+@JsonInclude(Include.NON_NULL)
 data class Webhook(
     var content: String?,
     var embeds: List<Embed>? = arrayListOf()
 ) {
 
+    @JsonInclude(Include.NON_NULL)
     data class Embed(
         var author: Author?,
         var color: Int?,
@@ -25,29 +29,34 @@ data class Webhook(
         var url: String?
     )
 
+    @JsonInclude(Include.NON_NULL)
     data class Field(
         var `inline`: Boolean = true,
         var name: String,
         var value: String
     )
 
+    @JsonInclude(Include.NON_NULL)
     data class Author(
-        @SerializedName("icon_url")
+        @JsonProperty("icon_url")
         var iconUrl: String?,
         var name: String?,
         var url: String?
     )
 
+    @JsonInclude(Include.NON_NULL)
     data class Thumbnail(
         var url: String
     )
 
+    @JsonInclude(Include.NON_NULL)
     data class Image(
         var url: String
     )
 
+    @JsonInclude(Include.NON_NULL)
     data class Footer(
-        @SerializedName("icon_url")
+        @JsonProperty("icon_url")
         var iconUrl: String?,
         var text: String
     )

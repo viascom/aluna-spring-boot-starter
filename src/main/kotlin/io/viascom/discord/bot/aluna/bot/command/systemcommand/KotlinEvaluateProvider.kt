@@ -4,6 +4,8 @@ import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.bot.handler.Command
 import io.viascom.discord.bot.aluna.bot.handler.queueAndRegisterInteraction
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.scriptengine.KotlinScriptService
 import io.viascom.discord.bot.aluna.util.createTextInput
 import io.viascom.discord.bot.aluna.util.getValueAsString
@@ -14,11 +16,13 @@ import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import kotlin.math.min
 
 @Command
-@ConditionalOnExpression("\${aluna.discord.enable-jda:true} && \${aluna.command.system-command.enable-kotlin-script-evaluate:false}")
+@ConditionalOnJdaEnabled
+@ConditionalOnSystemCommandEnabled
+@ConditionalOnProperty(name = ["command.system-command.enable-kotlin-script-evaluate"], prefix = "aluna", matchIfMissing = false)
 class KotlinEvaluateProvider(
     private val kotlinScriptService: KotlinScriptService
 ) : SystemCommandDataProvider(

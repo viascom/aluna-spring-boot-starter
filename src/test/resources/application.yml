@@ -8,23 +8,28 @@ aluna:
     application-id: <insert-application-id>
     default-permissions:
       - VIEW_CHANNEL
-    gateway-intents: GUILD_MEMBERS,GUILD_PRESENCES,DIRECT_MESSAGE_REACTIONS,DIRECT_MESSAGES
+    gateway-intents: GUILD_MEMBERS,GUILD_PRESENCES,DIRECT_MESSAGE_REACTIONS,DIRECT_MESSAGES,GUILD_MESSAGES
     memberCachePolicy: ALL
-    publish-events: true
+    publish-events: false
   thread:
     scoped-objects-timeout-scheduler: 5
   command:
     system-command:
-      enable: true
+      enabled: true
       support-server: <insert-support-server>
-  enable-translation: true
-  use-stopwatch: true
-  show-hash-code: true
+      enable-kotlin-script-evaluate: true
+  translation:
+    enabled: true
+  debug:
+    use-stopwatch: true
+    show-hash-code: true
 
 logging:
   level:
     io.viascom.discord.bot.aluna: DEBUG
     io.viascom.discord.bot.aluna.event.EventPublisher: INFO
+    io.viascom.discord.bot.aluna.configuration.scope.CommandScope: INFO
+    io.viascom.discord.bot.aluna.botlist: INFO
     io.viascom.discord.bot.aluna.bot.handler.AlunaLocalizationFunction: INFO #Set to DEBUG to show translation keys for interactions
 
 

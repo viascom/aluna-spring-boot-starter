@@ -1,9 +1,11 @@
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import com.google.gson.Gson
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.handler.Command
 import io.viascom.discord.bot.aluna.bot.handler.queueAndRegisterInteraction
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.Webhook
 import io.viascom.discord.bot.aluna.util.createTextInput
 import io.viascom.discord.bot.aluna.util.getPrivateChannelByUser
@@ -17,13 +19,13 @@ import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.sharding.ShardManager
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 
 @Command
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
+@ConditionalOnJdaEnabled
+@ConditionalOnSystemCommandEnabled
 class SendMessageProvider(
     private val shardManager: ShardManager,
-    private val gson: Gson
+    private val objectMapper: ObjectMapper
 ) : SystemCommandDataProvider(
     "send_message",
     "Send Message",
@@ -51,14 +53,14 @@ class SendMessageProvider(
         var channelId = event.getValueAsString("channelId", "0")!!
         var isDM = false
         val message = event.getValueAsString("message")!!
-        val messageObj = if(message.startsWith("{")){
-            gson.fromJson(message, Webhook::class.java).toMessage()
+        val messageObj = if (message.startsWith("{")) {
+            objectMapper.readValue(message, Webhook::class.java).toMessage()
         } else {
             Webhook(message).toMessage()
         }
 
         //Set correct values for current if in DM
-        if(!event.isFromGuild && serverId == "0" && channelId == "0"){
+        if (!event.isFromGuild && serverId == "0" && channelId == "0") {
             channelId = "@${event.user.id}"
         }
 

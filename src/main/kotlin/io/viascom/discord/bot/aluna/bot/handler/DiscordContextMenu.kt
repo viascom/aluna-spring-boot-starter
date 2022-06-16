@@ -2,6 +2,7 @@ package io.viascom.discord.bot.aluna.bot.handler
 
 import datadog.trace.api.Trace
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.translation.MessageService
 import net.dv8tion.jda.api.Permission
@@ -23,7 +24,7 @@ import java.time.Duration
 import java.util.*
 import java.util.function.Consumer
 
-
+@Experimental("This is still in development")
 abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDataImpl(type, name), CommandScopedObject {
 
     @Autowired
@@ -143,9 +144,9 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     }
 
     fun exitCommand(event: GenericCommandInteractionEvent) {
-        if (alunaProperties.useStopwatch && stopWatch != null) {
+        if (alunaProperties.debug.useStopwatch && stopWatch != null) {
             stopWatch!!.stop()
-            logger.info("${event.name} (${this.author.id})${if (alunaProperties.showHashCode) " [${this.hashCode()}]" else ""} -> ${stopWatch!!.totalTimeMillis}ms")
+            logger.info("${event.name} (${this.author.id})${if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else ""} -> ${stopWatch!!.totalTimeMillis}ms")
         }
     }
 

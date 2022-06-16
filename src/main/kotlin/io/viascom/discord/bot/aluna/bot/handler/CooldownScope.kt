@@ -1,5 +1,8 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
+import io.viascom.discord.bot.aluna.configuration.Experimental
+
+@Experimental("Cooldowns are currently not supported")
 enum class CooldownScope(private val format: String, internal val errorSpecification: String) {
     /**
      * Applies the cooldown to the calling [User][net.dv8tion.jda.core.entities.User] across all locations on this instance (IE: TextChannels, PrivateChannels, etc).

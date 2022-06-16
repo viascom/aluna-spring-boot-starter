@@ -9,7 +9,7 @@ plugins {
 }
 
 group "io.viascom.discord.bot"
-version "0.0.21_5.0.0-alpha.12"
+version "0.0.22_5.0.0-alpha.12"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -50,7 +50,18 @@ repositories {
 }
 
 ext {
-    jdaVersion="5.0.0-alpha.12"
+    jdaVersion = "5.0.0-alpha.12"
+    retrofitVersion = "2.9.0"
+    gsonVersion = "2.9.0"
+    gsonJavatimeVersion = "1.1.1"
+    jacksonSpringBootVersion = "2.7.0"
+    jacksonVersion = "2.13.3"
+    graalvmJsVersion = "22.1.0.1"
+    jnanoidVersion = "2.0.0"
+    nashornCoreVersion = "15.4"
+    commonsLang3Version = "3.12.0"
+    ddTraceVersion = "0.102.0"
+    emojiJavaVersion = "5.1.1"
 }
 
 
@@ -59,50 +70,49 @@ dependencies {
     //====== Kotlin ======
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
-
     implementation "org.jetbrains.kotlin:kotlin-script-util"
     implementation "org.jetbrains.kotlin:kotlin-script-runtime"
     implementation "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable"
     implementation "org.jetbrains.kotlin:kotlin-compiler-embeddable"
 
-    implementation "org.jetbrains.kotlin:kotlin-reflect"
-
     //====== Spring ======
-    compileOnly("org.springframework.boot:spring-boot-starter") {
-        exclude module: "spring-boot-starter-json"
-    }
+    compileOnly "org.springframework.boot:spring-boot-starter"
     compileOnly "org.springframework.boot:spring-boot-starter-actuator"
     kapt "org.springframework.boot:spring-boot-configuration-processor"
 
     //====== JDA ======
     api "net.dv8tion:JDA:$jdaVersion"
 
-    //====== Retrofit2 ======
-    compileOnly "com.squareup.retrofit2:retrofit:2.9.0"
-    compileOnly "com.squareup.retrofit2:converter-gson:2.9.0"
-
     //====== Gson ======
-    api "com.google.code.gson:gson:2.9.0"
-    api "com.fatboyindustrial.gson-javatime-serialisers:gson-javatime-serialisers:1.1.1"
+    compileOnly "com.google.code.gson:gson:$gsonVersion"
+    compileOnly "com.fatboyindustrial.gson-javatime-serialisers:gson-javatime-serialisers:$gsonJavatimeVersion"
+
+    //====== Jackson ======
+    implementation "org.springframework.boot:spring-boot-starter-json:$jacksonSpringBootVersion"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
 
     //====== Logging ======
-    compileOnly "org.zalando:logbook-logstash:2.14.0"
-    compileOnly "org.zalando:logbook-spring-boot-starter:2.14.0"
-    compileOnly "com.datadoghq:dd-trace-api:0.102.0"
+    compileOnly "com.datadoghq:dd-trace-api:$ddTraceVersion"
 
     //====== Script-Engine ======
-    compileOnly "org.openjdk.nashorn:nashorn-core:15.4"
-    compileOnly "org.graalvm.js:js:22.1.0.1"
-    compileOnly "org.graalvm.js:js-scriptengine:22.1.0.1"
+    compileOnly "org.openjdk.nashorn:nashorn-core:$nashornCoreVersion"
+    compileOnly "org.graalvm.js:js:$graalvmJsVersion"
+    compileOnly "org.graalvm.js:js-scriptengine:$graalvmJsVersion"
 
-    api "com.aventrix.jnanoid:jnanoid:2.0.0"
-    compileOnly "org.apache.commons:commons-lang3:3.12.0"
-    api("com.vdurmont:emoji-java:5.1.1") {
-        exclude group: "org.json", module: "json" //Because of https://advisory.checkmarx.net/advisory/vulnerability/Cx08fcacc9-cb99/
+    //====== NanoId ======
+    api "com.aventrix.jnanoid:jnanoid:$jnanoidVersion"
+
+    //====== Apache Commons ======
+    compileOnly "org.apache.commons:commons-lang3:$commonsLang3Version"
+
+    //====== Emoji Helper ======
+    api("com.vdurmont:emoji-java:$emojiJavaVersion") {
+        exclude group: "org.json", module: "json"
+        //Because of https://advisory.checkmarx.net/advisory/vulnerability/Cx08fcacc9-cb99/
     }
-    implementation 'org.json:json:20220320'
+    api 'org.json:json:20220320'
 
-
+    //====== Testing ======
     testImplementation "org.springframework.boot:spring-boot-starter-web"
     testImplementation "org.springframework.boot:spring-boot-starter-actuator"
 }
@@ -122,6 +132,11 @@ classes {
 
 processResources {
     filesMatching('banner.txt') {
+        filter {
+            it.replace('jda.version', "${jdaVersion}").replace('aluna.version', "${project.version}")
+        }
+    }
+    filesMatching('version.txt') {
         filter {
             it.replace('jda.version', "${jdaVersion}").replace('aluna.version', "${project.version}")
         }

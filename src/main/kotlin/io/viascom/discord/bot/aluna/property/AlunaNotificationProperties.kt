@@ -28,7 +28,7 @@ class Notification {
     /**
      * Enable this notification
      */
-    var enable: Boolean = false
+    var enabled: Boolean = false
 
     /**
      * Server where it gets posted

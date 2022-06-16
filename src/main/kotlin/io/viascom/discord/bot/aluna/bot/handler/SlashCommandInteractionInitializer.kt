@@ -1,6 +1,7 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordFirstShardReadyEvent
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.property.AlunaProperties
@@ -10,12 +11,11 @@ import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 
 @Service
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
+@ConditionalOnJdaEnabled
 internal open class SlashCommandInteractionInitializer(
     private val commands: List<DiscordCommand>,
     private val contextMenus: List<DiscordContextMenu>,
@@ -140,7 +140,7 @@ internal open class SlashCommandInteractionInitializer(
             shardManager.shards.first().retrieveCommands().queue {
                 it.filter { it.type == Command.Type.SLASH }.filter { it.name in commands.map { it.name } }.forEach { command ->
                     try {
-                        discordBot.commands.computeIfAbsent(command.id) { commands.first { it.name == command.name }?.javaClass }
+                        discordBot.commands.computeIfAbsent(command.id) { commands.first { it.name == command.name }.javaClass }
                         if (commands.first { it.name == command.name }.observeAutoComplete && command.id !in discordBot.commandsWithAutocomplete) {
                             discordBot.commandsWithAutocomplete.add(command.id)
                         }
@@ -151,7 +151,7 @@ internal open class SlashCommandInteractionInitializer(
 
                 it.filter { it.type != Command.Type.SLASH }.filter { it.name in contextMenus.map { it.name } }.forEach { command ->
                     try {
-                        discordBot.contextMenus.computeIfAbsent(command.id) { contextMenus.first { it.name == command.name }?.javaClass }
+                        discordBot.contextMenus.computeIfAbsent(command.id) { contextMenus.first { it.name == command.name }.javaClass }
                     } catch (e: Exception) {
                         logger.error("Could not add context menu '${command.name}' to available commands")
                     }
@@ -172,7 +172,7 @@ internal open class SlashCommandInteractionInitializer(
             val server = command.specificServer?.let { shardManager.getServer(it) }
             val serverCommands = server?.retrieveCommands()?.complete()
 
-            if (!command.alunaProperties.command.systemCommand.enable) {
+            if (!command.alunaProperties.command.systemCommand.enabled) {
                 if (serverCommands != null && serverCommands.any { it.name == "system-command" }) {
                     val serverCommand = serverCommands.first { it.name == "system-command" }
                     logger.debug("Removed unneeded specific command '/${serverCommand.name}'")
@@ -216,8 +216,8 @@ internal open class SlashCommandInteractionInitializer(
 
         }
 
-        /* This does currently not work for 100% as if a command is chnaged to another server, Aluna has no idea
-        where to removed the old command as this information can only be obtained by checking every server individually.
+        /* This does currently not work for 100% as if a command is changed to another server, Aluna has no idea
+        where to remove the old command as this information can only be obtained by checking every server individually.
 
 
         //Create per guild Commands

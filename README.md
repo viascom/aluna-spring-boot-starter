@@ -1,6 +1,6 @@
 <div align="center">
 <img src="./logo.png"
-         alt="FoxHttp Logo">
+         alt="Aluna Logo">
 </div>
 
 <h4 align="center">Fast and easy way to use JDA in your Spring-Boot Project</h4>
@@ -24,7 +24,6 @@
 | JDA         | <img src="https://img.shields.io/badge/5.0.0--alpha.12-orange.svg" alt="5.0.0-alpha.12"> |
 | Spring Boot |        <img src="https://img.shields.io/badge/2.7.0-brightgreen.svg" alt="2.7.0">         |
 | Kotlin      |       <img src="https://img.shields.io/badge/1.6.21-brightgreen.svg" alt="1.6.21">       |
-| gson        |        <img src="https://img.shields.io/badge/2.9.0-brightgreen.svg" alt="2.9.0">        |
 | jnanoid     |        <img src="https://img.shields.io/badge/2.0.0-brightgreen.svg" alt="2.0.0">        |
 | emoji-java  |        <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1">        |
 

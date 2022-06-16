@@ -1,21 +1,23 @@
 package io.viascom.discord.bot.aluna.bot
 
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandDataProvider
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 
 @Service
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true)
+@ConditionalOnJdaEnabled
+@ConditionalOnSystemCommandEnabled
 class SystemCommandFeatureOverviewPrinter : ApplicationListener<ApplicationStartedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onApplicationEvent(event: ApplicationStartedEvent) {
-        val systemCommand = event.applicationContext.environment.getProperty("aluna.command.system-command.enable", Boolean::class.java) ?: false
+        val systemCommand = event.applicationContext.environment.getProperty("aluna.command.system-command.enabled", Boolean::class.java) ?: false
         //Print enabled /system-command features
         if (systemCommand) {
             val allFunctions = event.applicationContext.getBeansOfType(SystemCommandDataProvider::class.java)

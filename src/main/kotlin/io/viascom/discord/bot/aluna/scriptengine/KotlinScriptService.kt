@@ -1,24 +1,44 @@
 package io.viascom.discord.bot.aluna.scriptengine
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
 import org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
+import kotlin.reflect.KClass
 
 /**
  * Kotlin script service which can be used to execute kotlin scripts during runtime.
  *
  * !! Attention: This does not provide any security or sandbox like feature. !!
  *
- * By default all classes from the io.viascom.discord.bot.aluna.* package are imported.
+ * By default, all classes from the io.viascom.discord.bot.aluna.* package are imported.
  * You can directly access shardManager, discordBot, alunaProperties. If you need other binding and or imports, you have to implement KotlinScriptBindingProvider
  *
+ * Default Bindings:
+ * - shardManager: ShardManager
+ * - discordBot: DiscordBot
+ * - alunaProperties: AlunaProperties
+ *
+ * Default imports:
+ * - io.viascom.discord.bot.aluna.*
+ * - java.awt.Color
+ * - java.util.*
+ * - java.time.OffsetDateTime",
+ * - net.dv8tion.jda.api.interactions.commands.*
+ * - net.dv8tion.jda.api.interactions.commands.build.*
+ * - net.dv8tion.jda.api.interactions.components.*
+ * - net.dv8tion.jda.api.interactions.components.buttons.*
+ * - net.dv8tion.jda.api.interactions.components.selections.*
+ * - net.dv8tion.jda.api.*
+ * - net.dv8tion.jda.api.entities.*
  */
 @Service
-@ConditionalOnExpression("\${aluna.discord.enable-jda:true} && \${aluna.command.system-command.enable-kotlin-script-evaluate:false}")
+@ConditionalOnJdaEnabled
+@ConditionalOnProperty(name = ["command.system-command.enable-kotlin-script-evaluate"], prefix = "aluna", matchIfMissing = false)
 class KotlinScriptService(
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
@@ -44,9 +64,9 @@ class KotlinScriptService(
     fun eval(kotlin: String): Any {
 
         val bindings = arrayListOf(
-            Triple("shardManager", shardManager, ShardManager::class),
-            Triple("discordBot", discordBot, DiscordBot::class),
-            Triple("alunaProperties", alunaProperties, AlunaProperties::class),
+            Binding("shardManager", shardManager, ShardManager::class),
+            Binding("discordBot", discordBot, DiscordBot::class),
+            Binding("alunaProperties", alunaProperties, AlunaProperties::class),
         )
 
         var providedImports = ""
@@ -57,11 +77,11 @@ class KotlinScriptService(
         }
 
         // Insert them into the script engine
-        bindings.forEach { engine.put(it.first, it.second) }
+        bindings.forEach { engine.put(it.name, it.obj) }
 
         // Prepend the variables to the script, so we don't have to use bindings["name"]
         val variables = bindings.joinToString("\n", postfix = "\n\n") {
-            """val ${it.first} = bindings["${it.first}"] as ${it.third.qualifiedName}"""
+            """val ${it.name} = bindings["${it.name}"] as ${it.type.qualifiedName}"""
         }
 
         // Before we begin constructing the script, we need to find any additional imports
@@ -86,5 +106,7 @@ class KotlinScriptService(
             "net.dv8tion.jda.api.entities.*"
         )
     }
+
+    open class Binding(val name: String, val obj: Any, val type: KClass<out Any>)
 
 }

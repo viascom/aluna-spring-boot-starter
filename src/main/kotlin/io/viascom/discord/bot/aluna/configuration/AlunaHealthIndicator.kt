@@ -2,6 +2,7 @@ package io.viascom.discord.bot.aluna.configuration
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.CommandScope
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.JDA
@@ -9,18 +10,19 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 import net.dv8tion.jda.api.sharding.ShardManager
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.HealthIndicator
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.stereotype.Component
 
 @Component
 @ConditionalOnWebApplication
 @ConditionalOnClass(HealthIndicator::class)
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
+@ConditionalOnJdaEnabled
 class AlunaHealthIndicator(
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
@@ -28,6 +30,13 @@ class AlunaHealthIndicator(
     private val alunaProperties: AlunaProperties,
     private val configurableListableBeanFactory: ConfigurableListableBeanFactory
 ) : HealthIndicator {
+
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+
+    init {
+        logger.debug("Register AlunaHealthIndicator")
+    }
+
     override fun health(): Health {
         val status = Health.unknown()
 
@@ -35,6 +44,10 @@ class AlunaHealthIndicator(
             status.down()
         } else {
             status.up()
+        }
+
+        if (shardManager.shards.all { it.status != JDA.Status.CONNECTED }) {
+            status.outOfService()
         }
 
         val commandScope = configurableListableBeanFactory.getRegisteredScope("command") as CommandScope

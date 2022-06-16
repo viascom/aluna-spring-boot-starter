@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
 import net.dv8tion.jda.api.sharding.ShardManager
+import net.dv8tion.jda.api.utils.ChunkingFilter
 import net.dv8tion.jda.api.utils.MemberCachePolicy
 import net.dv8tion.jda.api.utils.cache.CacheFlag
 import org.slf4j.Logger
@@ -33,6 +34,7 @@ class DefaultShardManagerBuilder(
             .setStatus(OnlineStatus.DO_NOT_DISTURB)
             .setActivity(Activity.playing("loading..."))
             .setBulkDeleteSplittingEnabled(true)
+            .setShardsTotal(alunaProperties.discord.totalShards)
             .setMemberCachePolicy(
                 when (alunaProperties.discord.memberCachePolicy) {
                     AlunaDiscordProperties.MemberCachePolicyType.NONE -> MemberCachePolicy.NONE
@@ -47,7 +49,17 @@ class DefaultShardManagerBuilder(
             )
             .setAutoReconnect(alunaProperties.discord.autoReconnect)
 
-        if(alunaProperties.discord.cacheFlags.isNotEmpty()) {
+        if (alunaProperties.discord.chunkingFilter != null) {
+            logger.debug("Set ChunkingFilter: [${alunaProperties.discord.chunkingFilter!!.name}]")
+            shardManagerBuilder.setChunkingFilter(
+                when (alunaProperties.discord.chunkingFilter!!) {
+                    AlunaDiscordProperties.ChunkingFilter.ALL -> ChunkingFilter.ALL
+                    AlunaDiscordProperties.ChunkingFilter.NONE -> ChunkingFilter.NONE
+                }
+            )
+        }
+
+        if (alunaProperties.discord.cacheFlags.isNotEmpty()) {
             logger.debug("Enable CacheFlags: [${alunaProperties.discord.cacheFlags.joinToString(", ") { it.name }}]")
             alunaProperties.discord.cacheFlags.forEach {
                 shardManagerBuilder.enableCache(

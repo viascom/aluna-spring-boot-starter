@@ -2,6 +2,7 @@ package io.viascom.discord.bot.aluna.bot.listener
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordReadyEvent
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.getServerTextChannel
@@ -10,13 +11,12 @@ import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 import java.awt.Color
 
 @Service
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
+@ConditionalOnJdaEnabled
 internal open class DiscordReadyEventListener(
     private val commands: List<DiscordCommand>,
     private val shardManager: ShardManager,
@@ -34,7 +34,7 @@ internal open class DiscordReadyEventListener(
         }
 
         discordBot.asyncExecutor.execute {
-            if (alunaProperties.notification.botReady.enable) {
+            if (alunaProperties.notification.botReady.enabled) {
                 val embedMessage = EmbedBuilder()
                     .setTitle("⚡ Bot Ready")
                     .setColor(Color.GREEN)

@@ -1,13 +1,13 @@
 package io.viascom.discord.bot.aluna.bot.listener
 
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
+@ConditionalOnJdaEnabled
 class ShardReadyEvent(private val discordReadyEventPublisher: EventPublisher) : ListenerAdapter() {
 
     override fun onReady(event: ReadyEvent) {

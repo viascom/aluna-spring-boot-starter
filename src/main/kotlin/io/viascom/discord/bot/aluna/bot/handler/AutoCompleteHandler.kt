@@ -1,11 +1,13 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.configuration.Experimental
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.springframework.beans.factory.annotation.Autowired
 import kotlin.reflect.KClass
 
+@Experimental("This is still in development")
 abstract class AutoCompleteHandler(private val command: KClass<out DiscordCommand>, private val option: String) : ListenerAdapter() {
 
     @Autowired

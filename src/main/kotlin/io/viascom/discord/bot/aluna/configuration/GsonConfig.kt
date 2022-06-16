@@ -3,25 +3,28 @@ package io.viascom.discord.bot.aluna.configuration
 import com.fatboyindustrial.gsonjavatime.Converters
 import com.google.gson.*
 import com.google.gson.annotations.Expose
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.autoconfigure.gson.GsonBuilderCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
+@ConditionalOnClass(Gson::class)
 open class GsonConfig {
 
     @Bean
+    @ConditionalOnClass(Gson::class)
     open fun localDateTimeGsonBuilderCustomizer(): GsonBuilderCustomizer {
         return GsonBuilderCustomizer { gsonBuilder -> Converters.registerAll(gsonBuilder) }
     }
 
     @Bean
+    @ConditionalOnClass(Gson::class)
     open fun exclusionStrategyGsonBuilderCustomizer(): GsonBuilderCustomizer {
         return object : GsonBuilderCustomizer {
             override fun customize(gsonBuilder: GsonBuilder) {
                 gsonBuilder.addSerializationExclusionStrategy(object : ExclusionStrategy {
                     override fun shouldSkipField(f: FieldAttributes): Boolean {
-                        val annotation = f.getAnnotation(Expose::class.java)
                         return f.getAnnotation(Expose::class.java) != null && !f.getAnnotation(Expose::class.java).serialize;
                     }
 
@@ -34,6 +37,7 @@ open class GsonConfig {
     }
 
     @Bean
+    @ConditionalOnClass(Gson::class)
     open fun registerByteArrayAdapter(): GsonBuilderCustomizer {
         return GsonBuilderCustomizer { gsonBuilder ->
             gsonBuilder.registerTypeAdapter(

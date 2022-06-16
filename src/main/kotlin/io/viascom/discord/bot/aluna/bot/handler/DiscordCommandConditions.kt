@@ -5,24 +5,51 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 interface DiscordCommandConditions {
 
+    /**
+     * Check the use scope f the command.
+     * Make sure to not block the execution for to long as the command needs to be acknowledged in 3 seconds.
+     *
+     * @param discordCommand Discord command instance
+     * @param useScope Use scope of the command
+     * @param subCommandUseScope Use scope of the sub commands
+     * @param event Slash command event
+     * @return WrongUseScope
+     */
     fun checkUseScope(
-        event: SlashCommandInteractionEvent,
+        discordCommand: DiscordCommand,
         useScope: DiscordCommand.UseScope,
         subCommandUseScope: HashMap<String, DiscordCommand.UseScope>,
-        discordCommand: DiscordCommand
+        event: SlashCommandInteractionEvent
     ): DiscordCommand.WrongUseScope
 
+    /**
+     * Check if the user has all the needed permissions.
+     * Make sure to not block the execution for to long as the command needs to be acknowledged in 3 seconds.
+     *
+     * @param discordCommand Discord command instance
+     * @param userPermissions Needed Permissions
+     * @param event Slash command event
+     * @return MissingPermissions
+     */
     fun checkForNeededUserPermissions(
-        event: SlashCommandInteractionEvent,
+        discordCommand: DiscordCommand,
         userPermissions: ArrayList<Permission>,
-        discordCommand: DiscordCommand
+        event: SlashCommandInteractionEvent
     ): DiscordCommand.MissingPermissions
 
+    /**
+     * Check if the bot has all the needed permissions.
+     * Make sure to not block the execution for to long as the command needs to be acknowledged in 3 seconds.
+     *
+     * @param discordCommand Discord command instance
+     * @param botPermissions Needed Permissions
+     * @param event Slash command event
+     * @return MissingPermissions
+     */
     fun checkForNeededBotPermissions(
-        event: SlashCommandInteractionEvent,
+        discordCommand: DiscordCommand,
         botPermissions: ArrayList<Permission>,
-        discordCommand: DiscordCommand
+        event: SlashCommandInteractionEvent
     ): DiscordCommand.MissingPermissions
 
-    fun checkForAdditionalRequirements(event: SlashCommandInteractionEvent, discordCommand: DiscordCommand): DiscordCommand.AdditionalRequirements
 }

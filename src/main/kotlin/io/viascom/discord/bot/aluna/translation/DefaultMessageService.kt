@@ -15,7 +15,7 @@ class DefaultMessageService(
 ) : MessageService {
 
     override fun get(key: String, locale: Locale, vararg args: String): String {
-        val correctLocale = if (alunaProperties.useEnGbForEnInProduction && locale == Locale.ENGLISH && alunaProperties.productionMode) {
+        val correctLocale = if (alunaProperties.translation.useEnGbForEnInProduction && locale == Locale.ENGLISH && alunaProperties.productionMode) {
             Locale.forLanguageTag("en-GB")
         } else {
             locale
@@ -28,7 +28,7 @@ class DefaultMessageService(
     }
 
     override fun getWithDefault(key: String, locale: Locale, default: String, vararg args: String): String {
-        val correctLocale = if (alunaProperties.useEnGbForEnInProduction && locale == Locale.ENGLISH && alunaProperties.productionMode) {
+        val correctLocale = if (alunaProperties.translation.useEnGbForEnInProduction && locale == Locale.ENGLISH && alunaProperties.productionMode) {
             Locale.forLanguageTag("en-GB")
         } else {
             locale

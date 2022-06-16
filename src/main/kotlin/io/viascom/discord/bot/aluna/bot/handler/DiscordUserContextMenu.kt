@@ -1,19 +1,21 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
 import datadog.trace.api.Trace
+import io.viascom.discord.bot.aluna.configuration.Experimental
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.Command
 import org.slf4j.MDC
 import org.springframework.util.StopWatch
 
+@Experimental("This is still in development")
 abstract class DiscordUserContextMenu(name: String) : DiscordContextMenu(Command.Type.USER, name) {
 
     /**
      * The main body method of a [DiscordContextMenu].
      * <br></br>This is the "response" for a successful
-     * [#run(DiscordaCommand)][DiscordContextMenu.execute].
+     * [#run(DiscordContextMenu)][DiscordContextMenu.execute].
      *
-     * @param event The [DiscordCommandEvent] that triggered this Command
+     * @param event The [UserContextInteractionEvent] that triggered this Command
      */
     @Trace
     protected abstract fun execute(event: UserContextInteractionEvent)
@@ -21,11 +23,11 @@ abstract class DiscordUserContextMenu(name: String) : DiscordContextMenu(Command
     /**
      * Runs checks for the [DiscordUserContextMenu] with the given [UserContextInteractionEvent] that called it.
      *
-     * @param event The DiscordCommandEvent that triggered this Command
+     * @param event The UserContextInteractionEvent that triggered this Command
      */
     @Trace
     open fun run(event: UserContextInteractionEvent) {
-        if (alunaProperties.useStopwatch) {
+        if (alunaProperties.debug.useStopwatch) {
             stopWatch = StopWatch()
             stopWatch!!.start()
         }
@@ -49,7 +51,7 @@ abstract class DiscordUserContextMenu(name: String) : DiscordContextMenu(Command
 
         try {
             writeToStats()
-            logger.info("Run context menu ${event.commandPath}" + if (alunaProperties.showHashCode) " [${this.hashCode()}]" else "")
+            logger.info("Run context menu ${event.commandPath}" + if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else "")
             execute(event)
             exitCommand(event)
         } catch (t: Throwable) {

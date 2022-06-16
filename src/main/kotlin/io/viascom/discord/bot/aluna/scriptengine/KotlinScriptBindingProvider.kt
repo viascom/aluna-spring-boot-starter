@@ -1,10 +1,23 @@
 package io.viascom.discord.bot.aluna.scriptengine
 
-import kotlin.reflect.KClass
-
+/**
+ * Kotlin script binding provider.
+ * Implement this interface in order to add additional bindings and imports to the KotlinScriptService.
+ *
+ */
 interface KotlinScriptBindingProvider {
 
-    fun getBindings(): List<Triple<String, Any, KClass<out Any>>>
-    fun getImports(): List<String>
+    /**
+     * Get binding definitions.
+     *
+     * @return List of Bindings.
+     */
+    fun getBindings(): List<KotlinScriptService.Binding>
 
+    /**
+     * Get import definitions
+     *
+     * @return List of imports
+     */
+    fun getImports(): List<String>
 }

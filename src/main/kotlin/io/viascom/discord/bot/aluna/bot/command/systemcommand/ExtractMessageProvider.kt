@@ -1,8 +1,10 @@
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import com.google.gson.Gson
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.handler.Command
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.Webhook
 import io.viascom.discord.bot.aluna.util.getMessage
 import io.viascom.discord.bot.aluna.util.getOptionAsString
@@ -10,13 +12,13 @@ import io.viascom.discord.bot.aluna.util.getServerMessage
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.sharding.ShardManager
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 
 @Command
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
+@ConditionalOnJdaEnabled
+@ConditionalOnSystemCommandEnabled
 class ExtractMessageProvider(
     private val shardManager: ShardManager,
-    private val gson: Gson
+    private val objectMapper: ObjectMapper
 ) : SystemCommandDataProvider(
     "extract_message",
     "Get Message as JSON",
@@ -58,7 +60,7 @@ class ExtractMessageProvider(
         }
 
         val webhook = Webhook.fromMessage(message)
-        val webhookJson = gson.toJson(webhook)
+        val webhookJson = objectMapper.writeValueAsString(webhook)
 
         event.reply("Message Json:").setEphemeral(true).addFile(webhookJson.toByteArray(), "message.json").queue()
     }

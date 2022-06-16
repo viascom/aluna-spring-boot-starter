@@ -30,8 +30,12 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
 
     init {
         val scopedObjectsTimeoutScheduler = context.environment.getProperty("aluna.thread.scoped-objects-timeout-scheduler", Int::class.java, 2)
-        this.scopedObjectsTimeoutScheduler = AlunaThreadPool.getFixedScheduledThreadPool(
-            scopedObjectsTimeoutScheduler, "Aluna-Scoped-Objects-Timeout-Pool-%d", true
+        this.scopedObjectsTimeoutScheduler = AlunaThreadPool.getScheduledThreadPool(
+            1,
+            scopedObjectsTimeoutScheduler,
+            Duration.ofSeconds(30),
+            "Aluna-Scoped-Objects-Timeout-Pool-%d",
+            true
         )
     }
 
@@ -219,7 +223,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
                                 discordBot.messagesToObserveSelect.remove(it.key)
                             }
 
-                            eventWaiter.removeEvents(uniqueId, true)
+                            eventWaiter.removeWaiter(uniqueId, true)
                         }
                     } catch (e: Exception) {
                         logger.debug("Could not remove observer for ${newObj}\"\n${e.stackTraceToString()}")

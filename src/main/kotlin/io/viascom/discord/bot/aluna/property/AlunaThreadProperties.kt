@@ -40,20 +40,17 @@ class AlunaThreadProperties {
     var eventWaiterThreadPoolTtl: Duration = Duration.ofSeconds(30)
 
     /**
-     * Amount of scheduler threads for timeout handling on interaction observers.
-     * This value should be kept low as these threads are not destroyed and only used to trigger timeout actions.
+     * Max amount of scheduler threads for timeout handling on interaction observers.
      */
     var messagesToObserveScheduledThreadPool: Int = 2
 
     /**
-     * Amount of scheduler threads for timeout handling on discord scoped objects.
-     * This value should be kept low as these threads are not destroyed and only used to trigger timeout actions.
+     * Max amount of scheduler threads for timeout handling on discord scoped objects.
      */
     var scopedObjectsTimeoutScheduler: Int = 2
 
     /**
-     * Amount of scheduler threads for event waiter timeout handling.
-     * This value should be kept low as these threads are not destroyed and only used to trigger timeout actions.
+     * Max amount of scheduler threads for event waiter timeout handling.
      */
     var eventWaiterTimeoutScheduler: Int = 2
 }

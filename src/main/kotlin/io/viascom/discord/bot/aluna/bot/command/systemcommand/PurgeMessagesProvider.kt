@@ -4,6 +4,8 @@ import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.bot.handler.Command
 import io.viascom.discord.bot.aluna.bot.handler.queueAndRegisterInteraction
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.util.createTextInput
 import io.viascom.discord.bot.aluna.util.getOptionAsString
 import io.viascom.discord.bot.aluna.util.getValueAsString
@@ -17,11 +19,11 @@ import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.sharding.ShardManager
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import java.util.stream.Collectors
 
 @Command
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
+@ConditionalOnJdaEnabled
+@ConditionalOnSystemCommandEnabled
 class PurgeMessagesProvider(
     private val shardManager: ShardManager
 ) : SystemCommandDataProvider(

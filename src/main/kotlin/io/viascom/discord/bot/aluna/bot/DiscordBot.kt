@@ -2,6 +2,7 @@ package io.viascom.discord.bot.aluna.bot
 
 import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.handler.DiscordContextMenu
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.model.ObserveCommandInteraction
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
@@ -9,7 +10,6 @@ import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -18,7 +18,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 @Service
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
+@ConditionalOnJdaEnabled
 open class DiscordBot(
     private val context: ConfigurableApplicationContext,
     private val alunaProperties: AlunaProperties
@@ -43,8 +43,10 @@ open class DiscordBot(
         private set
 
     internal val messagesToObserveScheduledThreadPool =
-        AlunaThreadPool.getFixedScheduledThreadPool(
+        AlunaThreadPool.getScheduledThreadPool(
+            1,
             alunaProperties.thread.messagesToObserveScheduledThreadPool,
+            Duration.ofSeconds(30),
             "Aluna-Message-Observer-Timeout-Pool-%d",
             true
         )
@@ -54,6 +56,7 @@ open class DiscordBot(
     internal val asyncExecutor =
         AlunaThreadPool.getDynamicThreadPool(alunaProperties.thread.asyncExecutorCount, alunaProperties.thread.asyncExecutorTtl, "Aluna-Async-%d")
 
+    @JvmOverloads
     fun registerMessageForButtonEvents(
         messageId: String,
         command: DiscordCommand,
@@ -91,6 +94,7 @@ open class DiscordBot(
             )
     }
 
+    @JvmOverloads
     fun registerMessageForButtonEvents(
         hook: InteractionHook,
         command: DiscordCommand,
@@ -129,6 +133,7 @@ open class DiscordBot(
         }
     }
 
+    @JvmOverloads
     fun registerMessageForSelectEvents(
         messageId: String,
         command: DiscordCommand,
@@ -165,6 +170,7 @@ open class DiscordBot(
             )
     }
 
+    @JvmOverloads
     fun registerMessageForSelectEvents(
         hook: InteractionHook,
         command: DiscordCommand,
@@ -203,6 +209,7 @@ open class DiscordBot(
         }
     }
 
+    @JvmOverloads
     fun registerMessageForModalEvents(
         authorId: String,
         command: DiscordCommand,

@@ -6,7 +6,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata
 
 class SendServerNotificationCondition : Condition {
     override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata) =
-        context.environment.getProperty("aluna.notification.server-join.enable", Boolean::class.java) == true ||
-                context.environment.getProperty("aluna.notification.server-leave.enable", Boolean::class.java) == true ||
-                context.environment.getProperty("aluna.notification.bot-ready.enable", Boolean::class.java) == true
+        context.environment.getProperty("aluna.notification.server-join.enabled", Boolean::class.java) == true ||
+                context.environment.getProperty("aluna.notification.server-leave.enabled", Boolean::class.java) == true ||
+                context.environment.getProperty("aluna.notification.bot-ready.enabled", Boolean::class.java) == true
 }

@@ -1,11 +1,13 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
 import datadog.trace.api.Trace
+import io.viascom.discord.bot.aluna.configuration.Experimental
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.Command
 import org.slf4j.MDC
 import org.springframework.util.StopWatch
 
+@Experimental("This is still in development")
 abstract class DiscordMessageContextMenu(name: String) : DiscordContextMenu(Command.Type.MESSAGE, name) {
 
     /**
@@ -25,7 +27,7 @@ abstract class DiscordMessageContextMenu(name: String) : DiscordContextMenu(Comm
      */
     @Trace
     open fun run(event: MessageContextInteractionEvent) {
-        if (alunaProperties.useStopwatch) {
+        if (alunaProperties.debug.useStopwatch) {
             stopWatch = StopWatch()
             stopWatch!!.start()
         }
@@ -49,7 +51,7 @@ abstract class DiscordMessageContextMenu(name: String) : DiscordContextMenu(Comm
 
         try {
             writeToStats()
-            logger.info("Run context menu ${event.commandPath}" + if (alunaProperties.showHashCode) " [${this.hashCode()}]" else "")
+            logger.info("Run context menu ${event.commandPath}" + if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else "")
             execute(event)
             exitCommand(event)
         } catch (t: Throwable) {

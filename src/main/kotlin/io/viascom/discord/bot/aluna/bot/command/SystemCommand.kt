@@ -4,6 +4,8 @@ import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandDataP
 import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.bot.handler.Command
 import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.property.ModeratorIdProvider
 import io.viascom.discord.bot.aluna.property.OwnerIdProvider
 import io.viascom.discord.bot.aluna.util.getOptionAsString
@@ -13,10 +15,10 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 
 @Command
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
+@ConditionalOnJdaEnabled
+@ConditionalOnSystemCommandEnabled
 class SystemCommand(
     private val dataProviders: List<SystemCommandDataProvider>,
     private val ownerIdProvider: OwnerIdProvider,
@@ -40,6 +42,11 @@ class SystemCommand(
     }
 
     override fun execute(event: SlashCommandInteractionEvent) {
+        if (event.user.idLong !in ownerIdProvider.getOwnerIds() && event.user.idLong !in moderatorIdProvider.getModeratorIds()) {
+            event.deferReply(true).setContent("${AlunaEmote.BOT_CROSS.asMention()} This command is to powerful for you.").queue()
+            return
+        }
+
         selectedProvider = dataProviders.filter {
             it.id in (alunaProperties.command.systemCommand.enabledFunctions ?: arrayListOf()) || alunaProperties.command.systemCommand.enabledFunctions == null
         }
@@ -120,8 +127,8 @@ class SystemCommand(
                         "system-command/${it.id}"
                     ))
                 }
-                    .filter { it.name.lowercase().contains(input.lowercase()) }
-            }.take(25).map {
+                    .filter { it.name.lowercase().contains(input.lowercase()) || it.id.lowercase().contains(input.lowercase()) }
+            }.take(25).sortedBy { it.name }.map {
                 net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name, it.id)
             }
 

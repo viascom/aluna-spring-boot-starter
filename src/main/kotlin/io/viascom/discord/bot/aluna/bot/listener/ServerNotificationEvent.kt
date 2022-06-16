@@ -25,7 +25,7 @@ internal open class ServerNotificationEvent(private val discordBot: DiscordBot, 
 
     override fun onGuildJoin(event: GuildJoinEvent) {
         discordBot.asyncExecutor.execute {
-            if (!alunaProperties.notification.serverJoin.enable) {
+            if (!alunaProperties.notification.serverJoin.enabled) {
                 return@execute
             }
 
@@ -59,7 +59,7 @@ internal open class ServerNotificationEvent(private val discordBot: DiscordBot, 
 
     override fun onGuildLeave(event: GuildLeaveEvent) {
         discordBot.asyncExecutor.execute {
-            if (!alunaProperties.notification.serverLeave.enable) {
+            if (!alunaProperties.notification.serverLeave.enabled) {
                 return@execute
             }
 

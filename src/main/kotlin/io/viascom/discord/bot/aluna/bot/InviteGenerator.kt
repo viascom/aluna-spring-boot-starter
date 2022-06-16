@@ -1,5 +1,6 @@
 package io.viascom.discord.bot.aluna.bot
 
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.property.ModeratorIdProvider
 import io.viascom.discord.bot.aluna.property.OwnerIdProvider
@@ -11,7 +12,8 @@ import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 
 @Service
-@ConditionalOnExpression("\${aluna.discord.enable-jda:true} && \${aluna.enable-debug-configuration-log:true}")
+@ConditionalOnJdaEnabled
+@ConditionalOnExpression("\${aluna.debug.enable-debug-configuration-log:true} && \${aluna.production-mode:false} == false")
 class InviteGenerator(
     private val alunaProperties: AlunaProperties,
     private val ownerIdProvider: OwnerIdProvider,
@@ -34,9 +36,9 @@ class InviteGenerator(
                 
                 ###############################################
                                 Configuration
-                -> ownerIds:      ${ownerIdProvider.getOwnerIds().joinToString { it.toString() }}
-                -> modIds:        ${moderatorIdProvider.getModeratorIds().joinToString { it.toString() }}
-                -> applicationId: ${alunaProperties.discord.applicationId ?: ""}
+                -> ownerIds:      ${ownerIdProvider.getOwnerIds().joinToString { it.toString() }.ifBlank { "n/a" }}
+                -> modIds:        ${moderatorIdProvider.getModeratorIds().joinToString { it.toString() }.ifBlank { "n/a" }}
+                -> applicationId: ${alunaProperties.discord.applicationId ?: "n/a"}
                 -> token:         ${alunaProperties.discord.token}
                 -> invite:        $invite
                 ###############################################

@@ -6,10 +6,10 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 class DefaultDiscordCommandConditions : DiscordCommandConditions {
 
     override fun checkUseScope(
-        event: SlashCommandInteractionEvent,
+        discordCommand: DiscordCommand,
         useScope: DiscordCommand.UseScope,
         subCommandUseScope: HashMap<String, DiscordCommand.UseScope>,
-        discordCommand: DiscordCommand
+        event: SlashCommandInteractionEvent
     ): DiscordCommand.WrongUseScope {
         val wrongUseScope = DiscordCommand.WrongUseScope()
 
@@ -27,9 +27,9 @@ class DefaultDiscordCommandConditions : DiscordCommandConditions {
     }
 
     override fun checkForNeededUserPermissions(
-        event: SlashCommandInteractionEvent,
+        discordCommand: DiscordCommand,
         userPermissions: ArrayList<Permission>,
-        discordCommand: DiscordCommand
+        event: SlashCommandInteractionEvent
     ): DiscordCommand.MissingPermissions {
         val missingPermissions = DiscordCommand.MissingPermissions()
         val server = event.guild ?: return missingPermissions
@@ -52,9 +52,9 @@ class DefaultDiscordCommandConditions : DiscordCommandConditions {
     }
 
     override fun checkForNeededBotPermissions(
-        event: SlashCommandInteractionEvent,
+        discordCommand: DiscordCommand,
         botPermissions: ArrayList<Permission>,
-        discordCommand: DiscordCommand
+        event: SlashCommandInteractionEvent
     ): DiscordCommand.MissingPermissions {
         val missingPermissions = DiscordCommand.MissingPermissions()
         val server = event.guild ?: return missingPermissions
@@ -88,9 +88,5 @@ class DefaultDiscordCommandConditions : DiscordCommandConditions {
         }
 
         return missingPermissions
-    }
-
-    override fun checkForAdditionalRequirements(event: SlashCommandInteractionEvent, discordCommand: DiscordCommand): DiscordCommand.AdditionalRequirements {
-        return DiscordCommand.AdditionalRequirements()
     }
 }

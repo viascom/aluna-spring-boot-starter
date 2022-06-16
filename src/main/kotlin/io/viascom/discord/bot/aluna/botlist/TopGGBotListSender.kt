@@ -1,6 +1,8 @@
 package io.viascom.discord.bot.aluna.botlist
 
-import com.google.gson.Gson
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnAlunaProductionMode
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.sharding.ShardManager
 import okhttp3.MediaType.Companion.toMediaType
@@ -9,16 +11,16 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
 @Component
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
+@ConditionalOnJdaEnabled
+@ConditionalOnAlunaProductionMode
 class TopGGBotListSender(
     private val alunaProperties: AlunaProperties,
     private val shardManager: ShardManager,
-    private val gson: Gson
+    private val objectMapper: ObjectMapper
 ) : BotListSender {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -39,7 +41,7 @@ class TopGGBotListSender(
             .build()
 
         val request = Request.Builder().url("https://top.gg/api/bots/${alunaProperties.discord.applicationId}/stats").post(
-            gson.toJson(TopGGData(shardManager.shards.map { it.guilds.size })).toRequestBody("application/json".toMediaType())
+            objectMapper.writeValueAsBytes(TopGGData(shardManager.shards.map { it.guilds.size })).toRequestBody("application/json".toMediaType())
         ).header("Authorization", topGGToken).build()
 
         httpClient.newCall(request).execute()

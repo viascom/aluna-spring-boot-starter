@@ -4,6 +4,8 @@ import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.bot.handler.Command
 import io.viascom.discord.bot.aluna.bot.handler.queueAndRegisterInteraction
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.util.createDangerButton
 import io.viascom.discord.bot.aluna.util.createSuccessButton
 import io.viascom.discord.bot.aluna.util.getOptionAsString
@@ -16,12 +18,12 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.sharding.ShardManager
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import java.awt.Color
 import java.time.Duration
 
 @Command
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
+@ConditionalOnJdaEnabled
+@ConditionalOnSystemCommandEnabled
 class LeaveServerProvider(
     private val shardManager: ShardManager
 ) : SystemCommandDataProvider(

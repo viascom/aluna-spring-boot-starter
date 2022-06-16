@@ -16,7 +16,7 @@ class PropertiesListener : ApplicationListener<ApplicationContextInitializedEven
 
     override fun onApplicationEvent(event: ApplicationContextInitializedEvent) {
         //Check if jda is disabled
-        if((event.applicationContext.environment.getProperty("aluna.discord.enable-jda", Boolean::class.java) ?: true) == false){
+        if ((event.applicationContext.environment.getProperty("aluna.discord.enable-jda", Boolean::class.java) ?: true) == false) {
             return
         }
 
@@ -34,7 +34,7 @@ class PropertiesListener : ApplicationListener<ApplicationContextInitializedEven
 
         //Check owners if system-command is enabled
         val ownerIds = event.applicationContext.environment.getProperty("aluna.owner-ids", ArrayList::class.java) ?: arrayListOf<Long>()
-        val systemCommand = event.applicationContext.environment.getProperty("aluna.command.system-command.enable", Boolean::class.java) ?: false
+        val systemCommand = event.applicationContext.environment.getProperty("aluna.command.system-command.enabled", Boolean::class.java) ?: false
         if (ownerIds.isEmpty() && systemCommand) {
             logger.info("/system-command is enabled but no owner-ids are defined! If you use the DefaultOwnerIdProvider, you may not be able to use this command.")
         }
@@ -44,10 +44,70 @@ class PropertiesListener : ApplicationListener<ApplicationContextInitializedEven
         checkNotification("aluna.notification.server-leave", event)
         checkNotification("aluna.notification.bot-ready", event)
 
+
+        //Check JDA Stuff
+        val gatewayIntents = event.applicationContext.environment.getProperty("aluna.discord.gateway-intents", ArrayList::class.java) ?: arrayListOf<String>()
+        val memberCachePolicy =
+            event.applicationContext.environment.getProperty("aluna.discord.member-cache-policy", AlunaDiscordProperties.MemberCachePolicyType::class.java)
+                ?: AlunaDiscordProperties.MemberCachePolicyType.DEFAULT
+        val cacheFlags = event.applicationContext.environment.getProperty("aluna.discord.cache-flags", AlunaDiscordProperties.CacheFlags::class.java)
+            ?: AlunaDiscordProperties.CacheFlags()
+        val chunkingFilter =
+            event.applicationContext.environment.getProperty("aluna.discord.chunking-filter", AlunaDiscordProperties.ChunkingFilter::class.java)
+
+        //Check that GUILD_MEMBERS is active if memberCachePolicy is all
+        if (!gatewayIntents.contains("GUILD_MEMBERS") && memberCachePolicy == AlunaDiscordProperties.MemberCachePolicyType.ALL) {
+            throw AlunaPropertiesException(
+                "Aluna configuration is not valid",
+                "aluna.discord.member-cache-policy",
+                memberCachePolicy.name,
+                "Cannot use MemberCachePolicy.ALL without GatewayIntent.GUILD_MEMBERS enabled!"
+            )
+        }
+
+        //Check that needed gatewayIntents for specific CacheFlags are enabled
+        when {
+            (cacheFlags.contains(AlunaDiscordProperties.CacheFlag.ACTIVITY) && !gatewayIntents.contains("GUILD_PRESENCES")) -> {
+                throw AlunaPropertiesException(
+                    "Aluna configuration is not valid",
+                    "aluna.discord.cache-flags",
+                    cacheFlags.joinToString(",") { it.name },
+                    "CacheFlag.ACTIVITY requires GUILD_PRESENCES intent to be enabled."
+                )
+            }
+            (cacheFlags.contains(AlunaDiscordProperties.CacheFlag.CLIENT_STATUS) && !gatewayIntents.contains("GUILD_PRESENCES")) -> {
+                throw AlunaPropertiesException(
+                    "Aluna configuration is not valid",
+                    "aluna.discord.cache-flags",
+                    cacheFlags.joinToString(",") { it.name },
+                    "CacheFlag.CLIENT_STATUS requires GUILD_PRESENCES intent to be enabled."
+                )
+            }
+            (cacheFlags.contains(AlunaDiscordProperties.CacheFlag.ONLINE_STATUS) && !gatewayIntents.contains("GUILD_PRESENCES")) -> {
+                throw AlunaPropertiesException(
+                    "Aluna configuration is not valid",
+                    "aluna.discord.cache-flags",
+                    cacheFlags.joinToString(",") { it.name },
+                    "CacheFlag.ONLINE_STATUS requires GUILD_PRESENCES intent to be enabled."
+                )
+            }
+        }
+
+        //Check that gatewayIntents.GUILD_MEMBERS is enabled if chunking is not NONE
+        if (chunkingFilter != null && chunkingFilter != AlunaDiscordProperties.ChunkingFilter.NONE && !gatewayIntents.contains("GUILD_MEMBERS")) {
+            throw AlunaPropertiesException(
+                "Aluna configuration is not valid",
+                "aluna.discord.chunking-filter",
+                chunkingFilter.name,
+                "To use chunking, the GUILD_MEMBERS intent must be enabled! Otherwise you must use NONE!"
+            )
+        }
+
+
     }
 
     private fun checkNotification(base: String, event: ApplicationContextInitializedEvent) {
-        val sendJoin = event.applicationContext.environment.getProperty("$base.enable", Boolean::class.java) ?: false
+        val sendJoin = event.applicationContext.environment.getProperty("$base.enabled", Boolean::class.java) ?: false
         if (sendJoin) {
             val sendJoinServer = event.applicationContext.environment.getProperty("$base.server", Long::class.java) ?: 0L
             if (sendJoinServer == 0L) {

@@ -9,17 +9,17 @@ class DefaultDiscordCommandMetaDataHandler : DiscordCommandMetaDataHandler {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onCommandExecution(event: SlashCommandInteractionEvent, discordCommand: DiscordCommand) {
+    override fun onCommandExecution(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent) {
     }
 
-    override fun onExitCommand(event: SlashCommandInteractionEvent, stopWatch: StopWatch?, discordCommand: DiscordCommand) {
+    override fun onExitCommand(discordCommand: DiscordCommand, stopWatch: StopWatch?, event: SlashCommandInteractionEvent) {
     }
 
     override fun onGenericExecutionException(
-        event: SlashCommandInteractionEvent,
+        discordCommand: DiscordCommand,
         throwableOfExecution: Exception,
         exceptionOfSpecificHandler: Exception,
-        discordCommand: DiscordCommand
+        event: SlashCommandInteractionEvent
     ) {
         throw throwableOfExecution;
     }

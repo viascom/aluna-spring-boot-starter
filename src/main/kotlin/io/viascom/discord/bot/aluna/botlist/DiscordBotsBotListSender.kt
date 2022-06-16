@@ -1,5 +1,7 @@
 package io.viascom.discord.bot.aluna.botlist
 
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnAlunaProductionMode
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.sharding.ShardManager
 import okhttp3.MediaType.Companion.toMediaType
@@ -8,12 +10,12 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
 @Component
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
+@ConditionalOnJdaEnabled
+@ConditionalOnAlunaProductionMode
 class DiscordBotsBotListSender(
     private val alunaProperties: AlunaProperties,
     private val shardManager: ShardManager

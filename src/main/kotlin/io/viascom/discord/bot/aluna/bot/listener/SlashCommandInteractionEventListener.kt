@@ -4,17 +4,17 @@ import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.handler.DiscordMessageContextMenu
 import io.viascom.discord.bot.aluna.bot.handler.DiscordUserContextMenu
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.stereotype.Component
 
 @Component
-@ConditionalOnProperty(name = ["discord.enable-jda"], prefix = "aluna", matchIfMissing = true, havingValue = "true")
+@ConditionalOnJdaEnabled
 open class SlashCommandInteractionEventListener(
     private val discordBot: DiscordBot,
     private val context: ConfigurableApplicationContext

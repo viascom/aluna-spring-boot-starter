@@ -3,6 +3,7 @@ package io.viascom.discord.bot.aluna.bot.handler
 import datadog.trace.api.Trace
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
+import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.translation.MessageService
@@ -44,6 +45,9 @@ abstract class DiscordCommand(
     lateinit var discordCommandConditions: DiscordCommandConditions
 
     @Autowired
+    lateinit var discordCommandAdditionalConditions: DiscordCommandAdditionalConditions
+
+    @Autowired
     lateinit var discordCommandLoadAdditionalData: DiscordCommandLoadAdditionalData
 
     @Autowired
@@ -70,12 +74,15 @@ abstract class DiscordCommand(
     override lateinit var uniqueId: String
 
     var useScope = UseScope.GLOBAL
-    var specificServer: String? = null
+    internal var specificServer: String? = null
 
+    @Experimental("This attribute is currently not used by Aluna")
     var isOwnerCommand = false
+
+    @Experimental("This attribute is currently not used by Aluna")
     var isAdministratorOnlyCommand = false
+
     var isEarlyAccessCommand = false
-    var isHidden = false
 
     var commandDevelopmentStatus = DevelopmentStatus.LIVE
 
@@ -88,7 +95,10 @@ abstract class DiscordCommand(
      * The [CooldownScope][Command.CooldownScope] of the command. This defines how far from a scope cooldowns have.
      * <br></br>Default [CooldownScope.USER][Command.CooldownScope.USER].
      */
+    @Experimental("Cooldowns are currently not supported")
     var cooldownScope = CooldownScope.USER
+
+    @Experimental("Cooldowns are currently not supported")
     var cooldown = 0
 
     /**
@@ -118,11 +128,9 @@ abstract class DiscordCommand(
     var stopWatch: StopWatch? = null
 
     /**
-     * The main body method of a [DiscordCommand].
-     * <br></br>This is the "response" for a successful
-     * [#run(DiscordCommand)][DiscordCommand.run].
+     * Method to implement for command execution
      *
-     * @param event The [DiscordCommandEvent] that triggered this Command
+     * @param event The [SlashCommandInteractionEvent] that triggered this Command
      */
     @Trace
     protected abstract fun execute(event: SlashCommandInteractionEvent)
@@ -263,8 +271,9 @@ abstract class DiscordCommand(
         processDevelopmentStatus()
     }
 
+    @Experimental("This gets called by Aluna, but is currently only a preparation for Localization.")
     fun prepareLocalization() {
-        if (alunaProperties.enableTranslation) {
+        if (alunaProperties.translation.enabled) {
 //            this.setLocalizationMapper(LocalizationMapper.fromFunction(localizationFunction))
             this.toData()
         }
@@ -277,7 +286,7 @@ abstract class DiscordCommand(
      */
     @Trace
     fun run(event: SlashCommandInteractionEvent) {
-        if (alunaProperties.useStopwatch) {
+        if (alunaProperties.debug.useStopwatch) {
             stopWatch = StopWatch()
             stopWatch!!.start()
         }
@@ -303,7 +312,7 @@ abstract class DiscordCommand(
         //checkIfLocalDevelopment(event)
         //checkCommandStatus(event)
 
-        val wrongUseScope = discordCommandConditions.checkUseScope(event, useScope, subCommandUseScope, this)
+        val wrongUseScope = discordCommandConditions.checkUseScope(this, useScope, subCommandUseScope, event)
         if (wrongUseScope.wrongUseScope) {
             onWrongUseScope(event, wrongUseScope)
             return
@@ -313,13 +322,13 @@ abstract class DiscordCommand(
 
         //checkChannelTopics(event)
 
-        val missingUserPermissions = discordCommandConditions.checkForNeededUserPermissions(event, userPermissions, this)
+        val missingUserPermissions = discordCommandConditions.checkForNeededUserPermissions(this, userPermissions, event)
         if (missingUserPermissions.hasMissingPermissions) {
             onMissingUserPermission(event, missingUserPermissions)
             return
         }
 
-        val missingBotPermissions = discordCommandConditions.checkForNeededBotPermissions(event, botPermissions, this)
+        val missingBotPermissions = discordCommandConditions.checkForNeededBotPermissions(this, botPermissions, event)
         if (missingBotPermissions.hasMissingPermissions) {
             onMissingBotPermission(event, missingBotPermissions)
             return
@@ -328,7 +337,7 @@ abstract class DiscordCommand(
         //checkForCommandCooldown(event)
 
         //checkAdditionalRequirements(event)
-        val additionalRequirements = discordCommandConditions.checkForAdditionalRequirements(event, this)
+        val additionalRequirements = discordCommandAdditionalConditions.checkForAdditionalRequirements(this, event)
         if (additionalRequirements.failed) {
             onFailedAdditionalRequirements(event, additionalRequirements)
             return
@@ -340,18 +349,18 @@ abstract class DiscordCommand(
         try {
             //Run onCommandExecution in asyncExecutor to ensure it is not blocking the execution of the command itself
             discordBot.asyncExecutor.execute {
-                discordCommandMetaDataHandler.onCommandExecution(event, this)
+                discordCommandMetaDataHandler.onCommandExecution(this, event)
             }
             if (alunaProperties.discord.publishDiscordCommandEvent) {
                 eventPublisher.publishDiscordCommandEvent(author, channel, server, event.commandPath, this)
             }
-            logger.info("Run command /${event.commandPath}" + if (alunaProperties.showHashCode) " [${this.hashCode()}]" else "")
+            logger.info("Run command /${event.commandPath}" + if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else "")
             execute(event)
         } catch (e: Exception) {
             try {
                 onExecutionException(event, e)
             } catch (exceptionError: Exception) {
-                discordCommandMetaDataHandler.onGenericExecutionException(event, e, exceptionError, this)
+                discordCommandMetaDataHandler.onGenericExecutionException(this, e, exceptionError, event)
             }
         } finally {
             exitCommand(event)
@@ -360,16 +369,16 @@ abstract class DiscordCommand(
     }
 
     private fun exitCommand(event: SlashCommandInteractionEvent) {
-        if (alunaProperties.useStopwatch && stopWatch != null) {
+        if (alunaProperties.debug.useStopwatch && stopWatch != null) {
             stopWatch!!.stop()
-            logger.info("/${event.commandPath} (${this.author.id})${if (alunaProperties.showHashCode) " [${this.hashCode()}]" else ""} -> ${stopWatch!!.totalTimeMillis}ms")
+            logger.info("/${event.commandPath} (${this.author.id})${if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else ""} -> ${stopWatch!!.totalTimeMillis}ms")
             when {
                 (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the command /${event.commandPath} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
                 (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the command /${event.commandPath} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
             }
         }
         discordBot.asyncExecutor.execute {
-            discordCommandMetaDataHandler.onExitCommand(event, stopWatch, this)
+            discordCommandMetaDataHandler.onExitCommand(this, stopWatch, event)
         }
     }
 
@@ -377,9 +386,6 @@ abstract class DiscordCommand(
         when (commandDevelopmentStatus) {
             DevelopmentStatus.IN_DEVELOPMENT,
             DevelopmentStatus.ALPHA -> {
-                if (alunaProperties.productionMode) {
-                    this.isHidden = true
-                }
                 this.isEarlyAccessCommand = false
             }
             DevelopmentStatus.EARLY_ACCESS -> {
@@ -401,6 +407,8 @@ abstract class DiscordCommand(
     enum class UseScope {
         GLOBAL,
         GUILD_ONLY,
+
+        @Experimental("This UseScope is currently not in use")
         GUILD_SPECIFIC
     }
 
@@ -414,17 +422,12 @@ abstract class DiscordCommand(
             get() = textChannel.isNotEmpty() || voiceChannel.isNotEmpty() || server.isNotEmpty()
     }
 
-    class WrongUseScope(
-        var serverOnly: Boolean = false,
-        var subCommandServerOnly: Boolean = false
-    ) {
+    class WrongUseScope(var serverOnly: Boolean = false, var subCommandServerOnly: Boolean = false) {
         val wrongUseScope: Boolean
             get() = serverOnly || subCommandServerOnly
     }
 
-    class AdditionalRequirements(
-        val failedRequirements: HashMap<String, Any> = hashMapOf<String, Any>()
-    ) {
+    class AdditionalRequirements(val failedRequirements: HashMap<String, Any> = hashMapOf()) {
         val failed: Boolean
             get() = failedRequirements.isNotEmpty()
     }
