@@ -6,6 +6,7 @@ plugins {
     id "org.jetbrains.kotlin.kapt" version "1.7.0"
     id "org.springframework.boot" version "2.7.0"
     id "io.spring.dependency-management" version "1.0.11.RELEASE"
+    id "de.undercouch.download" version "5.1.0"
 }
 
 group "io.viascom.discord.bot"
@@ -142,6 +143,20 @@ processResources {
         }
     }
 }
+
+task downloadBeautifyJsFile(type: Download) {
+    src "https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.3/beautify.min.js"
+    dest "build/resources/main/js/lib/beautify.js"
+    quiet true
+    overwrite false
+}
+
+task verifyBeautifyJsFile(type: Verify, dependsOn: downloadBeautifyJsFile) {
+    src new File("build/resources/main/js/lib/", 'beautify.js')
+    algorithm "SHA-512"
+    checksum "d7a654bae33f39c79753b8bc53acd0aad0ec1be3c229c597f5796634dd33fa5a949413330e6233acab7a4ce996e3c100538ed7214e92a5a7a5cfcb4cf4b80629"
+}
+processResources.dependsOn verifyBeautifyJsFile
 
 publishing {
     repositories {
