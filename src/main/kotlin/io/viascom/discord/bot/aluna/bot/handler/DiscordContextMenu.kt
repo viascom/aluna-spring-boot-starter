@@ -1,7 +1,9 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
 import datadog.trace.api.Trace
+import io.viascom.discord.bot.aluna.bot.CommandScopedObject
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.translation.MessageService

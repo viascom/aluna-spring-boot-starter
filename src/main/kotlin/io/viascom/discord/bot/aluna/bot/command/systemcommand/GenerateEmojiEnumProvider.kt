@@ -1,9 +1,9 @@
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
+import io.viascom.discord.bot.aluna.bot.Command
+import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
-import io.viascom.discord.bot.aluna.bot.handler.Command
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.handler.queueAndRegisterInteraction
+import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnAlunaNotProductionMode
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled

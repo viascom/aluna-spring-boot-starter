@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 @ConditionalOnJdaEnabled
 open class GenericInteractionListener(
     private val discordBot: DiscordBot,
-    private val context: ConfigurableApplicationContext
+    private val context: ConfigurableApplicationContext,
 ) : ListenerAdapter() {
 
     override fun onCommandAutoCompleteInteraction(event: CommandAutoCompleteInteractionEvent) {
@@ -26,9 +26,19 @@ open class GenericInteractionListener(
                 discordBot.commands[commandId]?.let { command ->
                     discordBot.commandExecutor.execute {
                         DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, NanoIdUtils.randomNanoId())
-                        context.getBean(command).onAutoCompleteEvent(event.focusedOption.name, event)
+                        context.getBean(command).onAutoCompleteEventCall(event.focusedOption.name, event)
                     }
                 }
+            }
+        }
+
+        discordBot.asyncExecutor.execute {
+            val handler = discordBot.autoCompleteHandlers.entries.firstOrNull { entry ->
+                entry.key.first == event.commandId && (entry.key.second == null || entry.key.second == event.focusedOption.name)
+            }
+            if (handler != null) {
+                DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, NanoIdUtils.randomNanoId())
+                context.getBean(handler.value).onRequestCall(event)
             }
         }
     }

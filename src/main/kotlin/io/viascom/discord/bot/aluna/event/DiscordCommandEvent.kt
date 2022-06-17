@@ -1,6 +1,6 @@
 package io.viascom.discord.bot.aluna.event
 
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import net.dv8tion.jda.api.entities.Channel
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User

@@ -1,9 +1,9 @@
 package io.viascom.discord.bot.aluna.bot.command
 
+import io.viascom.discord.bot.aluna.bot.Command
+import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandDataProvider
 import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
-import io.viascom.discord.bot.aluna.bot.handler.Command
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.property.ModeratorIdProvider

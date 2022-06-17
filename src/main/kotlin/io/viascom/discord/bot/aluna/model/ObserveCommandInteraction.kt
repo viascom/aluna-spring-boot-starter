@@ -1,6 +1,6 @@
 package io.viascom.discord.bot.aluna.model
 
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.concurrent.ScheduledFuture

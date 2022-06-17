@@ -1,4 +1,4 @@
-package io.viascom.discord.bot.aluna.bot
+package io.viascom.discord.bot.aluna.bot.command
 
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandDataProvider
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled

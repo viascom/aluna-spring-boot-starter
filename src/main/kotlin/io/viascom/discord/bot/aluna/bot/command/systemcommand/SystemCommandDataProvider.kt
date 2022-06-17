@@ -1,7 +1,7 @@
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
+import io.viascom.discord.bot.aluna.bot.CommandScopedObject
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
-import io.viascom.discord.bot.aluna.bot.handler.CommandScopedObject
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent

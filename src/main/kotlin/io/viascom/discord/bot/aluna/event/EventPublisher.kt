@@ -1,7 +1,8 @@
 package io.viascom.discord.bot.aluna.event
 
+import io.viascom.discord.bot.aluna.bot.AutoCompleteHandler
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.entities.Channel
@@ -52,6 +53,14 @@ class EventPublisher(
             logger.debug("Publishing DiscordSlashCommandInitializedEvent")
             val discordSlashCommandInitializedEvent = DiscordSlashCommandInitializedEvent(this, newCommands, updatedCommands, removedCommands)
             applicationEventPublisher.publishEvent(discordSlashCommandInitializedEvent)
+        }
+    }
+
+    internal fun publishDiscordAutoCompleteHandlerInitializedEvent(handlers: List<KClass<out AutoCompleteHandler>>) {
+        discordBot.asyncExecutor.execute {
+            logger.debug("Publishing DiscordAutoCompleteHandlerInitializedEvent")
+            val discordAutoCompleteHandlerInitializedEvent = DiscordAutoCompleteHandlerInitializedEvent(this, handlers)
+            applicationEventPublisher.publishEvent(discordAutoCompleteHandlerInitializedEvent)
         }
     }
 

@@ -1,12 +1,11 @@
 package io.viascom.discord.bot.aluna
 
-import io.viascom.discord.bot.aluna.bot.handler.Command
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.Command
+import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
 import io.viascom.discord.bot.aluna.util.createPrimaryButton
 import io.viascom.discord.bot.aluna.util.getOptionAsString
 import io.viascom.discord.bot.aluna.util.removeActionRows
-import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
@@ -22,8 +21,7 @@ class PingCommand(
     private val shardManager: ShardManager
 ) : DiscordCommand(
     "ping",
-    "Send a ping",
-    observeAutoComplete = true
+    "Send a ping"
 ) {
 
     init {
@@ -53,12 +51,12 @@ class PingCommand(
         }
     }
 
-    override fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
-        super.onAutoCompleteEvent(option, event)
+//    override fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
+//        logger.debug("autocomplete: " + this.hashCode().toString())
+//        event.replyChoice("hello", "hello").queue()
+//    }
 
-        logger.debug("autocomplete: " + this.hashCode().toString())
-        event.replyChoice("hello", "hello").queue()
-    }
+
 
     override fun onDestroy() {
         logger.debug("/ping got destroyed " + this.hashCode().toString())

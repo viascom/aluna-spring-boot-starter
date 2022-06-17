@@ -1,8 +1,8 @@
 package io.viascom.discord.bot.aluna.configuration.scope
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
+import io.viascom.discord.bot.aluna.bot.CommandScopedObject
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.handler.CommandScopedObject
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
 import net.dv8tion.jda.internal.interactions.CommandDataImpl

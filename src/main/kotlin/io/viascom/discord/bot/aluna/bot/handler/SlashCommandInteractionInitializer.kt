@@ -1,6 +1,7 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordFirstShardReadyEvent
 import io.viascom.discord.bot.aluna.event.EventPublisher
@@ -156,14 +157,14 @@ internal open class SlashCommandInteractionInitializer(
                         logger.error("Could not add context menu '${command.name}' to available commands")
                     }
                 }
-            }
 
-            eventPublisher.publishDiscordSlashCommandInitializedEvent(
-                commandsToAdd.filter { it.type == Command.Type.SLASH }.map { it::class },
-                commandsToUpdate.filter { it.type == Command.Type.SLASH }
-                    .map { discordCommand -> commandDataList.first { it.name == discordCommand.name } }
-                    .map { it::class },
-                commandsToRemove.map { it.name })
+                eventPublisher.publishDiscordSlashCommandInitializedEvent(
+                    commandsToAdd.filter { it.type == Command.Type.SLASH }.map { it::class },
+                    commandsToUpdate.filter { it.type == Command.Type.SLASH }
+                        .map { discordCommand -> commandDataList.first { it.name == discordCommand.name } }
+                        .map { it::class },
+                    commandsToRemove.map { it.name })
+            }
         }
 
         //Register internal commands
@@ -316,8 +317,8 @@ internal open class SlashCommandInteractionInitializer(
                 commandData.options.map { Command.Option(it.toData()) } == command.options &&
                 commandData.subcommandGroups.map { Command.SubcommandGroup(it.toData()) } == command.subcommandGroups &&
                 commandData.subcommands.map { Command.Subcommand(it.toData()) } == command.subcommands
-                //commandData.nameLocalizations.toMap() == command.nameLocalizations.toMap() &&
-                //commandData.descriptionLocalizations.toMap() == command.descriptionLocalizations.toMap()
+        //commandData.nameLocalizations.toMap() == command.nameLocalizations.toMap() &&
+        //commandData.descriptionLocalizations.toMap() == command.descriptionLocalizations.toMap()
     }
 
 }

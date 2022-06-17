@@ -1,6 +1,5 @@
 package io.viascom.discord.bot.aluna.bot
 
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.handler.DiscordContextMenu
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.model.ObserveCommandInteraction
@@ -31,6 +30,7 @@ open class DiscordBot(
     val commands = hashMapOf<String, Class<DiscordCommand>>()
     val contextMenus = hashMapOf<String, Class<DiscordContextMenu>>()
     val commandsWithAutocomplete = arrayListOf<String>()
+    val autoCompleteHandlers = hashMapOf<Pair<String, String?>, Class<out AutoCompleteHandler>>()
 
     internal var messagesToObserveButton: MutableMap<String, ObserveCommandInteraction> =
         Collections.synchronizedMap(hashMapOf<String, ObserveCommandInteraction>())

@@ -1,8 +1,5 @@
-package io.viascom.discord.bot.aluna.bot
+package io.viascom.discord.bot.aluna.bot.listener
 
-import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
-import io.viascom.discord.bot.aluna.bot.listener.GenericEventPublisher
-import io.viascom.discord.bot.aluna.bot.listener.ServerNotificationEvent
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.sharding.ShardManager

@@ -1,6 +1,6 @@
 package io.viascom.discord.bot.aluna
 
-import io.viascom.discord.bot.aluna.bot.handler.CommandScopedObject
+import io.viascom.discord.bot.aluna.bot.CommandScopedObject
 import java.time.Duration
 
 abstract class ExtendedSubCommand : CommandScopedObject {

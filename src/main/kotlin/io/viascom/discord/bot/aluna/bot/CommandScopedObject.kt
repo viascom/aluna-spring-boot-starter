@@ -1,4 +1,4 @@
-package io.viascom.discord.bot.aluna.bot.handler
+package io.viascom.discord.bot.aluna.bot
 
 import java.time.Duration
 

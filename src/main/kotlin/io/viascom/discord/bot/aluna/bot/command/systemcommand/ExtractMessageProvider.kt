@@ -1,8 +1,8 @@
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.viascom.discord.bot.aluna.bot.Command
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
-import io.viascom.discord.bot.aluna.bot.handler.Command
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.Webhook

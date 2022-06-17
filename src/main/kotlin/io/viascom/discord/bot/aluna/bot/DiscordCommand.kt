@@ -1,8 +1,8 @@
-package io.viascom.discord.bot.aluna.bot.handler
+package io.viascom.discord.bot.aluna.bot
 
 import datadog.trace.api.Trace
-import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
+import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.property.AlunaProperties
@@ -186,12 +186,17 @@ abstract class DiscordCommand(
     /**
      * This method gets triggered, as soon as an autocomplete event for this command is called.
      * This will always use the same instance if user and server is the same. The command itself will than override this instance.
+     * Before calling this method, Aluna will execute discordCommandLoadAdditionalData.loadData()
      *
      * @param event
      */
     @Trace
     open fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
+    }
+
+    internal fun onAutoCompleteEventCall(option: String, event: CommandAutoCompleteInteractionEvent) {
         discordCommandLoadAdditionalData.loadData(this, event)
+        onAutoCompleteEvent(option, event)
     }
 
     /**

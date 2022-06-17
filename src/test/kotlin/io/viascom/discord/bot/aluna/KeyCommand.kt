@@ -1,8 +1,8 @@
 package io.viascom.discord.bot.aluna
 
-import io.viascom.discord.bot.aluna.bot.handler.Command
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.handler.queueAndRegisterInteraction
+import io.viascom.discord.bot.aluna.bot.Command
+import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.util.addTextField
 import io.viascom.discord.bot.aluna.util.getValueAsString
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent

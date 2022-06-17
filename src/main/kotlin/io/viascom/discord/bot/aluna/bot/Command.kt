@@ -1,4 +1,4 @@
-package io.viascom.discord.bot.aluna.bot.handler
+package io.viascom.discord.bot.aluna.bot
 
 import io.viascom.discord.bot.aluna.configuration.scope.CommandScoped
 import org.springframework.stereotype.Component

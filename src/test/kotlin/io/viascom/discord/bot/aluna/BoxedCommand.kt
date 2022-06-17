@@ -1,6 +1,6 @@
 package io.viascom.discord.bot.aluna
 
-import io.viascom.discord.bot.aluna.bot.handler.Command
+import io.viascom.discord.bot.aluna.bot.Command
 import io.viascom.discord.bot.aluna.configuration.scope.CommandScope
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
