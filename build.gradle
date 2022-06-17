@@ -31,6 +31,10 @@ jar {
         rename ".*", "pom.xml"
     }
 
+    into("META-INF") {
+        from 'build/tmp/kapt3/classes/main/META-INF/spring-configuration-metadata.json'
+    }
+
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
@@ -131,16 +135,6 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17
         freeCompilerArgs = ['-Xjvm-default=all']
-    }
-}
-
-classes {
-    doLast {
-        // Copy generated spring-configuration-metadata.json into jar resources
-        copy {
-            from 'build/tmp/kapt3/classes/main/META-INF/spring-configuration-metadata.json'
-            into "build/resources/main/META-INF"
-        }
     }
 }
 
