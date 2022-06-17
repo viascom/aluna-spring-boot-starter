@@ -26,15 +26,6 @@ jar {
         attributes "Implementation-Version": "${project.version}"
     }
 
-    into("META-INF/maven/$project.group/aluna-spring-boot-starter") {
-        from { generatePomFileForMavenJavaPublication }
-        rename ".*", "pom.xml"
-    }
-
-    into("META-INF") {
-        from 'build/tmp/kapt3/classes/main/META-INF/spring-configuration-metadata.json'
-    }
-
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
@@ -43,8 +34,8 @@ springBoot {
 }
 
 java {
-    withJavadocJar()
     withSourcesJar()
+    withJavadocJar()
 }
 
 repositories {
@@ -66,7 +57,6 @@ ext {
     graalvmJsVersion = "22.1.0.1"
     jnanoidVersion = "2.0.0"
     nashornCoreVersion = "15.4"
-    commonsLang3Version = "3.12.0"
     ddTraceVersion = "0.102.0"
     emojiJavaVersion = "5.1.1"
 }
@@ -112,9 +102,6 @@ dependencies {
     //====== NanoId ======
     api "com.aventrix.jnanoid:jnanoid:$jnanoidVersion"
 
-    //====== Apache Commons ======
-    compileOnly "org.apache.commons:commons-lang3:$commonsLang3Version"
-
     //====== Emoji Helper ======
     api("com.vdurmont:emoji-java:$emojiJavaVersion") {
         exclude group: "org.json", module: "json"
@@ -138,19 +125,24 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     }
 }
 
-compileKotlin.inputs.files(processResources)
-compileKotlin.inputs.files(bootBuildInfo)
+//Wait for files from processResources and bootBuildInfo
+compileKotlin.inputs.files(processResources, bootBuildInfo)
 
+processResources.dependsOn 'kaptKotlin'
 processResources {
-    filesMatching('banner.txt') {
+    filesMatching(['banner.txt', 'version.txt']) {
         filter {
             it.replace('jda.version', "${jdaVersion}").replace('aluna.version', "${project.version}")
         }
     }
-    filesMatching('version.txt') {
-        filter {
-            it.replace('jda.version', "${jdaVersion}").replace('aluna.version', "${project.version}")
-        }
+
+    //Add spring-configuration-metadata.json to resources
+    from "build/tmp/kapt3/classes/main"
+
+    //Add generatePomFileForMavenJavaPublication to resources
+    into("META-INF/maven/$project.group/aluna-spring-boot-starter") {
+        from { generatePomFileForMavenJavaPublication }
+        rename ".*", "pom.xml"
     }
 }
 
