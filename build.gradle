@@ -10,7 +10,7 @@ plugins {
 }
 
 group "io.viascom.discord.bot"
-version "0.0.22_5.0.0-alpha.12"
+version "0.0.22_5.0.0-alpha.12_DEV"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -30,6 +30,8 @@ jar {
         from { generatePomFileForMavenJavaPublication }
         rename ".*", "pom.xml"
     }
+
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 springBoot {
@@ -71,15 +73,18 @@ dependencies {
     //====== Kotlin ======
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
-    implementation "org.jetbrains.kotlin:kotlin-script-util"
-    implementation "org.jetbrains.kotlin:kotlin-script-runtime"
-    implementation "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable"
-    implementation "org.jetbrains.kotlin:kotlin-compiler-embeddable"
+    compileOnly "org.jetbrains.kotlin:kotlin-script-util"
+    compileOnly "org.jetbrains.kotlin:kotlin-script-runtime"
+    compileOnly "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable"
+    compileOnly "org.jetbrains.kotlin:kotlin-compiler-embeddable"
 
     //====== Spring ======
     compileOnly "org.springframework.boot:spring-boot-starter"
     compileOnly "org.springframework.boot:spring-boot-starter-actuator"
+
+    //====== Configuration Processor ======
     kapt "org.springframework.boot:spring-boot-configuration-processor"
+    compileOnly "org.springframework.boot:spring-boot-configuration-processor"
 
     //====== JDA ======
     api "net.dv8tion:JDA:$jdaVersion"
@@ -116,20 +121,31 @@ dependencies {
     //====== Testing ======
     testImplementation "org.springframework.boot:spring-boot-starter-web"
     testImplementation "org.springframework.boot:spring-boot-starter-actuator"
+    testImplementation "org.jetbrains.kotlin:kotlin-script-util"
+    testImplementation "org.jetbrains.kotlin:kotlin-script-runtime"
+    testImplementation "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable"
+    testImplementation "org.jetbrains.kotlin:kotlin-compiler-embeddable"
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17
+        freeCompilerArgs = ['-Xjvm-default=all']
     }
 }
 
 classes {
     doLast {
         // Copy generated spring-configuration-metadata.json into jar resources
-        file("build/tmp/kapt3/classes/main/META-INF/spring-configuration-metadata.json").renameTo(file("build/resources/main/META-INF/spring-configuration-metadata.json"))
+        copy {
+            from 'build/tmp/kapt3/classes/main/META-INF/spring-configuration-metadata.json'
+            into "build/resources/main/META-INF"
+        }
     }
 }
+
+compileKotlin.inputs.files(processResources)
+compileKotlin.inputs.files(bootBuildInfo)
 
 processResources {
     filesMatching('banner.txt') {

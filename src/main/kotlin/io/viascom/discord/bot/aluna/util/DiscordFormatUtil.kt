@@ -1,3 +1,6 @@
+@file:JvmName("AlunaUtils")
+@file:JvmMultifileClass
+
 package io.viascom.discord.bot.aluna.util
 
 import java.time.LocalDateTime

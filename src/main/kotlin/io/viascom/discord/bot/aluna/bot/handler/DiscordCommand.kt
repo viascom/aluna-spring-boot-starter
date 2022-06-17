@@ -460,7 +460,7 @@ fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
             command.discordBot.registerMessageForSelectEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
         }
         if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
-            command.discordBot.registerMessageForModalEvents(command.author.id, command, duration, additionalData)
+            command.discordBot.registerMessageForModalEvents(command.author.id, command, persist, duration, additionalData)
         }
         success?.accept(it)
     }, {
@@ -471,6 +471,7 @@ fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
 fun RestAction<Void>.queueAndRegisterInteraction(
     command: DiscordCommand,
     type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.MODAL),
+    persist: Boolean = false,
     duration: Duration = Duration.ofMinutes(15),
     additionalData: HashMap<String, Any?> = hashMapOf(),
     failure: Consumer<in Throwable>? = null,
@@ -478,7 +479,7 @@ fun RestAction<Void>.queueAndRegisterInteraction(
 ) {
     this.queue({
         if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
-            command.discordBot.registerMessageForModalEvents(command.author.id, command, duration, additionalData)
+            command.discordBot.registerMessageForModalEvents(command.author.id, command, persist, duration, additionalData)
         }
         success?.accept(it)
     }, {
@@ -503,6 +504,9 @@ fun ReplyCallbackAction.queueAndRegisterInteraction(
         }
         if (type.contains(DiscordCommand.EventRegisterType.SELECT)) {
             command.discordBot.registerMessageForSelectEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
+        }
+        if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
+            command.discordBot.registerMessageForModalEvents(command.author.id, command, persist, duration, additionalData)
         }
         success?.accept(it)
     }, {

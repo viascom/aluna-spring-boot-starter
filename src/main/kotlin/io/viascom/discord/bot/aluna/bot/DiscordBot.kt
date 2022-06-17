@@ -213,6 +213,7 @@ open class DiscordBot(
     fun registerMessageForModalEvents(
         authorId: String,
         command: DiscordCommand,
+        persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
         additionalData: HashMap<String, Any?> = hashMapOf()
     ) {
@@ -232,7 +233,7 @@ open class DiscordBot(
                 command.uniqueId,
                 LocalDateTime.now(),
                 duration,
-                false,
+                persist,
                 additionalData,
                 arrayListOf(authorId),
                 true,

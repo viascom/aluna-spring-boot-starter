@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.entities.Emoji
  * </code>
  *
  */
+@JvmDefaultWithCompatibility
 interface DiscordEmote {
     val id: String
     val emoteName: String

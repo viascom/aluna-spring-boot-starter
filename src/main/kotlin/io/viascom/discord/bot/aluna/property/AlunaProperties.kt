@@ -55,8 +55,10 @@ class AlunaProperties {
      */
     var modIds: ArrayList<Long> = arrayListOf()
 
+    @NestedConfigurationProperty
     var debug: AlunaDebugProperties = AlunaDebugProperties()
 
+    @NestedConfigurationProperty
     var translation: AlunaTranslationProperties = AlunaTranslationProperties()
 
     /**
