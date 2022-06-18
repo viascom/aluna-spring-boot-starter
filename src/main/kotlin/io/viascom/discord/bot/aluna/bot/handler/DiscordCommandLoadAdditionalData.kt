@@ -1,7 +1,9 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
 /**
@@ -34,5 +36,14 @@ interface DiscordCommandLoadAdditionalData {
      * @param event Auto complete interaction event
      */
     fun loadData(event: CommandAutoCompleteInteractionEvent)
+
+    /**
+     * This method get called before the context menu is executed.
+     * Make sure to not block the execution for to long as the interaction needs to be acknowledged in 3 seconds.
+     *
+     * @param contextMenu Discord context menu instance
+     * @param event Discord context menu event
+     */
+    fun loadData(contextMenu: DiscordContextMenu, event: GenericCommandInteractionEvent)
 
 }

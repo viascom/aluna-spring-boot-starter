@@ -113,10 +113,12 @@ enum class CooldownScope(private val format: String, internal val errorSpecifica
      */
     GLOBAL("Global", "globally");
 
+    @JvmSynthetic
     internal fun genKey(name: String, id: Long): String {
         return genKey(name, id, -1)
     }
 
+    @JvmSynthetic
     internal fun genKey(name: String, idOne: Long, idTwo: Long): String {
         return when {
             this == GLOBAL -> "$name|$format"

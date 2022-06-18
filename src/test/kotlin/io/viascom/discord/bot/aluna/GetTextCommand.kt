@@ -1,7 +1,7 @@
 package io.viascom.discord.bot.aluna
 
 import io.viascom.discord.bot.aluna.bot.Command
-import io.viascom.discord.bot.aluna.bot.handler.DiscordMessageContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordMessageContextMenu
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 
 @Command

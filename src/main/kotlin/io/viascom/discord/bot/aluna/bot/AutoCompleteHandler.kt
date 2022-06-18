@@ -36,6 +36,7 @@ abstract class AutoCompleteHandler @JvmOverloads constructor(val commands: Array
      */
     abstract fun onRequest(event: CommandAutoCompleteInteractionEvent)
 
+    @JvmSynthetic
     internal fun onRequestCall(event: CommandAutoCompleteInteractionEvent) {
         discordCommandLoadAdditionalData.loadData(event)
         onRequest(event)

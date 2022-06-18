@@ -15,11 +15,8 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
-import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
-import net.dv8tion.jda.api.requests.RestAction
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -29,7 +26,6 @@ import org.springframework.context.MessageSource
 import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
-import java.util.function.Consumer
 
 abstract class DiscordCommand(
     name: String,
@@ -78,6 +74,9 @@ abstract class DiscordCommand(
     override lateinit var uniqueId: String
 
     var useScope = UseScope.GLOBAL
+
+    @get:JvmSynthetic
+    @set:JvmSynthetic
     internal var specificServer: String? = null
 
     var isOwnerCommand = false
@@ -195,6 +194,7 @@ abstract class DiscordCommand(
     open fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
     }
 
+    @JvmSynthetic
     internal fun onAutoCompleteEventCall(option: String, event: CommandAutoCompleteInteractionEvent) {
         discordCommandLoadAdditionalData.loadData(this, event)
         onAutoCompleteEvent(option, event)
@@ -360,7 +360,7 @@ abstract class DiscordCommand(
         //checkForCommandCooldown(event)
 
         //checkAdditionalRequirements(event)
-        val additionalRequirements = discordCommandAdditionalConditions.checkForAdditionalRequirements(this, event)
+        val additionalRequirements = discordCommandAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
         if (additionalRequirements.failed) {
             onFailedAdditionalRequirements(event, additionalRequirements)
             return
@@ -461,78 +461,4 @@ abstract class DiscordCommand(
     enum class EventRegisterType {
         BUTTON, SELECT, MODAL
     }
-}
-
-fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
-    hook: InteractionHook,
-    command: DiscordCommand,
-    type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
-    persist: Boolean = false,
-    duration: Duration = Duration.ofMinutes(15),
-    additionalData: HashMap<String, Any?> = hashMapOf(),
-    authorIds: ArrayList<String>? = arrayListOf(command.author.id),
-    commandUserOnly: Boolean = true,
-    failure: Consumer<in Throwable>? = null,
-    success: Consumer<in T>? = null
-) {
-    this.queue({
-        if (type.contains(DiscordCommand.EventRegisterType.BUTTON)) {
-            command.discordBot.registerMessageForButtonEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
-        }
-        if (type.contains(DiscordCommand.EventRegisterType.SELECT)) {
-            command.discordBot.registerMessageForSelectEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
-        }
-        if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
-            command.discordBot.registerMessageForModalEvents(command.author.id, command, persist, duration, additionalData)
-        }
-        success?.accept(it)
-    }, {
-        failure?.accept(it)
-    })
-}
-
-fun RestAction<Void>.queueAndRegisterInteraction(
-    command: DiscordCommand,
-    type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.MODAL),
-    persist: Boolean = false,
-    duration: Duration = Duration.ofMinutes(15),
-    additionalData: HashMap<String, Any?> = hashMapOf(),
-    failure: Consumer<in Throwable>? = null,
-    success: Consumer<in Void>? = null
-) {
-    this.queue({
-        if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
-            command.discordBot.registerMessageForModalEvents(command.author.id, command, persist, duration, additionalData)
-        }
-        success?.accept(it)
-    }, {
-        failure?.accept(it)
-    })
-}
-
-fun ReplyCallbackAction.queueAndRegisterInteraction(
-    command: DiscordCommand,
-    type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
-    persist: Boolean = false,
-    duration: Duration = Duration.ofMinutes(15),
-    additionalData: HashMap<String, Any?> = hashMapOf(),
-    authorIds: ArrayList<String>? = arrayListOf(command.author.id),
-    commandUserOnly: Boolean = true,
-    failure: Consumer<in Throwable>? = null,
-    success: Consumer<in InteractionHook>? = null
-) {
-    this.queue({
-        if (type.contains(DiscordCommand.EventRegisterType.BUTTON)) {
-            command.discordBot.registerMessageForButtonEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
-        }
-        if (type.contains(DiscordCommand.EventRegisterType.SELECT)) {
-            command.discordBot.registerMessageForSelectEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
-        }
-        if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
-            command.discordBot.registerMessageForModalEvents(command.author.id, command, persist, duration, additionalData)
-        }
-        success?.accept(it)
-    }, {
-        failure?.accept(it)
-    })
 }

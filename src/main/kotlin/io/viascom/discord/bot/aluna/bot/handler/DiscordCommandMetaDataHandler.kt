@@ -1,6 +1,8 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import org.springframework.util.StopWatch
 
@@ -18,6 +20,14 @@ interface DiscordCommandMetaDataHandler {
     fun onCommandExecution(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent)
 
     /**
+     * Gets called asynchronously before the context menu is executed.
+     *
+     * @param contextMenu Discord context menu instance
+     * @param event
+     */
+    fun onContextMenuExecution(contextMenu: DiscordContextMenu, event: GenericCommandInteractionEvent)
+
+    /**
      * Gets called asynchronously after the command is executed.
      * This gets also called if the command execution throws an exception.
      *
@@ -26,6 +36,16 @@ interface DiscordCommandMetaDataHandler {
      * @param event Slash command event
      */
     fun onExitCommand(discordCommand: DiscordCommand, stopWatch: StopWatch?, event: SlashCommandInteractionEvent)
+
+    /**
+     * Gets called asynchronously after the context menu is executed.
+     * This gets also called if the context menu execution throws an exception.
+     *
+     * @param contextMenu Discord command instance
+     * @param stopWatch StopWatch instance if enabled
+     * @param event Slash command event
+     */
+    fun onExitCommand(contextMenu: DiscordContextMenu, stopWatch: StopWatch?, event: GenericCommandInteractionEvent)
 
     /**
      * Gets called if the command defined onExecutionException throws an exception.
@@ -39,7 +59,21 @@ interface DiscordCommandMetaDataHandler {
         discordCommand: DiscordCommand,
         throwableOfExecution: Exception,
         exceptionOfSpecificHandler: Exception,
-        event: SlashCommandInteractionEvent
+        event: GenericCommandInteractionEvent
     )
 
+    /**
+     * Gets called if the command defined onExecutionException throws an exception.
+     *
+     * @param contextMenu Discord command instance
+     * @param throwableOfExecution initial exception from the execution
+     * @param exceptionOfSpecificHandler exception thrown by onExecutionException
+     * @param event Slash command event
+     */
+    fun onGenericExecutionException(
+        contextMenu: DiscordContextMenu,
+        throwableOfExecution: Exception,
+        exceptionOfSpecificHandler: Exception,
+        event: GenericCommandInteractionEvent
+    )
 }

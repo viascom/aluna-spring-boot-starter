@@ -11,6 +11,7 @@ aluna:
     gateway-intents: GUILD_MEMBERS,GUILD_PRESENCES,DIRECT_MESSAGE_REACTIONS,DIRECT_MESSAGES,GUILD_MESSAGES
     memberCachePolicy: ALL
     publish-events: false
+    publish-discord-command-event: true
   thread:
     scoped-objects-timeout-scheduler: 5
   command:

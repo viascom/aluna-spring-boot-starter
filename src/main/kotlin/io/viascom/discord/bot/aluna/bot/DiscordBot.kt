@@ -1,11 +1,12 @@
 package io.viascom.discord.bot.aluna.bot
 
-import io.viascom.discord.bot.aluna.bot.handler.DiscordContextMenu
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.model.ObserveCommandInteraction
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
 import net.dv8tion.jda.api.interactions.InteractionHook
+import net.dv8tion.jda.api.requests.RestAction
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -15,6 +16,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
+import java.util.function.Consumer
 
 @Service
 @ConditionalOnJdaEnabled
@@ -32,16 +34,22 @@ open class DiscordBot(
     val commandsWithAutocomplete = arrayListOf<String>()
     val autoCompleteHandlers = hashMapOf<Pair<String, String?>, Class<out AutoCompleteHandler>>()
 
+    @get:JvmSynthetic
+    @set:JvmSynthetic
     internal var messagesToObserveButton: MutableMap<String, ObserveCommandInteraction> =
         Collections.synchronizedMap(hashMapOf<String, ObserveCommandInteraction>())
-        private set
+
+    @get:JvmSynthetic
+    @set:JvmSynthetic
     internal var messagesToObserveSelect: MutableMap<String, ObserveCommandInteraction> =
         Collections.synchronizedMap(hashMapOf<String, ObserveCommandInteraction>())
-        private set
+
+    @get:JvmSynthetic
+    @set:JvmSynthetic
     internal var messagesToObserveModal: MutableMap<String, ObserveCommandInteraction> =
         Collections.synchronizedMap(hashMapOf<String, ObserveCommandInteraction>())
-        private set
 
+    @get:JvmSynthetic
     internal val messagesToObserveScheduledThreadPool =
         AlunaThreadPool.getScheduledThreadPool(
             1,
@@ -51,8 +59,11 @@ open class DiscordBot(
             true
         )
 
+    @get:JvmSynthetic
     internal val commandExecutor =
         AlunaThreadPool.getDynamicThreadPool(alunaProperties.thread.commandExecutorCount, alunaProperties.thread.commandExecutorTtl, "Aluna-Command-%d")
+
+    @get:JvmSynthetic
     internal val asyncExecutor =
         AlunaThreadPool.getDynamicThreadPool(alunaProperties.thread.asyncExecutorCount, alunaProperties.thread.asyncExecutorTtl, "Aluna-Async-%d")
 
@@ -245,4 +256,118 @@ open class DiscordBot(
     fun removeMessageForSelectEvents(messageId: String) = messagesToObserveSelect.remove(messageId)
     fun removeMessageForModalEvents(userId: String) = messagesToObserveModal.remove(userId)
 
+    @JvmOverloads
+    fun <T : Any> queueAndRegisterInteraction(
+        action: RestAction<T>,
+        hook: InteractionHook,
+        command: DiscordCommand,
+        type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
+        persist: Boolean = false,
+        duration: Duration = Duration.ofMinutes(15),
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        authorIds: ArrayList<String>? = arrayListOf(command.author.id),
+        commandUserOnly: Boolean = true,
+        failure: Consumer<in Throwable>? = null,
+        success: Consumer<in T>? = null
+    ) {
+        action.queue({
+            if (type.contains(DiscordCommand.EventRegisterType.BUTTON)) {
+                this.registerMessageForButtonEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
+            }
+            if (type.contains(DiscordCommand.EventRegisterType.SELECT)) {
+                this.registerMessageForSelectEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
+            }
+            if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
+                this.registerMessageForModalEvents(command.author.id, command, persist, duration, additionalData)
+            }
+            success?.accept(it)
+        }, {
+            failure?.accept(it)
+        })
+    }
+
+    @JvmOverloads
+    fun queueAndRegisterInteraction(
+        action: RestAction<Void>,
+        command: DiscordCommand,
+        type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.MODAL),
+        persist: Boolean = false,
+        duration: Duration = Duration.ofMinutes(15),
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        failure: Consumer<in Throwable>? = null,
+        success: Consumer<in Void>? = null
+    ) {
+        action.queue({
+            if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
+                this.registerMessageForModalEvents(command.author.id, command, persist, duration, additionalData)
+            }
+            success?.accept(it)
+        }, {
+            failure?.accept(it)
+        })
+    }
+
+    @JvmOverloads
+    fun queueAndRegisterInteraction(
+        action: ReplyCallbackAction,
+        command: DiscordCommand,
+        type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
+        persist: Boolean = false,
+        duration: Duration = Duration.ofMinutes(15),
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        authorIds: ArrayList<String>? = arrayListOf(command.author.id),
+        commandUserOnly: Boolean = true,
+        failure: Consumer<in Throwable>? = null,
+        success: Consumer<in InteractionHook>? = null
+    ) {
+        action.queue({
+            if (type.contains(DiscordCommand.EventRegisterType.BUTTON)) {
+                this.registerMessageForButtonEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
+            }
+            if (type.contains(DiscordCommand.EventRegisterType.SELECT)) {
+                this.registerMessageForSelectEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
+            }
+            if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
+                this.registerMessageForModalEvents(command.author.id, command, persist, duration, additionalData)
+            }
+            success?.accept(it)
+        }, {
+            failure?.accept(it)
+        })
+    }
 }
+
+fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
+    hook: InteractionHook,
+    command: DiscordCommand,
+    type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
+    persist: Boolean = false,
+    duration: Duration = Duration.ofMinutes(15),
+    additionalData: HashMap<String, Any?> = hashMapOf(),
+    authorIds: ArrayList<String>? = arrayListOf(command.author.id),
+    commandUserOnly: Boolean = true,
+    failure: Consumer<in Throwable>? = null,
+    success: Consumer<in T>? = null
+) = command.discordBot.queueAndRegisterInteraction(this, hook, command, type, persist, duration, additionalData, authorIds, commandUserOnly, failure, success)
+
+fun RestAction<Void>.queueAndRegisterInteraction(
+    command: DiscordCommand,
+    type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.MODAL),
+    persist: Boolean = false,
+    duration: Duration = Duration.ofMinutes(15),
+    additionalData: HashMap<String, Any?> = hashMapOf(),
+    failure: Consumer<in Throwable>? = null,
+    success: Consumer<in Void>? = null
+) = command.discordBot.queueAndRegisterInteraction(this, command, type, persist, duration, additionalData, failure, success)
+
+fun ReplyCallbackAction.queueAndRegisterInteraction(
+    command: DiscordCommand,
+    type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
+    persist: Boolean = false,
+    duration: Duration = Duration.ofMinutes(15),
+    additionalData: HashMap<String, Any?> = hashMapOf(),
+    authorIds: ArrayList<String>? = arrayListOf(command.author.id),
+    commandUserOnly: Boolean = true,
+    failure: Consumer<in Throwable>? = null,
+    success: Consumer<in InteractionHook>? = null
+) = command.discordBot.queueAndRegisterInteraction(this, command, type, persist, duration, additionalData, authorIds, commandUserOnly, failure, success)

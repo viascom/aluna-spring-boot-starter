@@ -1,8 +1,6 @@
 package io.viascom.discord.bot.aluna.event
 
-import io.viascom.discord.bot.aluna.bot.AutoCompleteHandler
-import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.*
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.entities.Channel
@@ -28,6 +26,7 @@ class EventPublisher(
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
+    @JvmSynthetic
     internal fun publishDiscordReadyEvent(jdaEvent: ReadyEvent) {
         discordBot.asyncExecutor.execute {
             logger.debug("Publishing DiscordReadyEvent")
@@ -36,6 +35,7 @@ class EventPublisher(
         }
     }
 
+    @JvmSynthetic
     internal fun publishDiscordFirstShardReadyEvent(jdaEvent: ReadyEvent) {
         discordBot.asyncExecutor.execute {
             logger.debug("Publishing DiscordFirstShardReadyEvent")
@@ -44,6 +44,7 @@ class EventPublisher(
         }
     }
 
+    @JvmSynthetic
     internal fun publishDiscordSlashCommandInitializedEvent(
         newCommands: List<KClass<out CommandDataImpl>>,
         updatedCommands: List<KClass<out CommandDataImpl>>,
@@ -56,6 +57,7 @@ class EventPublisher(
         }
     }
 
+    @JvmSynthetic
     internal fun publishDiscordAutoCompleteHandlerInitializedEvent(handlers: List<KClass<out AutoCompleteHandler>>) {
         discordBot.asyncExecutor.execute {
             logger.debug("Publishing DiscordAutoCompleteHandlerInitializedEvent")
@@ -64,6 +66,7 @@ class EventPublisher(
         }
     }
 
+    @JvmSynthetic
     internal fun publishDiscordCommandEvent(user: User, channel: Channel, server: Guild?, commandPath: String, command: DiscordCommand) {
         discordBot.asyncExecutor.execute {
             logger.debug("Publishing DiscordCommandEvent")
@@ -72,6 +75,25 @@ class EventPublisher(
         }
     }
 
+    @JvmSynthetic
+    internal fun publishDiscordMessageContextEvent(user: User, channel: Channel?, server: Guild?, name: String, contextMenu: DiscordMessageContextMenu) {
+        discordBot.asyncExecutor.execute {
+            logger.debug("Publishing DiscordMessageContextEvent")
+            val discordMessageContextEvent = DiscordMessageContextEvent(this, user, channel, server, name, contextMenu)
+            applicationEventPublisher.publishEvent(discordMessageContextEvent)
+        }
+    }
+
+    @JvmSynthetic
+    internal fun publishDiscordUserContextEvent(user: User, channel: Channel?, server: Guild?, name: String, contextMenu: DiscordUserContextMenu) {
+        discordBot.asyncExecutor.execute {
+            logger.debug("Publishing DiscordUserContextEvent")
+            val discordUserContextEvent = DiscordUserContextEvent(this, user, channel, server, name, contextMenu)
+            applicationEventPublisher.publishEvent(discordUserContextEvent)
+        }
+    }
+
+    @JvmSynthetic
     internal fun publishDiscordEvent(event: GenericEvent) {
         if (alunaProperties.discord.publishEvents) {
             discordBot.asyncExecutor.execute {

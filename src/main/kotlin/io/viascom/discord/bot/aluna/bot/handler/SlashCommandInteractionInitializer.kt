@@ -2,6 +2,7 @@ package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordFirstShardReadyEvent
 import io.viascom.discord.bot.aluna.event.EventPublisher
@@ -78,11 +79,11 @@ internal open class SlashCommandInteractionInitializer(
                     } else {
                         true
                     }
-                }.none { command.name == it.name }
+                }.none { command.name == it.name && command.type == it.type}
             }
 
             commandsToRemove.forEach {
-                logger.debug("Removed unneeded command '/${it.name}'")
+                logger.debug("Removed unneeded interaction '${it.name}'")
                 shardManager.shards.first().deleteCommandById(it.id).queue()
             }
 
@@ -97,10 +98,10 @@ internal open class SlashCommandInteractionInitializer(
             }
 
             commandsToUpdate.forEach { discordCommand ->
-                logger.debug("Update command '/${discordCommand.name}'")
+                logger.debug("Update interaction '${discordCommand.name}'")
                 val editCommand = shardManager.shards.first().editCommandById(discordCommand.id)
                 editCommand.clearOptions()
-                editCommand.apply(commandDataList.first { it.name == discordCommand.name }).queue()
+                editCommand.apply(commandDataList.first { it.name == discordCommand.name && it.type == discordCommand.type }).queue()
             }
 
             val commandsToAdd = commandDataList
@@ -125,10 +126,10 @@ internal open class SlashCommandInteractionInitializer(
                 shardManager.shards.first().upsertCommand(discordCommand).queue { command ->
                     if (discordCommand.type == Command.Type.SLASH) {
                         printCommand((discordCommand as DiscordCommand))
-                        discordBot.commands[command.id] = (discordCommand as DiscordCommand).javaClass
+                        discordBot.commands[command.id] = discordCommand.javaClass
                     }
                     if (discordCommand.type != Command.Type.SLASH) {
-                        logger.debug("Register context menu ${(discordCommand as DiscordContextMenu).name}")
+                        logger.debug("Register context menu '${(discordCommand as DiscordContextMenu).name}'")
                         discordBot.contextMenus[command.id] = discordCommand.javaClass
                     }
                     if (discordCommand.type == Command.Type.SLASH && (discordCommand as DiscordCommand).observeAutoComplete && command.name !in discordBot.commandsWithAutocomplete) {

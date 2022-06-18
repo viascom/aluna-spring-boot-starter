@@ -23,6 +23,7 @@ class CommandScope(private val context: ConfigurableApplicationContext) : Scope 
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
+    @get:JvmSynthetic
     internal val scopedObjects = Collections.synchronizedMap(HashMap<BeanName, HashMap<DiscordStateId, HashMap<UniqueId, ScopedObjectData>>>())
     private var scopedObjectsTimeoutScheduler: ScheduledThreadPoolExecutor
 

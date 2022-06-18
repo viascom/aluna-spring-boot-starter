@@ -122,6 +122,11 @@ class AlunaDiscordProperties {
     var publishDiscordCommandEvent: Boolean = false
 
     /**
+     * Publish Aluna discord context menu event. This event should not be used to answer the context menu!
+     */
+    var publishDiscordContextEvent: Boolean = false
+
+    /**
      * Set status to online and remove activity as soon as Aluna is finished with the startup process and is connected to Discord.
      */
     var setStatusToOnlineWhenReady: Boolean = true

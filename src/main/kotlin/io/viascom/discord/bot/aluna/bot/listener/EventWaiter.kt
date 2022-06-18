@@ -36,13 +36,17 @@ class EventWaiter(
 
     private var logger = LoggerFactory.getLogger(javaClass)
 
+    @get:JvmSynthetic
     internal val waitingEvents: ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, ArrayList<WaitingEvent<GenericEvent>>>> = ConcurrentHashMap()
 
+    @get:JvmSynthetic
     internal val executorThreadPool = AlunaThreadPool.getDynamicThreadPool(
         alunaProperties.thread.eventWaiterThreadPoolCount,
         alunaProperties.thread.eventWaiterThreadPoolTtl,
         "Aluna-Waiter-Pool-%d"
     )
+
+    @get:JvmSynthetic
     internal val scheduledThreadPool =
         AlunaThreadPool.getScheduledThreadPool(
             1,

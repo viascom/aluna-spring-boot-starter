@@ -2,8 +2,8 @@ package io.viascom.discord.bot.aluna.bot.listener
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.handler.DiscordMessageContextMenu
-import io.viascom.discord.bot.aluna.bot.handler.DiscordUserContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordMessageContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenu
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent

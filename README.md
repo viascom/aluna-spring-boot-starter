@@ -22,7 +22,7 @@
 | Library     |                                         Version                                          |
 |-------------|:----------------------------------------------------------------------------------------:|
 | JDA         | <img src="https://img.shields.io/badge/5.0.0--alpha.12-orange.svg" alt="5.0.0-alpha.12"> |
-| Spring Boot |        <img src="https://img.shields.io/badge/2.7.0-brightgreen.svg" alt="2.7.0">         |
+| Spring Boot |        <img src="https://img.shields.io/badge/2.7.0-brightgreen.svg" alt="2.7.0">        |
 | Kotlin      |       <img src="https://img.shields.io/badge/1.6.21-brightgreen.svg" alt="1.6.21">       |
 | jnanoid     |        <img src="https://img.shields.io/badge/2.0.0-brightgreen.svg" alt="2.0.0">        |
 | emoji-java  |        <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1">        |
