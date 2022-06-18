@@ -7,7 +7,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
 
-abstract class AutoCompleteHandler @JvmOverloads constructor(val command: Class<out DiscordCommand>, val option: String? = null) : CommandScopedObject {
+abstract class AutoCompleteHandler @JvmOverloads constructor(val commands: ArrayList<Class<out DiscordCommand>>, val option: String? = null) :
+    CommandScopedObject {
+
+    constructor(command: Class<out DiscordCommand>, option: String? = null) : this(arrayListOf(command), option)
 
     @Autowired
     lateinit var discordBot: DiscordBot

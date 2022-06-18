@@ -28,14 +28,16 @@ internal open class AutoCompleteInteractionInitializer(
         logger.debug("Register AutoCompleteHandlers")
 
         autoCompleteHandlers.forEach { handler ->
-            val command = discordBot.commands.entries.firstOrNull { entry -> handler.command.isAssignableFrom(entry.value) }
-            if (command == null) {
-                logger.warn("Could not register '${handler::class.java.canonicalName}'. No registered command for '${handler.command.canonicalName}' found.")
-                return
-            }
+            handler.commands.forEach { command ->
+                val commandElement = discordBot.commands.entries.firstOrNull { entry -> command.isAssignableFrom(entry.value) }
+                if (commandElement == null) {
+                    logger.warn("Could not register '${handler::class.java.canonicalName}'. No registered command for '${command.canonicalName}' found.")
+                    return
+                }
 
-            discordBot.autoCompleteHandlers[Pair(command.key, handler.option)] = handler::class.java
-            logger.debug("\t--> ${handler::class.simpleName} for ${command.value.simpleName} (${handler.option ?: "<all>"})")
+                discordBot.autoCompleteHandlers[Pair(commandElement.key, handler.option)] = handler::class.java
+                logger.debug("\t--> ${handler::class.simpleName} for ${commandElement.value.simpleName} (${handler.option ?: "<all>"})")
+            }
         }
 
         eventPublisher.publishDiscordAutoCompleteHandlerInitializedEvent(autoCompleteHandlers.map { it::class })
