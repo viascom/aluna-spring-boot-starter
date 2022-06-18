@@ -7,7 +7,6 @@ import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.property.ModeratorIdProvider
-import io.viascom.discord.bot.aluna.property.OwnerIdProvider
 import io.viascom.discord.bot.aluna.util.getOptionAsString
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
@@ -21,7 +20,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType
 @ConditionalOnSystemCommandEnabled
 class SystemCommand(
     private val dataProviders: List<SystemCommandDataProvider>,
-    private val ownerIdProvider: OwnerIdProvider,
     private val moderatorIdProvider: ModeratorIdProvider
 ) : DiscordCommand(
     "system-command",

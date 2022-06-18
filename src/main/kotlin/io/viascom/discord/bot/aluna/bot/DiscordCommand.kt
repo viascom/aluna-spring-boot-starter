@@ -6,6 +6,7 @@ import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.property.AlunaProperties
+import io.viascom.discord.bot.aluna.property.OwnerIdProvider
 import io.viascom.discord.bot.aluna.translation.MessageService
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
@@ -59,6 +60,9 @@ abstract class DiscordCommand(
     @Autowired
     lateinit var discordBot: DiscordBot
 
+    @Autowired
+    lateinit var ownerIdProvider: OwnerIdProvider
+
     @Autowired(required = false)
     lateinit var messageService: MessageService
 
@@ -76,10 +80,7 @@ abstract class DiscordCommand(
     var useScope = UseScope.GLOBAL
     internal var specificServer: String? = null
 
-    @Experimental("This attribute is currently not used by Aluna")
     var isOwnerCommand = false
-
-    @Experimental("This attribute is currently not used by Aluna")
     var isAdministratorOnlyCommand = false
 
     var isEarlyAccessCommand = false
@@ -217,6 +218,10 @@ abstract class DiscordCommand(
     open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
+    open fun onOwnerCommandNotAllowedByUser(event: SlashCommandInteractionEvent) {
+        event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} This command is to powerful for you.").queue()
+    }
+
     open fun onWrongUseScope(event: SlashCommandInteractionEvent, wrongUseScope: WrongUseScope) {
         when {
             wrongUseScope.serverOnly -> {
@@ -313,6 +318,11 @@ abstract class DiscordCommand(
             serverLocale = event.guildLocale
         }
 
+        if (isOwnerCommand && author.idLong !in ownerIdProvider.getOwnerIds()) {
+            onOwnerCommandNotAllowedByUser(event)
+            return
+        }
+
         //checkForBlockedIds(event)
         //checkIfLocalDevelopment(event)
         //checkCommandStatus(event)
@@ -326,6 +336,14 @@ abstract class DiscordCommand(
         //executeCategoryChecks(event)
 
         //checkChannelTopics(event)
+
+        if (isAdministratorOnlyCommand) {
+            val missingAdministratorPermission = discordCommandConditions.checkForNeededUserPermissions(this, arrayListOf(Permission.ADMINISTRATOR), event)
+            if (missingAdministratorPermission.hasMissingPermissions) {
+                onMissingUserPermission(event, missingAdministratorPermission)
+                return
+            }
+        }
 
         val missingUserPermissions = discordCommandConditions.checkForNeededUserPermissions(this, userPermissions, event)
         if (missingUserPermissions.hasMissingPermissions) {
