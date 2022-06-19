@@ -22,11 +22,14 @@
 package io.viascom.discord.bot.aluna
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.bot.command.systemcommand.DefaultSystemCommandEmojiProvider
+import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandEmojiProvider
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.bot.listener.*
 import io.viascom.discord.bot.aluna.bot.shardmanager.DefaultShardManagerBuilder
 import io.viascom.discord.bot.aluna.bot.shardmanager.ShardManagerBuilder
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnTranslationEnabled
 import io.viascom.discord.bot.aluna.property.*
 import io.viascom.discord.bot.aluna.translation.DefaultMessageService
@@ -139,6 +142,15 @@ open class AlunaAutoConfiguration {
     open fun moderatorIdProvider(alunaProperties: AlunaProperties): ModeratorIdProvider {
         logger.debug("Enable DefaultModeratorIdProvider")
         return DefaultModeratorIdProvider(alunaProperties)
+    }
+
+    @Bean
+    @ConditionalOnJdaEnabled
+    @ConditionalOnSystemCommandEnabled
+    @ConditionalOnMissingBean
+    open fun systemCommandEmojiProvider(): SystemCommandEmojiProvider {
+        logger.debug("Enable DefaultSystemCommandEmojiProvider")
+        return DefaultSystemCommandEmojiProvider()
     }
 
     @Bean

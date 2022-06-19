@@ -23,7 +23,6 @@ package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
 import io.viascom.discord.bot.aluna.bot.Command
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
-import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
@@ -46,7 +45,8 @@ import java.util.stream.Collectors
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 class PurgeMessagesProvider(
-    private val shardManager: ShardManager
+    private val shardManager: ShardManager,
+    private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : SystemCommandDataProvider(
     "purge_messages",
     "Purge Messages",
@@ -62,13 +62,13 @@ class PurgeMessagesProvider(
 
         val id = event.getOptionAsString("args", "")!!
         if (id.isEmpty()) {
-            event.deferReply().setContent("${AlunaEmote.BOT_CROSS.asMention()} Please specify an ID as argument for this command").queue()
+            event.deferReply().setContent("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify an ID as argument for this command").queue()
             return
         }
 
         val channel = shardManager.getChannelById(GuildMessageChannel::class.java, id)
         if (channel == null) {
-            event.deferReply().setContent("${AlunaEmote.BOT_CROSS.asMention()} Please specify a valid channel ID as argument for this command").queue()
+            event.deferReply().setContent("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify a valid channel ID as argument for this command").queue()
             return
         }
 
@@ -87,7 +87,7 @@ class PurgeMessagesProvider(
     override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         event.deferReply(true).queue {
             it.editOriginal(
-                "${AlunaEmote.BOT_CHECK.asMention()} Removing ${
+                "${systemCommandEmojiProvider.tickEmoji().asMention} Removing ${
                     event.getValueAsString(
                         "amount",
                         "0"

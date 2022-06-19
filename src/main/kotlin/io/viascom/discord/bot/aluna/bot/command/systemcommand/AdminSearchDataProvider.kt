@@ -25,7 +25,6 @@ import io.viascom.discord.bot.aluna.bot.Command
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.adminsearch.AdminSearchPageDataProvider
-import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
@@ -49,7 +48,8 @@ import java.awt.Color
 @ConditionalOnSystemCommandEnabled
 class AdminSearchDataProvider(
     private val shardManager: ShardManager,
-    private val adminSearchPageDataProviders: List<AdminSearchPageDataProvider>
+    private val adminSearchPageDataProviders: List<AdminSearchPageDataProvider>,
+    private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : SystemCommandDataProvider(
     "admin_search",
     "Admin Search",
@@ -73,14 +73,14 @@ class AdminSearchDataProvider(
 
         val id = event.getOptionAsString("args", "")!!
         if (id.isEmpty()) {
-            lastHook.editOriginal("${AlunaEmote.BOT_CROSS.asMention()} Please specify an ID as argument for this command").queue()
+            lastHook.editOriginal("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify an ID as argument for this command").queue()
             return
         }
 
         lastEmbed = EmbedBuilder()
             .setColor(Color.MAGENTA)
             .setTitle("Admin Search")
-            .setDescription("${AlunaEmote.LOADING.asMention()} Searching for `${id}`...")
+            .setDescription("${systemCommandEmojiProvider.loadingEmoji().asMention} Searching for `${id}`...")
         lastHook.editOriginalEmbeds(lastEmbed.build()).complete()
 
         //======= User =======

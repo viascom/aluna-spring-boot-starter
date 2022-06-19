@@ -23,7 +23,6 @@ package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
 import io.viascom.discord.bot.aluna.bot.Command
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
-import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
@@ -45,7 +44,8 @@ import kotlin.math.min
 @ConditionalOnSystemCommandEnabled
 @ConditionalOnProperty(name = ["command.system-command.enable-kotlin-script-evaluate"], prefix = "aluna", matchIfMissing = false)
 class KotlinEvaluateProvider(
-    private val kotlinScriptService: KotlinScriptService
+    private val kotlinScriptService: KotlinScriptService,
+    private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : SystemCommandDataProvider(
     "evaluate_kotlin",
     "Evaluate Script",
@@ -72,7 +72,7 @@ class KotlinEvaluateProvider(
         event.reply(
             "Script:\n```kotlin\n" +
                     "$script```\n" +
-                    "${AlunaEmote.LOADING.asMention()} Result:\n" +
+                    "${systemCommandEmojiProvider.loadingEmoji().asMention} Result:\n" +
                     "``` ```"
         ).queue {
             val result = try {

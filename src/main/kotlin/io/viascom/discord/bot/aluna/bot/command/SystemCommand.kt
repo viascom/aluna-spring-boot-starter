@@ -24,7 +24,7 @@ package io.viascom.discord.bot.aluna.bot.command
 import io.viascom.discord.bot.aluna.bot.Command
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandDataProvider
-import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
+import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandEmojiProvider
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.property.ModeratorIdProvider
@@ -41,7 +41,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionType
 @ConditionalOnSystemCommandEnabled
 class SystemCommand(
     private val dataProviders: List<SystemCommandDataProvider>,
-    private val moderatorIdProvider: ModeratorIdProvider
+    private val moderatorIdProvider: ModeratorIdProvider,
+    private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : DiscordCommand(
     "system-command",
     "Runs a system command.",
@@ -62,7 +63,7 @@ class SystemCommand(
 
     override fun execute(event: SlashCommandInteractionEvent) {
         if (event.user.idLong !in ownerIdProvider.getOwnerIds() && event.user.idLong !in moderatorIdProvider.getModeratorIds()) {
-            event.deferReply(true).setContent("${AlunaEmote.BOT_CROSS.asMention()} This command is to powerful for you.").queue()
+            event.deferReply(true).setContent("${systemCommandEmojiProvider.crossEmoji().asMention} This command is to powerful for you.").queue()
             return
         }
 
@@ -81,7 +82,7 @@ class SystemCommand(
                 "system-command/${selectedProvider!!.id}"
             ))
         ) {
-            event.deferReply(true).setContent("${AlunaEmote.BOT_CROSS.asMention()} This command is to powerful for you.").queue()
+            event.deferReply(true).setContent("${systemCommandEmojiProvider.crossEmoji().asMention} This command is to powerful for you.").queue()
             return
         }
 

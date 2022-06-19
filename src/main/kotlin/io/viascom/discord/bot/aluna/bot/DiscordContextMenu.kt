@@ -22,7 +22,6 @@
 package io.viascom.discord.bot.aluna.bot
 
 import datadog.trace.api.Trace
-import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandAdditionalConditions
 import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandConditions
 import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandLoadAdditionalData
@@ -184,7 +183,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
         val voiceChannelPermissions = missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" }
         val serverPermissions = missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
         event.deferReply(true).setContent(
-            "${AlunaEmote.SMALL_CROSS.asMention()} You are missing the following permission to execute this command:\n" +
+            "⛔ You are missing the following permission to execute this command:\n" +
                     (if (textChannelPermissions.isNotBlank()) textChannelPermissions + "\n" else "") +
                     (if (voiceChannelPermissions.isNotBlank()) voiceChannelPermissions + "\n" else "") +
                     (if (serverPermissions.isNotBlank()) serverPermissions + "\n" else "")
@@ -195,11 +194,11 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
         when {
             missingPermissions.notInVoice -> {
                 event.deferReply(true)
-                    .setContent("${AlunaEmote.SMALL_CROSS.asMention()} You need to be in a voice channel yourself to execute this command").queue()
+                    .setContent("⛔ You need to be in a voice channel yourself to execute this command").queue()
 
             }
             (missingPermissions.hasMissingPermissions) -> {
-                event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} I'm missing the following permission to execute this command:\n" +
+                event.deferReply(true).setContent("⛔ I'm missing the following permission to execute this command:\n" +
                         missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
                         missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
                         missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
@@ -209,7 +208,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     }
 
     open fun onFailedAdditionalRequirements(event: GenericCommandInteractionEvent, additionalRequirements: DiscordCommand.AdditionalRequirements) {
-        event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} Additional requirements for this command failed.").queue()
+        event.deferReply(true).setContent("⛔ Additional requirements for this command failed.").queue()
     }
 
     open fun onExecutionException(event: GenericCommandInteractionEvent, exception: Exception) {

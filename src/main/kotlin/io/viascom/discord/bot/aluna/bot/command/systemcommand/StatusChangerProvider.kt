@@ -24,7 +24,6 @@ package io.viascom.discord.bot.aluna.bot.command.systemcommand
 import io.viascom.discord.bot.aluna.bot.Command
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
-import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
@@ -48,7 +47,8 @@ import java.awt.Color
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 class StatusChangerProvider(
-    private val shardManager: ShardManager
+    private val shardManager: ShardManager,
+    private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : SystemCommandDataProvider(
     "change_status",
     "Change Bot Status & Activity",
@@ -90,9 +90,9 @@ class StatusChangerProvider(
                 "New Activity Url",
                 activityUrl + "\n" +
                         if (Activity.isValidStreamingUrl(activityUrl)) {
-                            AlunaEmote.SMALL_TICK.toStringShort(true) + "Valid"
+                            "${systemCommandEmojiProvider.tickEmoji().asMention} Valid"
                         } else {
-                            AlunaEmote.SMALL_CROSS.toStringShort(true) + "Invalid"
+                            "${systemCommandEmojiProvider.crossEmoji().asMention} Invalid"
                         },
                 false
             )
@@ -156,7 +156,7 @@ class StatusChangerProvider(
 
                 lastEmbed.clearFields()
                 lastEmbed.setThumbnail(null)
-                lastEmbed.setDescription("${AlunaEmote.BOT_CHECK.toStringShort()} Changed bot status")
+                lastEmbed.setDescription("${systemCommandEmojiProvider.tickEmoji().asMention} Changed bot status")
 
                 lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(arrayListOf()).queue()
             }
@@ -166,7 +166,7 @@ class StatusChangerProvider(
                 lastEmbed.clearFields()
                 lastEmbed.setThumbnail(null)
                 lastEmbed.setColor(Color.RED)
-                lastEmbed.setDescription("${AlunaEmote.BOT_CROSS.toStringShort()} Canceled")
+                lastEmbed.setDescription("${systemCommandEmojiProvider.crossEmoji().asMention} Canceled")
 
                 lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(arrayListOf()).queue()
             }

@@ -23,7 +23,6 @@ package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
 import io.viascom.discord.bot.aluna.bot.Command
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
-import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
@@ -46,7 +45,8 @@ import java.time.Duration
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 class LeaveServerProvider(
-    private val shardManager: ShardManager
+    private val shardManager: ShardManager,
+    private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : SystemCommandDataProvider(
     "leave_server",
     "Leave Server",
@@ -64,13 +64,13 @@ class LeaveServerProvider(
 
         val id = event.getOptionAsString("args", "")!!
         if (id.isEmpty()) {
-            lastHook.editOriginal("${AlunaEmote.BOT_CROSS.asMention()} Please specify an ID as argument for this command").queue()
+            lastHook.editOriginal("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify an ID as argument for this command").queue()
             return
         }
 
         val server = shardManager.getGuildById(id)
         if (server == null) {
-            lastHook.editOriginal("${AlunaEmote.BOT_CROSS.asMention()} Please specify a valid server ID as argument for this command").queue()
+            lastHook.editOriginal("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify a valid server ID as argument for this command").queue()
             return
         }
 
@@ -78,11 +78,11 @@ class LeaveServerProvider(
 
         lastEmbed = EmbedBuilder()
             .setColor(Color.RED)
-            .setDescription("${AlunaEmote.DOT_RED.asMention()} Do you really want that this Bot leaves the server **${server.name}**?")
+            .setDescription("❓ Do you really want that this Bot leaves the server **${server.name}**?")
         lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(
             ActionRow.of(
-                createDangerButton("yes", "Yes", AlunaEmote.SMALL_TICK_WHITE.toEmoji()),
-                createSuccessButton("no", "No", AlunaEmote.SMALL_CROSS_WHITE.toEmoji())
+                createDangerButton("yes", "Yes"),
+                createSuccessButton("no", "No")
             )
         ).queueAndRegisterInteraction(lastHook, command, duration = Duration.ofMinutes(2))
     }
@@ -92,10 +92,10 @@ class LeaveServerProvider(
             lastHook = hook
 
             if (event.componentId == "yes") {
-                lastEmbed.setDescription("${AlunaEmote.DOT_GREEN.asMention()} Bot left **${selectedServer.name}**")
+                lastEmbed.setDescription("${systemCommandEmojiProvider.tickEmoji().asMention} Bot left **${selectedServer.name}**")
                 selectedServer.leave().queue()
             } else {
-                lastEmbed.setDescription("${AlunaEmote.DOT_YELLOW.asMention()} Canceled")
+                lastEmbed.setDescription("${systemCommandEmojiProvider.crossEmoji().asMention} Canceled")
             }
             lastHook.editOriginalEmbeds(lastEmbed.build()).removeActionRows().queue()
         }

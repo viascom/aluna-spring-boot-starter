@@ -22,7 +22,6 @@
 package io.viascom.discord.bot.aluna.bot
 
 import datadog.trace.api.Trace
-import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.event.EventPublisher
@@ -242,16 +241,16 @@ abstract class DiscordCommand(
     }
 
     open fun onOwnerCommandNotAllowedByUser(event: SlashCommandInteractionEvent) {
-        event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} This command is to powerful for you.").queue()
+        event.deferReply(true).setContent("⛔ This command is to powerful for you.").queue()
     }
 
     open fun onWrongUseScope(event: SlashCommandInteractionEvent, wrongUseScope: WrongUseScope) {
         when {
             wrongUseScope.serverOnly -> {
-                event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} This command can only be used on a server directly.").queue()
+                event.deferReply(true).setContent("⛔ This command can only be used on a server directly.").queue()
             }
             wrongUseScope.subCommandServerOnly -> {
-                event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} This command can only be used on a server directly.").queue()
+                event.deferReply(true).setContent("⛔ This command can only be used on a server directly.").queue()
             }
         }
     }
@@ -261,7 +260,7 @@ abstract class DiscordCommand(
         val voiceChannelPermissions = missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" }
         val serverPermissions = missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
         event.deferReply(true).setContent(
-            "${AlunaEmote.SMALL_CROSS.asMention()} You are missing the following permission to execute this command:\n" +
+            "⛔ You are missing the following permission to execute this command:\n" +
                     (if (textChannelPermissions.isNotBlank()) textChannelPermissions + "\n" else "") +
                     (if (voiceChannelPermissions.isNotBlank()) voiceChannelPermissions + "\n" else "") +
                     (if (serverPermissions.isNotBlank()) serverPermissions + "\n" else "")
@@ -272,11 +271,11 @@ abstract class DiscordCommand(
         when {
             missingPermissions.notInVoice -> {
                 event.deferReply(true)
-                    .setContent("${AlunaEmote.SMALL_CROSS.asMention()} You need to be in a voice channel yourself to execute this command").queue()
+                    .setContent("⛔ You need to be in a voice channel yourself to execute this command").queue()
 
             }
             (missingPermissions.hasMissingPermissions) -> {
-                event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} I'm missing the following permission to execute this command:\n" +
+                event.deferReply(true).setContent("⛔ I'm missing the following permission to execute this command:\n" +
                         missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
                         missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
                         missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
@@ -286,7 +285,7 @@ abstract class DiscordCommand(
     }
 
     open fun onFailedAdditionalRequirements(event: SlashCommandInteractionEvent, additionalRequirements: AdditionalRequirements) {
-        event.deferReply(true).setContent("${AlunaEmote.SMALL_CROSS.asMention()} Additional requirements for this command failed.").queue()
+        event.deferReply(true).setContent("⛔ Additional requirements for this command failed.").queue()
     }
 
     open fun onExecutionException(event: SlashCommandInteractionEvent, exception: Exception) {

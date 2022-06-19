@@ -2,7 +2,6 @@ package io.viascom.discord.bot.aluna
 
 import io.viascom.discord.bot.aluna.bot.Command
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.emotes.AlunaEmote
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.util.removeActionRows
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -27,7 +26,7 @@ class PongCommand : DiscordCommand(
     override fun execute(event: SlashCommandInteractionEvent) {
         event.deferReply().queue { hook ->
             logger.debug(this.hashCode().toString())
-            hook.editOriginal("I'm currently ${AlunaEmote.ONLINE.asMention()} Online").setActionRows(ActionRow.of(Button.primary("hi", "Hi")))
+            hook.editOriginal("I'm currently Online").setActionRows(ActionRow.of(Button.primary("hi", "Hi")))
                 .queueAndRegisterInteraction(hook, this, persist = true, type = arrayListOf(EventRegisterType.BUTTON, EventRegisterType.SELECT))
 
         }
