@@ -1,13 +1,13 @@
 package io.viascom.discord.bot.aluna.model
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.DiscordInteractionHandler
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.concurrent.ScheduledFuture
 import kotlin.reflect.KClass
 
 class ObserveCommandInteraction(
-    val command: KClass<out DiscordCommand>,
+    val command: KClass<out DiscordInteractionHandler>,
     val uniqueId: String?,
     val startTime: LocalDateTime,
     val duration: Duration,

@@ -19,12 +19,13 @@ import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
 
-abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDataImpl(type, name), CommandScopedObject {
+abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDataImpl(type, name), CommandScopedObject, DiscordInteractionHandler {
 
     @Autowired
     lateinit var alunaProperties: AlunaProperties
@@ -45,17 +46,20 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     lateinit var eventPublisher: EventPublisher
 
     @Autowired
-    lateinit var discordBot: DiscordBot
+    override lateinit var discordBot: DiscordBot
 
     @Autowired(required = false)
     lateinit var messageService: MessageService
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
+    //This gets set by the CommandContext automatically
     override lateinit var uniqueId: String
 
+    override val interactionName = name
+
     var commandDevelopmentStatus = DiscordCommand.DevelopmentStatus.LIVE
-    var isEarlyAccessCommand = false
+    private var isEarlyAccessCommand = false
 
     override var beanTimoutDelay: Duration = Duration.ofMinutes(15)
     override var beanUseAutoCompleteBean: Boolean = false
@@ -75,7 +79,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     var botPermissions = arrayListOf<Permission>()
 
     var channel: Channel? = null
-    lateinit var author: User
+    override lateinit var author: User
 
     var server: Guild? = null
     var serverChannel: GuildChannel? = null
@@ -94,7 +98,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
     @Trace
-    open fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return true
     }
 
@@ -104,7 +108,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
      * @param event
      */
     @Trace
-    open fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    override fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
     /**
@@ -115,7 +119,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
     @Trace
-    open fun onSelectMenuInteraction(event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onSelectMenuInteraction(event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return true
     }
 
@@ -125,7 +129,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
      * @param event
      */
     @Trace
-    open fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    override fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
     /**
@@ -135,7 +139,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
     @Trace
-    open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return true
     }
 
@@ -143,7 +147,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
      * This method gets triggered, as soon as a modal event observer duration timeout is reached.
      */
     @Trace
-    open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    override fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
     @Trace
@@ -194,7 +198,8 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     fun exitCommand(event: GenericCommandInteractionEvent) {
         if (alunaProperties.debug.useStopwatch && stopWatch != null) {
             stopWatch!!.stop()
-            logger.info("/${event.commandPath} (${this.author.id})${if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else ""} -> ${stopWatch!!.totalTimeMillis}ms")
+            MDC.put("duration", stopWatch!!.totalTimeMillis.toString())
+            logger.info("Context menu '${event.commandPath}' (${this.author.id})${if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else ""} took ${stopWatch!!.totalTimeMillis}ms")
             when {
                 (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the context menu ${event.commandPath} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
                 (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the context menu ${event.commandPath} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")

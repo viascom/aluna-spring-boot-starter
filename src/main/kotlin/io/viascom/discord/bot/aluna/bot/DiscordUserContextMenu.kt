@@ -31,6 +31,7 @@ abstract class DiscordUserContextMenu(name: String) : DiscordContextMenu(Command
         }
 
         MDC.put("command", event.commandPath)
+        MDC.put("uniqueId", uniqueId)
 
         server = event.guild
         server?.let { MDC.put("discord.server", "${it.id} (${it.name})") }
@@ -76,7 +77,7 @@ abstract class DiscordUserContextMenu(name: String) : DiscordContextMenu(Command
             if (alunaProperties.discord.publishDiscordContextEvent) {
                 eventPublisher.publishDiscordUserContextEvent(author, channel, server, event.commandPath, this)
             }
-            logger.info("Run context menu ${event.commandPath}" + if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else "")
+            logger.info("Run context menu '${event.commandPath}'" + if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else "")
             execute(event)
         } catch (e: Exception) {
             try {

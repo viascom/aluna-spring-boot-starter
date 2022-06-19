@@ -70,14 +70,14 @@ open class DiscordBot(
     @JvmOverloads
     fun registerMessageForButtonEvents(
         messageId: String,
-        command: DiscordCommand,
+        command: DiscordInteractionHandler,
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
         additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
         commandUserOnly: Boolean = false
     ) {
-        logger.debug("Register message $messageId for button events to command /${command.name}" + if (commandUserOnly) " (only specified users can use it)" else "")
+        logger.debug("Register message $messageId for button events to interaction '${command.interactionName}'" + if (commandUserOnly) " (only specified users can use it)" else "")
         if (!additionalData.containsKey("message.id")) {
             additionalData["message.id"] = messageId
         }
@@ -86,7 +86,7 @@ open class DiscordBot(
             try {
                 context.getBean(command::class.java).onButtonInteractionTimeout(additionalData)
             } catch (e: Exception) {
-                logger.debug("Could not run onButtonInteractionTimeout for command /${command.name}\"\n${e.stackTraceToString()}")
+                logger.debug("Could not run onButtonInteractionTimeout for interaction '${command.interactionName}'\"\n${e.stackTraceToString()}")
             }
             removeMessageForButtonEvents(messageId)
         }, duration.seconds, TimeUnit.SECONDS)
@@ -108,7 +108,7 @@ open class DiscordBot(
     @JvmOverloads
     fun registerMessageForButtonEvents(
         hook: InteractionHook,
-        command: DiscordCommand,
+        command: DiscordInteractionHandler,
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
         additionalData: HashMap<String, Any?> = hashMapOf(),
@@ -116,7 +116,7 @@ open class DiscordBot(
         commandUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal().queue { message ->
-            logger.debug("Register message ${message.id} for button events to command /${command.name}" + if (commandUserOnly) " (only specified users can use it)" else "")
+            logger.debug("Register message ${message.id} for button events to interaction '${command.interactionName}'" + if (commandUserOnly) " (only specified users can use it)" else "")
             if (!additionalData.containsKey("message.id")) {
                 additionalData["message.id"] = message.id
             }
@@ -124,7 +124,7 @@ open class DiscordBot(
                 try {
                     context.getBean(command::class.java).onButtonInteractionTimeout(additionalData)
                 } catch (e: Exception) {
-                    logger.debug("Could not run onButtonInteractionTimeout for command /${command.name}\"\n${e.stackTraceToString()}")
+                    logger.debug("Could not run onButtonInteractionTimeout for interaction '${command.interactionName}'\"\n${e.stackTraceToString()}")
                 }
                 removeMessageForButtonEvents(message.id)
             }, duration.seconds, TimeUnit.SECONDS)
@@ -147,14 +147,14 @@ open class DiscordBot(
     @JvmOverloads
     fun registerMessageForSelectEvents(
         messageId: String,
-        command: DiscordCommand,
+        command: DiscordInteractionHandler,
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
         additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
         commandUserOnly: Boolean = false
     ) {
-        logger.debug("Register message $messageId for select events to command /${command.name}" + if (commandUserOnly) " (only specified users can use it)" else "")
+        logger.debug("Register message $messageId for select events to interaction '${command.interactionName}'" + if (commandUserOnly) " (only specified users can use it)" else "")
         if (!additionalData.containsKey("message.id")) {
             additionalData["message.id"] = messageId
         }
@@ -162,7 +162,7 @@ open class DiscordBot(
             try {
                 context.getBean(command::class.java).onSelectMenuInteractionTimeout(additionalData)
             } catch (e: Exception) {
-                logger.debug("Could not run onSelectMenuInteractionTimeout for command /${command.name}\"\n${e.stackTraceToString()}")
+                logger.debug("Could not run onSelectMenuInteractionTimeout for interaction '${command.interactionName}'\"\n${e.stackTraceToString()}")
             }
             removeMessageForSelectEvents(messageId)
         }, duration.seconds, TimeUnit.SECONDS)
@@ -184,7 +184,7 @@ open class DiscordBot(
     @JvmOverloads
     fun registerMessageForSelectEvents(
         hook: InteractionHook,
-        command: DiscordCommand,
+        command: DiscordInteractionHandler,
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
         additionalData: HashMap<String, Any?> = hashMapOf(),
@@ -192,7 +192,7 @@ open class DiscordBot(
         commandUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal().queue { message ->
-            logger.debug("Register message ${message.id} for select events to command /${command.name}" + if (commandUserOnly) " (only specified users can use it)" else "")
+            logger.debug("Register message ${message.id} for select events to interaction '${command.interactionName}'" + if (commandUserOnly) " (only specified users can use it)" else "")
             if (!additionalData.containsKey("message.id")) {
                 additionalData["message.id"] = message.id
             }
@@ -200,7 +200,7 @@ open class DiscordBot(
                 try {
                     context.getBean(command::class.java).onSelectMenuInteractionTimeout(additionalData)
                 } catch (e: Exception) {
-                    logger.debug("Could not run onSelectMenuInteractionTimeout for command /${command.name}\"\n${e.stackTraceToString()}")
+                    logger.debug("Could not run onSelectMenuInteractionTimeout for interaction '${command.interactionName}'\"\n${e.stackTraceToString()}")
                 }
                 removeMessageForSelectEvents(message.id)
             }, duration.seconds, TimeUnit.SECONDS)
@@ -223,17 +223,17 @@ open class DiscordBot(
     @JvmOverloads
     fun registerMessageForModalEvents(
         authorId: String,
-        command: DiscordCommand,
+        command: DiscordInteractionHandler,
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
         additionalData: HashMap<String, Any?> = hashMapOf()
     ) {
-        logger.debug("Register user $authorId for modal events to command /${command.name}")
+        logger.debug("Register user $authorId for modal events to interaction '${command.interactionName}'")
         val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
             try {
                 context.getBean(command::class.java).onModalInteractionTimeout(additionalData)
             } catch (e: Exception) {
-                logger.debug("Could not run onModalInteractionTimeout for command /${command.name}\"\n${e.stackTraceToString()}")
+                logger.debug("Could not run onModalInteractionTimeout for interaction '${command.interactionName}'\"\n${e.stackTraceToString()}")
             }
             removeMessageForModalEvents(authorId)
         }, duration.seconds, TimeUnit.SECONDS)
@@ -260,7 +260,7 @@ open class DiscordBot(
     fun <T : Any> queueAndRegisterInteraction(
         action: RestAction<T>,
         hook: InteractionHook,
-        command: DiscordCommand,
+        command: DiscordInteractionHandler,
         type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
@@ -289,7 +289,7 @@ open class DiscordBot(
     @JvmOverloads
     fun queueAndRegisterInteraction(
         action: RestAction<Void>,
-        command: DiscordCommand,
+        command: DiscordInteractionHandler,
         type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.MODAL),
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
@@ -310,7 +310,7 @@ open class DiscordBot(
     @JvmOverloads
     fun queueAndRegisterInteraction(
         action: ReplyCallbackAction,
-        command: DiscordCommand,
+        command: DiscordInteractionHandler,
         type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
@@ -339,7 +339,7 @@ open class DiscordBot(
 
 fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
     hook: InteractionHook,
-    command: DiscordCommand,
+    command: DiscordInteractionHandler,
     type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
     persist: Boolean = false,
     duration: Duration = Duration.ofMinutes(15),
@@ -351,7 +351,7 @@ fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
 ) = command.discordBot.queueAndRegisterInteraction(this, hook, command, type, persist, duration, additionalData, authorIds, commandUserOnly, failure, success)
 
 fun RestAction<Void>.queueAndRegisterInteraction(
-    command: DiscordCommand,
+    command: DiscordInteractionHandler,
     type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.MODAL),
     persist: Boolean = false,
     duration: Duration = Duration.ofMinutes(15),
@@ -361,7 +361,7 @@ fun RestAction<Void>.queueAndRegisterInteraction(
 ) = command.discordBot.queueAndRegisterInteraction(this, command, type, persist, duration, additionalData, failure, success)
 
 fun ReplyCallbackAction.queueAndRegisterInteraction(
-    command: DiscordCommand,
+    command: DiscordInteractionHandler,
     type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
     persist: Boolean = false,
     duration: Duration = Duration.ofMinutes(15),
