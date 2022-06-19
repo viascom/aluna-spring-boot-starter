@@ -27,6 +27,8 @@ import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordFirstShardReadyEvent
 import io.viascom.discord.bot.aluna.event.EventPublisher
+import io.viascom.discord.bot.aluna.model.DevelopmentStatus
+import io.viascom.discord.bot.aluna.model.UseScope
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.getServer
 import net.dv8tion.jda.api.interactions.commands.Command
@@ -61,7 +63,7 @@ internal open class SlashCommandInteractionInitializer(
         val filteredCommands = commands.filter {
             when {
                 (alunaProperties.includeInDevelopmentCommands) -> true
-                (alunaProperties.productionMode && it.commandDevelopmentStatus == DiscordCommand.DevelopmentStatus.IN_DEVELOPMENT) -> false
+                (alunaProperties.productionMode && it.commandDevelopmentStatus == DevelopmentStatus.IN_DEVELOPMENT) -> false
                 else -> true
             }
         }.map {
@@ -84,7 +86,7 @@ internal open class SlashCommandInteractionInitializer(
             val filteredContext = contextMenus.filter {
                 when {
                     (alunaProperties.includeInDevelopmentCommands) -> true
-                    (alunaProperties.productionMode && it.commandDevelopmentStatus == DiscordCommand.DevelopmentStatus.IN_DEVELOPMENT) -> false
+                    (alunaProperties.productionMode && it.commandDevelopmentStatus == DevelopmentStatus.IN_DEVELOPMENT) -> false
                     else -> true
                 }
             }.toCollection(arrayListOf())
@@ -96,7 +98,7 @@ internal open class SlashCommandInteractionInitializer(
             val commandsToRemove = currentCommands.filter { command ->
                 commandDataList.filter {
                     if (it.type == Command.Type.SLASH) {
-                        (it as DiscordCommand).useScope in arrayListOf(DiscordCommand.UseScope.GLOBAL, DiscordCommand.UseScope.GUILD_ONLY)
+                        (it as DiscordCommand).useScope in arrayListOf(UseScope.GLOBAL, UseScope.GUILD_ONLY)
                     } else {
                         true
                     }
@@ -111,7 +113,7 @@ internal open class SlashCommandInteractionInitializer(
             val commandsToUpdate = currentCommands.filter { it.name !in commandsToRemove.map { it.name } }.filter { command ->
                 commandDataList.filter {
                     if (it.type == Command.Type.SLASH) {
-                        (it as DiscordCommand).useScope in arrayListOf(DiscordCommand.UseScope.GLOBAL, DiscordCommand.UseScope.GUILD_ONLY)
+                        (it as DiscordCommand).useScope in arrayListOf(UseScope.GLOBAL, UseScope.GUILD_ONLY)
                     } else {
                         true
                     }
@@ -128,7 +130,7 @@ internal open class SlashCommandInteractionInitializer(
             val commandsToAdd = commandDataList
                 .filter {
                     if (it.type == Command.Type.SLASH) {
-                        (it as DiscordCommand).useScope in arrayListOf(DiscordCommand.UseScope.GLOBAL, DiscordCommand.UseScope.GUILD_ONLY)
+                        (it as DiscordCommand).useScope in arrayListOf(UseScope.GLOBAL, UseScope.GUILD_ONLY)
                     } else {
                         true
                     }

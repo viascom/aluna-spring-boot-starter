@@ -22,12 +22,12 @@
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
 import io.viascom.discord.bot.aluna.bot.Command
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnAlunaNotProductionMode
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
+import io.viascom.discord.bot.aluna.model.EventRegisterType
 import io.viascom.discord.bot.aluna.util.*
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -67,7 +67,7 @@ class GenerateEmojiEnumProvider(
         createOverviewMessage()
         event.replyEmbeds(latestEmbed.build()).setEphemeral(true).addActionRows(getActionRow()).queueAndRegisterInteraction(
             command,
-            arrayListOf(DiscordCommand.EventRegisterType.BUTTON, DiscordCommand.EventRegisterType.SELECT, DiscordCommand.EventRegisterType.MODAL),
+            arrayListOf(EventRegisterType.BUTTON, EventRegisterType.SELECT, EventRegisterType.MODAL),
             true
         ) {
             latestHook = it

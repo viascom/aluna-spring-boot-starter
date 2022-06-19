@@ -25,6 +25,7 @@ import datadog.trace.api.Trace
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.event.EventPublisher
+import io.viascom.discord.bot.aluna.model.*
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.property.OwnerIdProvider
 import io.viascom.discord.bot.aluna.translation.MessageService
@@ -445,45 +446,6 @@ abstract class DiscordCommand(
         }
     }
 
-    enum class DevelopmentStatus {
-        IN_DEVELOPMENT,
-        ALPHA,
-        EARLY_ACCESS,
-        LIVE
-    }
-
-    enum class UseScope {
-        GLOBAL,
-        GUILD_ONLY,
-
-        @Experimental("This UseScope is currently not in use")
-        GUILD_SPECIFIC
-    }
-
-    class MissingPermissions(
-        val textChannel: ArrayList<Permission> = arrayListOf(),
-        val voiceChannel: ArrayList<Permission> = arrayListOf(),
-        val server: ArrayList<Permission> = arrayListOf(),
-        var notInVoice: Boolean = false,
-    ) {
-        val hasMissingPermissions: Boolean
-            get() = textChannel.isNotEmpty() || voiceChannel.isNotEmpty() || server.isNotEmpty()
-    }
-
-    class WrongUseScope(var serverOnly: Boolean = false, var subCommandServerOnly: Boolean = false) {
-        val wrongUseScope: Boolean
-            get() = serverOnly || subCommandServerOnly
-    }
-
-    class AdditionalRequirements(val failedRequirements: HashMap<String, Any> = hashMapOf()) {
-        val failed: Boolean
-            get() = failedRequirements.isNotEmpty()
-    }
-
     fun MessageService.getForUser(key: String, vararg args: String): String = this.get(key, userLocale, *args)
     fun MessageService.getForServer(key: String, vararg args: String): String = this.get(key, serverLocale, *args)
-
-    enum class EventRegisterType {
-        BUTTON, SELECT, MODAL
-    }
 }

@@ -23,6 +23,9 @@ package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
+import io.viascom.discord.bot.aluna.model.MissingPermissions
+import io.viascom.discord.bot.aluna.model.UseScope
+import io.viascom.discord.bot.aluna.model.WrongUseScope
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 
@@ -30,56 +33,56 @@ class DefaultDiscordCommandConditions : DiscordCommandConditions {
 
     override fun checkUseScope(
         discordCommand: DiscordCommand,
-        useScope: DiscordCommand.UseScope,
-        subCommandUseScope: HashMap<String, DiscordCommand.UseScope>,
+        useScope: UseScope,
+        subCommandUseScope: HashMap<String, UseScope>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.WrongUseScope = checkUseScopeGeneric(useScope, subCommandUseScope, event)
+    ): WrongUseScope = checkUseScopeGeneric(useScope, subCommandUseScope, event)
 
     override fun checkForNeededUserPermissions(
         discordCommand: DiscordCommand,
         userPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.MissingPermissions = checkForNeededUserPermissionsGeneric(userPermissions, event)
+    ): MissingPermissions = checkForNeededUserPermissionsGeneric(userPermissions, event)
 
     override fun checkForNeededBotPermissions(
         discordCommand: DiscordCommand,
         botPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.MissingPermissions = checkForNeededBotPermissionsGeneric(botPermissions, event)
+    ): MissingPermissions = checkForNeededBotPermissionsGeneric(botPermissions, event)
 
     override fun checkUseScope(
         contextMenu: DiscordContextMenu,
-        useScope: DiscordCommand.UseScope,
-        subCommandUseScope: HashMap<String, DiscordCommand.UseScope>,
+        useScope: UseScope,
+        subCommandUseScope: HashMap<String, UseScope>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.WrongUseScope = checkUseScopeGeneric(useScope, subCommandUseScope, event)
+    ): WrongUseScope = checkUseScopeGeneric(useScope, subCommandUseScope, event)
 
     override fun checkForNeededUserPermissions(
         contextMenu: DiscordContextMenu,
         userPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.MissingPermissions = checkForNeededUserPermissionsGeneric(userPermissions, event)
+    ): MissingPermissions = checkForNeededUserPermissionsGeneric(userPermissions, event)
 
     override fun checkForNeededBotPermissions(
         contextMenu: DiscordContextMenu,
         botPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.MissingPermissions = checkForNeededBotPermissionsGeneric(botPermissions, event)
+    ): MissingPermissions = checkForNeededBotPermissionsGeneric(botPermissions, event)
 
     fun checkUseScopeGeneric(
-        useScope: DiscordCommand.UseScope,
-        subCommandUseScope: HashMap<String, DiscordCommand.UseScope>,
+        useScope: UseScope,
+        subCommandUseScope: HashMap<String, UseScope>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.WrongUseScope {
-        val wrongUseScope = DiscordCommand.WrongUseScope()
+    ): WrongUseScope {
+        val wrongUseScope = WrongUseScope()
 
         val server = event.guild
 
-        if (useScope != DiscordCommand.UseScope.GLOBAL && server == null) {
+        if (useScope != UseScope.GLOBAL && server == null) {
             wrongUseScope.serverOnly = true
         }
 
-        if (subCommandUseScope.getOrDefault(event.commandPath, DiscordCommand.UseScope.GLOBAL) != DiscordCommand.UseScope.GLOBAL && server == null) {
+        if (subCommandUseScope.getOrDefault(event.commandPath, UseScope.GLOBAL) != UseScope.GLOBAL && server == null) {
             wrongUseScope.subCommandServerOnly = true
         }
 
@@ -89,8 +92,8 @@ class DefaultDiscordCommandConditions : DiscordCommandConditions {
     fun checkForNeededUserPermissionsGeneric(
         userPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.MissingPermissions {
-        val missingPermissions = DiscordCommand.MissingPermissions()
+    ): MissingPermissions {
+        val missingPermissions = MissingPermissions()
         val server = event.guild ?: return missingPermissions
         val serverChannel = event.guildChannel
         val member = server.getMember(event.user)
@@ -113,8 +116,8 @@ class DefaultDiscordCommandConditions : DiscordCommandConditions {
     fun checkForNeededBotPermissionsGeneric(
         botPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.MissingPermissions {
-        val missingPermissions = DiscordCommand.MissingPermissions()
+    ): MissingPermissions {
+        val missingPermissions = MissingPermissions()
         val server = event.guild ?: return missingPermissions
         val serverChannel = event.guildChannel
         val member = server.getMember(event.user)

@@ -22,12 +22,12 @@
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
 import io.viascom.discord.bot.aluna.bot.Command
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.adminsearch.AdminSearchPageDataProvider
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
+import io.viascom.discord.bot.aluna.model.EventRegisterType
 import io.viascom.discord.bot.aluna.util.getOptionAsString
 import io.viascom.discord.bot.aluna.util.getSelection
 import io.viascom.discord.bot.aluna.util.removeActionRows
@@ -90,7 +90,7 @@ class AdminSearchDataProvider(
             selectedType = AdminSearchType.USER
             generateDiscordUser(discordUser)
             lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(getDiscordMenu(AdminSearchType.USER))
-                .queueAndRegisterInteraction(lastHook, command, arrayListOf(DiscordCommand.EventRegisterType.SELECT), true)
+                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
             return
         }
 
@@ -101,7 +101,7 @@ class AdminSearchDataProvider(
             selectedType = AdminSearchType.SERVER
             generateDiscordServer(discordServer)
             lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(getDiscordMenu(AdminSearchType.SERVER))
-                .queueAndRegisterInteraction(lastHook, command, arrayListOf(DiscordCommand.EventRegisterType.SELECT), true)
+                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
             return
         }
 
@@ -112,7 +112,7 @@ class AdminSearchDataProvider(
             selectedType = AdminSearchType.ROLE
             generateDiscordRole(discordRole)
             lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(getDiscordMenu(AdminSearchType.ROLE))
-                .queueAndRegisterInteraction(lastHook, command, arrayListOf(DiscordCommand.EventRegisterType.SELECT), true)
+                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
             return
         }
 
@@ -123,7 +123,7 @@ class AdminSearchDataProvider(
             selectedType = AdminSearchType.CHANNEL
             generateDiscordChannel(discordChannel)
             lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(getDiscordMenu(AdminSearchType.CHANNEL))
-                .queueAndRegisterInteraction(lastHook, command, arrayListOf(DiscordCommand.EventRegisterType.SELECT), true)
+                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
             return
         }
 
@@ -134,7 +134,7 @@ class AdminSearchDataProvider(
             selectedType = AdminSearchType.EMOTE
             generateDiscordEmote(discordEmote)
             lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(getDiscordMenu(AdminSearchType.EMOTE))
-                .queueAndRegisterInteraction(lastHook, command, arrayListOf(DiscordCommand.EventRegisterType.SELECT), true)
+                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
             return
         }
     }

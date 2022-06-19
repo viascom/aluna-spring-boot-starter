@@ -22,6 +22,7 @@
 package io.viascom.discord.bot.aluna.bot
 
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import io.viascom.discord.bot.aluna.model.EventRegisterType
 import io.viascom.discord.bot.aluna.model.ObserveCommandInteraction
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
@@ -282,7 +283,7 @@ open class DiscordBot(
         action: RestAction<T>,
         hook: InteractionHook,
         command: DiscordInteractionHandler,
-        type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
+        type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
         additionalData: HashMap<String, Any?> = hashMapOf(),
@@ -292,13 +293,13 @@ open class DiscordBot(
         success: Consumer<in T>? = null
     ) {
         action.queue({
-            if (type.contains(DiscordCommand.EventRegisterType.BUTTON)) {
+            if (type.contains(EventRegisterType.BUTTON)) {
                 this.registerMessageForButtonEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
             }
-            if (type.contains(DiscordCommand.EventRegisterType.SELECT)) {
+            if (type.contains(EventRegisterType.SELECT)) {
                 this.registerMessageForSelectEvents(hook, command, persist, duration, additionalData, authorIds, commandUserOnly)
             }
-            if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
+            if (type.contains(EventRegisterType.MODAL)) {
                 this.registerMessageForModalEvents(command.author.id, command, persist, duration, additionalData)
             }
             success?.accept(it)
@@ -311,7 +312,7 @@ open class DiscordBot(
     fun queueAndRegisterInteraction(
         action: RestAction<Void>,
         command: DiscordInteractionHandler,
-        type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.MODAL),
+        type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.MODAL),
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
         additionalData: HashMap<String, Any?> = hashMapOf(),
@@ -319,7 +320,7 @@ open class DiscordBot(
         success: Consumer<in Void>? = null
     ) {
         action.queue({
-            if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
+            if (type.contains(EventRegisterType.MODAL)) {
                 this.registerMessageForModalEvents(command.author.id, command, persist, duration, additionalData)
             }
             success?.accept(it)
@@ -332,7 +333,7 @@ open class DiscordBot(
     fun queueAndRegisterInteraction(
         action: ReplyCallbackAction,
         command: DiscordInteractionHandler,
-        type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
+        type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
         persist: Boolean = false,
         duration: Duration = Duration.ofMinutes(15),
         additionalData: HashMap<String, Any?> = hashMapOf(),
@@ -342,13 +343,13 @@ open class DiscordBot(
         success: Consumer<in InteractionHook>? = null
     ) {
         action.queue({
-            if (type.contains(DiscordCommand.EventRegisterType.BUTTON)) {
+            if (type.contains(EventRegisterType.BUTTON)) {
                 this.registerMessageForButtonEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
             }
-            if (type.contains(DiscordCommand.EventRegisterType.SELECT)) {
+            if (type.contains(EventRegisterType.SELECT)) {
                 this.registerMessageForSelectEvents(it, command, persist, duration, additionalData, authorIds, commandUserOnly)
             }
-            if (type.contains(DiscordCommand.EventRegisterType.MODAL)) {
+            if (type.contains(EventRegisterType.MODAL)) {
                 this.registerMessageForModalEvents(command.author.id, command, persist, duration, additionalData)
             }
             success?.accept(it)
@@ -361,7 +362,7 @@ open class DiscordBot(
 fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
     hook: InteractionHook,
     command: DiscordInteractionHandler,
-    type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
+    type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
     persist: Boolean = false,
     duration: Duration = Duration.ofMinutes(15),
     additionalData: HashMap<String, Any?> = hashMapOf(),
@@ -373,7 +374,7 @@ fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
 
 fun RestAction<Void>.queueAndRegisterInteraction(
     command: DiscordInteractionHandler,
-    type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.MODAL),
+    type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.MODAL),
     persist: Boolean = false,
     duration: Duration = Duration.ofMinutes(15),
     additionalData: HashMap<String, Any?> = hashMapOf(),
@@ -383,7 +384,7 @@ fun RestAction<Void>.queueAndRegisterInteraction(
 
 fun ReplyCallbackAction.queueAndRegisterInteraction(
     command: DiscordInteractionHandler,
-    type: ArrayList<DiscordCommand.EventRegisterType> = arrayListOf(DiscordCommand.EventRegisterType.BUTTON),
+    type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
     persist: Boolean = false,
     duration: Duration = Duration.ofMinutes(15),
     additionalData: HashMap<String, Any?> = hashMapOf(),

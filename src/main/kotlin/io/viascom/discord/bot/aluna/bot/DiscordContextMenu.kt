@@ -27,6 +27,9 @@ import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandConditions
 import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandLoadAdditionalData
 import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandMetaDataHandler
 import io.viascom.discord.bot.aluna.event.EventPublisher
+import io.viascom.discord.bot.aluna.model.AdditionalRequirements
+import io.viascom.discord.bot.aluna.model.DevelopmentStatus
+import io.viascom.discord.bot.aluna.model.MissingPermissions
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.translation.MessageService
 import net.dv8tion.jda.api.Permission
@@ -78,7 +81,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
 
     override val interactionName = name
 
-    var commandDevelopmentStatus = DiscordCommand.DevelopmentStatus.LIVE
+    var commandDevelopmentStatus = DevelopmentStatus.LIVE
     private var isEarlyAccessCommand = false
 
     override var beanTimoutDelay: Duration = Duration.ofMinutes(15)
@@ -178,7 +181,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
         processDevelopmentStatus()
     }
 
-    open fun onMissingUserPermission(event: GenericCommandInteractionEvent, missingPermissions: DiscordCommand.MissingPermissions) {
+    open fun onMissingUserPermission(event: GenericCommandInteractionEvent, missingPermissions: MissingPermissions) {
         val textChannelPermissions = missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" }
         val voiceChannelPermissions = missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" }
         val serverPermissions = missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
@@ -190,7 +193,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
         ).queue()
     }
 
-    open fun onMissingBotPermission(event: GenericCommandInteractionEvent, missingPermissions: DiscordCommand.MissingPermissions) {
+    open fun onMissingBotPermission(event: GenericCommandInteractionEvent, missingPermissions: MissingPermissions) {
         when {
             missingPermissions.notInVoice -> {
                 event.deferReply(true)
@@ -207,7 +210,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
         }
     }
 
-    open fun onFailedAdditionalRequirements(event: GenericCommandInteractionEvent, additionalRequirements: DiscordCommand.AdditionalRequirements) {
+    open fun onFailedAdditionalRequirements(event: GenericCommandInteractionEvent, additionalRequirements: AdditionalRequirements) {
         event.deferReply(true).setContent("⛔ Additional requirements for this command failed.").queue()
     }
 
@@ -232,14 +235,14 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
 
     private fun processDevelopmentStatus() {
         when (commandDevelopmentStatus) {
-            DiscordCommand.DevelopmentStatus.IN_DEVELOPMENT,
-            DiscordCommand.DevelopmentStatus.ALPHA -> {
+            DevelopmentStatus.IN_DEVELOPMENT,
+            DevelopmentStatus.ALPHA -> {
                 this.isEarlyAccessCommand = false
             }
-            DiscordCommand.DevelopmentStatus.EARLY_ACCESS -> {
+            DevelopmentStatus.EARLY_ACCESS -> {
                 this.isEarlyAccessCommand = true
             }
-            DiscordCommand.DevelopmentStatus.LIVE -> {
+            DevelopmentStatus.LIVE -> {
                 this.isEarlyAccessCommand = false
             }
         }

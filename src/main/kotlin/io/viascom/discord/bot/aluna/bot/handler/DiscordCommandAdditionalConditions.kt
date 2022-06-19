@@ -23,6 +23,7 @@ package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
+import io.viascom.discord.bot.aluna.model.AdditionalRequirements
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
@@ -37,7 +38,7 @@ interface DiscordCommandAdditionalConditions {
      * @param event Slash command event
      * @return AdditionalRequirements
      */
-    fun checkForAdditionalCommandRequirements(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent): DiscordCommand.AdditionalRequirements
+    fun checkForAdditionalCommandRequirements(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent): AdditionalRequirements
 
     /**
      * Check for additional requirements.
@@ -47,7 +48,7 @@ interface DiscordCommandAdditionalConditions {
      * @param event User context menu event
      * @return AdditionalRequirements
      */
-    fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenu, event: UserContextInteractionEvent): DiscordCommand.AdditionalRequirements
+    fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenu, event: UserContextInteractionEvent): AdditionalRequirements
 
 
     /**
@@ -58,5 +59,5 @@ interface DiscordCommandAdditionalConditions {
      * @param event Message context menu event
      * @return AdditionalRequirements
      */
-    fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenu, event: MessageContextInteractionEvent): DiscordCommand.AdditionalRequirements
+    fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenu, event: MessageContextInteractionEvent): AdditionalRequirements
 }

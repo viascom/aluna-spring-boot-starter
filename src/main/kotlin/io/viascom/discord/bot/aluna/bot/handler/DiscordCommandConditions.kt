@@ -23,6 +23,9 @@ package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
+import io.viascom.discord.bot.aluna.model.MissingPermissions
+import io.viascom.discord.bot.aluna.model.UseScope
+import io.viascom.discord.bot.aluna.model.WrongUseScope
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 
@@ -40,10 +43,10 @@ interface DiscordCommandConditions {
      */
     fun checkUseScope(
         discordCommand: DiscordCommand,
-        useScope: DiscordCommand.UseScope,
-        subCommandUseScope: HashMap<String, DiscordCommand.UseScope>,
+        useScope: UseScope,
+        subCommandUseScope: HashMap<String, UseScope>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.WrongUseScope
+    ): WrongUseScope
 
     /**
      * Check if the user has all the needed permissions.
@@ -58,7 +61,7 @@ interface DiscordCommandConditions {
         discordCommand: DiscordCommand,
         userPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.MissingPermissions
+    ): MissingPermissions
 
     /**
      * Check if the bot has all the needed permissions.
@@ -73,7 +76,7 @@ interface DiscordCommandConditions {
         discordCommand: DiscordCommand,
         botPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.MissingPermissions
+    ): MissingPermissions
 
 
     /**
@@ -88,10 +91,10 @@ interface DiscordCommandConditions {
      */
     fun checkUseScope(
         contextMenu: DiscordContextMenu,
-        useScope: DiscordCommand.UseScope,
-        subCommandUseScope: HashMap<String, DiscordCommand.UseScope>,
+        useScope: UseScope,
+        subCommandUseScope: HashMap<String, UseScope>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.WrongUseScope
+    ): WrongUseScope
 
     /**
      * Check if the user has all the needed permissions.
@@ -106,7 +109,7 @@ interface DiscordCommandConditions {
         contextMenu: DiscordContextMenu,
         userPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.MissingPermissions
+    ): MissingPermissions
 
     /**
      * Check if the bot has all the needed permissions.
@@ -121,6 +124,6 @@ interface DiscordCommandConditions {
         contextMenu: DiscordContextMenu,
         botPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
-    ): DiscordCommand.MissingPermissions
+    ): MissingPermissions
 
 }
