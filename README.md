@@ -73,3 +73,6 @@ logging:
     io.viascom.discord.bot.aluna.event.EventPublisher: INFO #Set to DEBUG to show all published events
     io.viascom.discord.bot.aluna.bot.handler.AlunaLocalizationFunction: INFO #Set to DEBUG to show translation keys for interactions
 ```
+
+# Licence
+[Apache License, Version 2.0, January 2004](http://www.apache.org/licenses/LICENSE-2.0)

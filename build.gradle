@@ -94,11 +94,6 @@ dependencies {
     //====== Logging ======
     compileOnly "com.datadoghq:dd-trace-api:$ddTraceVersion"
 
-    //====== Script-Engine ======
-    compileOnly "org.openjdk.nashorn:nashorn-core:$nashornCoreVersion"
-    compileOnly "org.graalvm.js:js:$graalvmJsVersion"
-    compileOnly "org.graalvm.js:js-scriptengine:$graalvmJsVersion"
-
     //====== NanoId ======
     api "com.aventrix.jnanoid:jnanoid:$jnanoidVersion"
 

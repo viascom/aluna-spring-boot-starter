@@ -24,7 +24,7 @@ abstract class DiscordUserContextMenu(name: String) : DiscordContextMenu(Command
      * @param event The UserContextInteractionEvent that triggered this Command
      */
     @Trace
-    open fun run(event: UserContextInteractionEvent) {
+    fun run(event: UserContextInteractionEvent) {
         if (alunaProperties.debug.useStopwatch) {
             stopWatch = StopWatch()
             stopWatch!!.start()

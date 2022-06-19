@@ -1,3 +1,24 @@
+/*
+ * Copyright 2022 Viascom Ltd liab. Co
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package io.viascom.discord.bot.aluna.bot.listener
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
@@ -59,21 +80,15 @@ class EventWaiter(
     override fun onEvent(event: GenericEvent) {
         var eventClass: Class<*>? = event.javaClass
 
-        // Runs at least once for the fired Event, at most
-        // once for each superclass (excluding Object) because
-        // Class#getSuperclass() returns null when the superclass
-        // is primitive, void, or (in this case) Object.
         while (eventClass != null) {
             val workClass = eventClass
 
+            //GatewayPingEvent is filtered out because this happens to often and generates unnecessary load
             if (workClass == GatewayPingEvent::class.java) {
                 return
             }
 
             if (waitingEvents.containsKey(key = workClass)) {
-                // WaitingEvent#attempt invocations that return true have passed their condition tests
-                // and executed the action. We filter the ones that return false out of the toRemove and
-                // remove them all from the set.
                 waitingEvents[workClass]!!.forEach {
                     val waitingEventElements = it.value
                     val elementsToRemove = arrayListOf<Int>()
@@ -101,16 +116,19 @@ class EventWaiter(
                         }
                     }
 
+                    //Cleanup waitingEvents hash map
                     elementsToRemove.forEach { codes ->
                         waitingEvents[workClass]?.get(it.key)?.removeIf { it.hashCode() == codes }
                     }
 
+                    //Cleanup waitingEvents hash map
                     if (waitingEvents[workClass]?.get(it.key)?.isEmpty() == true) {
                         waitingEvents[workClass]?.remove(it.key)
                     }
 
                 }
-
+                
+                //Cleanup waitingEvents hash map
                 if (waitingEvents[workClass]?.isEmpty() == true) {
                     waitingEvents.remove(workClass)
                 }
