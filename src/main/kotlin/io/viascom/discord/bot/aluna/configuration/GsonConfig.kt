@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Configuration
 open class GsonConfig {
 
     @Bean
-    @ConditionalOnClass(Gson::class)
+    @ConditionalOnClass(Gson::class, Converters::class)
     open fun localDateTimeGsonBuilderCustomizer(): GsonBuilderCustomizer {
         return GsonBuilderCustomizer { gsonBuilder -> Converters.registerAll(gsonBuilder) }
     }
