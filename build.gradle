@@ -52,7 +52,7 @@ ext {
     retrofitVersion = "2.9.0"
     gsonVersion = "2.9.0"
     gsonJavatimeVersion = "1.1.1"
-    jacksonSpringBootVersion = "2.7.0"
+    jacksonSpringBootVersion = "2.7.1"
     jacksonVersion = "2.13.3"
     graalvmJsVersion = "22.1.0.1"
     jnanoidVersion = "2.0.0"
