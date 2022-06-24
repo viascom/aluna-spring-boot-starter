@@ -3,11 +3,12 @@ package io.viascom.discord.bot.aluna
 import io.viascom.discord.bot.aluna.bot.Command
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
-import io.viascom.discord.bot.aluna.util.createPrimaryButton
-import io.viascom.discord.bot.aluna.util.getOptionAsString
-import io.viascom.discord.bot.aluna.util.removeActionRows
+import io.viascom.discord.bot.aluna.model.ChannelOption
+import io.viascom.discord.bot.aluna.model.StringOption
+import io.viascom.discord.bot.aluna.util.*
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
+import net.dv8tion.jda.api.interactions.commands.OptionMapping
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.components.ActionRow
@@ -28,15 +29,18 @@ class PingCommand(
         this.beanTimoutDelay = Duration.ofSeconds(20)
     }
 
-    override fun initCommandOptions() {
-        val mapOption = OptionData(OptionType.STRING, "map", "Select a map", false, true)
+    private val mapOption = StringOption("map", "Select a map", isRequired = false, isAutoComplete = true)
+    private val channelOption = ChannelOption("channel", "Select a map", isRequired = false)
 
-        this.addOptions(mapOption)
+    override fun initCommandOptions() {
+        this.addOptions(mapOption, channelOption)
     }
 
     override fun execute(event: SlashCommandInteractionEvent) {
         logger.debug("command: " + this.hashCode().toString())
-        val selectedMap = event.getOptionAsString("map", "all")
+        val selectedMap = event.getTypedOption(mapOption)
+        val selectedChannel = event.getTypedOption(channelOption, OptionMapping::getAsAudioChannel)
+        val oldWayChannel = event.getOption("channel")
 
         event.reply("Pong\nYour locale is:${this.userLocale}").addActionRows(ActionRow.of(createPrimaryButton("hi", "Hi"))).queue {
             eventWaiter.waitForInteraction(this.uniqueId,

@@ -105,7 +105,7 @@ class DefaultDiscordCommandConditions : DiscordCommandConditions {
                 }
             } else {
                 if (!member!!.hasPermission(permission)) {
-                    missingPermissions.server.add(permission)
+                    missingPermissions.guild.add(permission)
                 }
             }
         }
@@ -143,7 +143,7 @@ class DefaultDiscordCommandConditions : DiscordCommandConditions {
                 }
             } else {
                 if (!selfMember.hasPermission(permission)) {
-                    missingPermissions.server.add(permission)
+                    missingPermissions.guild.add(permission)
                 }
             }
         }

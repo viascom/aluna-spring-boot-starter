@@ -54,8 +54,8 @@ abstract class DiscordMessageContextMenu(name: String) : DiscordContextMenu(Comm
         MDC.put("command", event.commandPath)
         MDC.put("uniqueId", uniqueId)
 
-        server = event.guild
-        server?.let { MDC.put("discord.server", "${it.id} (${it.name})") }
+        guild = event.guild
+        guild?.let { MDC.put("discord.server", "${it.id} (${it.name})") }
         channel = event.channel
         channel?.let { MDC.put("discord.channel", it.id) }
         author = event.user
@@ -64,10 +64,10 @@ abstract class DiscordMessageContextMenu(name: String) : DiscordContextMenu(Comm
 
         userLocale = event.userLocale
 
-        if (server != null) {
-            member = server!!.getMember(author)
-            serverChannel = event.guildChannel
-            serverLocale = event.guildLocale
+        if (guild != null) {
+            member = guild!!.getMember(author)
+            guildChannel = event.guildChannel
+            guildLocale = event.guildLocale
         }
 
         val missingUserPermissions = discordCommandConditions.checkForNeededUserPermissions(this, userPermissions, event)
@@ -97,7 +97,7 @@ abstract class DiscordMessageContextMenu(name: String) : DiscordContextMenu(Comm
                 discordCommandMetaDataHandler.onContextMenuExecution(this, event)
             }
             if (alunaProperties.discord.publishDiscordContextEvent) {
-                eventPublisher.publishDiscordMessageContextEvent(author, channel, server, event.commandPath, this)
+                eventPublisher.publishDiscordMessageContextEvent(author, channel, guild, event.commandPath, this)
             }
             logger.info("Run context menu '${event.commandPath}'" + if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else "")
             execute(event)

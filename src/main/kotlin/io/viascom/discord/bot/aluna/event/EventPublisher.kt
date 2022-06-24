@@ -88,28 +88,28 @@ class EventPublisher(
     }
 
     @JvmSynthetic
-    internal fun publishDiscordCommandEvent(user: User, channel: Channel, server: Guild?, commandPath: String, command: DiscordCommand) {
+    internal fun publishDiscordCommandEvent(user: User, channel: Channel, guild: Guild?, commandPath: String, command: DiscordCommand) {
         discordBot.asyncExecutor.execute {
             logger.debug("Publishing DiscordCommandEvent")
-            val discordCommandEvent = DiscordCommandEvent(this, user, channel, server, commandPath, command)
+            val discordCommandEvent = DiscordCommandEvent(this, user, channel, guild, commandPath, command)
             applicationEventPublisher.publishEvent(discordCommandEvent)
         }
     }
 
     @JvmSynthetic
-    internal fun publishDiscordMessageContextEvent(user: User, channel: Channel?, server: Guild?, name: String, contextMenu: DiscordMessageContextMenu) {
+    internal fun publishDiscordMessageContextEvent(user: User, channel: Channel?, guild: Guild?, name: String, contextMenu: DiscordMessageContextMenu) {
         discordBot.asyncExecutor.execute {
             logger.debug("Publishing DiscordMessageContextEvent")
-            val discordMessageContextEvent = DiscordMessageContextEvent(this, user, channel, server, name, contextMenu)
+            val discordMessageContextEvent = DiscordMessageContextEvent(this, user, channel, guild, name, contextMenu)
             applicationEventPublisher.publishEvent(discordMessageContextEvent)
         }
     }
 
     @JvmSynthetic
-    internal fun publishDiscordUserContextEvent(user: User, channel: Channel?, server: Guild?, name: String, contextMenu: DiscordUserContextMenu) {
+    internal fun publishDiscordUserContextEvent(user: User, channel: Channel?, guild: Guild?, name: String, contextMenu: DiscordUserContextMenu) {
         discordBot.asyncExecutor.execute {
             logger.debug("Publishing DiscordUserContextEvent")
-            val discordUserContextEvent = DiscordUserContextEvent(this, user, channel, server, name, contextMenu)
+            val discordUserContextEvent = DiscordUserContextEvent(this, user, channel, guild, name, contextMenu)
             applicationEventPublisher.publishEvent(discordUserContextEvent)
         }
     }

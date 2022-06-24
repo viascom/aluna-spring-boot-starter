@@ -30,7 +30,7 @@ import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.model.DevelopmentStatus
 import io.viascom.discord.bot.aluna.model.UseScope
 import io.viascom.discord.bot.aluna.property.AlunaProperties
-import io.viascom.discord.bot.aluna.util.getServer
+import io.viascom.discord.bot.aluna.util.getGuild
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
@@ -194,7 +194,7 @@ internal open class SlashCommandInteractionInitializer(
         //Register internal commands
         if (filteredCommands.any { it.name == "system-command" }) {
             val command = filteredCommands.first { it.name == "system-command" }
-            val server = command.specificServer?.let { shardManager.getServer(it) }
+            val server = command.specificServer?.let { shardManager.getGuild(it) }
             val serverCommands = server?.retrieveCommands()?.complete()
 
             if (!command.alunaProperties.command.systemCommand.enabled) {

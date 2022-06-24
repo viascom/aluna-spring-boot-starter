@@ -82,7 +82,7 @@ class GenerateEmojiEnumProvider(
             .setTitle("Generate Emoji-Enum")
             .setFooter("This system-command is only enabled on no production mode!")
             .setDescription("This command lets you create Emotji-Enums which extend the Aluna DiscordEmote interface. To get started add the servers you want and hit generate.")
-            .addField("Selected Servers", selectedServerIds.joinToString("\n") { "- ${shardManager.getServer(it)?.name ?: it}" }, false)
+            .addField("Selected Servers", selectedServerIds.joinToString("\n") { "- ${shardManager.getGuild(it)?.name ?: it}" }, false)
     }
 
     private fun createRemoveMessage() {
@@ -97,7 +97,7 @@ class GenerateEmojiEnumProvider(
         val row1 = arrayListOf<ItemComponent>()
         val serverList = SelectMenu.create("serverList")
 
-        selectedServerIds.mapNotNull { shardManager.getServer(it) }.forEach {
+        selectedServerIds.mapNotNull { shardManager.getGuild(it) }.forEach {
             serverList.addOption(it.name, it.id, it.id)
         }
 
@@ -205,7 +205,7 @@ class GenerateEmojiEnumProvider(
                 //Check server id
                 val serverID = event.getValueAsString("serverId", "0")
                 val newServer = try {
-                    shardManager.getServer(serverID!!)
+                    shardManager.getGuild(serverID!!)
                 } catch (e: Exception) {
                     null
                 }
@@ -235,7 +235,7 @@ class GenerateEmojiEnumProvider(
 
         when (selectedType) {
             "text" -> {
-                selectedServerIds.mapNotNull { shardManager.getServer(it) }.forEach { guild ->
+                selectedServerIds.mapNotNull { shardManager.getGuild(it) }.forEach { guild ->
                     content += "\n\n** ${guild.name} (${guild.id})**\n"
                     content += guild.emotes.sortedBy { it.name }.joinToString("\n") { "${it.asMention} `${it.asMention}`" }
                 }
@@ -254,7 +254,7 @@ class GenerateEmojiEnumProvider(
                     enum class MyEmotes(override val id: String, override val emoteName: String, override val animated: Boolean = false) : DiscordEmote {
                 """.trimIndent()
 
-                selectedServerIds.mapNotNull { shardManager.getServer(it) }.forEach {
+                selectedServerIds.mapNotNull { shardManager.getGuild(it) }.forEach {
                     content += "\n\n    //${it.name} (${it.id})\n"
                     content += it.emotes
                         .sortedBy { it.name }
@@ -275,7 +275,7 @@ class GenerateEmojiEnumProvider(
                    public enum MyEmotes implements DiscordEmote {
                 """.trimIndent()
 
-                selectedServerIds.mapNotNull { shardManager.getServer(it) }.forEach {
+                selectedServerIds.mapNotNull { shardManager.getGuild(it) }.forEach {
                     content += "\n\n    //${it.name} (${it.id})\n"
                     content += it.emotes
                         .sortedBy { it.name }

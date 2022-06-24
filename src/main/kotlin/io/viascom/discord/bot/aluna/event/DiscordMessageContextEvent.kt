@@ -33,9 +33,9 @@ import org.springframework.context.ApplicationEvent
  *
  * @param user user of the context menu
  * @param channel channel of the context menu
- * @param server server of the context menu if available
+ * @param guild server of the context menu if available
  * @param name name of the context menu
  * @param contextMenu context menu itself
  */
-class DiscordMessageContextEvent(source: Any, val user: User, val channel: Channel?, val server: Guild?, val name: String, val contextMenu: DiscordMessageContextMenu) :
+class DiscordMessageContextEvent(source: Any, val user: User, val channel: Channel?, val guild: Guild?, val name: String, val contextMenu: DiscordMessageContextMenu) :
     ApplicationEvent(source)

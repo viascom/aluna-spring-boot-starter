@@ -26,7 +26,7 @@ import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordReadyEvent
 import io.viascom.discord.bot.aluna.property.AlunaProperties
-import io.viascom.discord.bot.aluna.util.getServerTextChannel
+import io.viascom.discord.bot.aluna.util.getGuildTextChannel
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -64,7 +64,7 @@ internal open class DiscordReadyEventListener(
                     .addField("» Total Commands", commands.size.toString(), true)
                     .addField("» Production Mode", alunaProperties.productionMode.toString(), true)
 
-                val channel = shardManager.getServerTextChannel(
+                val channel = shardManager.getGuildTextChannel(
                     alunaProperties.notification.botReady.server.toString(),
                     alunaProperties.notification.botReady.channel.toString()
                 )

@@ -141,12 +141,12 @@ abstract class DiscordCommand(
     lateinit var channel: MessageChannel
     override lateinit var author: User
 
-    var server: Guild? = null
-    var serverChannel: GuildChannel? = null
+    var guild: Guild? = null
+    var guildChannel: GuildChannel? = null
     var member: Member? = null
 
     var userLocale: Locale = Locale.ENGLISH
-    var serverLocale: Locale = Locale.ENGLISH
+    var guildLocale: Locale = Locale.ENGLISH
 
     var stopWatch: StopWatch? = null
 
@@ -259,12 +259,12 @@ abstract class DiscordCommand(
     open fun onMissingUserPermission(event: SlashCommandInteractionEvent, missingPermissions: MissingPermissions) {
         val textChannelPermissions = missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" }
         val voiceChannelPermissions = missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" }
-        val serverPermissions = missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
+        val guildPermissions = missingPermissions.guild.joinToString("\n") { "└ ${it.getName()}" }
         event.deferReply(true).setContent(
             "⛔ You are missing the following permission to execute this command:\n" +
                     (if (textChannelPermissions.isNotBlank()) textChannelPermissions + "\n" else "") +
                     (if (voiceChannelPermissions.isNotBlank()) voiceChannelPermissions + "\n" else "") +
-                    (if (serverPermissions.isNotBlank()) serverPermissions + "\n" else "")
+                    (if (guildPermissions.isNotBlank()) guildPermissions + "\n" else "")
         ).queue()
     }
 
@@ -279,7 +279,7 @@ abstract class DiscordCommand(
                 event.deferReply(true).setContent("⛔ I'm missing the following permission to execute this command:\n" +
                         missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
                         missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
-                        missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
+                        missingPermissions.guild.joinToString("\n") { "└ ${it.getName()}" }
                 ).queue()
             }
         }
@@ -327,8 +327,8 @@ abstract class DiscordCommand(
         MDC.put("command", event.commandPath)
         MDC.put("uniqueId", uniqueId)
 
-        server = event.guild
-        server?.let { MDC.put("discord.server", "${it.id} (${it.name})") }
+        guild = event.guild
+        guild?.let { MDC.put("discord.server", "${it.id} (${it.name})") }
         channel = event.channel
         MDC.put("discord.channel", channel.id)
         author = event.user
@@ -337,10 +337,10 @@ abstract class DiscordCommand(
 
         userLocale = event.userLocale
 
-        if (server != null) {
-            member = server!!.getMember(author)
-            serverChannel = event.guildChannel
-            serverLocale = event.guildLocale
+        if (guild != null) {
+            member = guild!!.getMember(author)
+            guildChannel = event.guildChannel
+            guildLocale = event.guildLocale
         }
 
         if (isOwnerCommand && author.idLong !in ownerIdProvider.getOwnerIds()) {
@@ -400,7 +400,7 @@ abstract class DiscordCommand(
                 discordCommandMetaDataHandler.onCommandExecution(this, event)
             }
             if (alunaProperties.discord.publishDiscordCommandEvent) {
-                eventPublisher.publishDiscordCommandEvent(author, channel, server, event.commandPath, this)
+                eventPublisher.publishDiscordCommandEvent(author, channel, guild, event.commandPath, this)
             }
             logger.info("Run command /${event.commandPath}" + if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else "")
             execute(event)
@@ -447,5 +447,5 @@ abstract class DiscordCommand(
     }
 
     fun MessageService.getForUser(key: String, vararg args: String): String = this.get(key, userLocale, *args)
-    fun MessageService.getForServer(key: String, vararg args: String): String = this.get(key, serverLocale, *args)
+    fun MessageService.getForServer(key: String, vararg args: String): String = this.get(key, guildLocale, *args)
 }

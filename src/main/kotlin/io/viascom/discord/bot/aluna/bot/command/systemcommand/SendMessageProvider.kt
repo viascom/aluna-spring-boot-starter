@@ -29,8 +29,8 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnab
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.Webhook
 import io.viascom.discord.bot.aluna.util.createTextInput
+import io.viascom.discord.bot.aluna.util.getGuildTextChannel
 import io.viascom.discord.bot.aluna.util.getPrivateChannelByUser
-import io.viascom.discord.bot.aluna.util.getServerTextChannel
 import io.viascom.discord.bot.aluna.util.getValueAsString
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -117,7 +117,7 @@ class SendMessageProvider(
                 return true
             }
             (serverId != "0" && channelId != "0") -> {
-                val channel = shardManager.getServerTextChannel(serverId, channelId)
+                val channel = shardManager.getGuildTextChannel(serverId, channelId)
                 if (channel == null) {
                     event.deferReply(true).queue {
                         it.editOriginal("Could not find channel $channelId on $serverId!").queue()

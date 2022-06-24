@@ -24,6 +24,7 @@
 
 package io.viascom.discord.bot.aluna.util
 
+import io.viascom.discord.bot.aluna.model.CommandOption
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
@@ -32,6 +33,8 @@ import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEve
 import net.dv8tion.jda.api.interactions.ModalInteraction
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.OptionMapping
+import net.dv8tion.jda.api.interactions.commands.OptionType
+import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
@@ -46,6 +49,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackA
 import net.dv8tion.jda.api.sharding.ShardManager
 import java.awt.Color
 import java.util.*
+import java.util.function.Function
 
 fun Double.round(decimals: Int): Double {
     var multiplier = 1.0
@@ -59,11 +63,11 @@ fun MessageEditCallbackAction.removeActionRows() = this.setActionRows(arrayListO
 fun WebhookMessageUpdateAction<Message>.removeActionRows() = this.setActionRows(arrayListOf())
 fun MessageAction.removeActionRows() = this.setActionRows(arrayListOf())
 
-fun ShardManager.getServer(serverId: String): Guild? = this.getGuildById(serverId)
-fun ShardManager.getServerTextChannel(serverId: String, channelId: String): MessageChannel? = this.getServer(serverId)?.getTextChannelById(channelId)
-fun ShardManager.getServerVoiceChannel(serverId: String, channelId: String): VoiceChannel? = this.getServer(serverId)?.getVoiceChannelById(channelId)
-fun ShardManager.getServerMessage(serverId: String, channelId: String, messageId: String): Message? =
-    this.getServerTextChannel(serverId, channelId)?.retrieveMessageById(messageId)?.complete()
+fun ShardManager.getGuild(guildId: String): Guild? = this.getGuildById(guildId)
+fun ShardManager.getGuildTextChannel(guildId: String, channelId: String): MessageChannel? = this.getGuild(guildId)?.getTextChannelById(channelId)
+fun ShardManager.getGuildVoiceChannel(guildId: String, channelId: String): VoiceChannel? = this.getGuild(guildId)?.getVoiceChannelById(channelId)
+fun ShardManager.getGuildMessage(guildId: String, channelId: String, messageId: String): Message? =
+    this.getGuildTextChannel(guildId, channelId)?.retrieveMessageById(messageId)?.complete()
 
 fun ShardManager.getPrivateChannelByUser(userId: String): MessageChannel? = this.retrieveUserById(userId).complete()?.openPrivateChannel()?.complete()
 fun ShardManager.getPrivateChannel(channelId: String): MessageChannel? = this.getPrivateChannelById(channelId)
@@ -81,6 +85,60 @@ fun ShardManager.getPrivateMessage(channelId: String, messageId: String): Messag
     } catch (e: Exception) {
         null
     }
+}
+
+@JvmOverloads
+fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<in T>, default: T? = null): T? {
+    val optionData = (option as OptionData)
+    return when (optionData.type) {
+        OptionType.STRING -> this.getOption(optionData.name, default, OptionMapping::getAsString)
+        OptionType.INTEGER -> this.getOption(optionData.name, default, OptionMapping::getAsInt)
+        OptionType.BOOLEAN -> this.getOption(optionData.name, default, OptionMapping::getAsBoolean)
+        OptionType.USER -> this.getOption(optionData.name, default, OptionMapping::getAsUser)
+        OptionType.CHANNEL -> this.getOption(optionData.name, default, OptionMapping::getAsGuildChannel)
+        OptionType.ROLE -> this.getOption(optionData.name, default, OptionMapping::getAsRole)
+        OptionType.MENTIONABLE -> this.getOption(optionData.name, default, OptionMapping::getAsMentionable)
+        OptionType.NUMBER -> this.getOption(optionData.name, default, OptionMapping::getAsDouble)
+        OptionType.ATTACHMENT -> this.getOption(optionData.name, default, OptionMapping::getAsAttachment)
+        OptionType.UNKNOWN -> throw IllegalArgumentException("Can't convert OptionType.UNKNOWN")
+        OptionType.SUB_COMMAND -> throw IllegalArgumentException("Can't convert OptionType.SUB_COMMAND")
+        OptionType.SUB_COMMAND_GROUP -> throw IllegalArgumentException("Can't convert OptionType.SUB_COMMAND_GROUP")
+    } as T?
+}
+
+@JvmOverloads
+fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<in T>, mapper: Function<in OptionMapping, out T?>, default: T? = null): T? {
+    val optionData = (option as OptionData)
+    return this.getOption(optionData.name)?.let { mapper.apply(it) } ?: default
+}
+
+@JvmOverloads
+fun <T : Any> CommandAutoCompleteInteractionEvent.getTypedOption(option: CommandOption<in T>, default: T? = null): T? {
+    val optionData = (option as OptionData)
+    return when (optionData.type) {
+        OptionType.STRING -> this.getOption(optionData.name, default, OptionMapping::getAsString)
+        OptionType.INTEGER -> this.getOption(optionData.name, default, OptionMapping::getAsInt)
+        OptionType.BOOLEAN -> this.getOption(optionData.name, default, OptionMapping::getAsBoolean)
+        OptionType.USER -> this.getOption(optionData.name, default, OptionMapping::getAsUser)
+        OptionType.CHANNEL -> this.getOption(optionData.name, default, OptionMapping::getAsGuildChannel)
+        OptionType.ROLE -> this.getOption(optionData.name, default, OptionMapping::getAsRole)
+        OptionType.MENTIONABLE -> this.getOption(optionData.name, default, OptionMapping::getAsMentionable)
+        OptionType.NUMBER -> this.getOption(optionData.name, default, OptionMapping::getAsDouble)
+        OptionType.ATTACHMENT -> this.getOption(optionData.name, default, OptionMapping::getAsAttachment)
+        OptionType.UNKNOWN -> throw IllegalArgumentException("Can't convert OptionType.UNKNOWN")
+        OptionType.SUB_COMMAND -> throw IllegalArgumentException("Can't convert OptionType.SUB_COMMAND")
+        OptionType.SUB_COMMAND_GROUP -> throw IllegalArgumentException("Can't convert OptionType.SUB_COMMAND_GROUP")
+    } as T?
+}
+
+@JvmOverloads
+fun <T : Any> CommandAutoCompleteInteractionEvent.getTypedOption(
+    option: CommandOption<in T>,
+    mapper: Function<in OptionMapping, out T?>,
+    default: T? = null
+): T? {
+    val optionData = (option as OptionData)
+    return this.getOption(optionData.name)?.let { mapper.apply(it) } ?: default
 }
 
 @JvmOverloads

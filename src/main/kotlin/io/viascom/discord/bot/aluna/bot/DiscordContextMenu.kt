@@ -104,12 +104,12 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     var channel: Channel? = null
     override lateinit var author: User
 
-    var server: Guild? = null
-    var serverChannel: GuildChannel? = null
+    var guild: Guild? = null
+    var guildChannel: GuildChannel? = null
     var member: Member? = null
 
     var userLocale: Locale = Locale.ENGLISH
-    var serverLocale: Locale = Locale.ENGLISH
+    var guildLocale: Locale = Locale.ENGLISH
 
     var stopWatch: StopWatch? = null
 
@@ -184,12 +184,12 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     open fun onMissingUserPermission(event: GenericCommandInteractionEvent, missingPermissions: MissingPermissions) {
         val textChannelPermissions = missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" }
         val voiceChannelPermissions = missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" }
-        val serverPermissions = missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
+        val guildPermissions = missingPermissions.guild.joinToString("\n") { "└ ${it.getName()}" }
         event.deferReply(true).setContent(
             "⛔ You are missing the following permission to execute this command:\n" +
                     (if (textChannelPermissions.isNotBlank()) textChannelPermissions + "\n" else "") +
                     (if (voiceChannelPermissions.isNotBlank()) voiceChannelPermissions + "\n" else "") +
-                    (if (serverPermissions.isNotBlank()) serverPermissions + "\n" else "")
+                    (if (guildPermissions.isNotBlank()) guildPermissions + "\n" else "")
         ).queue()
     }
 
@@ -204,7 +204,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
                 event.deferReply(true).setContent("⛔ I'm missing the following permission to execute this command:\n" +
                         missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
                         missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
-                        missingPermissions.server.joinToString("\n") { "└ ${it.getName()}" }
+                        missingPermissions.guild.joinToString("\n") { "└ ${it.getName()}" }
                 ).queue()
             }
         }

@@ -24,7 +24,7 @@ package io.viascom.discord.bot.aluna.bot.listener
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.SendServerNotificationCondition
 import io.viascom.discord.bot.aluna.property.AlunaProperties
-import io.viascom.discord.bot.aluna.util.getServerTextChannel
+import io.viascom.discord.bot.aluna.util.getGuildTextChannel
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent
@@ -64,7 +64,7 @@ internal open class ServerNotificationEvent(private val discordBot: DiscordBot, 
                 embedMessage.addField("» Other Bots", server.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }, false)
             }
 
-            val channel = shardManager.getServerTextChannel(
+            val channel = shardManager.getGuildTextChannel(
                 alunaProperties.notification.serverJoin.server.toString(),
                 alunaProperties.notification.serverJoin.channel.toString()
             )
@@ -102,7 +102,7 @@ internal open class ServerNotificationEvent(private val discordBot: DiscordBot, 
                 )
             }
 
-            val channel = shardManager.getServerTextChannel(
+            val channel = shardManager.getGuildTextChannel(
                 alunaProperties.notification.serverLeave.server.toString(),
                 alunaProperties.notification.serverLeave.channel.toString()
             )

@@ -27,9 +27,9 @@ import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.Webhook
+import io.viascom.discord.bot.aluna.util.getGuildMessage
 import io.viascom.discord.bot.aluna.util.getMessage
 import io.viascom.discord.bot.aluna.util.getOptionAsString
-import io.viascom.discord.bot.aluna.util.getServerMessage
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -69,7 +69,7 @@ class ExtractMessageProvider(
             }
         } else {
             try {
-                shardManager.getServerMessage(serverId, channelId, messageId)
+                shardManager.getGuildMessage(serverId, channelId, messageId)
             } catch (e: Exception) {
                 null
             }
