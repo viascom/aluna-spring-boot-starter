@@ -46,6 +46,7 @@ class AdminSearchUserMutualPage(
         val mutualServers = shardManager.getMutualGuilds(discordUser)
 
         embedBuilder.clearFields()
+        embedBuilder.setImage(null)
 
         var text = ""
         var isFirst = true

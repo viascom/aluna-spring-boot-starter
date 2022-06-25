@@ -61,6 +61,7 @@ class AdminSearchOverviewPage(
 
         embedBuilder.addField("Discord-ID", discordUser.id, true)
             .addField("Discord-Tag", discordUser.asTag, true)
+            .addField("Discord-Mention", discordUser.asMention, true)
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
             val localeMap = discordUser.mutualGuilds.groupBy { it.locale }
             val probableLocales = localeMap.entries.sortedByDescending { it.value.size }.take(3)
@@ -84,20 +85,25 @@ class AdminSearchOverviewPage(
                 true
             )
             .addField("Avatar-URL", "[Link](${discordUser.effectiveAvatarUrl})", true)
-        discordUser.retrieveProfile().complete().bannerUrl?.let {
+
+        val profile = discordUser.retrieveProfile().complete()
+
+        profile.bannerUrl?.let {
             embedBuilder.addField(
                 "Banner-URL",
                 "[Link](${discordUser.retrieveProfile().complete().bannerUrl})",
                 true
             )
         }
-        discordUser.retrieveProfile().complete().accentColor?.let {
+        profile.accentColor?.let {
             embedBuilder.addField(
                 "Accent Color",
                 "`${discordUser.retrieveProfile().complete().accentColor?.toHex() ?: "n/a"}`",
                 true
             )
         }
+
+        embedBuilder.setImage(profile.bannerUrl)
     }
 
     override fun onServerRequest(discordServer: Guild, embedBuilder: EmbedBuilder) {
@@ -124,6 +130,7 @@ class AdminSearchOverviewPage(
         )
         embedBuilder.addField("In-Server-Name", discordServer.selfMember.effectiveName, true)
         embedBuilder.addField("Features", discordServer.features.joinToString(" | "), false)
+
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
             embedBuilder.addField("Other Bots", discordServer.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }, false)
         }
