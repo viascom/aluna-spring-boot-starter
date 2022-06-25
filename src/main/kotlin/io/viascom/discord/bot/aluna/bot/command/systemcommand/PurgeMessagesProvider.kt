@@ -27,7 +27,7 @@ import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.util.createTextInput
-import io.viascom.discord.bot.aluna.util.getOptionAsString
+import io.viascom.discord.bot.aluna.util.getTypedOption
 import io.viascom.discord.bot.aluna.util.getValueAsString
 import net.dv8tion.jda.api.entities.GuildMessageChannel
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -60,7 +60,7 @@ class PurgeMessagesProvider(
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
 
-        val id = event.getOptionAsString("args", "")!!
+        val id = event.getTypedOption(command.argsOption, "")!!
         if (id.isEmpty()) {
             event.deferReply().setContent("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify an ID as argument for this command").queue()
             return
@@ -68,7 +68,8 @@ class PurgeMessagesProvider(
 
         val channel = shardManager.getChannelById(GuildMessageChannel::class.java, id)
         if (channel == null) {
-            event.deferReply().setContent("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify a valid channel ID as argument for this command").queue()
+            event.deferReply().setContent("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify a valid channel ID as argument for this command")
+                .queue()
             return
         }
 
@@ -104,8 +105,8 @@ class PurgeMessagesProvider(
         return true
     }
 
-    override fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent) {
-        val input = event.getOptionAsString("args", "")!!
+    override fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: SystemCommand) {
+        val input = event.getTypedOption(command.argsOption, "")!!
 
         if (input == "") {
             event.replyChoices().queue()

@@ -29,7 +29,7 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemC
 import io.viascom.discord.bot.aluna.model.Webhook
 import io.viascom.discord.bot.aluna.util.getGuildMessage
 import io.viascom.discord.bot.aluna.util.getMessage
-import io.viascom.discord.bot.aluna.util.getOptionAsString
+import io.viascom.discord.bot.aluna.util.getTypedOption
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -50,7 +50,7 @@ class ExtractMessageProvider(
 ) {
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
-        val elements = event.getOptionAsString("args")?.split("/")
+        val elements = event.getTypedOption(command.argsOption)?.split("/")
 
         if (elements == null) {
             event.reply("Please define a message link as arg to use this command.").setEphemeral(true).queue()

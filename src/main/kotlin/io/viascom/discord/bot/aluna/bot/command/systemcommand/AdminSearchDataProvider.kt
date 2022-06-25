@@ -28,8 +28,8 @@ import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.EventRegisterType
-import io.viascom.discord.bot.aluna.util.getOptionAsString
 import io.viascom.discord.bot.aluna.util.getSelection
+import io.viascom.discord.bot.aluna.util.getTypedOption
 import io.viascom.discord.bot.aluna.util.removeActionRows
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.*
@@ -71,7 +71,7 @@ class AdminSearchDataProvider(
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
         lastHook = hook!!
 
-        val id = event.getOptionAsString("args", "")!!
+        val id = event.getTypedOption(command.argsOption, "")!!
         if (id.isEmpty()) {
             lastHook.editOriginal("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify an ID as argument for this command").queue()
             return
@@ -274,8 +274,8 @@ class AdminSearchDataProvider(
         return ActionRow.of(menu.build())
     }
 
-    override fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent) {
-        val arg = event.getOptionAsString("args", "")!!
+    override fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: SystemCommand) {
+        val arg = event.getTypedOption(command.argsOption, "")!!
 
         val user = checkForUser(arg)
         if (user != null) {

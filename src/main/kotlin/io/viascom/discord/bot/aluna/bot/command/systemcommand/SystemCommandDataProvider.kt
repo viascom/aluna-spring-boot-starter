@@ -63,7 +63,7 @@ abstract class SystemCommandDataProvider(
     }
 
     open fun onSelectMenuInteractionTimeout() {}
-    open fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent) {}
+    open fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: SystemCommand) {}
 
 
     open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {

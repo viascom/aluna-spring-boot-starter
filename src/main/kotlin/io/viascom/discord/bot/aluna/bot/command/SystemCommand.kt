@@ -27,14 +27,15 @@ import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandDataP
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandEmojiProvider
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
+import io.viascom.discord.bot.aluna.model.StringOption
 import io.viascom.discord.bot.aluna.property.ModeratorIdProvider
-import io.viascom.discord.bot.aluna.util.getOptionAsString
+import io.viascom.discord.bot.aluna.util.addOption
+import io.viascom.discord.bot.aluna.util.getTypedOption
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
-import net.dv8tion.jda.api.interactions.commands.OptionType
 
 @Command
 @ConditionalOnJdaEnabled
@@ -55,10 +56,13 @@ class SystemCommand(
 
     private var selectedProvider: SystemCommandDataProvider? = null
 
+    var commandOption = StringOption("command", "System command to execute", isRequired = true, isAutoComplete = true)
+    var argsOption = StringOption("args", "Arguments", isRequired = false, isAutoComplete = true)
+
     override fun initCommandOptions() {
         specificServer = alunaProperties.command.systemCommand.server
-        addOption(OptionType.STRING, "command", "System command to execute", true, true)
-        addOption(OptionType.STRING, "args", "Arguments", false, true)
+        addOption(commandOption)
+        addOption(argsOption)
     }
 
     override fun execute(event: SlashCommandInteractionEvent) {
@@ -70,7 +74,7 @@ class SystemCommand(
         selectedProvider = dataProviders.filter {
             it.id in (alunaProperties.command.systemCommand.enabledFunctions ?: arrayListOf()) || alunaProperties.command.systemCommand.enabledFunctions == null
         }
-            .firstOrNull { it.id == event.getOptionAsString("command", "") }
+            .firstOrNull { it.id == event.getTypedOption(commandOption, "") }
 
         if (selectedProvider == null) {
             event.reply("Command not found!").setEphemeral(true).queue()
@@ -128,7 +132,7 @@ class SystemCommand(
         super.onAutoCompleteEvent(option, event)
 
         if (option == "command") {
-            val input = event.getOptionAsString(option, "")!!
+            val input = event.getTypedOption(commandOption, "")!!
 
             val filteredDataProviders = dataProviders.filter {
                 it.id in (alunaProperties.command.systemCommand.enabledFunctions
@@ -157,9 +161,9 @@ class SystemCommand(
         }
 
         if (option == "args") {
-            val possibleProvider = dataProviders.firstOrNull { it.id == event.getOptionAsString("command", "")!! && it.supportArgsAutoComplete }
+            val possibleProvider = dataProviders.firstOrNull { it.id == event.getTypedOption(commandOption, "")!! && it.supportArgsAutoComplete }
             if (possibleProvider != null) {
-                possibleProvider.onArgsAutoComplete(event)
+                possibleProvider.onArgsAutoComplete(event, this)
             } else {
                 event.replyChoices().queue()
             }

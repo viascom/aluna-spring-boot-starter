@@ -47,6 +47,7 @@ import net.dv8tion.jda.api.requests.restaction.WebhookMessageUpdateAction
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction
 import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
+import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
 import java.util.*
 import java.util.function.Function
@@ -85,6 +86,10 @@ fun ShardManager.getPrivateMessage(channelId: String, messageId: String): Messag
     } catch (e: Exception) {
         null
     }
+}
+
+fun <T : Any> CommandDataImpl.addOption(option: CommandOption<in T>) {
+    this.addOptions(option as OptionData)
 }
 
 @JvmOverloads
