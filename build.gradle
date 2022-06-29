@@ -48,7 +48,7 @@ repositories {
 }
 
 ext {
-    jdaVersion = "5.0.0-alpha.12"
+    jdaVersion = "5.0.0-alpha.13"
     retrofitVersion = "2.9.0"
     gsonVersion = "2.9.0"
     gsonJavatimeVersion = "1.1.1"
