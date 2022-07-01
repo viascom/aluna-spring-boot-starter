@@ -98,7 +98,7 @@ class EventWaiter(
                                 try {
                                     if (SlashCommandInteractionEvent::class.isSuperclassOf(event::class)) {
                                         event as SlashCommandInteractionEvent
-                                        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.COMMAND)
+                                        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.INTERACTION)
                                     }
                                     waitingEvent.execute(event)
                                 } catch (e: Exception) {
@@ -160,7 +160,7 @@ class EventWaiter(
                                     entry.timeoutAction?.invoke()
                                 }
                             } catch (e: Exception) {
-                                logger.debug("Could not run timeout action for event wait $id\"\n" + e.stackTraceToString())
+                                logger.debug("Could not run timeout action for event wait $id\n" + e.stackTraceToString())
                             }
                         }
                     }
@@ -215,7 +215,7 @@ class EventWaiter(
                         }
                     }
 
-                }, timeout?.seconds ?: it.timeout?.seconds ?: Duration.ofMinutes(15).seconds, TimeUnit.SECONDS)
+                }, timeout?.seconds ?: it.timeout?.seconds ?: Duration.ofMinutes(14).seconds, TimeUnit.SECONDS)
 
             }
         }
@@ -277,7 +277,7 @@ class EventWaiter(
     @JvmOverloads
     fun <T : GenericComponentInteractionCreateEvent> waitForInteraction(
         id: String = NanoIdUtils.randomNanoId(), type: Class<T>, message: Message, action: Consumer<T>, condition: Predicate<T>? = null,
-        timeout: Duration? = Duration.ofMinutes(15), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
+        timeout: Duration? = Duration.ofMinutes(14), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
     ) {
         waitForEvent(
             id,
@@ -305,7 +305,7 @@ class EventWaiter(
     @JvmOverloads
     fun <T : ModalInteractionEvent> waitForInteraction(
         id: String = NanoIdUtils.randomNanoId(), type: Class<T>, action: Consumer<T>, condition: Predicate<T>? = null,
-        timeout: Duration? = Duration.ofMinutes(15), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
+        timeout: Duration? = Duration.ofMinutes(14), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
     ) {
         waitForEvent(
             id,
@@ -334,7 +334,7 @@ class EventWaiter(
     @JvmOverloads
     fun <T : GenericComponentInteractionCreateEvent> waitForInteraction(
         id: String = NanoIdUtils.randomNanoId(), type: Class<T>, hook: InteractionHook, action: Consumer<T>, condition: Predicate<T>? = null,
-        timeout: Duration? = Duration.ofMinutes(15), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
+        timeout: Duration? = Duration.ofMinutes(14), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
     ) {
         waitForEvent(
             id,
@@ -362,7 +362,7 @@ class EventWaiter(
     @JvmOverloads
     fun <T : Event> waitForEvent(
         id: String = NanoIdUtils.randomNanoId(), type: Class<T>, action: Consumer<T>, condition: Predicate<T>,
-        timeout: Duration? = Duration.ofMinutes(15), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
+        timeout: Duration? = Duration.ofMinutes(14), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
     ) {
         Checks.check(!isShutdown(), "Attempted to register a WaitingEvent while the EventWaiter's thread pool was already shut down!")
         Checks.notNull(type, "The provided type")

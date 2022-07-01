@@ -24,12 +24,12 @@ import net.dv8tion.jda.api.events.channel.ChannelCreateEvent
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent
 import net.dv8tion.jda.api.events.channel.GenericChannelEvent
 import net.dv8tion.jda.api.events.channel.update.*
-import net.dv8tion.jda.api.events.emote.EmoteAddedEvent
-import net.dv8tion.jda.api.events.emote.EmoteRemovedEvent
-import net.dv8tion.jda.api.events.emote.GenericEmoteEvent
-import net.dv8tion.jda.api.events.emote.update.EmoteUpdateNameEvent
-import net.dv8tion.jda.api.events.emote.update.EmoteUpdateRolesEvent
-import net.dv8tion.jda.api.events.emote.update.GenericEmoteUpdateEvent
+import net.dv8tion.jda.api.events.emoji.EmojiAddedEvent
+import net.dv8tion.jda.api.events.emoji.EmojiRemovedEvent
+import net.dv8tion.jda.api.events.emoji.GenericEmojiEvent
+import net.dv8tion.jda.api.events.emoji.update.EmojiUpdateNameEvent
+import net.dv8tion.jda.api.events.emoji.update.EmojiUpdateRolesEvent
+import net.dv8tion.jda.api.events.emoji.update.GenericEmojiUpdateEvent
 import net.dv8tion.jda.api.events.guild.*
 import net.dv8tion.jda.api.events.guild.invite.GenericGuildInviteEvent
 import net.dv8tion.jda.api.events.guild.invite.GuildInviteCreateEvent
@@ -62,6 +62,10 @@ import net.dv8tion.jda.api.events.stage.StageInstanceDeleteEvent
 import net.dv8tion.jda.api.events.stage.update.GenericStageInstanceUpdateEvent
 import net.dv8tion.jda.api.events.stage.update.StageInstanceUpdatePrivacyLevelEvent
 import net.dv8tion.jda.api.events.stage.update.StageInstanceUpdateTopicEvent
+import net.dv8tion.jda.api.events.sticker.GenericGuildStickerEvent
+import net.dv8tion.jda.api.events.sticker.GuildStickerAddedEvent
+import net.dv8tion.jda.api.events.sticker.GuildStickerRemovedEvent
+import net.dv8tion.jda.api.events.sticker.update.*
 import net.dv8tion.jda.api.events.thread.GenericThreadEvent
 import net.dv8tion.jda.api.events.thread.ThreadHiddenEvent
 import net.dv8tion.jda.api.events.thread.ThreadRevealedEvent
@@ -116,7 +120,7 @@ class OnMessageEmbedEvent(source: Any?, @Nonnull val event: MessageEmbedEvent) :
 class OnMessageReactionAddEvent(source: Any?, @Nonnull val event: MessageReactionAddEvent) : ApplicationEvent(source)
 class OnMessageReactionRemoveEvent(source: Any?, @Nonnull val event: MessageReactionRemoveEvent) : ApplicationEvent(source)
 class OnMessageReactionRemoveAllEvent(source: Any?, @Nonnull val event: MessageReactionRemoveAllEvent) : ApplicationEvent(source)
-class OnMessageReactionRemoveEmoteEvent(source: Any?, @Nonnull val event: MessageReactionRemoveEmoteEvent) : ApplicationEvent(source)
+class OnMessageReactionRemoveEmojiEvent(source: Any?, @Nonnull val event: MessageReactionRemoveEmojiEvent) : ApplicationEvent(source)
 class OnPermissionOverrideDeleteEvent(source: Any?, @Nonnull val event: PermissionOverrideDeleteEvent) : ApplicationEvent(source)
 class OnPermissionOverrideUpdateEvent(source: Any?, @Nonnull val event: PermissionOverrideUpdateEvent) : ApplicationEvent(source)
 class OnPermissionOverrideCreateEvent(source: Any?, @Nonnull val event: PermissionOverrideCreateEvent) : ApplicationEvent(source)
@@ -213,10 +217,19 @@ class OnRoleUpdateMentionableEvent(source: Any?, @Nonnull val event: RoleUpdateM
 class OnRoleUpdateNameEvent(source: Any?, @Nonnull val event: RoleUpdateNameEvent) : ApplicationEvent(source)
 class OnRoleUpdatePermissionsEvent(source: Any?, @Nonnull val event: RoleUpdatePermissionsEvent) : ApplicationEvent(source)
 class OnRoleUpdatePositionEvent(source: Any?, @Nonnull val event: RoleUpdatePositionEvent) : ApplicationEvent(source)
-class OnEmoteAddedEvent(source: Any?, @Nonnull val event: EmoteAddedEvent) : ApplicationEvent(source)
-class OnEmoteRemovedEvent(source: Any?, @Nonnull val event: EmoteRemovedEvent) : ApplicationEvent(source)
-class OnEmoteUpdateNameEvent(source: Any?, @Nonnull val event: EmoteUpdateNameEvent) : ApplicationEvent(source)
-class OnEmoteUpdateRolesEvent(source: Any?, @Nonnull val event: EmoteUpdateRolesEvent) : ApplicationEvent(source)
+class OnEmojiAddedEvent(source: Any?, @Nonnull val event: EmojiAddedEvent) : ApplicationEvent(source)
+class OnEmojiRemovedEvent(source: Any?, @Nonnull val event: EmojiRemovedEvent) : ApplicationEvent(source)
+class OnEmojiUpdateNameEvent(source: Any?, @Nonnull val event: EmojiUpdateNameEvent) : ApplicationEvent(source)
+class OnEmojiUpdateRolesEvent(source: Any?, @Nonnull val event: EmojiUpdateRolesEvent) : ApplicationEvent(source)
+class OnGuildStickerAddedEvent(source: Any?, @Nonnull val event: GuildStickerAddedEvent) : ApplicationEvent(source)
+class OnGuildStickerRemovedEvent(source: Any?, @Nonnull val event: GuildStickerRemovedEvent) : ApplicationEvent(source)
+class OnGenericGuildStickerEvent(source: Any?, @Nonnull val event: GenericGuildStickerEvent) : ApplicationEvent(source)
+
+class OnGenericGuildStickerUpdateEvent(source: Any?, @Nonnull val event: GenericGuildStickerUpdateEvent<Any>) : ApplicationEvent(source)
+class OnGuildStickerUpdateAvailableEvent(source: Any?, @Nonnull val event: GuildStickerUpdateAvailableEvent) : ApplicationEvent(source)
+class OnGuildStickerUpdateDescriptionEvent(source: Any?, @Nonnull val event: GuildStickerUpdateDescriptionEvent) : ApplicationEvent(source)
+class OnGuildStickerUpdateNameEvent(source: Any?, @Nonnull val event: GuildStickerUpdateNameEvent) : ApplicationEvent(source)
+class OnGuildStickerUpdateTagsEvent(source: Any?, @Nonnull val event: GuildStickerUpdateTagsEvent) : ApplicationEvent(source)
 
 //class OnHttpRequestEvent(@Nonnull val event: HttpRequestEvent):ApplicationEvent(source)
 class OnGenericInteractionCreateEvent(source: Any?, @Nonnull val event: GenericInteractionCreateEvent) : ApplicationEvent(source)
@@ -243,8 +256,8 @@ class OnGenericGuildMemberUpdateEvent(source: Any?, @Nonnull val event: GenericG
 class OnGenericGuildVoiceEvent(source: Any?, @Nonnull val event: GenericGuildVoiceEvent) : ApplicationEvent(source)
 class OnGenericRoleEvent(source: Any?, @Nonnull val event: GenericRoleEvent) : ApplicationEvent(source)
 class OnGenericRoleUpdateEvent(source: Any?, @Nonnull val event: GenericRoleUpdateEvent<*>) : ApplicationEvent(source)
-class OnGenericEmoteEvent(source: Any?, @Nonnull val event: GenericEmoteEvent) : ApplicationEvent(source)
-class OnGenericEmoteUpdateEvent(source: Any?, @Nonnull val event: GenericEmoteUpdateEvent<*>) : ApplicationEvent(source)
+class OnGenericEmojiEvent(source: Any?, @Nonnull val event: GenericEmojiEvent) : ApplicationEvent(source)
+class OnGenericEmojiUpdateEvent(source: Any?, @Nonnull val event: GenericEmojiUpdateEvent<*>) : ApplicationEvent(source)
 class OnGenericPermissionOverrideEvent(source: Any?, @Nonnull val event: GenericPermissionOverrideEvent) : ApplicationEvent(source)
 class OnEvent(source: Any?, @Nonnull val event: Event) : ApplicationEvent(source)
 class OnModalInteractionEvent(source: Any?, @Nonnull event: ModalInteractionEvent) : ApplicationEvent(source)

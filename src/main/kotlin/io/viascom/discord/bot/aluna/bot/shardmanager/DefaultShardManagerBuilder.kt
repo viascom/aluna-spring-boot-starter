@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory
 
 class DefaultShardManagerBuilder(
     private val shardReadyEvent: ShardReadyEvent,
-    private val slashCommandInteractionEventListener: SlashCommandInteractionEventListener,
+    private val interactionEventListener: InteractionEventListener,
     private val genericInteractionListener: GenericInteractionListener,
     private val eventWaiter: EventWaiter,
     private val genericEventPublisher: GenericEventPublisher,
@@ -51,7 +51,7 @@ class DefaultShardManagerBuilder(
             .addEventListeners(genericEventPublisher)
             .addEventListeners(genericInteractionListener)
             .addEventListeners(shardReadyEvent)
-            .addEventListeners(slashCommandInteractionEventListener)
+            .addEventListeners(interactionEventListener)
             .setStatus(OnlineStatus.DO_NOT_DISTURB)
             .setActivity(Activity.playing("loading..."))
             .setBulkDeleteSplittingEnabled(true)
@@ -87,7 +87,7 @@ class DefaultShardManagerBuilder(
                     when (it) {
                         AlunaDiscordProperties.CacheFlag.ACTIVITY -> CacheFlag.ACTIVITY
                         AlunaDiscordProperties.CacheFlag.VOICE_STATE -> CacheFlag.VOICE_STATE
-                        AlunaDiscordProperties.CacheFlag.EMOTE -> CacheFlag.EMOTE
+                        AlunaDiscordProperties.CacheFlag.EMOJI -> CacheFlag.EMOJI
                         AlunaDiscordProperties.CacheFlag.CLIENT_STATUS -> CacheFlag.CLIENT_STATUS
                         AlunaDiscordProperties.CacheFlag.MEMBER_OVERRIDES -> CacheFlag.MEMBER_OVERRIDES
                         AlunaDiscordProperties.CacheFlag.ROLE_TAGS -> CacheFlag.ROLE_TAGS

@@ -1,6 +1,6 @@
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import net.dv8tion.jda.api.entities.Emoji
+import net.dv8tion.jda.api.entities.emoji.Emoji
 
 class DefaultSystemCommandEmojiProvider : SystemCommandEmojiProvider {
     override fun loadingEmoji(): Emoji = Emoji.fromUnicode("\uD83D\uDD04")

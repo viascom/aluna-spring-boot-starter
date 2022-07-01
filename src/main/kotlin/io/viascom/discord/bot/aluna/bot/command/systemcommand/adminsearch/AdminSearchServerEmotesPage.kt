@@ -43,12 +43,12 @@ class AdminSearchServerEmotesPage : AdminSearchPageDataProvider(
         var text = ""
         var isFirst = true
 
-        discordServer.retrieveEmotes().complete()
+        discordServer.retrieveEmojis().complete()
 
-        discordServer.emotes.forEach {
+        discordServer.emojis.sortedBy { it.name }.forEach {
             val newElement = "${it.asMention}  `${it.asMention}`"
             if (text.length + newElement.length >= 1000) {
-                embedBuilder.addField(if (isFirst) "Emotes (${discordServer.emotes.size})" else "", text, false)
+                embedBuilder.addField(if (isFirst) "Emotes (${discordServer.emojis.size})" else "", text, false)
                 text = ""
                 isFirst = false
             }
@@ -56,7 +56,7 @@ class AdminSearchServerEmotesPage : AdminSearchPageDataProvider(
         }
 
         if (text.isNotEmpty()) {
-            embedBuilder.addField(if (isFirst) "Emotes (${discordServer.emotes.size})" else "", text, false)
+            embedBuilder.addField(if (isFirst) "Emotes (${discordServer.emojis.size})" else "", text, false)
         }
 
     }

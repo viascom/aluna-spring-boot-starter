@@ -30,7 +30,7 @@ open class ScopeBeanFactoryPostProcessor(
 ) : BeanFactoryPostProcessor {
 
     override fun postProcessBeanFactory(factory: ConfigurableListableBeanFactory) {
-        factory.registerScope("command", CommandScope(context))
+        factory.registerScope("interaction", InteractionScope(context))
     }
 
 }

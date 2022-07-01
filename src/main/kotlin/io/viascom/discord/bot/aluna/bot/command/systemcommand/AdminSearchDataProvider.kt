@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import io.viascom.discord.bot.aluna.bot.Command
+import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.adminsearch.AdminSearchPageDataProvider
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
@@ -33,6 +33,7 @@ import io.viascom.discord.bot.aluna.util.getTypedOption
 import io.viascom.discord.bot.aluna.util.removeActionRows
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
@@ -43,7 +44,7 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectOption
 import net.dv8tion.jda.api.sharding.ShardManager
 import java.awt.Color
 
-@Command
+@Interaction
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 class AdminSearchDataProvider(
@@ -66,21 +67,21 @@ class AdminSearchDataProvider(
     lateinit var discordServer: Guild
     lateinit var discordRole: Role
     lateinit var discordChannel: Channel
-    lateinit var discordEmote: Emote
+    lateinit var discordEmote: RichCustomEmoji
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
         lastHook = hook!!
 
         val id = event.getTypedOption(command.argsOption, "")!!
         if (id.isEmpty()) {
-            lastHook.editOriginal("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify an ID as argument for this command").queue()
+            lastHook.editOriginal("${systemCommandEmojiProvider.crossEmoji().formatted} Please specify an ID as argument for this command").queue()
             return
         }
 
         lastEmbed = EmbedBuilder()
             .setColor(Color.MAGENTA)
             .setTitle("Admin Search")
-            .setDescription("${systemCommandEmojiProvider.loadingEmoji().asMention} Searching for `${id}`...")
+            .setDescription("${systemCommandEmojiProvider.loadingEmoji().formatted} Searching for `${id}`...")
         lastHook.editOriginalEmbeds(lastEmbed.build()).complete()
 
         //======= User =======
@@ -128,7 +129,7 @@ class AdminSearchDataProvider(
         }
 
         //======= Emote =======
-        val optionalDiscordEmote = checkForEmote(id)?.firstOrNull()
+        val optionalDiscordEmote = checkForEmoji(id)?.firstOrNull()
         if (optionalDiscordEmote != null) {
             discordEmote = optionalDiscordEmote
             selectedType = AdminSearchType.EMOTE
@@ -207,15 +208,15 @@ class AdminSearchDataProvider(
         }
     }
 
-    private fun checkForEmote(id: String): List<Emote>? {
+    private fun checkForEmoji(id: String): List<RichCustomEmoji>? {
         return if (id.isEmpty()) {
             null
         } else {
             try {
-                shardManager.guilds.first().emoteCache
-                shardManager.getEmoteById(id)?.let { arrayListOf(it) }
+                shardManager.guilds.first().emojis
+                shardManager.getEmojiById(id)?.let { arrayListOf(it) }
             } catch (e: Exception) {
-                shardManager.getEmotesByName(id, false)
+                shardManager.getEmojisByName(id, false)
             }
         }
     }
@@ -255,7 +256,7 @@ class AdminSearchDataProvider(
             ?.onChannelRequest(discordChannel, lastEmbed)
     }
 
-    private fun generateDiscordEmote(discordEmote: Emote, page: String = "OVERVIEW") {
+    private fun generateDiscordEmote(discordEmote: RichCustomEmoji, page: String = "OVERVIEW") {
         lastEmbed.clearFields()
         lastEmbed.setDescription("Found Discord Emote **${discordEmote.name}**\nwith ID: ``${discordEmote.id}``")
         lastEmbed.setThumbnail(discordEmote.imageUrl)
@@ -268,7 +269,7 @@ class AdminSearchDataProvider(
         val menu = SelectMenu.create("menu:type")
             .setRequiredRange(1, 1)
 
-        adminSearchPageDataProviders.filter { it.supportedTypes.contains(type) }.forEach {
+        adminSearchPageDataProviders.filter { it.supportedTypes.contains(type) }.sortedBy { it.pageName }.forEach {
             menu.addOptions(SelectOption.of(it.pageName, it.pageId).withDefault(it.pageId == page))
         }
         return ActionRow.of(menu.build())
@@ -301,9 +302,9 @@ class AdminSearchDataProvider(
             return
         }
 
-        val emotes = checkForEmote(arg)
-        if (emotes != null && emotes.isNotEmpty()) {
-            event.replyChoices(emotes.map { net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name + " (Emote) (${it.guild?.name ?: ""})", it.id) })
+        val emojis = checkForEmoji(arg)
+        if (emojis != null && emojis.isNotEmpty()) {
+            event.replyChoices(emojis.map { net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name + " (Emote) (${it.guild?.name ?: ""})", it.id) })
                 .queue()
             return
         }

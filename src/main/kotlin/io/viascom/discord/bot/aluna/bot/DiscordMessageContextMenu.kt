@@ -51,7 +51,7 @@ abstract class DiscordMessageContextMenu(name: String) : DiscordContextMenu(Comm
             stopWatch!!.start()
         }
 
-        MDC.put("command", event.commandPath)
+        MDC.put("interaction", event.commandPath)
         MDC.put("uniqueId", uniqueId)
 
         guild = event.guild
@@ -70,31 +70,31 @@ abstract class DiscordMessageContextMenu(name: String) : DiscordContextMenu(Comm
             guildLocale = event.guildLocale
         }
 
-        val missingUserPermissions = discordCommandConditions.checkForNeededUserPermissions(this, userPermissions, event)
+        val missingUserPermissions = discordInteractionConditions.checkForNeededUserPermissions(this, userPermissions, event)
         if (missingUserPermissions.hasMissingPermissions) {
             onMissingUserPermission(event, missingUserPermissions)
             return
         }
 
-        val missingBotPermissions = discordCommandConditions.checkForNeededBotPermissions(this, botPermissions, event)
+        val missingBotPermissions = discordInteractionConditions.checkForNeededBotPermissions(this, botPermissions, event)
         if (missingBotPermissions.hasMissingPermissions) {
             onMissingBotPermission(event, missingBotPermissions)
             return
         }
 
-        val additionalRequirements = discordCommandAdditionalConditions.checkForAdditionalContextRequirements(this, event)
+        val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalContextRequirements(this, event)
         if (additionalRequirements.failed) {
             onFailedAdditionalRequirements(event, additionalRequirements)
             return
         }
 
-        //Load additional data for this command
-        discordCommandLoadAdditionalData.loadData(this, event)
+        //Load additional data for this interaction
+        discordInteractionLoadAdditionalData.loadData(this, event)
 
         try {
-            //Run onCommandExecution in asyncExecutor to ensure it is not blocking the execution of the command itself
-            discordBot.asyncExecutor.execute {
-                discordCommandMetaDataHandler.onContextMenuExecution(this, event)
+            //Run onCommandExecution in asyncExecutor to ensure it is not blocking the execution of the interaction itself
+            discordBot.interactionExecutor.execute {
+                discordInteractionMetaDataHandler.onContextMenuExecution(this, event)
             }
             if (alunaProperties.discord.publishDiscordContextEvent) {
                 eventPublisher.publishDiscordMessageContextEvent(author, channel, guild, event.commandPath, this)
@@ -105,7 +105,7 @@ abstract class DiscordMessageContextMenu(name: String) : DiscordContextMenu(Comm
             try {
                 onExecutionException(event, e)
             } catch (exceptionError: Exception) {
-                discordCommandMetaDataHandler.onGenericExecutionException(this, e, exceptionError, event)
+                discordInteractionMetaDataHandler.onGenericExecutionException(this, e, exceptionError, event)
             }
         } finally {
             exitCommand(event)

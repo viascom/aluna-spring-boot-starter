@@ -22,7 +22,7 @@
 package io.viascom.discord.bot.aluna.bot.listener
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordReadyEvent
 import io.viascom.discord.bot.aluna.property.AlunaProperties
@@ -39,7 +39,7 @@ import java.awt.Color
 @Service
 @ConditionalOnJdaEnabled
 internal open class DiscordReadyEventListener(
-    private val commands: List<DiscordCommand>,
+    private val interactions: List<InteractionScopedObject>,
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
     private val alunaProperties: AlunaProperties
@@ -48,7 +48,7 @@ internal open class DiscordReadyEventListener(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onApplicationEvent(event: DiscordReadyEvent) {
-        if(alunaProperties.discord.setStatusToOnlineWhenReady){
+        if (alunaProperties.discord.setStatusToOnlineWhenReady) {
             //Set status to online and remove activity
             shardManager.setStatus(OnlineStatus.ONLINE)
             shardManager.setActivity(null)
@@ -59,9 +59,9 @@ internal open class DiscordReadyEventListener(
                 val embedMessage = EmbedBuilder()
                     .setTitle("⚡ Bot Ready")
                     .setColor(Color.GREEN)
-                    .setDescription("Bot is up and ready to answer commands.")
-                    .addField("» Client-Id", alunaProperties.discord.applicationId, false)
-                    .addField("» Total Commands", commands.size.toString(), true)
+                    .setDescription("Bot is up and ready to answer interactions.")
+                    .addField("» Client-Id", alunaProperties.discord.applicationId ?: "n/a", false)
+                    .addField("» Total Interactions", interactions.size.toString(), true)
                     .addField("» Production Mode", alunaProperties.productionMode.toString(), true)
 
                 val channel = shardManager.getGuildTextChannel(

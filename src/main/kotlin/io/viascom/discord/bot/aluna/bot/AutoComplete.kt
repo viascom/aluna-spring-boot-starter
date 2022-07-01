@@ -21,9 +21,9 @@
 
 package io.viascom.discord.bot.aluna.bot
 
-import io.viascom.discord.bot.aluna.configuration.scope.CommandScoped
+import io.viascom.discord.bot.aluna.configuration.scope.InteractionScoped
 import org.springframework.stereotype.Component
 
 @Component
-@CommandScoped
+@InteractionScoped
 annotation class AutoComplete

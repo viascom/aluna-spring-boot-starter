@@ -28,15 +28,15 @@ import java.time.temporal.ChronoUnit
 class AlunaThreadProperties {
 
     /**
-     * Max amount of threads used for command execution.
+     * Max amount of threads used for interaction execution.
      */
-    var commandExecutorCount: Int = 100
+    var interactionExecutorCount: Int = 100
 
     /**
-     * Duration of how long a command thread should be keep inactive before it gets destroyed.
+     * Duration of how long an interaction thread should be keep inactive before it gets destroyed.
      */
     @DurationUnit(ChronoUnit.SECONDS)
-    var commandExecutorTtl: Duration = Duration.ofSeconds(30)
+    var interactionExecutorTtl: Duration = Duration.ofSeconds(30)
 
     /**
      * Max amount of async executor threads. These threads are used by Aluna to handle internal async task.

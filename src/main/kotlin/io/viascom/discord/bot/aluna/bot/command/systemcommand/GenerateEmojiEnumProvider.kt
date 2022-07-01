@@ -21,10 +21,9 @@
 
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import io.viascom.discord.bot.aluna.bot.Command
+import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
-import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnAlunaNotProductionMode
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.EventRegisterType
@@ -42,10 +41,9 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
 import net.dv8tion.jda.api.sharding.ShardManager
 import java.awt.Color
 
-@Command
+@Interaction
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-@ConditionalOnAlunaNotProductionMode
 class GenerateEmojiEnumProvider(
     private val shardManager: ShardManager
 ) : SystemCommandDataProvider(
@@ -80,9 +78,8 @@ class GenerateEmojiEnumProvider(
         latestEmbed = EmbedBuilder()
             .setColor(Color.BLUE)
             .setTitle("Generate Emoji-Enum")
-            .setFooter("This system-command is only enabled on no production mode!")
-            .setDescription("This command lets you create Emotji-Enums which extend the Aluna DiscordEmote interface. To get started add the servers you want and hit generate.")
-            .addField("Selected Servers", selectedServerIds.joinToString("\n") { "- ${shardManager.getGuild(it)?.name ?: it}" }, false)
+            .setDescription("This command lets you create Emotji-Enums which extend the Aluna DiscordEmoji interface. To get started add the servers you want and hit generate.")
+            .addField("Selected Servers", selectedServerIds.joinToString("\n") { "- ${shardManager.getGuildById(it)?.name ?: it}" }, false)
     }
 
     private fun createRemoveMessage() {
@@ -97,7 +94,7 @@ class GenerateEmojiEnumProvider(
         val row1 = arrayListOf<ItemComponent>()
         val serverList = SelectMenu.create("serverList")
 
-        selectedServerIds.mapNotNull { shardManager.getGuild(it) }.forEach {
+        selectedServerIds.mapNotNull { shardManager.getGuildById(it) }.forEach {
             serverList.addOption(it.name, it.id, it.id)
         }
 
@@ -205,7 +202,7 @@ class GenerateEmojiEnumProvider(
                 //Check server id
                 val serverID = event.getValueAsString("serverId", "0")
                 val newServer = try {
-                    shardManager.getGuild(serverID!!)
+                    shardManager.getGuildById(serverID!!)
                 } catch (e: Exception) {
                     null
                 }
@@ -235,28 +232,28 @@ class GenerateEmojiEnumProvider(
 
         when (selectedType) {
             "text" -> {
-                selectedServerIds.mapNotNull { shardManager.getGuild(it) }.forEach { guild ->
+                selectedServerIds.mapNotNull { shardManager.getGuildById(it) }.forEach { guild ->
                     content += "\n\n** ${guild.name} (${guild.id})**\n"
-                    content += guild.emotes.sortedBy { it.name }.joinToString("\n") { "${it.asMention} `${it.asMention}`" }
+                    content += guild.emojis.sortedBy { it.name }.joinToString("\n") { "${it.asMention} `${it.asMention}`" }
                 }
             }
             "kotlin" -> {
                 content = """
-                    import io.viascom.discord.bot.aluna.model.DiscordEmote;
+                    import io.viascom.discord.bot.aluna.model.DiscordEmoji;
                     
                     /**
-                     * My emotes
+                     * My emojis
                      *
                      * @property id Id of the emoji
-                     * @property emoteName Name of the emoji
+                     * @property emojiName Name of the emoji
                      * @property animated Is this emoji animated
                      */
-                    enum class MyEmotes(override val id: String, override val emoteName: String, override val animated: Boolean = false) : DiscordEmote {
+                    enum class MyEmojis(override val id: String, override val emojiName: String, override val animated: Boolean = false) : DiscordEmoji {
                 """.trimIndent()
 
-                selectedServerIds.mapNotNull { shardManager.getGuild(it) }.forEach {
-                    content += "\n\n    //${it.name} (${it.id})\n"
-                    content += it.emotes
+                selectedServerIds.mapNotNull { shardManager.getGuildById(it) }.forEach { guild ->
+                    content += "\n\n    //${guild.name} (${guild.id})\n"
+                    content += guild.emojis
                         .sortedBy { it.name }
                         .joinToString("\n") { "    ${it.name.uppercase()}(\"${it.id}\", \"${it.name}\"" + if (it.isAnimated) ", true)," else ")," }
                 }
@@ -266,18 +263,18 @@ class GenerateEmojiEnumProvider(
             }
             "java" -> {
                 content = """
-                   import io.viascom.discord.bot.aluna.model.DiscordEmote;
+                   import io.viascom.discord.bot.aluna.model.DiscordEmoji;
                    import org.jetbrains.annotations.NotNull;
 
                    /**
-                    * My emotes
+                    * My emojis
                     */
-                   public enum MyEmotes implements DiscordEmote {
+                   public enum MyEmojis implements DiscordEmoji {
                 """.trimIndent()
 
-                selectedServerIds.mapNotNull { shardManager.getGuild(it) }.forEach {
-                    content += "\n\n    //${it.name} (${it.id})\n"
-                    content += it.emotes
+                selectedServerIds.mapNotNull { shardManager.getGuildById(it) }.forEach { guild ->
+                    content += "\n\n    //${guild.name} (${guild.id})\n"
+                    content += guild.emojis
                         .sortedBy { it.name }
                         .joinToString("\n") { "    ${it.name.uppercase()}(\"${it.id}\", \"${it.name}\"" + if (it.isAnimated) ", true)," else ")," }
                 }
@@ -291,13 +288,13 @@ class GenerateEmojiEnumProvider(
                        final String name;
                        final boolean animated;
                    
-                       MyEmotes(String id, String name, boolean animated) {
+                       MyEmojis(String id, String name, boolean animated) {
                            this.id = id;
                            this.name = name;
                            this.animated = animated;
                        }
                    
-                       MyEmotes(String id, String name) {
+                       MyEmojis(String id, String name) {
                            this.id = id;
                            this.name = name;
                            this.animated = false;
@@ -310,7 +307,7 @@ class GenerateEmojiEnumProvider(
 
                        @NotNull
                        @Override
-                       public String getEmoteName() {
+                       public String getEmojiName() {
                            return name;
                        }
 

@@ -45,7 +45,7 @@ open class GenericInteractionListener(
             val commandId = discordBot.commandsWithAutocomplete.firstOrNull { it == event.commandId }
             if (commandId != null) {
                 discordBot.commands[commandId]?.let { command ->
-                    discordBot.commandExecutor.execute {
+                    discordBot.interactionExecutor.execute {
                         DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, NanoIdUtils.randomNanoId())
                         context.getBean(command).onAutoCompleteEventCall(event.focusedOption.name, event)
                     }
@@ -67,14 +67,14 @@ open class GenericInteractionListener(
     override fun onButtonInteraction(event: ButtonInteractionEvent) {
         discordBot.asyncExecutor.execute {
             if (discordBot.messagesToObserveButton.containsKey(event.message.id)) {
-                discordBot.commandExecutor.execute commandExecutor@{
+                discordBot.interactionExecutor.execute commandExecutor@{
                     val entry = discordBot.messagesToObserveButton[event.message.id]!!
                     DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
-                    if (entry.commandUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
+                    if (entry.interactionUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
                         return@commandExecutor
                     }
 
-                    val result = context.getBean(entry.command.java).onButtonInteraction(event, entry.additionalData)
+                    val result = context.getBean(entry.interaction.java).onButtonInteraction(event, entry.additionalData)
                     if (!entry.stayActive && result) {
                         discordBot.removeMessageForButtonEvents(event.message.id)
                     }
@@ -87,14 +87,14 @@ open class GenericInteractionListener(
     override fun onSelectMenuInteraction(event: SelectMenuInteractionEvent) {
         discordBot.asyncExecutor.execute {
             if (discordBot.messagesToObserveSelect.containsKey(event.message.id)) {
-                discordBot.commandExecutor.execute commandExecutor@{
+                discordBot.interactionExecutor.execute interactionExecutor@{
                     val entry = discordBot.messagesToObserveSelect[event.message.id]!!
                     DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
-                    if (entry.commandUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
-                        return@commandExecutor
+                    if (entry.interactionUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
+                        return@interactionExecutor
                     }
 
-                    val result = context.getBean(entry.command.java).onSelectMenuInteraction(event, entry.additionalData)
+                    val result = context.getBean(entry.interaction.java).onSelectMenuInteraction(event, entry.additionalData)
                     if (!entry.stayActive && result) {
                         discordBot.removeMessageForSelectEvents(event.message.id)
                     }
@@ -106,14 +106,14 @@ open class GenericInteractionListener(
     override fun onModalInteraction(event: ModalInteractionEvent) {
         discordBot.asyncExecutor.execute {
             if (discordBot.messagesToObserveModal.containsKey(event.user.id)) {
-                discordBot.commandExecutor.execute commandExecutor@{
+                discordBot.interactionExecutor.execute interactionExecutor@{
                     val entry = discordBot.messagesToObserveModal[event.user.id]!!
                     DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
-                    if (entry.commandUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
-                        return@commandExecutor
+                    if (entry.interactionUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
+                        return@interactionExecutor
                     }
 
-                    val result = context.getBean(entry.command.java).onModalInteraction(event, entry.additionalData)
+                    val result = context.getBean(entry.interaction.java).onModalInteraction(event, entry.additionalData)
                     if (!entry.stayActive && result) {
                         discordBot.removeMessageForModalEvents(event.user.id)
                     }

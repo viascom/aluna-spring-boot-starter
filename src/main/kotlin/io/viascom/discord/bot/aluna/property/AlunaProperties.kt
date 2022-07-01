@@ -83,7 +83,7 @@ class AlunaProperties {
     var translation: AlunaTranslationProperties = AlunaTranslationProperties()
 
     /**
-     * Should Aluna register commands in production mode which are in commandDevelopmentStatus == IN_DEVELOPMENT
+     * Should Aluna register interactions in production mode which are in interactionDevelopmentStatus == IN_DEVELOPMENT
      */
-    var includeInDevelopmentCommands: Boolean = false
+    var includeInDevelopmentInteractions: Boolean = false
 }

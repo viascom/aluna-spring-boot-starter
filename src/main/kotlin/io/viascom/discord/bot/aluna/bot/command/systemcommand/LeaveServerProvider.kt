@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import io.viascom.discord.bot.aluna.bot.Command
+import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
@@ -41,7 +41,7 @@ import net.dv8tion.jda.api.sharding.ShardManager
 import java.awt.Color
 import java.time.Duration
 
-@Command
+@Interaction
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 class LeaveServerProvider(
@@ -64,13 +64,13 @@ class LeaveServerProvider(
 
         val id = event.getTypedOption(command.argsOption, "")!!
         if (id.isEmpty()) {
-            lastHook.editOriginal("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify an ID as argument for this command").queue()
+            lastHook.editOriginal("${systemCommandEmojiProvider.crossEmoji().formatted} Please specify an ID as argument for this command").queue()
             return
         }
 
         val server = shardManager.getGuildById(id)
         if (server == null) {
-            lastHook.editOriginal("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify a valid server ID as argument for this command").queue()
+            lastHook.editOriginal("${systemCommandEmojiProvider.crossEmoji().formatted} Please specify a valid server ID as argument for this command").queue()
             return
         }
 
@@ -92,10 +92,10 @@ class LeaveServerProvider(
             lastHook = hook
 
             if (event.componentId == "yes") {
-                lastEmbed.setDescription("${systemCommandEmojiProvider.tickEmoji().asMention} Bot left **${selectedServer.name}**")
+                lastEmbed.setDescription("${systemCommandEmojiProvider.tickEmoji().formatted} Bot left **${selectedServer.name}**")
                 selectedServer.leave().queue()
             } else {
-                lastEmbed.setDescription("${systemCommandEmojiProvider.crossEmoji().asMention} Canceled")
+                lastEmbed.setDescription("${systemCommandEmojiProvider.crossEmoji().formatted} Canceled")
             }
             lastHook.editOriginalEmbeds(lastEmbed.build()).removeActionRows().queue()
         }

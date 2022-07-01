@@ -1,6 +1,6 @@
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import net.dv8tion.jda.api.entities.Emoji
+import net.dv8tion.jda.api.entities.emoji.Emoji
 
 interface SystemCommandEmojiProvider {
 

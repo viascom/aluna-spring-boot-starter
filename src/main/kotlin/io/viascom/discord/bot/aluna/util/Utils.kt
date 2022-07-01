@@ -25,8 +25,11 @@
 package io.viascom.discord.bot.aluna.util
 
 import io.viascom.discord.bot.aluna.model.CommandOption
+import io.viascom.discord.bot.aluna.model.DiscordSticker
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.entities.Message.Attachment
+import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
@@ -64,14 +67,14 @@ fun MessageEditCallbackAction.removeActionRows() = this.setActionRows(arrayListO
 fun WebhookMessageUpdateAction<Message>.removeActionRows() = this.setActionRows(arrayListOf())
 fun MessageAction.removeActionRows() = this.setActionRows(arrayListOf())
 
-fun ShardManager.getGuild(guildId: String): Guild? = this.getGuildById(guildId)
-fun ShardManager.getGuildTextChannel(guildId: String, channelId: String): MessageChannel? = this.getGuild(guildId)?.getTextChannelById(channelId)
-fun ShardManager.getGuildVoiceChannel(guildId: String, channelId: String): VoiceChannel? = this.getGuild(guildId)?.getVoiceChannelById(channelId)
+fun MessageAction.setStickers(vararg stickers: DiscordSticker) = this.setStickers(stickers.map { it.toSticker() })
+fun MessageAction.setStickers(stickers: Collection<DiscordSticker>) = this.setStickers(stickers.map { it.toSticker() })
+fun ShardManager.getGuildTextChannel(guildId: String, channelId: String): MessageChannel? = this.getGuildById(guildId)?.getTextChannelById(channelId)
+fun ShardManager.getGuildVoiceChannel(guildId: String, channelId: String): VoiceChannel? = this.getGuildById(guildId)?.getVoiceChannelById(channelId)
 fun ShardManager.getGuildMessage(guildId: String, channelId: String, messageId: String): Message? =
     this.getGuildTextChannel(guildId, channelId)?.retrieveMessageById(messageId)?.complete()
 
 fun ShardManager.getPrivateChannelByUser(userId: String): MessageChannel? = this.retrieveUserById(userId).complete()?.openPrivateChannel()?.complete()
-fun ShardManager.getPrivateChannel(channelId: String): MessageChannel? = this.getPrivateChannelById(channelId)
 fun ShardManager.getPrivateMessageByUser(userId: String, messageId: String): Message? {
     return try {
         getPrivateChannelByUser(userId)?.retrieveMessageById(messageId)?.complete()
@@ -82,7 +85,7 @@ fun ShardManager.getPrivateMessageByUser(userId: String, messageId: String): Mes
 
 fun ShardManager.getPrivateMessage(channelId: String, messageId: String): Message? {
     return try {
-        getPrivateChannel(channelId)?.retrieveMessageById(messageId)?.complete()
+        getPrivateChannelById(channelId)?.retrieveMessageById(messageId)?.complete()
     } catch (e: Exception) {
         null
     }
@@ -184,12 +187,34 @@ fun CommandAutoCompleteInteractionEvent.getOptionAsMember(name: String, default:
 @JvmOverloads
 fun CommandAutoCompleteInteractionEvent.getOptionAsUser(name: String, default: User? = null): User? = this.getOption(name, default, OptionMapping::getAsUser)
 
+@JvmOverloads
+fun CommandAutoCompleteInteractionEvent.getOptionAsAttachment(name: String, default: Attachment? = null): Attachment? =
+    this.getOption(name, default, OptionMapping::getAsAttachment)
+
+/**
+ * Reply string choices
+ *
+ * @param choices HashMap of choices (Key , Value)
+ * @return AutoCompleteCallbackAction
+ */
 fun CommandAutoCompleteInteractionEvent.replyStringChoices(choices: Map<String, String>): AutoCompleteCallbackAction =
     this.replyChoices(choices.entries.map { Command.Choice(it.key, it.value) })
 
+/**
+ * Reply long choices
+ *
+ * @param choices HashMap of choices (Key , Value)
+ * @return AutoCompleteCallbackAction
+ */
 fun CommandAutoCompleteInteractionEvent.replyLongChoices(choices: Map<String, Long>): AutoCompleteCallbackAction =
     this.replyChoices(choices.entries.map { Command.Choice(it.key, it.value) })
 
+/**
+ * Reply double choices
+ *
+ * @param choices HashMap of choices (Key , Value)
+ * @return AutoCompleteCallbackAction
+ */
 fun CommandAutoCompleteInteractionEvent.replyDoubleChoices(choices: Map<String, Double>): AutoCompleteCallbackAction =
     this.replyChoices(choices.entries.map { Command.Choice(it.key, it.value) })
 

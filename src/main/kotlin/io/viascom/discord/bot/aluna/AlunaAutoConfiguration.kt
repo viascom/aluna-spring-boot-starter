@@ -67,7 +67,7 @@ open class AlunaAutoConfiguration {
     @ConditionalOnMissingBean(ShardManagerBuilder::class)
     open fun defaultShardManagerBuilder(
         shardReadyEvent: ShardReadyEvent,
-        slashCommandInteractionEventListener: SlashCommandInteractionEventListener,
+        interactionEventListener: InteractionEventListener,
         genericAutoCompleteListener: GenericInteractionListener,
         eventWaiter: EventWaiter,
         genericEventPublisher: GenericEventPublisher,
@@ -77,7 +77,7 @@ open class AlunaAutoConfiguration {
 
         discordBot.shardManager = discordBot.shardManager ?: DefaultShardManagerBuilder(
             shardReadyEvent,
-            slashCommandInteractionEventListener,
+            interactionEventListener,
             genericAutoCompleteListener,
             eventWaiter,
             genericEventPublisher,
@@ -99,33 +99,33 @@ open class AlunaAutoConfiguration {
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
-    open fun defaultDiscordCommandConditions(): DiscordCommandConditions {
-        logger.debug("Enable DefaultDiscordCommandConditions")
-        return DefaultDiscordCommandConditions()
+    open fun defaultDiscordInteractionConditions(): DiscordInteractionConditions {
+        logger.debug("Enable DefaultDiscordInteractionConditions")
+        return DefaultDiscordInteractionConditions()
     }
 
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
-    open fun defaultDiscordCommandAdditionalConditions(): DiscordCommandAdditionalConditions {
-        logger.debug("Enable DefaultDiscordCommandAdditionalConditions")
-        return DefaultDiscordCommandAdditionalConditions()
+    open fun defaultDiscordInteractionAdditionalConditions(): DiscordInteractionAdditionalConditions {
+        logger.debug("Enable DefaultDiscordInteractionAdditionalConditions")
+        return DefaultDiscordInteractionAdditionalConditions()
     }
 
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
-    open fun discordCommandLoadAdditionalData(): DiscordCommandLoadAdditionalData {
-        logger.debug("Enable DefaultDiscordCommandLoadAdditionalData")
-        return DefaultDiscordCommandLoadAdditionalData()
+    open fun discordInteractionLoadAdditionalData(): DiscordInteractionLoadAdditionalData {
+        logger.debug("Enable DefaultDiscordInteractionLoadAdditionalData")
+        return DefaultDiscordInteractionLoadAdditionalData()
     }
 
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
-    open fun discordCommandMetaDataHandler(): DiscordCommandMetaDataHandler {
-        logger.debug("Enable DefaultDiscordCommandMetaDataHandler")
-        return DefaultDiscordCommandMetaDataHandler()
+    open fun discordInteractionMetaDataHandler(): DiscordInteractionMetaDataHandler {
+        logger.debug("Enable DefaultDiscordInteractionMetaDataHandler")
+        return DefaultDiscordInteractionMetaDataHandler()
     }
 
     @Bean

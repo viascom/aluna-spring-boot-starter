@@ -24,7 +24,7 @@ package io.viascom.discord.bot.aluna.configuration
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
-import io.viascom.discord.bot.aluna.configuration.scope.CommandScope
+import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -71,7 +71,7 @@ class AlunaHealthIndicator(
             status.outOfService()
         }
 
-        val commandScope = configurableListableBeanFactory.getRegisteredScope("command") as CommandScope
+        val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
 
         shardManager.shards.first().status
         status.withDetail("clientId", alunaProperties.discord.applicationId)
@@ -82,15 +82,15 @@ class AlunaHealthIndicator(
         status.withDetail("productionMode", alunaProperties.productionMode)
 
         val threads = hashMapOf<String, Any>()
-        threads["commandThreads"] = discordBot.commandExecutor.activeCount
+        threads["interactionThreads"] = discordBot.interactionExecutor.activeCount
         threads["asyncThreads"] = discordBot.asyncExecutor.activeCount
         threads["messagesToObserveTimeoutThreads"] = discordBot.messagesToObserveScheduledThreadPool.activeCount
         threads["eventWaiterExecutorThreads"] = eventWaiter.executorThreadPool.activeCount
         threads["eventWaiterExecutorTimeoutThreads"] = eventWaiter.scheduledThreadPool.activeCount
 
         status.withDetail("threads", threads)
-        status.withDetail("currentActiveCommands", commandScope.getInstanceCount())
-        status.withDetail("currentActiveCommandTimeouts", commandScope.getTimeoutCount())
+        status.withDetail("currentActiveInteractions", interactionScope.getInstanceCount())
+        status.withDetail("currentActiveInteractionTimeouts", interactionScope.getTimeoutCount())
 
         val interactionObserver = hashMapOf<String, Any>()
         interactionObserver["buttons"] =

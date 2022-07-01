@@ -21,23 +21,33 @@
 
 package io.viascom.discord.bot.aluna.bot
 
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandLoadAdditionalData
+import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionLoadAdditionalData
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
 
+/**
+ * Global auto complete handler to provide choices for multiple commands.
+ *
+ * @property commands Commands which this auto complete handler is mapped to
+ * @property option Name of the option or null if this auto complete handler should reply on all options
+ */
 abstract class AutoCompleteHandler @JvmOverloads constructor(val commands: ArrayList<Class<out DiscordCommand>>, val option: String? = null) :
-    CommandScopedObject {
+    InteractionScopedObject {
 
+    /**
+     * @property command Command which this auto complete handler is mapped to
+     * @property option Name of the option or null if this auto complete handler should reply on all options
+     */
     constructor(command: Class<out DiscordCommand>, option: String? = null) : this(arrayListOf(command), option)
 
     @Autowired
     lateinit var discordBot: DiscordBot
 
     @Autowired
-    lateinit var discordCommandLoadAdditionalData: DiscordCommandLoadAdditionalData
+    lateinit var discordInteractionLoadAdditionalData: DiscordInteractionLoadAdditionalData
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
@@ -59,7 +69,7 @@ abstract class AutoCompleteHandler @JvmOverloads constructor(val commands: Array
 
     @JvmSynthetic
     internal fun onRequestCall(event: CommandAutoCompleteInteractionEvent) {
-        discordCommandLoadAdditionalData.loadData(event)
+        discordInteractionLoadAdditionalData.loadData(event)
         onRequest(event)
     }
 }

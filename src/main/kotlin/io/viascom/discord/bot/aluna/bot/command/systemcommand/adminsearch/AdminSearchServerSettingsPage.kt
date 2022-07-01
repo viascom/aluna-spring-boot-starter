@@ -48,9 +48,9 @@ class AdminSearchServerSettingsPage(
         embedBuilder.clearFields()
 
         if (discordServer.description != null && discordServer.description!!.isNotEmpty()) {
-            embedBuilder.addField("Description", discordServer.description, true)
+            embedBuilder.addField("Description", discordServer.description!!, true)
         }
-        embedBuilder.addField("Emotes", "${discordServer.emotes.size} / ${discordServer.maxEmotes}", true)
+        embedBuilder.addField("Emotes", "${discordServer.emojis.size} / ${discordServer.maxEmojis}", true)
         embedBuilder.addField("Members", "${discordServer.members.size} / ${discordServer.maxMembers}", true)
         embedBuilder.addField("Max Bitrate", "${discordServer.maxBitrate}", true)
         embedBuilder.addField("Max Filesize", "${discordServer.maxFileSize / 1000000} MB", true)
@@ -62,7 +62,7 @@ class AdminSearchServerSettingsPage(
         }, true)
         embedBuilder.addField(
             "Explicit Content Level", when (discordServer.explicitContentLevel) {
-                Guild.ExplicitContentLevel.OFF -> systemCommandEmojiProvider.crossEmoji().asMention + " Don't scan any messages."
+                Guild.ExplicitContentLevel.OFF -> systemCommandEmojiProvider.crossEmoji().formatted + " Don't scan any messages."
                 Guild.ExplicitContentLevel.NO_ROLE -> "\uD83D\uDD75️ Scan messages from members without a role."
                 Guild.ExplicitContentLevel.ALL -> "\uD83D\uDEC2 Scan messages sent by all members."
                 Guild.ExplicitContentLevel.UNKNOWN -> "Unknown filter level!"
@@ -77,8 +77,8 @@ class AdminSearchServerSettingsPage(
         }, true)
         embedBuilder.addField(
             "Required MFA Level", when (discordServer.requiredMFALevel) {
-                Guild.MFALevel.NONE -> systemCommandEmojiProvider.crossEmoji().asMention + " No"
-                Guild.MFALevel.TWO_FACTOR_AUTH -> systemCommandEmojiProvider.tickEmoji().asMention + " Yes"
+                Guild.MFALevel.NONE -> systemCommandEmojiProvider.crossEmoji().formatted + " No"
+                Guild.MFALevel.TWO_FACTOR_AUTH -> systemCommandEmojiProvider.tickEmoji().formatted + " Yes"
                 else -> "unknown"
             }, true
         )
@@ -91,7 +91,7 @@ class AdminSearchServerSettingsPage(
             Guild.VerificationLevel.UNKNOWN -> "unknown"
         }, true)
         embedBuilder.addField("Booster", when(discordServer.boostTier) {
-            Guild.BoostTier.NONE -> systemCommandEmojiProvider.crossEmoji().asMention + " None"
+            Guild.BoostTier.NONE -> systemCommandEmojiProvider.crossEmoji().formatted + " None"
             Guild.BoostTier.TIER_1 -> "1️⃣ Tier 1"
             Guild.BoostTier.TIER_2 -> "2️⃣ Tier 2"
             Guild.BoostTier.TIER_3 -> "3️⃣ Tier 3"
@@ -99,7 +99,7 @@ class AdminSearchServerSettingsPage(
         } + " (${discordServer.boostCount})", true)
         embedBuilder.addField(
             "Boost Progress Bar",
-            if (discordServer.isBoostProgressBarEnabled) systemCommandEmojiProvider.tickEmoji().asMention + " Yes" else systemCommandEmojiProvider.crossEmoji().asMention + " No",
+            if (discordServer.isBoostProgressBarEnabled) systemCommandEmojiProvider.tickEmoji().formatted + " Yes" else systemCommandEmojiProvider.crossEmoji().formatted + " No",
             true
         )
 

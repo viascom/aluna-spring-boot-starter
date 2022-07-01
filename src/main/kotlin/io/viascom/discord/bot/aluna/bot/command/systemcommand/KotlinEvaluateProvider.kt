@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import io.viascom.discord.bot.aluna.bot.Command
+import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
@@ -39,7 +39,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import kotlin.math.min
 
-@Command
+@Interaction
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 @ConditionalOnProperty(name = ["command.system-command.enable-kotlin-script-evaluate"], prefix = "aluna", matchIfMissing = false)
@@ -72,7 +72,7 @@ class KotlinEvaluateProvider(
         event.reply(
             "Script:\n```kotlin\n" +
                     "$script```\n" +
-                    "${systemCommandEmojiProvider.loadingEmoji().asMention} Result:\n" +
+                    "${systemCommandEmojiProvider.loadingEmoji().formatted} Result:\n" +
                     "``` ```"
         ).queue {
             val result = try {

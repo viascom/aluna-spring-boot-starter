@@ -116,3 +116,5 @@ class MentionableOption @JvmOverloads constructor(name: String, description: Str
 
 class AttachmentOption @JvmOverloads constructor(name: String, description: String, isRequired: Boolean = false) :
     OptionData(OptionType.ATTACHMENT, name, description, isRequired), CommandOption<Attachment?>
+
+typealias FileOption = AttachmentOption

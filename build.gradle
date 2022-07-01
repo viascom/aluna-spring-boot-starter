@@ -5,12 +5,12 @@ plugins {
     id "org.jetbrains.kotlin.jvm" version "1.7.0"
     id "org.jetbrains.kotlin.kapt" version "1.7.0"
     id "org.springframework.boot" version "2.7.1"
-    id "io.spring.dependency-management" version "1.0.11.RELEASE"
+    id "io.spring.dependency-management" version "1.0.12.RELEASE"
     id "de.undercouch.download" version "5.1.0"
 }
 
 group "io.viascom.discord.bot"
-version "0.0.23_5.0.0-alpha.12"
+version "0.0.23_5.0.0-alpha.13"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -48,7 +48,7 @@ repositories {
 }
 
 ext {
-    jdaVersion = "5.0.0-alpha.12"
+    jdaVersion = "5.0.0-alpha.13"
     retrofitVersion = "2.9.0"
     gsonVersion = "2.9.0"
     gsonJavatimeVersion = "1.1.1"

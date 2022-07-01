@@ -21,7 +21,7 @@
 
 | Library     |                                         Version                                          |
 |-------------|:----------------------------------------------------------------------------------------:|
-| JDA         | <img src="https://img.shields.io/badge/5.0.0--alpha.12-orange.svg" alt="5.0.0-alpha.12"> |
+| JDA         | <img src="https://img.shields.io/badge/5.0.0--alpha.13-orange.svg" alt="5.0.0-alpha.13"> |
 | Spring Boot |        <img src="https://img.shields.io/badge/2.7.1-brightgreen.svg" alt="2.7.1">        |
 | Kotlin      |       <img src="https://img.shields.io/badge/1.6.21-brightgreen.svg" alt="1.6.21">       |
 | jnanoid     |        <img src="https://img.shields.io/badge/2.0.0-brightgreen.svg" alt="2.0.0">        |
@@ -32,7 +32,7 @@
 ### Create a command
 
 ```kotlin
-@Command
+@Interaction
 class PingCommand : DiscordCommand(
     "ping",
     "Send a ping"

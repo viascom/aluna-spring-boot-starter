@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import io.viascom.discord.bot.aluna.bot.Command
+import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
@@ -43,7 +43,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.sharding.ShardManager
 import java.awt.Color
 
-@Command
+@Interaction
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 class StatusChangerProvider(
@@ -90,9 +90,9 @@ class StatusChangerProvider(
                 "New Activity Url",
                 activityUrl + "\n" +
                         if (Activity.isValidStreamingUrl(activityUrl)) {
-                            "${systemCommandEmojiProvider.tickEmoji().asMention} Valid"
+                            "${systemCommandEmojiProvider.tickEmoji().formatted} Valid"
                         } else {
-                            "${systemCommandEmojiProvider.crossEmoji().asMention} Invalid"
+                            "${systemCommandEmojiProvider.crossEmoji().formatted} Invalid"
                         },
                 false
             )
@@ -156,7 +156,7 @@ class StatusChangerProvider(
 
                 lastEmbed.clearFields()
                 lastEmbed.setThumbnail(null)
-                lastEmbed.setDescription("${systemCommandEmojiProvider.tickEmoji().asMention} Changed bot status")
+                lastEmbed.setDescription("${systemCommandEmojiProvider.tickEmoji().formatted} Changed bot status")
 
                 lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(arrayListOf()).queue()
             }
@@ -166,7 +166,7 @@ class StatusChangerProvider(
                 lastEmbed.clearFields()
                 lastEmbed.setThumbnail(null)
                 lastEmbed.setColor(Color.RED)
-                lastEmbed.setDescription("${systemCommandEmojiProvider.crossEmoji().asMention} Canceled")
+                lastEmbed.setDescription("${systemCommandEmojiProvider.crossEmoji().formatted} Canceled")
 
                 lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(arrayListOf()).queue()
             }

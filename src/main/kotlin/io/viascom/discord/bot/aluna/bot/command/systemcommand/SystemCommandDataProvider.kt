@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import io.viascom.discord.bot.aluna.bot.CommandScopedObject
+import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
@@ -44,10 +44,10 @@ abstract class SystemCommandDataProvider(
      * Should Aluna keep the event open or not. If not, Aluna will acknowledge the event before calling execute() and hook is in this case null.
      */
     var autoAcknowledgeEvent: Boolean = true
-) : CommandScopedObject {
+) : InteractionScopedObject {
 
     override lateinit var uniqueId: String
-    override var beanTimoutDelay: Duration = Duration.ofMinutes(15)
+    override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
     override var beanUseAutoCompleteBean: Boolean = true
     override var beanRemoveObserverOnDestroy: Boolean = false
     override var beanCallOnDestroy: Boolean = false

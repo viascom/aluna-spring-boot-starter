@@ -23,6 +23,11 @@ package io.viascom.discord.bot.aluna.botlist
 
 interface BotListSender {
 
+    fun onProductionModeOnly(): Boolean
+
+    fun isEnabled(): Boolean
+
+    fun getName(): String
     fun sendStats(totalServer: Int, totalShards: Int)
 
 }

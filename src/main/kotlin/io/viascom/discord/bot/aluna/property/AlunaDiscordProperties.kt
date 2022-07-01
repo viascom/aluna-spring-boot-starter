@@ -58,7 +58,7 @@ class AlunaDiscordProperties {
      * <ol>
      *     <li><b>GUILD_MEMBERS</b> - This is a <b>privileged</b> gateway intent that is used to update user information and join/leaves (including kicks). This is required to cache all members of a guild (including chunking)</li>
      *     <li><b>GUILD_BANS</b> - This will only track guild bans and unbans</li>
-     *     <li><b>GUILD_EMOJIS</b> - This will only track guild emote create/modify/delete. Most bots don't need this since they just use the emote id anyway.</li>
+     *     <li><b>GUILD_EMOJIS</b> - This will only track guild emojis create/modify/delete. Most bots don't need this since they just use the emojis id anyway.</li>
      *     <li><b>GUILD_WEBHOOKS</b> - This will only track guild webhook create/update/delete. Most bots don't need this since related events don't contain any useful information about webhook changes.</li>
      *     <li><b>GUILD_INVITES</b> - This will only track invite create/delete. Most bots don't make use of invites since they are added through OAuth2 authorization by administrators.</li>
      *     <li><b>GUILD_VOICE_STATES</b> - Required to properly get information of members in voice channels and cache them. <u>You cannot connect to a voice channel without this intent</u>.</li>
@@ -75,7 +75,7 @@ class AlunaDiscordProperties {
      * To get whitelisted you either need to contact discord support (for bots in more than 100 guilds)
      * or enable it in the developer dashboard of your application.
      *
-     * <p>You must use ChunkingFilter.NONE if GUILD_MEMBERS is disabled.
+     * <p>You must use [ChunkingFilter.NONE] if GUILD_MEMBERS is disabled.
      * To enable chunking the discord api requires the privileged GUILD_MEMBERS intent.
      */
     var gatewayIntents: ArrayList<GatewayIntent> = arrayListOf()
@@ -83,11 +83,11 @@ class AlunaDiscordProperties {
     /**
      * Configure the member caching policy.
      * This will decide whether to cache a member (and its respective user).
-     * <br>All members are cached by default. If a guild is enabled for chunking, all members will be cached for it.
+     * <br>If a guild is enabled for chunking and [MemberCachePolicyType.ALL] is set, all members will be cached for it.
      *
      * <p>You can use this to define a custom caching policy that will greatly improve memory usage.
-     * <p>It is not possible to disable GatewayIntent.GUILD_MEMBERS when
-     * using MemberCachePolicy.ALL as the members cannot be removed from cache by a leave event without this intent.
+     * <p>It is not possible to disable [GatewayIntent.GUILD_MEMBERS] when
+     * using [MemberCachePolicy.ALL] as the members cannot be removed from cache by a leave event without this intent.
      */
     var memberCachePolicy: MemberCachePolicyType = MemberCachePolicyType.ONLINE
 
@@ -102,8 +102,8 @@ class AlunaDiscordProperties {
      * <br>The filter decides based on the provided guild id whether chunking should be done
      * on guild initialization.
      *
-     * <p><b>To use chunking, the {@link net.dv8tion.jda.api.requests.GatewayIntent#GUILD_MEMBERS GUILD_MEMBERS} intent must be enabled!
-     * Otherwise you <u>must</u> use {@link #NONE}!</b>
+     * <b>To use chunking, the [GatewayIntent.GUILD_MEMBERS] intent must be enabled!
+     * Otherwise you <u>must</u> use [ChunkingFilter.NONE]!</b>
      */
     var chunkingFilter: ChunkingFilter? = null
 
@@ -138,7 +138,7 @@ class AlunaDiscordProperties {
     var publishGuildReadyEvent: Boolean = false
 
     /**
-     * Publish Aluna discord command event. This event should not be used to answer the command!
+     * Publish Aluna discord interaction event. This event should not be used to answer the interaction!
      */
     var publishDiscordCommandEvent: Boolean = false
 
@@ -166,7 +166,7 @@ class AlunaDiscordProperties {
     enum class CacheFlag {
         ACTIVITY,
         VOICE_STATE,
-        EMOTE,
+        EMOJI,
         CLIENT_STATUS,
         MEMBER_OVERRIDES,
         ROLE_TAGS,

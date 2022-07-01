@@ -32,8 +32,6 @@ interface DiscordInteractionHandler {
     var author: User
     var discordBot: DiscordBot
 
-    val interactionName: String
-
     fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
     fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>)
 

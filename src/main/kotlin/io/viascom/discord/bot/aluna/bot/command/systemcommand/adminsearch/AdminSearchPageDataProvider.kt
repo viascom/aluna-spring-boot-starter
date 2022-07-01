@@ -21,7 +21,11 @@
 
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.AdminSearchDataProvider
 import net.dv8tion.jda.api.EmbedBuilder
-import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.entities.Channel
+import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.Role
+import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji
 
 abstract class AdminSearchPageDataProvider(
     val pageId: String,
@@ -33,5 +37,5 @@ abstract class AdminSearchPageDataProvider(
     open fun onServerRequest(discordServer: Guild, embedBuilder: EmbedBuilder) {}
     open fun onRoleRequest(discordRole: Role, embedBuilder: EmbedBuilder) {}
     open fun onChannelRequest(discordChannel: Channel, embedBuilder: EmbedBuilder) {}
-    open fun onEmoteRequest(discordEmote: Emote, embedBuilder: EmbedBuilder) {}
+    open fun onEmoteRequest(discordEmote: RichCustomEmoji, embedBuilder: EmbedBuilder) {}
 }

@@ -22,14 +22,16 @@
 package io.viascom.discord.bot.aluna.bot
 
 import datadog.trace.api.Trace
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandAdditionalConditions
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandConditions
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandLoadAdditionalData
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandMetaDataHandler
+import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionAdditionalConditions
+import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionConditions
+import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionLoadAdditionalData
+import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionMetaDataHandler
+import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.model.AdditionalRequirements
 import io.viascom.discord.bot.aluna.model.DevelopmentStatus
 import io.viascom.discord.bot.aluna.model.MissingPermissions
+import io.viascom.discord.bot.aluna.model.UseScope
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.translation.MessageService
 import net.dv8tion.jda.api.Permission
@@ -39,6 +41,7 @@ import net.dv8tion.jda.api.events.interaction.command.*
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.Command
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -48,22 +51,22 @@ import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
 
-abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDataImpl(type, name), CommandScopedObject, DiscordInteractionHandler {
+abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDataImpl(type, name), InteractionScopedObject, DiscordInteractionHandler {
 
     @Autowired
     lateinit var alunaProperties: AlunaProperties
 
     @Autowired
-    lateinit var discordCommandConditions: DiscordCommandConditions
+    lateinit var discordInteractionConditions: DiscordInteractionConditions
 
     @Autowired
-    lateinit var discordCommandAdditionalConditions: DiscordCommandAdditionalConditions
+    lateinit var discordInteractionAdditionalConditions: DiscordInteractionAdditionalConditions
 
     @Autowired
-    lateinit var discordCommandLoadAdditionalData: DiscordCommandLoadAdditionalData
+    lateinit var discordInteractionLoadAdditionalData: DiscordInteractionLoadAdditionalData
 
     @Autowired
-    lateinit var discordCommandMetaDataHandler: DiscordCommandMetaDataHandler
+    lateinit var discordInteractionMetaDataHandler: DiscordInteractionMetaDataHandler
 
     @Autowired
     lateinit var eventPublisher: EventPublisher
@@ -79,24 +82,30 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     //This gets set by the CommandContext automatically
     override lateinit var uniqueId: String
 
-    override val interactionName = name
+    /**
+     * If true, this command is only seen by users with the administrator permission on the server by default!
+     * Aluna will set <code>this.defaultPermissions = DefaultMemberPermissions.DISABLED</code> if true.
+     */
+    var isAdministratorOnlyCommand = false
 
-    var commandDevelopmentStatus = DevelopmentStatus.LIVE
+    var interactionDevelopmentStatus = DevelopmentStatus.LIVE
     private var isEarlyAccessCommand = false
 
-    override var beanTimoutDelay: Duration = Duration.ofMinutes(15)
+    var useScope = UseScope.GLOBAL
+
+    override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
     override var beanUseAutoCompleteBean: Boolean = false
     override var beanRemoveObserverOnDestroy: Boolean = true
     override var beanCallOnDestroy: Boolean = true
 
     /**
-     * Any [Permission]s a Member must have to use this command.
+     * Any [Permission]s a Member must have to use this interaction.
      * <br></br>These are only checked in a [Guild][net.dv8tion.jda.core.entities.Guild] environment.
      */
     var userPermissions = arrayListOf<Permission>()
 
     /**
-     * Any [Permission]s the bot must have to use a command.
+     * Any [Permission]s the bot must have to use this interaction.
      * <br></br>These are only checked in a [Guild][net.dv8tion.jda.core.entities.Guild] environment.
      */
     var botPermissions = arrayListOf<Permission>()
@@ -114,7 +123,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     var stopWatch: StopWatch? = null
 
     /**
-     * This method gets triggered, as soon as a button event for this command is called.
+     * This method gets triggered, as soon as a button event for this interaction is called.
      * Make sure that you register your message id: discordBot.registerMessageForButtonEvents(it, this)
      *
      * @param event
@@ -135,7 +144,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     }
 
     /**
-     * This method gets triggered, as soon as a select event for this command is called.
+     * This method gets triggered, as soon as a select event for this interaction is called.
      * Make sure that you register your message id: discordBot.registerMessageForSelectEvents(it, this)
      *
      * @param event
@@ -156,7 +165,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     }
 
     /**
-     * This method gets triggered, as soon as a modal event for this command is called.
+     * This method gets triggered, as soon as a modal event for this interaction is called.
      *
      * @param event
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
@@ -177,8 +186,29 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     open fun onDestroy() {
     }
 
-    fun prepareCommand() {
+    fun prepareInteraction() {
         processDevelopmentStatus()
+        if (isAdministratorOnlyCommand) {
+            this.defaultPermissions = DefaultMemberPermissions.DISABLED
+        }
+        this.isGuildOnly = (useScope == UseScope.GUILD_ONLY)
+
+        if(!alunaProperties.productionMode){
+            if((isAdministratorOnlyCommand || this.defaultPermissions == DefaultMemberPermissions.DISABLED) && !this.isGuildOnly){
+                logger.warn("The interaction '$name' has a default permission for administrator only but is not restricted to guild only. All users will be able to use this interaction in DMs with your bot!")
+            }
+            if(this.defaultPermissions != DefaultMemberPermissions.ENABLED && this.defaultPermissions != DefaultMemberPermissions.DISABLED && !this.isGuildOnly){
+                logger.warn("The interaction '$name' has a default permission restriction for a specific user permission but is not restricted to guild only. All users will be able to use this interaction in DMs with your bot!")
+            }
+        }
+    }
+
+    @Experimental("This gets called by Aluna, but is currently only a preparation for Localization.")
+    fun prepareLocalization() {
+        if (alunaProperties.translation.enabled) {
+//            this.setLocalizationMapper(LocalizationMapper.fromFunction(localizationFunction))
+            this.toData()
+        }
     }
 
     open fun onMissingUserPermission(event: GenericCommandInteractionEvent, missingPermissions: MissingPermissions) {
@@ -186,7 +216,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
         val voiceChannelPermissions = missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" }
         val guildPermissions = missingPermissions.guild.joinToString("\n") { "└ ${it.getName()}" }
         event.deferReply(true).setContent(
-            "⛔ You are missing the following permission to execute this command:\n" +
+            "⛔ You are missing the following permission to execute this interaction:\n" +
                     (if (textChannelPermissions.isNotBlank()) textChannelPermissions + "\n" else "") +
                     (if (voiceChannelPermissions.isNotBlank()) voiceChannelPermissions + "\n" else "") +
                     (if (guildPermissions.isNotBlank()) guildPermissions + "\n" else "")
@@ -197,11 +227,11 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
         when {
             missingPermissions.notInVoice -> {
                 event.deferReply(true)
-                    .setContent("⛔ You need to be in a voice channel yourself to execute this command").queue()
+                    .setContent("⛔ You need to be in a voice channel yourself to execute this interaction").queue()
 
             }
             (missingPermissions.hasMissingPermissions) -> {
-                event.deferReply(true).setContent("⛔ I'm missing the following permission to execute this command:\n" +
+                event.deferReply(true).setContent("⛔ I'm missing the following permission to execute this interaction:\n" +
                         missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
                         missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
                         missingPermissions.guild.joinToString("\n") { "└ ${it.getName()}" }
@@ -211,7 +241,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     }
 
     open fun onFailedAdditionalRequirements(event: GenericCommandInteractionEvent, additionalRequirements: AdditionalRequirements) {
-        event.deferReply(true).setContent("⛔ Additional requirements for this command failed.").queue()
+        event.deferReply(true).setContent("⛔ Additional requirements for this interaction failed.").queue()
     }
 
     open fun onExecutionException(event: GenericCommandInteractionEvent, exception: Exception) {
@@ -227,14 +257,14 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
                 (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the context menu ${event.commandPath} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
                 (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the context menu ${event.commandPath} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
             }
-            discordBot.asyncExecutor.execute {
-                discordCommandMetaDataHandler.onExitCommand(this, stopWatch, event)
+            discordBot.interactionExecutor.execute {
+                discordInteractionMetaDataHandler.onExitInteraction(this, stopWatch, event)
             }
         }
     }
 
     private fun processDevelopmentStatus() {
-        when (commandDevelopmentStatus) {
+        when (interactionDevelopmentStatus) {
             DevelopmentStatus.IN_DEVELOPMENT,
             DevelopmentStatus.ALPHA -> {
                 this.isEarlyAccessCommand = false

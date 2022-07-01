@@ -33,6 +33,7 @@ import io.viascom.discord.bot.aluna.util.toHex
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.springframework.stereotype.Component
@@ -74,14 +75,14 @@ class AdminSearchOverviewPage(
         }
         embedBuilder.addField(
             "Is Bot",
-            (if (discordUser.isBot) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+            (if (discordUser.isBot) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
             true
         )
             .addField("Flags", discordUser.flags.joinToString(", ") { it.getName() }, true)
             .addField("Time Created", discordUser.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
             .addField(
                 "On Support Server",
-                (if (mutualServers.any { it.id == alunaProperties.command.systemCommand.supportServer }) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+                (if (mutualServers.any { it.id == alunaProperties.command.systemCommand.supportServer }) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
                 true
             )
             .addField("Avatar-URL", "[Link](${discordUser.effectiveAvatarUrl})", true)
@@ -111,7 +112,7 @@ class AdminSearchOverviewPage(
         embedBuilder.addField("Name", discordServer.name, true)
         embedBuilder.addField("Owner",
             "${discordServer.owner?.asMention} | ${discordServer.owner?.effectiveName} (`${discordServer.ownerId}`)\n" +
-                    "Owner on Support Server: " + (if (discordServer.owner?.user?.mutualGuilds?.any { it.id == alunaProperties.command.systemCommand.supportServer } == true) systemCommandEmojiProvider.tickEmoji().asMention + " Yes" else systemCommandEmojiProvider.crossEmoji().asMention + " No"),
+                    "Owner on Support Server: " + (if (discordServer.owner?.user?.mutualGuilds?.any { it.id == alunaProperties.command.systemCommand.supportServer } == true) systemCommandEmojiProvider.tickEmoji().formatted + " Yes" else systemCommandEmojiProvider.crossEmoji().formatted + " No"),
             false)
         embedBuilder.addField("Locale", discordServer.locale.displayLanguage, true)
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
@@ -144,38 +145,38 @@ class AdminSearchOverviewPage(
         embedBuilder.addField(
             "Is below Bot",
             if (discordRole.positionRaw < discordRole.guild.selfMember.roles.sortedBy { it.positionRaw }
-                    .last().positionRaw) systemCommandEmojiProvider.tickEmoji().asMention else systemCommandEmojiProvider.crossEmoji().asMention,
+                    .last().positionRaw) systemCommandEmojiProvider.tickEmoji().formatted else systemCommandEmojiProvider.crossEmoji().formatted,
             true
         )
         embedBuilder.addField(
             "Bot can interact",
             if (discordRole.guild.selfMember.roles.sortedBy { it.positionRaw }
-                    .last().canInteract(discordRole)) systemCommandEmojiProvider.tickEmoji().asMention else systemCommandEmojiProvider.crossEmoji().asMention,
+                    .last().canInteract(discordRole)) systemCommandEmojiProvider.tickEmoji().formatted else systemCommandEmojiProvider.crossEmoji().formatted,
             true
         )
         embedBuilder.addField(
             "Is Hoisted",
-            (if (discordRole.isHoisted) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+            (if (discordRole.isHoisted) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
             true
         )
         embedBuilder.addField(
             "Is Managed",
-            (if (discordRole.isManaged) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+            (if (discordRole.isManaged) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
             true
         )
         embedBuilder.addField(
             "Is Mentionable",
-            (if (discordRole.isMentionable) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+            (if (discordRole.isMentionable) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
             true
         )
         embedBuilder.addField(
             "Has Admin permission",
-            (if (discordRole.permissions.contains(Permission.ADMINISTRATOR)) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+            (if (discordRole.permissions.contains(Permission.ADMINISTRATOR)) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
             true
         )
         embedBuilder.addField(
             "Is from a Bot",
-            (if (discordRole.tags.isBot) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+            (if (discordRole.tags.isBot) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
             true
         )
         discordRole.tags.botId?.let {
@@ -184,12 +185,12 @@ class AdminSearchOverviewPage(
         }
         embedBuilder.addField(
             "Is Boost Role",
-            (if (discordRole.tags.isBoost) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+            (if (discordRole.tags.isBoost) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
             true
         )
         embedBuilder.addField(
             "Is Integration Role",
-            (if (discordRole.tags.isIntegration) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+            (if (discordRole.tags.isIntegration) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
             true
         )
         discordRole.tags.integrationId?.let {
@@ -214,16 +215,16 @@ class AdminSearchOverviewPage(
         embedBuilder.addField("Name", discordChannel.name, true)
         embedBuilder.addField(
             "Type", when (discordChannel.type) {
-                ChannelType.TEXT -> systemCommandEmojiProvider.channelEmoji().asMention + " Text-Channel"
-                ChannelType.PRIVATE -> systemCommandEmojiProvider.channelLockedEmoji().asMention + " Private-Channel"
-                ChannelType.VOICE -> systemCommandEmojiProvider.voiceChannelEmoji().asMention + " Voice-Channel"
-                ChannelType.GROUP -> systemCommandEmojiProvider.emptyEmoji().asMention + " Group"
-                ChannelType.CATEGORY -> systemCommandEmojiProvider.emptyEmoji().asMention + " Category"
-                ChannelType.NEWS -> systemCommandEmojiProvider.newsEmoji().asMention + " News"
-                ChannelType.STAGE -> systemCommandEmojiProvider.stageChannelEmoji().asMention + " Stage"
-                ChannelType.GUILD_NEWS_THREAD -> systemCommandEmojiProvider.newsEmoji().asMention + " News Thread"
-                ChannelType.GUILD_PUBLIC_THREAD -> systemCommandEmojiProvider.threadChannelEmoji().asMention + " Public Thread"
-                ChannelType.GUILD_PRIVATE_THREAD -> systemCommandEmojiProvider.threadChannelEmoji().asMention + " Private Thread"
+                ChannelType.TEXT -> systemCommandEmojiProvider.channelEmoji().formatted + " Text-Channel"
+                ChannelType.PRIVATE -> systemCommandEmojiProvider.channelLockedEmoji().formatted + " Private-Channel"
+                ChannelType.VOICE -> systemCommandEmojiProvider.voiceChannelEmoji().formatted + " Voice-Channel"
+                ChannelType.GROUP -> systemCommandEmojiProvider.emptyEmoji().formatted + " Group"
+                ChannelType.CATEGORY -> systemCommandEmojiProvider.emptyEmoji().formatted + " Category"
+                ChannelType.NEWS -> systemCommandEmojiProvider.newsEmoji().formatted + " News"
+                ChannelType.STAGE -> systemCommandEmojiProvider.stageChannelEmoji().formatted + " Stage"
+                ChannelType.GUILD_NEWS_THREAD -> systemCommandEmojiProvider.newsEmoji().formatted + " News Thread"
+                ChannelType.GUILD_PUBLIC_THREAD -> systemCommandEmojiProvider.threadChannelEmoji().formatted + " Public Thread"
+                ChannelType.GUILD_PRIVATE_THREAD -> systemCommandEmojiProvider.threadChannelEmoji().formatted + " Private Thread"
                 ChannelType.UNKNOWN -> "Unknown"
             }, true
         )
@@ -241,23 +242,23 @@ class AdminSearchOverviewPage(
                 }
                 embedBuilder.addField(
                     "Can send Message",
-                    (if (textChannel.canTalk()) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+                    (if (textChannel.canTalk()) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
                     true
                 )
                 embedBuilder.addField(
                     "Is Synced",
-                    (if (textChannel.isSynced) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+                    (if (textChannel.isSynced) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
                     true
                 )
                 embedBuilder.addField(
                     "Is NSFW",
-                    (if (textChannel.isNSFW) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+                    (if (textChannel.isNSFW) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
                     true
                 )
 
                 embedBuilder.addField(
                     "Is Slowmode",
-                    if (textChannel.slowmode != 0) systemCommandEmojiProvider.tickEmoji().asMention + " ${textChannel.slowmode}s" else systemCommandEmojiProvider.crossEmoji().asMention,
+                    if (textChannel.slowmode != 0) systemCommandEmojiProvider.tickEmoji().formatted + " ${textChannel.slowmode}s" else systemCommandEmojiProvider.crossEmoji().formatted,
                     true
                 )
                 if (textChannel.threadChannels.isNotEmpty()) {
@@ -277,12 +278,12 @@ class AdminSearchOverviewPage(
                 }
                 embedBuilder.addField(
                     "Is Synced",
-                    (if (voiceChannel.isSynced) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+                    (if (voiceChannel.isSynced) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
                     true
                 )
                 embedBuilder.addField(
                     "User-Limit",
-                    if (voiceChannel.userLimit != 0) systemCommandEmojiProvider.tickEmoji().asMention + " ${voiceChannel.userLimit}" else systemCommandEmojiProvider.crossEmoji().asMention,
+                    if (voiceChannel.userLimit != 0) systemCommandEmojiProvider.tickEmoji().formatted + " ${voiceChannel.userLimit}" else systemCommandEmojiProvider.crossEmoji().formatted,
                     true
                 )
             }
@@ -295,39 +296,39 @@ class AdminSearchOverviewPage(
                 threadChannel.owner?.let { embedBuilder.addField("Owner", "${it.effectiveName} (`${it.id}`)", false) }
                 embedBuilder.addField(
                     "Can send Message",
-                    (if (threadChannel.canTalk()) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+                    (if (threadChannel.canTalk()) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
                     true
                 )
                 embedBuilder.addField(
                     "Is Public",
-                    (if (threadChannel.isPublic) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+                    (if (threadChannel.isPublic) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
                     true
                 )
                 embedBuilder.addField(
                     "Is Locked",
-                    (if (threadChannel.isLocked) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+                    (if (threadChannel.isLocked) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
                     true
                 )
                 embedBuilder.addField(
                     "Is Slowmode",
-                    if (threadChannel.slowmode != 0) systemCommandEmojiProvider.tickEmoji().asMention + " ${threadChannel.slowmode}s" else systemCommandEmojiProvider.crossEmoji().asMention,
+                    if (threadChannel.slowmode != 0) systemCommandEmojiProvider.tickEmoji().formatted + " ${threadChannel.slowmode}s" else systemCommandEmojiProvider.crossEmoji().formatted,
                     true
                 )
                 if (discordChannel.type == ChannelType.GUILD_PRIVATE_THREAD) {
                     embedBuilder.addField(
                         "Is Invitable",
-                        (if (threadChannel.isInvitable) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+                        (if (threadChannel.isInvitable) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
                         true
                     )
                 }
                 embedBuilder.addField(
                     "Is Joined",
-                    (if (threadChannel.isJoined) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+                    (if (threadChannel.isJoined) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
                     true
                 )
                 embedBuilder.addField(
                     "Is Archived",
-                    (if (threadChannel.isArchived) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+                    (if (threadChannel.isArchived) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
                     true
                 )
                 embedBuilder.addField("Auto Archive Duration", "${threadChannel.autoArchiveDuration.minutes} min", true)
@@ -338,26 +339,26 @@ class AdminSearchOverviewPage(
         }
     }
 
-    override fun onEmoteRequest(discordEmote: Emote, embedBuilder: EmbedBuilder) {
+    override fun onEmoteRequest(discordEmote: RichCustomEmoji, embedBuilder: EmbedBuilder) {
         embedBuilder.addField("ID", discordEmote.id, true)
         embedBuilder.addField("Name", discordEmote.name, true)
-        embedBuilder.addField("Mention", "`${discordEmote.asMention}`", true)
+        embedBuilder.addField("Mention", "`${discordEmote.formatted}`", true)
         embedBuilder.addField("Time Created", discordEmote.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
         discordEmote.guild?.let { embedBuilder.addField("Server", "${it.name} (`${it.id}`)", false) }
         embedBuilder.addField("Url", "`${discordEmote.imageUrl}`", false)
         embedBuilder.addField(
             "Is Animated",
-            (if (discordEmote.isAnimated) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+            (if (discordEmote.isAnimated) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
             true
         )
         embedBuilder.addField(
             "Is Available",
-            (if (discordEmote.isAvailable) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+            (if (discordEmote.isAvailable) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
             true
         )
         embedBuilder.addField(
             "Is Managed",
-            (if (discordEmote.isManaged) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).asMention,
+            (if (discordEmote.isManaged) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
             true
         )
     }

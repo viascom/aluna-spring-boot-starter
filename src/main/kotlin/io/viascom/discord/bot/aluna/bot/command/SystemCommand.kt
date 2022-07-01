@@ -21,8 +21,8 @@
 
 package io.viascom.discord.bot.aluna.bot.command
 
-import io.viascom.discord.bot.aluna.bot.Command
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandDataProvider
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandEmojiProvider
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
@@ -37,7 +37,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 
-@Command
+@Interaction
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 class SystemCommand(
@@ -67,7 +67,7 @@ class SystemCommand(
 
     override fun execute(event: SlashCommandInteractionEvent) {
         if (event.user.idLong !in ownerIdProvider.getOwnerIds() && event.user.idLong !in moderatorIdProvider.getModeratorIds()) {
-            event.deferReply(true).setContent("${systemCommandEmojiProvider.crossEmoji().asMention} This command is to powerful for you.").queue()
+            event.deferReply(true).setContent("${systemCommandEmojiProvider.crossEmoji().formatted} This command is to powerful for you.").queue()
             return
         }
 
@@ -86,7 +86,7 @@ class SystemCommand(
                 "system-command/${selectedProvider!!.id}"
             ))
         ) {
-            event.deferReply(true).setContent("${systemCommandEmojiProvider.crossEmoji().asMention} This command is to powerful for you.").queue()
+            event.deferReply(true).setContent("${systemCommandEmojiProvider.crossEmoji().formatted} This command is to powerful for you.").queue()
             return
         }
 

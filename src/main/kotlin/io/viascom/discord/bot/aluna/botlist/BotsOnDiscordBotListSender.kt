@@ -21,7 +21,6 @@
 
 package io.viascom.discord.bot.aluna.botlist
 
-import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnAlunaProductionMode
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -36,13 +35,18 @@ import java.util.concurrent.TimeUnit
 
 @Component
 @ConditionalOnJdaEnabled
-@ConditionalOnAlunaProductionMode
 class BotsOnDiscordBotListSender(
     private val alunaProperties: AlunaProperties,
     private val shardManager: ShardManager
 ) : BotListSender {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
+
+    override fun onProductionModeOnly(): Boolean = true
+
+    override fun isEnabled(): Boolean = alunaProperties.botList.botsOnDiscordToken != null
+
+    override fun getName(): String = "bots.ondiscord.xyz"
 
     override fun sendStats(totalServer: Int, totalShards: Int) {
         val botsOnDiscordToken = alunaProperties.botList.botsOnDiscordToken

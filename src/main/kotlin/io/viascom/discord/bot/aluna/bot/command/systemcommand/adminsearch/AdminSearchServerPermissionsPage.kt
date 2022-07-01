@@ -49,7 +49,7 @@ class AdminSearchServerPermissionsPage(
         embedBuilder.clearFields()
 
         embedBuilder.addField("Assigned Roles", discordServer.selfMember.roles.joinToString("\n") { "- ${it.name} (${it.id})" }, false)
-        embedBuilder.addField("${systemCommandEmojiProvider.tickEmoji().asMention} Permissions", discordServer.selfMember.permissions.joinToString("\n") {
+        embedBuilder.addField("${systemCommandEmojiProvider.tickEmoji().formatted} Permissions", discordServer.selfMember.permissions.joinToString("\n") {
             if (it in alunaProperties.discord.defaultPermissions) {
                 "- **${it.getName()}**"
             } else {
@@ -60,7 +60,7 @@ class AdminSearchServerPermissionsPage(
         val missingPermissions = alunaProperties.discord.defaultPermissions.filter { it !in discordServer.selfMember.permissions }
 
         embedBuilder.addField(
-            "${systemCommandEmojiProvider.crossEmoji().asMention} Missing Permissions",
+            "${systemCommandEmojiProvider.crossEmoji().formatted} Missing Permissions",
             if (missingPermissions.isNotEmpty()) {
                 missingPermissions.joinToString("\n") {
                     "- **${it.getName()}**"
@@ -72,7 +72,7 @@ class AdminSearchServerPermissionsPage(
         )
         embedBuilder.addBlankField(false)
         embedBuilder.addField(
-            "${systemCommandEmojiProvider.tickEmoji().asMention} @everyone Permissions",
+            "${systemCommandEmojiProvider.tickEmoji().formatted} @everyone Permissions",
             discordServer.roles.first { it.isPublicRole }.permissions.joinToString("\n") {
                 if (it in arrayListOf(Permission.USE_APPLICATION_COMMANDS, Permission.MESSAGE_EXT_EMOJI)) {
                     "- **${it.getName()}**"
@@ -89,7 +89,7 @@ class AdminSearchServerPermissionsPage(
         ).filter { it !in discordServer.roles.first { it.isPublicRole }.permissions }
 
         embedBuilder.addField(
-            "${systemCommandEmojiProvider.crossEmoji().asMention} Missing @everyone Permissions",
+            "${systemCommandEmojiProvider.crossEmoji().formatted} Missing @everyone Permissions",
             if (missingEveryonePermissions.isNotEmpty()) {
                 missingEveryonePermissions.joinToString("\n") {
                     "- **${it.getName()}**"

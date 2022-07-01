@@ -52,7 +52,7 @@ class AdminSearchUserMutualPage(
         var isFirst = true
 
         mutualServers.forEach {
-            val newElement = "- ${it.name}${if (it.ownerId == discordUser.id) " ${systemCommandEmojiProvider.tickEmoji().asMention}" else ""} (`${it.id}`)"
+            val newElement = "- ${it.name}${if (it.ownerId == discordUser.id) " ${systemCommandEmojiProvider.tickEmoji().formatted}" else ""} (`${it.id}`)"
             if (text.length + newElement.length >= 1000) {
                 embedBuilder.addField(if (isFirst) "Mutual Servers (${mutualServers.size})" else "", text, false)
                 text = ""

@@ -31,12 +31,14 @@ import io.viascom.discord.bot.aluna.property.OwnerIdProvider
 import io.viascom.discord.bot.aluna.translation.MessageService
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.Command
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
@@ -47,29 +49,48 @@ import org.springframework.context.MessageSource
 import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
+import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.isAccessible
 
 abstract class DiscordCommand(
     name: String,
     description: String,
     //val localizations: HashMap<Locale, Pair<String, String>> = hashMapOf(),
-    val observeAutoComplete: Boolean = false
+
+    /**
+     * If enabled, Aluna will register an event listener for auto complete requests and link it to this command.
+     * If such an event gets triggered, the method [onAutoCompleteEvent] will be invoked.
+     */
+    val observeAutoComplete: Boolean = false,
+
+    /**
+     * If enabled, Aluna will automatically forward the command execution as well as interaction events to the matching sub command.
+     * For this to work, you need to annotate your autowired [DiscordSubCommand] or [DiscordSubCommandGroup] implementation with @[SubCommandElement]
+     * or register them manually with [registerSubCommands] during [initSubCommands].
+     * The Top-Level command can not be used (limitation of Discord), but Aluna will nevertheless always call [execute] on the top-level command before executing the sub command method.
+     */
+    val handleSubCommands: Boolean = false
 ) : CommandDataImpl(name, description),
-    SlashCommandData, CommandScopedObject, DiscordInteractionHandler {
+    SlashCommandData, InteractionScopedObject, DiscordInteractionHandler {
 
     @Autowired
     lateinit var alunaProperties: AlunaProperties
 
     @Autowired
-    lateinit var discordCommandConditions: DiscordCommandConditions
+    lateinit var discordInteractionConditions: DiscordInteractionConditions
 
     @Autowired
-    lateinit var discordCommandAdditionalConditions: DiscordCommandAdditionalConditions
+    lateinit var discordInteractionAdditionalConditions: DiscordInteractionAdditionalConditions
 
     @Autowired
-    lateinit var discordCommandLoadAdditionalData: DiscordCommandLoadAdditionalData
+    lateinit var discordInteractionLoadAdditionalData: DiscordInteractionLoadAdditionalData
 
     @Autowired
-    lateinit var discordCommandMetaDataHandler: DiscordCommandMetaDataHandler
+    lateinit var discordInteractionMetaDataHandler: DiscordInteractionMetaDataHandler
 
     @Autowired
     lateinit var eventPublisher: EventPublisher
@@ -91,28 +112,48 @@ abstract class DiscordCommand(
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    //This gets set by the CommandContext automatically
+    /**
+     * This gets set by the CommandContext automatically and should not be changed
+     */
     override lateinit var uniqueId: String
 
-    override val interactionName = name
-
+    /**
+     * Defines the use scope of this command.
+     *
+     * *This gets mapped to [isGuildOnly] if set to [UseScope.GUILD_ONLY].*
+     */
     var useScope = UseScope.GLOBAL
 
     @get:JvmSynthetic
     @set:JvmSynthetic
     internal var specificServer: String? = null
 
+    /**
+     * If true, only users which are returned by [OwnerIdProvider.getOwnerIds] are allowed to use it.
+     */
     var isOwnerCommand = false
+
+    /**
+     * If true, this command is only seen by users with the administrator permission on the server by default!
+     * Aluna will set <code>this.defaultPermissions = DefaultMemberPermissions.DISABLED</code> if true.
+     */
     var isAdministratorOnlyCommand = false
 
-    var isEarlyAccessCommand = false
+    var interactionDevelopmentStatus = DevelopmentStatus.LIVE
 
-    var commandDevelopmentStatus = DevelopmentStatus.LIVE
-
-    override var beanTimoutDelay: Duration = Duration.ofMinutes(15)
+    override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
     override var beanUseAutoCompleteBean: Boolean = true
     override var beanRemoveObserverOnDestroy: Boolean = true
     override var beanCallOnDestroy: Boolean = true
+
+    private val subCommandElements: HashMap<String, DiscordSubCommandElement> = hashMapOf()
+
+    /**
+     * Current sub command path gets set when the command gets used.
+     *
+     * *This variable is used by the internal sub command handling.*
+     */
+    private var currentSubCommandPath: String = ""
 
     /**
      * The [CooldownScope][Command.CooldownScope] of the command. This defines how far from a scope cooldowns have.
@@ -126,19 +167,20 @@ abstract class DiscordCommand(
 
     /**
      * Any [Permission]s a Member must have to use this command.
-     * <br></br>These are only checked in a [Guild][net.dv8tion.jda.core.entities.Guild] environment.
+     * <br></br>These are only checked in a [Guild] environment.
      */
     var userPermissions = arrayListOf<Permission>()
 
     /**
      * Any [Permission]s the bot must have to use a command.
-     * <br></br>These are only checked in a [Guild][net.dv8tion.jda.core.entities.Guild] environment.
+     * <br></br>These are only checked in a [Guild] environment.
      */
     var botPermissions = arrayListOf<Permission>()
 
     var subCommandUseScope = hashMapOf<String, UseScope>()
 
     lateinit var channel: MessageChannel
+
     override lateinit var author: User
 
     var guild: Guild? = null
@@ -167,7 +209,11 @@ abstract class DiscordCommand(
      */
     @Trace
     override fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
-        return true
+        return if (handleSubCommands) {
+            handleSubCommand(event, { it.onButtonInteraction(event) }, { onSubCommandInteractionFallback(event) })
+        } else {
+            true
+        }
     }
 
     /**
@@ -177,6 +223,15 @@ abstract class DiscordCommand(
      */
     @Trace
     override fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
+        if (handleSubCommands) {
+            handleSubCommand(null, {
+                it.onButtonInteractionTimeout(additionalData)
+                true
+            }, {
+                onSubCommandInteractionTimeoutFallback()
+                true
+            })
+        }
     }
 
     /**
@@ -188,7 +243,11 @@ abstract class DiscordCommand(
      */
     @Trace
     override fun onSelectMenuInteraction(event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
-        return true
+        return if (handleSubCommands) {
+            handleSubCommand(event, { it.onSelectMenuInteraction(event) }, { onSubCommandInteractionFallback(event) })
+        } else {
+            true
+        }
     }
 
     /**
@@ -196,6 +255,15 @@ abstract class DiscordCommand(
      */
     @Trace
     override fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {
+        if (handleSubCommands) {
+            handleSubCommand(null, {
+                it.onSelectMenuInteractionTimeout(additionalData)
+                true
+            }, {
+                onSubCommandInteractionTimeoutFallback()
+                true
+            })
+        }
     }
 
     /**
@@ -219,7 +287,7 @@ abstract class DiscordCommand(
 
     @JvmSynthetic
     internal fun onAutoCompleteEventCall(option: String, event: CommandAutoCompleteInteractionEvent) {
-        discordCommandLoadAdditionalData.loadData(this, event)
+        discordInteractionLoadAdditionalData.loadData(this, event)
         onAutoCompleteEvent(option, event)
     }
 
@@ -231,7 +299,11 @@ abstract class DiscordCommand(
      */
     @Trace
     override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
-        return true
+        return if (handleSubCommands) {
+            handleSubCommand(event, { it.onModalInteraction(event, additionalData) }, { onSubCommandInteractionFallback(event) })
+        } else {
+            true
+        }
     }
 
     /**
@@ -239,6 +311,25 @@ abstract class DiscordCommand(
      */
     @Trace
     override fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
+        if (handleSubCommands) {
+            handleSubCommand(null, {
+                it.onModalInteractionTimeout(additionalData)
+                true
+            }, {
+                onSubCommandInteractionTimeoutFallback()
+                true
+            })
+        }
+    }
+
+    open fun onSubCommandFallback(event: SlashCommandInteractionEvent) {
+    }
+
+    open fun onSubCommandInteractionFallback(event: GenericInteractionCreateEvent): Boolean {
+        return true
+    }
+
+    open fun onSubCommandInteractionTimeoutFallback() {
     }
 
     open fun onOwnerCommandNotAllowedByUser(event: SlashCommandInteractionEvent) {
@@ -246,13 +337,8 @@ abstract class DiscordCommand(
     }
 
     open fun onWrongUseScope(event: SlashCommandInteractionEvent, wrongUseScope: WrongUseScope) {
-        when {
-            wrongUseScope.serverOnly -> {
-                event.deferReply(true).setContent("⛔ This command can only be used on a server directly.").queue()
-            }
-            wrongUseScope.subCommandServerOnly -> {
-                event.deferReply(true).setContent("⛔ This command can only be used on a server directly.").queue()
-            }
+        if (wrongUseScope.subCommandServerOnly) {
+            event.deferReply(true).setContent("⛔ This command can only be used on a server directly.").queue()
         }
     }
 
@@ -300,8 +386,39 @@ abstract class DiscordCommand(
         return hashMapOf()
     }
 
-    fun prepareCommand() {
-        processDevelopmentStatus()
+    fun prepareInteraction() {
+        if (isAdministratorOnlyCommand) {
+            this.defaultPermissions = DefaultMemberPermissions.DISABLED
+        }
+        this.isGuildOnly = (useScope == UseScope.GUILD_ONLY)
+
+        if (!alunaProperties.productionMode) {
+            if ((isAdministratorOnlyCommand || this.defaultPermissions == DefaultMemberPermissions.DISABLED) && !this.isGuildOnly) {
+                logger.warn("The interaction '$name' has a default permission for administrator only but is not restricted to guild only. All users will be able to use this interaction in DMs with your bot!")
+            }
+            if (this.defaultPermissions != DefaultMemberPermissions.ENABLED && this.defaultPermissions != DefaultMemberPermissions.DISABLED && !this.isGuildOnly) {
+                logger.warn("The interaction '$name' has a default permission restriction for a specific user permission but is not restricted to guild only. All users will be able to use this interaction in DMs with your bot!")
+            }
+        }
+
+        loadDynamicSubCommandElements()
+    }
+
+    private fun loadDynamicSubCommandElements() {
+        if (subCommandElements.isEmpty()) {
+            initSubCommands()
+        }
+
+        if (subCommandElements.isEmpty()) {
+            this::class.primaryConstructor!!.parameters.forEach {
+                if (it.findAnnotation<SubCommandElement>() != null && (it.type.classifier as KClass<*>).isSubclassOf(DiscordSubCommandElement::class)) {
+                    val field = this::class.memberProperties.firstOrNull { member -> member.name == it.name }
+                        ?: throw IllegalArgumentException("Couldn't access ${it.name} parameter because it is not a property. To fix this, make sure that your parameter is defined as property.")
+                    field.isAccessible = true
+                    registerSubCommands(field.getter.call(this) as DiscordSubCommandElement)
+                }
+            }
+        }
     }
 
     @Experimental("This gets called by Aluna, but is currently only a preparation for Localization.")
@@ -324,7 +441,8 @@ abstract class DiscordCommand(
             stopWatch!!.start()
         }
 
-        MDC.put("command", event.commandPath)
+        currentSubCommandPath = event.commandPath
+        MDC.put("interaction", event.commandPath)
         MDC.put("uniqueId", uniqueId)
 
         guild = event.guild
@@ -352,7 +470,7 @@ abstract class DiscordCommand(
         //checkIfLocalDevelopment(event)
         //checkCommandStatus(event)
 
-        val wrongUseScope = discordCommandConditions.checkUseScope(this, useScope, subCommandUseScope, event)
+        val wrongUseScope = discordInteractionConditions.checkUseScope(this, subCommandUseScope, event)
         if (wrongUseScope.wrongUseScope) {
             onWrongUseScope(event, wrongUseScope)
             return
@@ -362,21 +480,13 @@ abstract class DiscordCommand(
 
         //checkChannelTopics(event)
 
-        if (isAdministratorOnlyCommand) {
-            val missingAdministratorPermission = discordCommandConditions.checkForNeededUserPermissions(this, arrayListOf(Permission.ADMINISTRATOR), event)
-            if (missingAdministratorPermission.hasMissingPermissions) {
-                onMissingUserPermission(event, missingAdministratorPermission)
-                return
-            }
-        }
-
-        val missingUserPermissions = discordCommandConditions.checkForNeededUserPermissions(this, userPermissions, event)
+        val missingUserPermissions = discordInteractionConditions.checkForNeededUserPermissions(this, userPermissions, event)
         if (missingUserPermissions.hasMissingPermissions) {
             onMissingUserPermission(event, missingUserPermissions)
             return
         }
 
-        val missingBotPermissions = discordCommandConditions.checkForNeededBotPermissions(this, botPermissions, event)
+        val missingBotPermissions = discordInteractionConditions.checkForNeededBotPermissions(this, botPermissions, event)
         if (missingBotPermissions.hasMissingPermissions) {
             onMissingBotPermission(event, missingBotPermissions)
             return
@@ -385,30 +495,34 @@ abstract class DiscordCommand(
         //checkForCommandCooldown(event)
 
         //checkAdditionalRequirements(event)
-        val additionalRequirements = discordCommandAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
+        val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
         if (additionalRequirements.failed) {
             onFailedAdditionalRequirements(event, additionalRequirements)
             return
         }
 
         //Load additional data for this command
-        discordCommandLoadAdditionalData.loadData(this, event)
+        discordInteractionLoadAdditionalData.loadData(this, event)
 
         try {
             //Run onCommandExecution in asyncExecutor to ensure it is not blocking the execution of the command itself
-            discordBot.asyncExecutor.execute {
-                discordCommandMetaDataHandler.onCommandExecution(this, event)
+            discordBot.interactionExecutor.execute {
+                discordInteractionMetaDataHandler.onCommandExecution(this, event)
             }
             if (alunaProperties.discord.publishDiscordCommandEvent) {
                 eventPublisher.publishDiscordCommandEvent(author, channel, guild, event.commandPath, this)
             }
             logger.info("Run command /${event.commandPath}" + if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else "")
             execute(event)
+            if (handleSubCommands) {
+                logger.debug("Handle sub command /${event.commandPath}")
+                handleSubCommandExecution(event) { onSubCommandFallback(event) }
+            }
         } catch (e: Exception) {
             try {
                 onExecutionException(event, e)
             } catch (exceptionError: Exception) {
-                discordCommandMetaDataHandler.onGenericExecutionException(this, e, exceptionError, event)
+                discordInteractionMetaDataHandler.onGenericExecutionException(this, e, exceptionError, event)
             }
         } finally {
             exitCommand(event)
@@ -426,26 +540,88 @@ abstract class DiscordCommand(
                 (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the command /${event.commandPath} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
             }
         }
-        discordBot.asyncExecutor.execute {
-            discordCommandMetaDataHandler.onExitCommand(this, stopWatch, event)
-        }
-    }
-
-    private fun processDevelopmentStatus() {
-        when (commandDevelopmentStatus) {
-            DevelopmentStatus.IN_DEVELOPMENT,
-            DevelopmentStatus.ALPHA -> {
-                this.isEarlyAccessCommand = false
-            }
-            DevelopmentStatus.EARLY_ACCESS -> {
-                this.isEarlyAccessCommand = true
-            }
-            DevelopmentStatus.LIVE -> {
-                this.isEarlyAccessCommand = false
-            }
+        discordBot.interactionExecutor.execute {
+            discordInteractionMetaDataHandler.onExitInteraction(this, stopWatch, event)
         }
     }
 
     fun MessageService.getForUser(key: String, vararg args: String): String = this.get(key, userLocale, *args)
     fun MessageService.getForServer(key: String, vararg args: String): String = this.get(key, guildLocale, *args)
+
+    fun registerSubCommands(vararg elements: DiscordSubCommandElement) {
+        elements.forEach { element ->
+            subCommandElements.putIfAbsent(element.getName(), element)
+
+            if (element::class.isSubclassOf(DiscordSubCommand::class)) {
+                this.addSubcommands(element as DiscordSubCommand)
+            }
+
+            if (element::class.isSubclassOf(DiscordSubCommandGroup::class)) {
+                element as DiscordSubCommandGroup
+                element.initSubCommands()
+                this.addSubcommandGroups(element)
+            }
+        }
+    }
+
+    fun handleSubCommandExecution(event: SlashCommandInteractionEvent, fallback: (SlashCommandInteractionEvent) -> (Unit)) {
+        loadDynamicSubCommandElements()
+
+        val path = event.commandPath.split("/")
+        val firstLevel = path[1]
+        if (!subCommandElements.containsKey(firstLevel)) {
+            logger.debug("Command path '${event.commandPath}' not found in the registered elements")
+            fallback.invoke(event)
+            return
+        }
+
+        val firstElement = subCommandElements[firstLevel]!!
+
+        //Check if it is a SubCommand
+        if (firstElement::class.isSubclassOf(DiscordSubCommand::class)) {
+            (firstElement as DiscordSubCommand).execute(event, null, this)
+            return
+        }
+
+        //Check if it is a SubCommand in a SubCommandGroup
+        val secondLevel = path[2]
+        if (!(firstElement as DiscordSubCommandGroup).subCommands.containsKey(secondLevel)) {
+            logger.debug("Command path '${event.commandPath}' not found in the registered elements")
+            fallback.invoke(event)
+            return
+        }
+
+        firstElement.subCommands[secondLevel]!!.execute(event, null, this)
+    }
+
+    fun handleSubCommand(
+        event: GenericInteractionCreateEvent?,
+        function: (DiscordSubCommand) -> (Boolean),
+        fallback: (GenericInteractionCreateEvent?) -> (Boolean)
+    ): Boolean {
+        loadDynamicSubCommandElements()
+
+        val path = currentSubCommandPath.split("/")
+        val firstLevel = path[1]
+        if (!subCommandElements.containsKey(firstLevel)) {
+            logger.debug("Command path '${currentSubCommandPath}' not found in the registered elements")
+            return fallback.invoke(event)
+        }
+
+        val firstElement = subCommandElements[firstLevel]!!
+
+        //Check if it is a SubCommand
+        if (firstElement::class.isSubclassOf(DiscordSubCommand::class)) {
+            return function.invoke((firstElement as DiscordSubCommand))
+        }
+
+        //Check if it is a SubCommand in a SubCommandGroup
+        val secondLevel = path[2]
+        if (!(firstElement as DiscordSubCommandGroup).subCommands.containsKey(secondLevel)) {
+            logger.debug("Command path '${currentSubCommandPath}' not found in the registered elements")
+            return fallback.invoke(event)
+        }
+
+        return function.invoke(firstElement.subCommands[secondLevel]!!)
+    }
 }

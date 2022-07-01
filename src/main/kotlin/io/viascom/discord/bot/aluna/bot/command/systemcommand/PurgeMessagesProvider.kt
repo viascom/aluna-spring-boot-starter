@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import io.viascom.discord.bot.aluna.bot.Command
+import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
@@ -29,6 +29,7 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemC
 import io.viascom.discord.bot.aluna.util.createTextInput
 import io.viascom.discord.bot.aluna.util.getTypedOption
 import io.viascom.discord.bot.aluna.util.getValueAsString
+import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.GuildMessageChannel
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
@@ -39,9 +40,8 @@ import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.sharding.ShardManager
-import java.util.stream.Collectors
 
-@Command
+@Interaction
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 class PurgeMessagesProvider(
@@ -59,16 +59,29 @@ class PurgeMessagesProvider(
     lateinit var selectedChannel: GuildMessageChannel
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
+        var id = event.getTypedOption(command.argsOption, "")!!
 
-        val id = event.getTypedOption(command.argsOption, "")!!
-        if (id.isEmpty()) {
-            event.deferReply().setContent("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify an ID as argument for this command").queue()
+        if (!event.isFromGuild && id.isEmpty()) {
+            event.deferReply()
+                .setContent("${systemCommandEmojiProvider.crossEmoji().formatted} This command can only be used in servers directly or a channelId is needed.")
+                .queue()
             return
+        }
+
+        if (id.isEmpty()) {
+            id = event.channel.id
         }
 
         val channel = shardManager.getChannelById(GuildMessageChannel::class.java, id)
         if (channel == null) {
-            event.deferReply().setContent("${systemCommandEmojiProvider.crossEmoji().asMention} Please specify a valid channel ID as argument for this command")
+            event.deferReply()
+                .setContent("${systemCommandEmojiProvider.crossEmoji().formatted} Please specify a valid channel ID as argument for this command.")
+                .queue()
+            return
+        }
+
+        if (!event.guild!!.getMember(event.jda.selfUser)!!.hasPermission(channel, Permission.MESSAGE_MANAGE)) {
+            event.deferReply().setContent("${systemCommandEmojiProvider.crossEmoji().formatted} This bot is not allowed to remove messages.")
                 .queue()
             return
         }
@@ -88,7 +101,7 @@ class PurgeMessagesProvider(
     override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         event.deferReply(true).queue {
             it.editOriginal(
-                "${systemCommandEmojiProvider.tickEmoji().asMention} Removing ${
+                "${systemCommandEmojiProvider.tickEmoji().formatted} Removing ${
                     event.getValueAsString(
                         "amount",
                         "0"
@@ -96,11 +109,11 @@ class PurgeMessagesProvider(
                 } messages from ${selectedChannel.asMention}..."
             ).queue()
 
-            val number = event.getValueAsString("amount", "0")!!.toLong()
-            selectedChannel.iterableHistory.queue {
-                val messages = it.stream().limit(number).collect(Collectors.toList())
-                selectedChannel.purgeMessages(messages)
-            }
+            val amount = event.getValueAsString("amount", "0")!!.toInt()
+
+            selectedChannel.iterableHistory
+                .takeAsync(amount)
+                .thenAccept(selectedChannel::purgeMessages)
         }
         return true
     }

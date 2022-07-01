@@ -34,7 +34,7 @@ class ShardReadyEvent(private val discordReadyEventPublisher: EventPublisher) : 
     override fun onReady(event: ReadyEvent) {
         super.onReady(event)
 
-        //If first shard is connected, trigger command update
+        //If first shard is connected, trigger interaction update
         if (event.jda.shardInfo.shardId == 0) {
             discordReadyEventPublisher.publishDiscordFirstShardReadyEvent(event)
         }

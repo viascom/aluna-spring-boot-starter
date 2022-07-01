@@ -21,7 +21,6 @@
 
 package io.viascom.discord.bot.aluna.botlist
 
-import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnAlunaProductionMode
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -32,7 +31,6 @@ import org.springframework.stereotype.Service
 
 @Service
 @ConditionalOnJdaEnabled
-@ConditionalOnAlunaProductionMode
 open class BotListHandler(
     private val senders: List<BotListSender>,
     private val shardManager: ShardManager,
@@ -41,11 +39,34 @@ open class BotListHandler(
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
+    init {
+        val enabledSenders = senders.filter { it.isEnabled() }
+        if (alunaProperties.productionMode && enabledSenders.isNotEmpty()) {
+            logger.info("Your bot stats are sent every 10 min to [${enabledSenders.joinToString(", ") { it.getName() }}]")
+        }
+
+        if (!alunaProperties.productionMode && enabledSenders.any { it.onProductionModeOnly() }) {
+            logger.info(
+                "Your bot stats will be sent every 10 min to [${
+                    enabledSenders.filter { it.onProductionModeOnly() }.joinToString(", ") { it.getName() }
+                }] in production mode only."
+            )
+        }
+
+        if (!alunaProperties.productionMode && enabledSenders.any { !it.onProductionModeOnly() }) {
+            logger.info(
+                "Your bot stats are sent every 10 min to [${
+                    enabledSenders.filter { !it.onProductionModeOnly() }.joinToString(", ") { it.getName() }
+                }]"
+            )
+        }
+    }
+
     @Scheduled(cron = "0 */10 * * * *", zone = "UTC") //Send updates every 10 minutes
     open fun sendStats() {
         senders.forEach { sender ->
             try {
-                if (alunaProperties.productionMode) {
+                if (alunaProperties.productionMode || !sender.onProductionModeOnly()) {
                     sender.sendStats(shardManager.guilds.size, shardManager.shardsTotal)
                 }
             } catch (e: Exception) {
