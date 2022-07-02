@@ -28,12 +28,12 @@ import net.dv8tion.jda.api.entities.emoji.Emoji
  * By implementing this interface, you get some QOL functions for your defined emoji.
  *
  * Example on how to use this interface:
- * <code>
+ * ```
  * enum class MyEmojis(override val id: String, override val emojiName: String, override val animated: Boolean = false) : DiscordEmoji {
  *     ASPARKLES("963462938822344794", "asparkles", true),
  *     AUTHORIZED("963463099317362728", "authorized"),
  * }
- * </code>
+ * ```
  *
  */
 @JvmDefaultWithCompatibility

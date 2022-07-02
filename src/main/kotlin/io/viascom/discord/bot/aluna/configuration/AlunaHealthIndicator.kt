@@ -93,15 +93,12 @@ class AlunaHealthIndicator(
         status.withDetail("currentActiveInteractionTimeouts", interactionScope.getTimeoutCount())
 
         val interactionObserver = hashMapOf<String, Any>()
-        interactionObserver["buttons"] =
-            discordBot.messagesToObserveButton.size +
-                    eventWaiter.waitingEvents.entries.filter { it.key == ButtonInteractionEvent::class.java }.count { it.value.isNotEmpty() }
-        interactionObserver["select"] =
-            discordBot.messagesToObserveSelect.size +
-                    eventWaiter.waitingEvents.entries.filter { it.key == SelectMenuInteractionEvent::class.java }.count { it.value.isNotEmpty() }
-        interactionObserver["modal"] =
-            discordBot.messagesToObserveModal.size +
-                    eventWaiter.waitingEvents.entries.filter { it.key == ModalInteractionEvent::class.java }.count { it.value.isNotEmpty() }
+        interactionObserver["buttons"] = discordBot.messagesToObserveButton.size +
+                eventWaiter.waitingEvents.entries.filter { it.key == ButtonInteractionEvent::class.java }.count { it.value.isNotEmpty() }
+        interactionObserver["select"] = discordBot.messagesToObserveSelect.size +
+                eventWaiter.waitingEvents.entries.filter { it.key == SelectMenuInteractionEvent::class.java }.count { it.value.isNotEmpty() }
+        interactionObserver["modal"] = discordBot.messagesToObserveModal.size +
+                eventWaiter.waitingEvents.entries.filter { it.key == ModalInteractionEvent::class.java }.count { it.value.isNotEmpty() }
 
         status.withDetail("interactionObserver", interactionObserver)
         status.withDetail("shardsTotal", shardManager.shardsTotal)

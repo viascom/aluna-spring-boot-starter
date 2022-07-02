@@ -69,7 +69,7 @@ abstract class DiscordCommand(
 
     /**
      * If enabled, Aluna will automatically forward the command execution as well as interaction events to the matching sub command.
-     * For this to work, you need to annotate your autowired [DiscordSubCommand] or [DiscordSubCommandGroup] implementation with @[SubCommandElement]
+     * For this to work, you need to annotate your autowired [DiscordSubCommand] or [DiscordSubCommandGroup] implementation with [@SubCommandElement][SubCommandElement]
      * or register them manually with [registerSubCommands] during [initSubCommands].
      * The Top-Level command can not be used (limitation of Discord), but Aluna will nevertheless always call [execute] on the top-level command before executing the sub command method.
      */
@@ -135,7 +135,7 @@ abstract class DiscordCommand(
 
     /**
      * If true, this command is only seen by users with the administrator permission on the server by default!
-     * Aluna will set <code>this.defaultPermissions = DefaultMemberPermissions.DISABLED</code> if true.
+     * Aluna will set `this.defaultPermissions = DefaultMemberPermissions.DISABLED` if true.
      */
     var isAdministratorOnlyCommand = false
 
@@ -167,29 +167,62 @@ abstract class DiscordCommand(
 
     /**
      * Any [Permission]s a Member must have to use this command.
-     * <br></br>These are only checked in a [Guild] environment.
+     *
+     * These are only checked in a [Guild] environment.
      */
     var userPermissions = arrayListOf<Permission>()
 
     /**
      * Any [Permission]s the bot must have to use a command.
-     * <br></br>These are only checked in a [Guild] environment.
+     *
+     *These are only checked in a [Guild] environment.
      */
     var botPermissions = arrayListOf<Permission>()
 
     var subCommandUseScope = hashMapOf<String, UseScope>()
 
+    /**
+     * [MessageChannel] in which the command was used in.
+     */
     lateinit var channel: MessageChannel
 
+    /**
+     * [Author][User] of the command
+     */
     override lateinit var author: User
 
+    /**
+     * [Guild] in which the command was used in. Can be null if the command was used in direct messages.
+     */
     var guild: Guild? = null
+
+    /**
+     * [GuildChannel] in which the command was used in. Can be null if the command was used in direct messages.
+     */
     var guildChannel: GuildChannel? = null
+
+    /**
+     * [Member] which used the command. Can be null if the command was used in direct messages.
+     */
     var member: Member? = null
 
+    /**
+     * User [Locale]
+     *
+     * *This is set by Aluna based on the information provided by Discord*
+     */
     var userLocale: Locale = Locale.ENGLISH
+
+    /**
+     * Guild [Locale]
+     *
+     * *This is set by Aluna based on the information provided by Discord*
+     */
     var guildLocale: Locale = Locale.ENGLISH
 
+    /**
+     * Stop watch used if enabled by properties
+     */
     var stopWatch: StopWatch? = null
 
     /**
@@ -202,9 +235,9 @@ abstract class DiscordCommand(
 
     /**
      * This method gets triggered, as soon as a button event for this command is called.
-     * Make sure that you register your message id: discordBot.registerMessageForButtonEvents(it, this)
+     * Make sure that you register your message id: `discordBot.registerMessageForButtonEvents(it, this)` or `.queueAndRegisterInteraction()`
      *
-     * @param event
+     * @param event [ButtonInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
     @Trace
@@ -218,8 +251,6 @@ abstract class DiscordCommand(
 
     /**
      * This method gets triggered, as soon as a button event observer duration timeout is reached.
-     *
-     * @param event
      */
     @Trace
     override fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
@@ -236,9 +267,9 @@ abstract class DiscordCommand(
 
     /**
      * This method gets triggered, as soon as a select event for this command is called.
-     * Make sure that you register your message id: discordBot.registerMessageForSelectEvents(it, this)
+     * Make sure that you register your message id: `discordBot.registerMessageForSelectEvents(it, this)` or `.queueAndRegisterInteraction()`
      *
-     * @param event
+     * @param event [SelectMenuInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
     @Trace
@@ -267,34 +298,10 @@ abstract class DiscordCommand(
     }
 
     /**
-     * On destroy gets called, when the object gets destroyed after the defined beanTimoutDelay.
-     *
-     */
-    @Trace
-    open fun onDestroy() {
-    }
-
-    /**
-     * This method gets triggered, as soon as an autocomplete event for this command is called.
-     * This will always use the same instance if user and server is the same. The command itself will than override this instance.
-     * Before calling this method, Aluna will execute discordCommandLoadAdditionalData.loadData()
-     *
-     * @param event
-     */
-    @Trace
-    open fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
-    }
-
-    @JvmSynthetic
-    internal fun onAutoCompleteEventCall(option: String, event: CommandAutoCompleteInteractionEvent) {
-        discordInteractionLoadAdditionalData.loadData(this, event)
-        onAutoCompleteEvent(option, event)
-    }
-
-    /**
      * This method gets triggered, as soon as a modal event for this command is called.
+     * Make sure that you register your message id: `discordBot.registerMessageForModalEvents(it, this)` or `.queueAndRegisterInteraction()`
      *
-     * @param event
+     * @param event [ModalInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
     @Trace
@@ -322,13 +329,52 @@ abstract class DiscordCommand(
         }
     }
 
+    /**
+     * On destroy gets called, when the object gets destroyed after the defined beanTimoutDelay.
+     */
+    @Trace
+    open fun onDestroy() {
+    }
+
+    /**
+     * This method gets triggered, as soon as an auto complete event for this command is called.
+     * This will always use the same instance if user and server is the same. The command itself will than override this instance.
+     * Before calling this method, Aluna will execute discordCommandLoadAdditionalData.loadData()
+     *
+     * @param option name of the option
+     * @param event [CommandAutoCompleteInteractionEvent] this method is based on
+     */
+    @Trace
+    open fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
+    }
+
+    @JvmSynthetic
+    internal fun onAutoCompleteEventCall(option: String, event: CommandAutoCompleteInteractionEvent) {
+        discordInteractionLoadAdditionalData.loadData(this, event)
+        onAutoCompleteEvent(option, event)
+    }
+
+    /**
+     * This method gets called if Aluna can not find a registered sub command
+     *
+     * @param event Original [SlashCommandInteractionEvent]
+     */
     open fun onSubCommandFallback(event: SlashCommandInteractionEvent) {
     }
 
+    /**
+     * This method gets called if Aluna can not find a registered sub command for an interaction event
+     *
+     * @param event Original [SlashCommandInteractionEvent]
+     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
+     */
     open fun onSubCommandInteractionFallback(event: GenericInteractionCreateEvent): Boolean {
         return true
     }
 
+    /**
+     * This method gets called if Aluna can not find a registered sub command for an interaction timeout
+     */
     open fun onSubCommandInteractionTimeoutFallback() {
     }
 
@@ -381,10 +427,6 @@ abstract class DiscordCommand(
 
     open fun initCommandOptions() {}
     open fun initSubCommands() {}
-
-    open fun getServerSpecificData(): HashMap<String, Any> {
-        return hashMapOf()
-    }
 
     fun prepareInteraction() {
         if (isAdministratorOnlyCommand) {

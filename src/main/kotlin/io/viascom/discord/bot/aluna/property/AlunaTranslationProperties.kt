@@ -35,9 +35,9 @@ class AlunaTranslationProperties {
     /**
      * Translation path
      *
-     * Format: <code>file:/</code> or <code>classpath:</code>
+     * Format: `file:/` or `classpath:`
      *
-     * If not set, Aluna will fall back to <code>classpath:i18n/messages</code>
+     * If not set, Aluna will fall back to `classpath:i18n/messages`
      */
     var basePath: String? = null
 

@@ -29,11 +29,11 @@ import net.dv8tion.jda.api.entities.sticker.StickerSnowflake
  * By implementing this interface, you get some QOL functions for your defined sticker.
  *
  * Example on how to use this interface:
- * <code>
+ * ```
  * enum class MyStickers(override val id: String, override val guildId: String) : DiscordSticker {
  *     ASPARKLES("963462938822344794", "963462938822344794"),
  * }
- * </code>
+ * ```
  *
  */
 @JvmDefaultWithCompatibility

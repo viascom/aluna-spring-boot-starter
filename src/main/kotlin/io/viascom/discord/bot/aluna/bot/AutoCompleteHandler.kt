@@ -60,7 +60,7 @@ abstract class AutoCompleteHandler @JvmOverloads constructor(val commands: Array
     override var beanCallOnDestroy: Boolean = false
 
     /**
-     * This method gets triggered, as soon as an autocomplete event for the option is called.
+     * This method gets triggered, as soon as an auto complete event for the option is called.
      * Before calling this method, Aluna will execute discordCommandLoadAdditionalData.loadData()
      *
      * @param event

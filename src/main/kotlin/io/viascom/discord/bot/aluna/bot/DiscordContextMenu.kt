@@ -37,7 +37,7 @@ import io.viascom.discord.bot.aluna.translation.MessageService
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
-import net.dv8tion.jda.api.events.interaction.command.*
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.Command
@@ -79,18 +79,24 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    //This gets set by the CommandContext automatically
+    /**
+     * This gets set by the CommandContext automatically and should not be changed
+     */
     override lateinit var uniqueId: String
 
     /**
      * If true, this command is only seen by users with the administrator permission on the server by default!
-     * Aluna will set <code>this.defaultPermissions = DefaultMemberPermissions.DISABLED</code> if true.
+     * Aluna will set `this.defaultPermissions = DefaultMemberPermissions.DISABLED` if true.
      */
     var isAdministratorOnlyCommand = false
 
     var interactionDevelopmentStatus = DevelopmentStatus.LIVE
-    private var isEarlyAccessCommand = false
 
+    /**
+     * Defines the use scope of this command.
+     *
+     * *This gets mapped to [isGuildOnly] if set to [UseScope.GUILD_ONLY].*
+     */
     var useScope = UseScope.GLOBAL
 
     override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
@@ -99,34 +105,66 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     override var beanCallOnDestroy: Boolean = true
 
     /**
-     * Any [Permission]s a Member must have to use this interaction.
-     * <br></br>These are only checked in a [Guild][net.dv8tion.jda.core.entities.Guild] environment.
+     * Any [Permission]s a Member must have to use this command.
+     * <br></br>These are only checked in a [Guild] environment.
      */
     var userPermissions = arrayListOf<Permission>()
 
     /**
-     * Any [Permission]s the bot must have to use this interaction.
-     * <br></br>These are only checked in a [Guild][net.dv8tion.jda.core.entities.Guild] environment.
+     * Any [Permission]s the bot must have to use a command.
+     * <br></br>These are only checked in a [Guild] environment.
      */
     var botPermissions = arrayListOf<Permission>()
 
+    /**
+     * [Channel] in which the command was used in.
+     */
     var channel: Channel? = null
+
+    /**
+     * [Author][User] of the command
+     */
     override lateinit var author: User
 
+    /**
+     * [Guild] in which the command was used in. Can be null if the command was used in direct messages.
+     */
     var guild: Guild? = null
+
+    /**
+     * [GuildChannel] in which the command was used in. Can be null if the command was used in direct messages.
+     */
     var guildChannel: GuildChannel? = null
+
+    /**
+     * [Member] which used the command. Can be null if the command was used in direct messages.
+     */
     var member: Member? = null
 
+    /**
+     * User [Locale]
+     *
+     * *This is set by Aluna based on the information provided by Discord*
+     */
     var userLocale: Locale = Locale.ENGLISH
+
+    /**
+     * Guild [Locale]
+     *
+     * *This is set by Aluna based on the information provided by Discord*
+     */
     var guildLocale: Locale = Locale.ENGLISH
 
+    /**
+     * Stop watch used if enabled by properties
+     */
     var stopWatch: StopWatch? = null
 
     /**
      * This method gets triggered, as soon as a button event for this interaction is called.
-     * Make sure that you register your message id: discordBot.registerMessageForButtonEvents(it, this)
+     * Make sure that you register your message id: `discordBot.registerMessageForButtonEvents(it, this)` or `.queueAndRegisterInteraction()`
      *
-     * @param event
+     * @param event [ButtonInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
     @Trace
@@ -136,8 +174,6 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
 
     /**
      * This method gets triggered, as soon as a button event observer duration timeout is reached.
-     *
-     * @param event
      */
     @Trace
     override fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
@@ -145,9 +181,9 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
 
     /**
      * This method gets triggered, as soon as a select event for this interaction is called.
-     * Make sure that you register your message id: discordBot.registerMessageForSelectEvents(it, this)
+     * Make sure that you register your message id: `discordBot.registerMessageForSelectEvents(it, this)` or `.queueAndRegisterInteraction()`
      *
-     * @param event
+     * @param event [SelectMenuInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
     @Trace
@@ -157,8 +193,6 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
-     *
-     * @param event
      */
     @Trace
     override fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {
@@ -166,8 +200,9 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
 
     /**
      * This method gets triggered, as soon as a modal event for this interaction is called.
+     * Make sure that you register your message id: `discordBot.registerMessageForModalEvents(it, this)` or `.queueAndRegisterInteraction()`
      *
-     * @param event
+     * @param event [ModalInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
     @Trace
@@ -182,22 +217,24 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     override fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
+    /**
+     * On destroy gets called, when the object gets destroyed after the defined beanTimoutDelay.
+     */
     @Trace
     open fun onDestroy() {
     }
 
     fun prepareInteraction() {
-        processDevelopmentStatus()
         if (isAdministratorOnlyCommand) {
             this.defaultPermissions = DefaultMemberPermissions.DISABLED
         }
         this.isGuildOnly = (useScope == UseScope.GUILD_ONLY)
 
-        if(!alunaProperties.productionMode){
-            if((isAdministratorOnlyCommand || this.defaultPermissions == DefaultMemberPermissions.DISABLED) && !this.isGuildOnly){
+        if (!alunaProperties.productionMode) {
+            if ((isAdministratorOnlyCommand || this.defaultPermissions == DefaultMemberPermissions.DISABLED) && !this.isGuildOnly) {
                 logger.warn("The interaction '$name' has a default permission for administrator only but is not restricted to guild only. All users will be able to use this interaction in DMs with your bot!")
             }
-            if(this.defaultPermissions != DefaultMemberPermissions.ENABLED && this.defaultPermissions != DefaultMemberPermissions.DISABLED && !this.isGuildOnly){
+            if (this.defaultPermissions != DefaultMemberPermissions.ENABLED && this.defaultPermissions != DefaultMemberPermissions.DISABLED && !this.isGuildOnly) {
                 logger.warn("The interaction '$name' has a default permission restriction for a specific user permission but is not restricted to guild only. All users will be able to use this interaction in DMs with your bot!")
             }
         }
@@ -259,21 +296,6 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
             }
             discordBot.interactionExecutor.execute {
                 discordInteractionMetaDataHandler.onExitInteraction(this, stopWatch, event)
-            }
-        }
-    }
-
-    private fun processDevelopmentStatus() {
-        when (interactionDevelopmentStatus) {
-            DevelopmentStatus.IN_DEVELOPMENT,
-            DevelopmentStatus.ALPHA -> {
-                this.isEarlyAccessCommand = false
-            }
-            DevelopmentStatus.EARLY_ACCESS -> {
-                this.isEarlyAccessCommand = true
-            }
-            DevelopmentStatus.LIVE -> {
-                this.isEarlyAccessCommand = false
             }
         }
     }
