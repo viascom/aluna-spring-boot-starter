@@ -95,6 +95,10 @@ fun <T : Any> CommandDataImpl.addOption(option: CommandOption<in T>) {
     this.addOptions(option as OptionData)
 }
 
+fun <T : Any> CommandDataImpl.addOptions(vararg option: CommandOption<in T>) {
+    option.forEach { this.addOption(it) }
+}
+
 @JvmOverloads
 fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<in T>, default: T? = null): T? {
     val optionData = (option as OptionData)

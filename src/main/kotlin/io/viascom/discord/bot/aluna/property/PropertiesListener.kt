@@ -37,7 +37,7 @@ class PropertiesListener : ApplicationListener<ApplicationContextInitializedEven
 
     override fun onApplicationEvent(event: ApplicationContextInitializedEvent) {
         //Check if jda is disabled
-        if ((event.applicationContext.environment.getProperty("aluna.discord.enable-jda", Boolean::class.java) ?: true) == false) {
+        if (event.applicationContext.environment.getProperty("aluna.discord.enable-jda", Boolean::class.java) == false) {
             return
         }
 

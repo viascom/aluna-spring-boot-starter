@@ -63,15 +63,18 @@ abstract class DiscordCommand(
 
     /**
      * If enabled, Aluna will register an event listener for auto complete requests and link it to this command.
+     *
      * If such an event gets triggered, the method [onAutoCompleteEvent] will be invoked.
      */
     val observeAutoComplete: Boolean = false,
 
     /**
      * If enabled, Aluna will automatically forward the command execution as well as interaction events to the matching sub command.
+     *
      * For this to work, you need to annotate your autowired [DiscordSubCommand] or [DiscordSubCommandGroup] implementation with [@SubCommandElement][SubCommandElement]
      * or register them manually with [registerSubCommands] during [initSubCommands].
-     * The Top-Level command can not be used (limitation of Discord), but Aluna will nevertheless always call [execute] on the top-level command before executing the sub command method.
+     *
+     * The Top-Level command can not be used (limitation of Discord), but Aluna will nevertheless always call [execute] on the top-level command before executing the sub command method if you need to do some general stuff.
      */
     val handleSubCommands: Boolean = false
 ) : CommandDataImpl(name, description),

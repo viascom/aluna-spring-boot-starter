@@ -29,7 +29,6 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnab
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.StringOption
 import io.viascom.discord.bot.aluna.property.ModeratorIdProvider
-import io.viascom.discord.bot.aluna.util.addOption
 import io.viascom.discord.bot.aluna.util.getTypedOption
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
@@ -61,8 +60,7 @@ class SystemCommand(
 
     override fun initCommandOptions() {
         specificServer = alunaProperties.command.systemCommand.server
-        addOption(commandOption)
-        addOption(argsOption)
+        addOptions(commandOption, argsOption)
     }
 
     override fun execute(event: SlashCommandInteractionEvent) {
