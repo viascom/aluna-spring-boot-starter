@@ -38,4 +38,10 @@ class AlunaDebugProperties {
      * If enabled and not production mode, Aluna will print a configuration block in the log which contains some selected settings and an invitation link for the bot itself.
      */
     var enableDebugConfigurationLog: Boolean = true
+
+    var showTranslationKeys: ShowTranslationKeys = ShowTranslationKeys.NONE
+
+    enum class ShowTranslationKeys {
+        NONE, ALL, ONLY_MISSING
+    }
 }

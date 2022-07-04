@@ -19,12 +19,14 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.translation
+package io.viascom.discord.bot.aluna.bot.handler
 
-import java.util.*
+import net.dv8tion.jda.api.interactions.DiscordLocale
+import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFunction
 
-interface MessageService {
-    fun get(key: String, locale: Locale, vararg args: String): String
-    fun getWithDefault(key: String, locale: Locale, default: String, vararg args: String): String
-    fun formatNumber(number: Double, locale: Locale): String
+interface DiscordInteractionLocalization {
+
+    fun getLocalizationFunction(): LocalizationFunction
+
+    fun getMissingTranslationKeys(): HashMap<DiscordLocale, ArrayList<String>>
 }

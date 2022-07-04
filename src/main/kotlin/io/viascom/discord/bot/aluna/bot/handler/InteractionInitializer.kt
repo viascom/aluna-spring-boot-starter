@@ -31,6 +31,7 @@ import io.viascom.discord.bot.aluna.model.DevelopmentStatus
 import io.viascom.discord.bot.aluna.model.UseScope
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.interactions.commands.Command
+import net.dv8tion.jda.api.interactions.commands.Command.*
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
@@ -93,8 +94,7 @@ internal open class InteractionInitializer(
         }.toCollection(arrayListOf())
 
         //Create global interactions
-        //shardManager.shards.first().retrieveCommands(true).queue { currentCommands ->
-        shardManager.shards.first().retrieveCommands().queue { currentCommands ->
+        shardManager.shards.first().retrieveCommands(true).queue { currentCommands ->
             val commandDataList = arrayListOf<CommandDataImpl>()
 
             commandDataList.addAll(filteredCommands)
@@ -167,8 +167,7 @@ internal open class InteractionInitializer(
                 }
             }
 
-            //shardManager.shards.first().retrieveCommands(true).queue {
-            shardManager.shards.first().retrieveCommands().queue { command ->
+            shardManager.shards.first().retrieveCommands(true).queue { command ->
                 command.filter { it.type == Command.Type.SLASH }.filter { it.name in commands.map { it.name } }.forEach { filteredCommand ->
                     try {
                         discordBot.commands.computeIfAbsent(filteredCommand.id) { commands.first { it.name == filteredCommand.name }.javaClass }
@@ -213,8 +212,7 @@ internal open class InteractionInitializer(
 
                 //Check if system command should be global
                 if (server == null) {
-                    //val serverCommand = shardManager.shards.first().retrieveCommands(true).complete().firstOrNull { it.name == command.name }
-                    val serverCommand = shardManager.shards.first().retrieveCommands().complete().firstOrNull { it.name == command.name }
+                    val serverCommand = shardManager.shards.first().retrieveCommands(true).complete().firstOrNull { it.name == command.name }
                     if (serverCommand != null && !compareCommands(command, serverCommand)) {
                         shardManager.shards.first().upsertCommand(command).queue {
                             printCommand(command)
@@ -344,13 +342,51 @@ internal open class InteractionInitializer(
     private fun compareCommands(commandData: CommandDataImpl, command: Command): Boolean {
         return commandData.name == command.name &&
                 commandData.description == command.description &&
-                commandData.options.map { Command.Option(it.toData()) } == command.options &&
-                commandData.subcommandGroups.map { Command.SubcommandGroup(it.toData()) } == command.subcommandGroups &&
-                commandData.subcommands.map { Command.Subcommand(it.toData()) } == command.subcommands &&
+                commandData.options.all { compareOptions(Option(it.toData()), command.options.firstOrNull { sub -> sub.name == it.name }) } &&
+                commandData.options.size == command.options.size &&
+                commandData.subcommandGroups.all {
+                    compareSubCommandGroup(
+                        SubcommandGroup(it.toData()),
+                        command.subcommandGroups.firstOrNull { sub -> sub.name == it.name })
+                } &&
+                commandData.subcommands.all { compareSubCommand(Subcommand(it.toData()), command.subcommands.firstOrNull { sub -> sub.name == it.name }) } &&
+                commandData.subcommands.size == command.subcommands.size &&
                 commandData.defaultPermissions.permissionsRaw == command.defaultPermissions.permissionsRaw &&
-                commandData.isGuildOnly == command.isGuildOnly
-        //commandData.nameLocalizations.toMap() == command.nameLocalizations.toMap() &&
-        //commandData.descriptionLocalizations.toMap() == command.descriptionLocalizations.toMap()
+                commandData.isGuildOnly == command.isGuildOnly &&
+                commandData.nameLocalizations.toMap() == command.nameLocalizations.toMap() &&
+                commandData.descriptionLocalizations.toMap() == command.descriptionLocalizations.toMap()
+    }
+
+    private fun compareSubCommandGroup(groupData: SubcommandGroup, group: SubcommandGroup?): Boolean {
+        if (group == null) {
+            return false
+        }
+
+        return groupData == group &&
+                groupData.nameLocalizations.toMap() == group.nameLocalizations.toMap() &&
+                groupData.descriptionLocalizations.toMap() == group.descriptionLocalizations.toMap() &&
+                groupData.subcommands.all { compareSubCommand(it, group.subcommands.firstOrNull { sub -> sub.name == it.name }) } &&
+                groupData.subcommands.size == group.subcommands.size
+    }
+
+    private fun compareSubCommand(commandData: Subcommand, subCommand: Subcommand?): Boolean {
+        if (subCommand == null) {
+            return false
+        }
+        return commandData == subCommand &&
+                commandData.nameLocalizations.toMap() == subCommand.nameLocalizations.toMap() &&
+                commandData.descriptionLocalizations.toMap() == subCommand.descriptionLocalizations.toMap() &&
+                commandData.options.all { compareOptions(it, subCommand.options.firstOrNull { sub -> sub.name == it.name }) } &&
+                commandData.options.size == subCommand.options.size
+    }
+
+    private fun compareOptions(optionData: Option, option: Option?): Boolean {
+        if (option == null) {
+            return false
+        }
+        return optionData == option &&
+                optionData.nameLocalizations.toMap() == option.nameLocalizations.toMap() &&
+                optionData.descriptionLocalizations.toMap() == option.descriptionLocalizations.toMap()
     }
 
 }

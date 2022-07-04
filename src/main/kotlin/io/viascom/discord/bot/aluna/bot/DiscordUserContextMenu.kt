@@ -3,10 +3,11 @@ package io.viascom.discord.bot.aluna.bot
 import datadog.trace.api.Trace
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.Command
+import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFunction
 import org.slf4j.MDC
 import org.springframework.util.StopWatch
 
-abstract class DiscordUserContextMenu(name: String) : DiscordContextMenu(Command.Type.USER, name) {
+abstract class DiscordUserContextMenu(name: String, localizations: LocalizationFunction? = null) : DiscordContextMenu(Command.Type.USER, name, localizations) {
 
     /**
      * The main body method of a [DiscordContextMenu].

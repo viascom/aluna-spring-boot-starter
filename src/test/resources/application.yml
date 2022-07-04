@@ -25,9 +25,11 @@ aluna:
       enable-kotlin-script-evaluate: true
   translation:
     enabled: true
+    supported-discord-locals: german, english_us
   debug:
     use-stopwatch: true
     show-hash-code: true
+    show-translation-keys: only_missing
 
 logging:
   level:

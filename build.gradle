@@ -10,7 +10,7 @@ plugins {
 }
 
 group "io.viascom.discord.bot"
-version "0.0.23_5.0.0-alpha.13"
+version "0.0.23_5.0.0-alpha.13_DEV"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -48,7 +48,7 @@ repositories {
 }
 
 ext {
-    jdaVersion = "5.0.0-alpha.13"
+    jdaVersion = "5.0.0-alpha.13_DEV"
     retrofitVersion = "2.9.0"
     gsonVersion = "2.9.0"
     gsonJavatimeVersion = "1.1.1"

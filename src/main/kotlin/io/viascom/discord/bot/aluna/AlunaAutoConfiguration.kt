@@ -32,8 +32,6 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnab
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnTranslationEnabled
 import io.viascom.discord.bot.aluna.property.*
-import io.viascom.discord.bot.aluna.translation.DefaultMessageService
-import io.viascom.discord.bot.aluna.translation.MessageService
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,14 +39,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.support.ReloadableResourceBundleMessageSource
-import org.springframework.core.env.Environment
 import org.springframework.scheduling.annotation.EnableScheduling
-import java.time.Duration
 
 @Configuration
 @EnableConfigurationProperties(AlunaProperties::class)
@@ -154,36 +148,12 @@ open class AlunaAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnJdaEnabled
     @ConditionalOnTranslationEnabled
-    open fun defaultMessageService(
-        alunaProperties: AlunaProperties,
-        reloadableMessageSource: ReloadableResourceBundleMessageSource,
-        messageSource: MessageSource
-    ): MessageService {
-        logger.debug("Enable DefaultMessageService")
-        return DefaultMessageService(messageSource, reloadableMessageSource, alunaProperties)
+    @ConditionalOnMissingBean
+    open fun defaultLocalizationProvider(alunaProperties: AlunaProperties): DiscordInteractionLocalization {
+        logger.debug("Enable DefaultDiscordInteractionLocalization")
+        return DefaultDiscordInteractionLocalization(alunaProperties)
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnTranslationEnabled
-    open fun messageSource(environment: Environment): MessageSource {
-        val messageSource = ReloadableResourceBundleMessageSource()
-        messageSource.setBasename(environment.getProperty("aluna.translation.base-path", String::class.java) ?: "classpath:i18n/messages")
-        messageSource.setDefaultEncoding(environment.getProperty("aluna.translation.default-encoding", String::class.java) ?: "UTF-8")
-        messageSource.setCacheSeconds(
-            (environment.getProperty("aluna.translation.cache-duration", Duration::class.java) ?: Duration.ofSeconds(60)).toSeconds().toInt()
-        )
-        messageSource.setUseCodeAsDefaultMessage(environment.getProperty("aluna.translation.use-code-as-default-message", Boolean::class.java) ?: true)
-        messageSource.setFallbackToSystemLocale(environment.getProperty("aluna.translation.fallback-to-system-locale", Boolean::class.java) ?: false)
-        return messageSource
-    }
-
-//    @Bean
-//    @ConditionalOnMissingBean
-//    @ConditionalOnProperty(name = ["enabled-translation"], prefix = "aluna", matchIfMissing = false)
-//    open fun alunaLocalizationFunction(messageSource: MessageSource): LocalizationFunction {
-//        return AlunaLocalizationFunction(messageSource)
-//    }
 }

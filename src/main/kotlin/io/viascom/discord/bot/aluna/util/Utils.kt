@@ -107,7 +107,7 @@ fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<
         OptionType.INTEGER -> this.getOption(optionData.name, default, OptionMapping::getAsInt)
         OptionType.BOOLEAN -> this.getOption(optionData.name, default, OptionMapping::getAsBoolean)
         OptionType.USER -> this.getOption(optionData.name, default, OptionMapping::getAsUser)
-        OptionType.CHANNEL -> this.getOption(optionData.name, default, OptionMapping::getAsGuildChannel)
+        OptionType.CHANNEL -> this.getOption(optionData.name, default, OptionMapping::getAsChannel)
         OptionType.ROLE -> this.getOption(optionData.name, default, OptionMapping::getAsRole)
         OptionType.MENTIONABLE -> this.getOption(optionData.name, default, OptionMapping::getAsMentionable)
         OptionType.NUMBER -> this.getOption(optionData.name, default, OptionMapping::getAsDouble)
@@ -132,7 +132,7 @@ fun <T : Any> CommandAutoCompleteInteractionEvent.getTypedOption(option: Command
         OptionType.INTEGER -> this.getOption(optionData.name, default, OptionMapping::getAsInt)
         OptionType.BOOLEAN -> this.getOption(optionData.name, default, OptionMapping::getAsBoolean)
         OptionType.USER -> this.getOption(optionData.name, default, OptionMapping::getAsUser)
-        OptionType.CHANNEL -> this.getOption(optionData.name, default, OptionMapping::getAsGuildChannel)
+        OptionType.CHANNEL -> this.getOption(optionData.name, default, OptionMapping::getAsChannel)
         OptionType.ROLE -> this.getOption(optionData.name, default, OptionMapping::getAsRole)
         OptionType.MENTIONABLE -> this.getOption(optionData.name, default, OptionMapping::getAsMentionable)
         OptionType.NUMBER -> this.getOption(optionData.name, default, OptionMapping::getAsDouble)
@@ -171,7 +171,7 @@ fun SlashCommandInteractionEvent.getOptionAsUser(name: String, default: User? = 
 
 @JvmOverloads
 fun SlashCommandInteractionEvent.getOptionAsGuildChannel(name: String, default: GuildChannel? = null): GuildChannel? =
-    this.getOption(name, default, OptionMapping::getAsGuildChannel)
+    this.getOption(name, default, OptionMapping::getAsChannel)
 
 @JvmOverloads
 fun CommandAutoCompleteInteractionEvent.getOptionAsInt(name: String, default: Int? = null): Int? = this.getOption(name, default, OptionMapping::getAsInt)
