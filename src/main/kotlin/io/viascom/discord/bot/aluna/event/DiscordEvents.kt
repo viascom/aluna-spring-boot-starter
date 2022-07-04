@@ -260,4 +260,4 @@ class OnGenericEmojiEvent(source: Any, @Nonnull val event: GenericEmojiEvent) : 
 class OnGenericEmojiUpdateEvent(source: Any, @Nonnull val event: GenericEmojiUpdateEvent<*>) : ApplicationEvent(source)
 class OnGenericPermissionOverrideEvent(source: Any, @Nonnull val event: GenericPermissionOverrideEvent) : ApplicationEvent(source)
 class OnEvent(source: Any, @Nonnull val event: Event) : ApplicationEvent(source)
-class OnModalInteractionEvent(source: Any, @Nonnull event: ModalInteractionEvent) : ApplicationEvent(source)
+class OnModalInteractionEvent(source: Any, @Nonnull val event: ModalInteractionEvent) : ApplicationEvent(source)

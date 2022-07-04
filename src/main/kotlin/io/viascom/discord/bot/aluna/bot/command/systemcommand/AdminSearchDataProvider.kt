@@ -304,7 +304,7 @@ class AdminSearchDataProvider(
 
         val emojis = checkForEmoji(arg)
         if (emojis != null && emojis.isNotEmpty()) {
-            event.replyChoices(emojis.map { net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name + " (Emote) (${it.guild?.name ?: ""})", it.id) })
+            event.replyChoices(emojis.map { net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name + " (Emote) (${it.guild.name})", it.id) })
                 .queue()
             return
         }

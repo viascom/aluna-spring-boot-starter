@@ -344,7 +344,7 @@ class AdminSearchOverviewPage(
         embedBuilder.addField("Name", discordEmote.name, true)
         embedBuilder.addField("Mention", "`${discordEmote.formatted}`", true)
         embedBuilder.addField("Time Created", discordEmote.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
-        discordEmote.guild?.let { embedBuilder.addField("Server", "${it.name} (`${it.id}`)", false) }
+        discordEmote.guild.let { embedBuilder.addField("Server", "${it.name} (`${it.id}`)", false) }
         embedBuilder.addField("Url", "`${discordEmote.imageUrl}`", false)
         embedBuilder.addField(
             "Is Animated",

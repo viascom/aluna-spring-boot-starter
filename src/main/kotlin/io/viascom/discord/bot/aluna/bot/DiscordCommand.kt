@@ -598,7 +598,9 @@ abstract class DiscordCommand(
             subCommandElements.putIfAbsent(element.getName(), element)
 
             if (element::class.isSubclassOf(DiscordSubCommand::class)) {
-                this.addSubcommands(element as DiscordSubCommand)
+                element as DiscordSubCommand
+                element.initCommandOptions()
+                this.addSubcommands(element)
             }
 
             if (element::class.isSubclassOf(DiscordSubCommandGroup::class)) {

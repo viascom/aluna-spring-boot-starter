@@ -19,6 +19,8 @@ abstract class DiscordSubCommand(name: String, description: String) : Subcommand
 
     abstract fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: DiscordCommand)
 
+    open fun initCommandOptions() {}
+
     open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return true
     }
