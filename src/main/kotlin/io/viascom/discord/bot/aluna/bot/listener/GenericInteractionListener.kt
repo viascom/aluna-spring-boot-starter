@@ -21,10 +21,10 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
-import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
+import io.viascom.discord.bot.aluna.util.NanoId
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
@@ -46,7 +46,7 @@ open class GenericInteractionListener(
             if (commandId != null) {
                 discordBot.commands[commandId]?.let { command ->
                     discordBot.interactionExecutor.execute {
-                        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, NanoIdUtils.randomNanoId())
+                        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, NanoId.generate())
                         context.getBean(command).onAutoCompleteEventCall(event.focusedOption.name, event)
                     }
                 }
@@ -58,7 +58,7 @@ open class GenericInteractionListener(
                 entry.key.first == event.commandId && (entry.key.second == null || entry.key.second == event.focusedOption.name)
             }
             if (handler != null) {
-                DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, NanoIdUtils.randomNanoId())
+                DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, NanoId.generate())
                 context.getBean(handler.value).onRequestCall(event)
             }
         }

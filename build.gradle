@@ -55,7 +55,6 @@ ext {
     jacksonSpringBootVersion = "2.7.1"
     jacksonVersion = "2.13.3"
     graalvmJsVersion = "22.1.0.1"
-    jnanoidVersion = "2.0.0"
     nashornCoreVersion = "15.4"
     ddTraceVersion = "0.103.0"
     emojiJavaVersion = "5.1.1"
@@ -93,9 +92,6 @@ dependencies {
 
     //====== Logging ======
     compileOnly "com.datadoghq:dd-trace-api:$ddTraceVersion"
-
-    //====== NanoId ======
-    api "com.aventrix.jnanoid:jnanoid:$jnanoidVersion"
 
     //====== Emoji Helper ======
     api("com.vdurmont:emoji-java:$emojiJavaVersion") {

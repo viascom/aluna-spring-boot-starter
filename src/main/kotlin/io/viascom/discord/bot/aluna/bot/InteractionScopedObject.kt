@@ -26,7 +26,7 @@ import java.time.Duration
 interface InteractionScopedObject {
     /**
      * Unique id for this object.
-     * It's recommended to use NanoIdUtils.randomNanoId()
+     * It's recommended to use NanoId.generate()
      */
     var uniqueId: String
 

@@ -21,12 +21,12 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
-import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
+import io.viascom.discord.bot.aluna.util.NanoId
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.events.Event
 import net.dv8tion.jda.api.events.GatewayPingEvent
@@ -276,7 +276,7 @@ class EventWaiter(
      */
     @JvmOverloads
     fun <T : GenericComponentInteractionCreateEvent> waitForInteraction(
-        id: String = NanoIdUtils.randomNanoId(), type: Class<T>, message: Message, action: Consumer<T>, condition: Predicate<T>? = null,
+        id: String = NanoId.generate(), type: Class<T>, message: Message, action: Consumer<T>, condition: Predicate<T>? = null,
         timeout: Duration? = Duration.ofMinutes(14), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
     ) {
         waitForEvent(
@@ -304,7 +304,7 @@ class EventWaiter(
      */
     @JvmOverloads
     fun <T : ModalInteractionEvent> waitForInteraction(
-        id: String = NanoIdUtils.randomNanoId(), type: Class<T>, action: Consumer<T>, condition: Predicate<T>? = null,
+        id: String = NanoId.generate(), type: Class<T>, action: Consumer<T>, condition: Predicate<T>? = null,
         timeout: Duration? = Duration.ofMinutes(14), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
     ) {
         waitForEvent(
@@ -333,7 +333,7 @@ class EventWaiter(
      */
     @JvmOverloads
     fun <T : GenericComponentInteractionCreateEvent> waitForInteraction(
-        id: String = NanoIdUtils.randomNanoId(), type: Class<T>, hook: InteractionHook, action: Consumer<T>, condition: Predicate<T>? = null,
+        id: String = NanoId.generate(), type: Class<T>, hook: InteractionHook, action: Consumer<T>, condition: Predicate<T>? = null,
         timeout: Duration? = Duration.ofMinutes(14), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
     ) {
         waitForEvent(
@@ -361,7 +361,7 @@ class EventWaiter(
      */
     @JvmOverloads
     fun <T : Event> waitForEvent(
-        id: String = NanoIdUtils.randomNanoId(), type: Class<T>, action: Consumer<T>, condition: Predicate<T>,
+        id: String = NanoId.generate(), type: Class<T>, action: Consumer<T>, condition: Predicate<T>,
         timeout: Duration? = Duration.ofMinutes(14), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
     ) {
         Checks.check(!isShutdown(), "Attempted to register a WaitingEvent while the EventWaiter's thread pool was already shut down!")
