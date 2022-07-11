@@ -36,7 +36,8 @@ import org.springframework.stereotype.Service
 @ConditionalOnJdaEnabled
 @ConditionalOnExpression("\${aluna.debug.enable-debug-configuration-log:true} && \${aluna.production-mode:false} == false")
 class DebugInfoPrinter(
-    private val interactions: List<InteractionScopedObject>,
+    private val commands: List<DiscordCommand>,
+    private val contextMenus: List<DiscordContextMenu>,
     private val alunaProperties: AlunaProperties,
     private val ownerIdProvider: OwnerIdProvider,
     private val moderatorIdProvider: ModeratorIdProvider
@@ -58,7 +59,7 @@ class DebugInfoPrinter(
                 
                 ###############################################
                                 Configuration
-                -> interaction:   ${interactions.size}
+                -> interaction:   ${commands.size + contextMenus.size}
                 -> ownerIds:      ${ownerIdProvider.getOwnerIds().joinToString { it.toString() }.ifBlank { "n/a" }}
                 -> modIds:        ${moderatorIdProvider.getModeratorIds().joinToString { it.toString() }.ifBlank { "n/a" }}
                 -> applicationId: ${alunaProperties.discord.applicationId ?: "n/a"}

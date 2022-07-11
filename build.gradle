@@ -10,7 +10,7 @@ plugins {
 }
 
 group "io.viascom.discord.bot"
-version "0.0.23_5.0.0-alpha.13"
+version "0.0.24_5.0.0-alpha.13"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -50,8 +50,6 @@ repositories {
 ext {
     jdaVersion = "5.0.0-alpha.13"
     retrofitVersion = "2.9.0"
-    gsonVersion = "2.9.0"
-    gsonJavatimeVersion = "1.1.1"
     jacksonSpringBootVersion = "2.7.1"
     jacksonVersion = "2.13.3"
     graalvmJsVersion = "22.1.0.1"
@@ -81,10 +79,6 @@ dependencies {
 
     //====== JDA ======
     api "net.dv8tion:JDA:$jdaVersion"
-
-    //====== Gson ======
-    compileOnly "com.google.code.gson:gson:$gsonVersion"
-    compileOnly "com.fatboyindustrial.gson-javatime-serialisers:gson-javatime-serialisers:$gsonJavatimeVersion"
 
     //====== Jackson ======
     implementation "org.springframework.boot:spring-boot-starter-json:$jacksonSpringBootVersion"

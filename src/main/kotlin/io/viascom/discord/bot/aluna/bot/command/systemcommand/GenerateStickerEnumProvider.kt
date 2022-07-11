@@ -102,7 +102,7 @@ class GenerateStickerEnumProvider(
         rows.add(ActionRow.of(row1))
 
         val row2 = arrayListOf<ItemComponent>()
-        row2.add(createDangerButton("cancel-remove", "Cancel"))
+        row2.add(dangerButton("cancel-remove", "Cancel"))
         rows.add(ActionRow.of(row2))
 
         return rows
@@ -112,8 +112,8 @@ class GenerateStickerEnumProvider(
         val rows = arrayListOf<ActionRow>()
 
         val row1 = arrayListOf<ItemComponent>()
-        row1.add(createPrimaryButton("add", "Add Server"))
-        row1.add(createDangerButton("remove", "Remove Server", disabled = selectedServerIds.isEmpty()))
+        row1.add(primaryButton("add", "Add Server"))
+        row1.add(dangerButton("remove", "Remove Server", disabled = selectedServerIds.isEmpty()))
         rows.add(ActionRow.of(row1))
 
         val row2 = arrayListOf<ItemComponent>()
@@ -127,8 +127,8 @@ class GenerateStickerEnumProvider(
         rows.add(ActionRow.of(row2))
 
         val row3 = arrayListOf<ItemComponent>()
-        row3.add(createDangerButton("cancel", "Cancel"))
-        row3.add(createSuccessButton("generate", "Generate File"))
+        row3.add(dangerButton("cancel", "Cancel"))
+        row3.add(successButton("generate", "Generate File"))
         rows.add(ActionRow.of(row3))
 
         return rows

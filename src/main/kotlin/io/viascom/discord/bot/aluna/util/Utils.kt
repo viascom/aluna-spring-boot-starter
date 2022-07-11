@@ -235,7 +235,7 @@ fun Modal.Builder.addTextField(
     max: Int = -1,
     value: String? = null,
     required: Boolean = true
-): Modal.Builder = this.addActionRow(createTextInput(id, label, style, placeholder, min, max, value, required))
+): Modal.Builder = this.addActionRow(textInput(id, label, style, placeholder, min, max, value, required))
 
 @JvmOverloads
 fun ModalInteraction.getValueAsString(name: String, default: String? = null): String? = this.getValue(name)?.asString ?: default
@@ -268,7 +268,7 @@ fun EmbedBuilder.setColor(red: Int, green: Int, blue: Int): EmbedBuilder = this.
 fun EmbedBuilder.setColor(hexColor: String): EmbedBuilder = this.setColor(Color.getColor(hexColor))
 
 @JvmOverloads
-fun createSelectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {
+fun selectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {
     var option = SelectOption.of(label, value)
     description?.let { option = option.withDescription(description) }
     emoji?.let { option = option.withEmoji(emoji) }
@@ -284,10 +284,10 @@ fun SelectMenu.Builder.addOption(
     description: String? = null,
     emoji: Emoji? = null,
     isDefault: Boolean? = null
-): SelectMenu.Builder = this.addOptions(createSelectOption(label, value, description, emoji, isDefault))
+): SelectMenu.Builder = this.addOptions(selectOption(label, value, description, emoji, isDefault))
 
 @JvmOverloads
-fun createTextInput(
+fun textInput(
     id: String,
     label: String,
     style: TextInputStyle = TextInputStyle.SHORT,
@@ -318,21 +318,23 @@ fun createTextInput(
 }
 
 @JvmOverloads
-fun createPrimaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+fun primaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.PRIMARY, id, label, emoji).withDisabled(disabled)
 
 @JvmOverloads
-fun createSecondaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+fun secondaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.SECONDARY, id, label, emoji).withDisabled(disabled)
 
 @JvmOverloads
-fun createSuccessButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+fun successButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.SUCCESS, id, label, emoji).withDisabled(disabled)
 
 @JvmOverloads
-fun createDangerButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+fun dangerButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.DANGER, id, label, emoji).withDisabled(disabled)
 
 @JvmOverloads
-fun createLinkButton(url: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+fun linkButton(url: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.LINK, url, label, emoji).withDisabled(disabled)
+
+fun String.toEmoji() = Emoji.fromFormatted(this)

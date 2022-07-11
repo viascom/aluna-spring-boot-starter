@@ -26,10 +26,10 @@ import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
-import io.viascom.discord.bot.aluna.util.createDangerButton
-import io.viascom.discord.bot.aluna.util.createSuccessButton
+import io.viascom.discord.bot.aluna.util.dangerButton
 import io.viascom.discord.bot.aluna.util.getTypedOption
 import io.viascom.discord.bot.aluna.util.removeActionRows
+import io.viascom.discord.bot.aluna.util.successButton
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
@@ -82,8 +82,8 @@ class LeaveServerProvider(
             .setDescription("❓ Do you really want that this Bot leaves the server **${server.name}**?")
         lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(
             ActionRow.of(
-                createDangerButton("yes", "Yes"),
-                createSuccessButton("no", "No")
+                dangerButton("yes", "Yes"),
+                successButton("no", "No")
             )
         ).queueAndRegisterInteraction(lastHook, command, duration = Duration.ofMinutes(2))
     }
