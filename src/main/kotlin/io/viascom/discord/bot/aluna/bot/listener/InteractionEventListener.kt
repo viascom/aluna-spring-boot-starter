@@ -21,12 +21,12 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
-import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.DiscordMessageContextMenu
 import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenu
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
+import io.viascom.discord.bot.aluna.util.NanoId
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
@@ -43,7 +43,7 @@ open class InteractionEventListener(
 
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
         discordBot.asyncExecutor.execute {
-            DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.INTERACTION, NanoIdUtils.randomNanoId())
+            DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.INTERACTION, NanoId.generate())
             discordBot.commands[event.commandId]?.let { interaction -> discordBot.interactionExecutor.execute { context.getBean(interaction).run(event) } }
         }
     }

@@ -21,11 +21,11 @@
 
 package io.viascom.discord.bot.aluna.configuration.scope
 
-import com.aventrix.jnanoid.jnanoid.NanoIdUtils
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
+import io.viascom.discord.bot.aluna.util.NanoId
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -120,7 +120,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
                 return data.value.obj
             } else {
                 //No bean exists, so we create one
-                DiscordContext.discordState!!.uniqueId = DiscordContext.discordState!!.uniqueId ?: NanoIdUtils.randomNanoId()
+                DiscordContext.discordState!!.uniqueId = DiscordContext.discordState!!.uniqueId ?: NanoId.generate()
                 val newObj = objectFactory.getObject() as InteractionScopedObject
                 newObj.uniqueId = DiscordContext.discordState!!.uniqueId!!
                 logger.debug("[$name]\t- ${DiscordContext.discordState} -> new instance (for auto-complete)")
@@ -190,7 +190,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
             }
 
             //No bean exists, so we create one
-            DiscordContext.discordState!!.uniqueId = DiscordContext.discordState!!.uniqueId ?: NanoIdUtils.randomNanoId()
+            DiscordContext.discordState!!.uniqueId = DiscordContext.discordState!!.uniqueId ?: NanoId.generate()
             logger.debug("[$name]\t- ${DiscordContext.discordState} -> new instance")
             val newObj = objectFactory.getObject() as InteractionScopedObject
             newObj.uniqueId = DiscordContext.discordState!!.uniqueId!!
