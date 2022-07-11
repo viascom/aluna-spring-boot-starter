@@ -506,31 +506,27 @@ abstract class DiscordCommand(
             guildLocale = event.guildLocale
         }
 
+        //Check if this is an owner command
         if (isOwnerCommand && author.idLong !in ownerIdProvider.getOwnerIds()) {
             onOwnerCommandNotAllowedByUser(event)
             return
         }
 
-        //checkForBlockedIds(event)
-        //checkIfLocalDevelopment(event)
-        //checkCommandStatus(event)
-
+        //Check use scope of this command
         val wrongUseScope = discordInteractionConditions.checkUseScope(this, subCommandUseScope, event)
         if (wrongUseScope.wrongUseScope) {
             onWrongUseScope(event, wrongUseScope)
             return
         }
 
-        //executeCategoryChecks(event)
-
-        //checkChannelTopics(event)
-
+        //Check needed user permissions for this command
         val missingUserPermissions = discordInteractionConditions.checkForNeededUserPermissions(this, userPermissions, event)
         if (missingUserPermissions.hasMissingPermissions) {
             onMissingUserPermission(event, missingUserPermissions)
             return
         }
 
+        //Check needed bot permissions for this command
         val missingBotPermissions = discordInteractionConditions.checkForNeededBotPermissions(this, botPermissions, event)
         if (missingBotPermissions.hasMissingPermissions) {
             onMissingBotPermission(event, missingBotPermissions)
@@ -539,7 +535,7 @@ abstract class DiscordCommand(
 
         //checkForCommandCooldown(event)
 
-        //checkAdditionalRequirements(event)
+        //Check additional requirements for this command
         val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
         if (additionalRequirements.failed) {
             onFailedAdditionalRequirements(event, additionalRequirements)
