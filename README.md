@@ -26,7 +26,25 @@
 | Kotlin      |       <img src="https://img.shields.io/badge/1.6.21-brightgreen.svg" alt="1.6.21">       |
 | emoji-java  |        <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1">        |
 
-## Quick Start
+## Download
+
+Gradle:
+```gradle
+dependencies {
+  implementation 'io.viascom.discord.bot:aluna-spring-boot-starter:0.0.24_5.0.0-alpha.13'
+}
+```
+
+Maven:
+```xml
+<dependency>
+  <groupId>io.viascom.discord.bot</groupId>
+  <artifactId>aluna-spring-boot-starter</artifactId>
+  <version>0.0.24_5.0.0-alpha.13</version>
+</dependency>
+```
+
+## Getting Started
 
 ### Create a command
 
@@ -45,7 +63,7 @@ class PingCommand : DiscordCommand(
 ### React to a Button
 
 ```kotlin
-event.reply("Pong\nYour locale is:${this.userLocale}").addActionRows(ActionRow.of(createPrimaryButton("hi", "Hi")))
+event.reply("Pong\nYour locale is:${this.userLocale}").addActionRows(ActionRow.of(primaryButton("hi", "Hi")))
     .queueAndRegisterInteraction(hook, this)
 
 
@@ -59,7 +77,9 @@ override fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: 
 }
 ```
 
-### Properties
+## Configuration Properties
+
+### Basic configuration example
 
 ```yaml
 aluna:
@@ -72,6 +92,22 @@ logging:
     io.viascom.discord.bot.aluna.event.EventPublisher: INFO #Set to DEBUG to show all published events
     io.viascom.discord.bot.aluna.bot.handler.AlunaLocalizationFunction: INFO #Set to DEBUG to show translation keys for interactions
 ```
+
+## Versioning
+
+This project is developed by [Viascom](https://github.com/viascom) using the [Semantic Versioning specification](https://semver.org). For the versions available, see the [releases on this repository](https://github.com/viascom/aluna-spring-boot-starter/releases).
+
+## Authors
+
+* **Patrick Bösch** - *Initial work* - [itsmefox](https://github.com/itsmefox)
+* **Nikola Stanković** - *Initial work* - [botscripter](https://github.com/botscripter)
+
+See also the list of [contributors](https://github.com/viascom/aluna-spring-boot-starter/contributors) who participated in this project. 💕
+
+## Contributing
+See [CONTRIBUTING.md](CONTRIBUTING.md) file.
+
+If you like aluna-spring-boot-starter you can show support by starring ⭐ this repository.
 
 # Licence
 [Apache License, Version 2.0, January 2004](http://www.apache.org/licenses/LICENSE-2.0)
