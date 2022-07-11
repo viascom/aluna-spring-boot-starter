@@ -38,6 +38,7 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
+import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
@@ -280,44 +281,44 @@ class AdminSearchDataProvider(
 
         val user = checkForUser(arg)
         if (user != null) {
-            event.replyChoices(net.dv8tion.jda.api.interactions.commands.Command.Choice(user.asTag + " (User)", arg)).queue()
+            event.replyChoices(Command.Choice(user.asTag + " (User)", arg)).queue()
             return
         }
 
         val server = checkForServer(arg)
         if (server != null) {
-            event.replyChoices(net.dv8tion.jda.api.interactions.commands.Command.Choice(server.name + " (Server)", arg)).queue()
+            event.replyChoices(Command.Choice(server.name + " (Server)", arg)).queue()
             return
         }
 
         val role = checkForRole(arg)
         if (role != null) {
-            event.replyChoices(net.dv8tion.jda.api.interactions.commands.Command.Choice(role.name + " (Role)", arg)).queue()
+            event.replyChoices(Command.Choice(role.name + " (Role)", arg)).queue()
             return
         }
 
         val channel = checkForChannel(arg)
         if (channel != null) {
-            event.replyChoices(net.dv8tion.jda.api.interactions.commands.Command.Choice(channel.name + " (Channel)", arg)).queue()
+            event.replyChoices(Command.Choice(channel.name + " (Channel)", arg)).queue()
             return
         }
 
         val emojis = checkForEmoji(arg)
         if (emojis != null && emojis.isNotEmpty()) {
-            event.replyChoices(emojis.map { net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name + " (Emote) (${it.guild.name})", it.id) })
+            event.replyChoices(emojis.map { Command.Choice(it.name + " (Emote) (${it.guild.name})", it.id) })
                 .queue()
             return
         }
 
         val possibleServers = shardManager.guilds.filter { it.name.lowercase().contains(arg.lowercase()) }.take(10).map {
-            net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name, it.id)
+            Command.Choice(it.name, it.id)
         }
         val possibleUsers = shardManager.userCache.filter { it.asTag.lowercase().contains(arg.lowercase()) }.take(15).map {
-            net.dv8tion.jda.api.interactions.commands.Command.Choice(it.asTag, it.id)
+            Command.Choice(it.asTag, it.id)
         }
 
         if (possibleServers.isNotEmpty() || possibleUsers.isNotEmpty()) {
-            val list = arrayListOf<net.dv8tion.jda.api.interactions.commands.Command.Choice>()
+            val list = arrayListOf<Command.Choice>()
             list.addAll(possibleServers)
             list.addAll(possibleUsers)
             event.replyChoices(list).queue()
