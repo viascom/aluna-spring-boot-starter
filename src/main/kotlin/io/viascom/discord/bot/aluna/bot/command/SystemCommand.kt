@@ -35,6 +35,7 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.interactions.commands.Command
 
 @Interaction
 @ConditionalOnJdaEnabled
@@ -151,7 +152,7 @@ class SystemCommand(
                 }
                     .filter { it.name.lowercase().contains(input.lowercase()) || it.id.lowercase().contains(input.lowercase()) }
             }.take(25).sortedBy { it.name }.map {
-                net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name, it.id)
+                Command.Choice(it.name, it.id)
             }
 
             event.replyChoices(options).queue()

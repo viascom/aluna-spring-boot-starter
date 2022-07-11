@@ -36,6 +36,7 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
+import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.sharding.ShardManager
 import java.awt.Color
@@ -109,7 +110,7 @@ class LeaveServerProvider(
     override fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: SystemCommand) {
         val input = event.getTypedOption(command.argsOption, "")!!
         val options = shardManager.guilds.filter { it.name.lowercase().contains(input.lowercase()) }.take(25).map {
-            net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name, it.id)
+            Command.Choice(it.name, it.id)
         }
 
         event.replyChoices(options).queue()

@@ -35,6 +35,7 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
+import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.text.TextInput
@@ -129,7 +130,7 @@ class PurgeMessagesProvider(
         val possibleChannel = shardManager.getChannelById(GuildMessageChannel::class.java, input)
 
         if (possibleChannel != null) {
-            event.replyChoices(net.dv8tion.jda.api.interactions.commands.Command.Choice(possibleChannel.name, possibleChannel.id)).queue()
+            event.replyChoices(Command.Choice(possibleChannel.name, possibleChannel.id)).queue()
         } else {
             event.replyChoices().queue()
         }
