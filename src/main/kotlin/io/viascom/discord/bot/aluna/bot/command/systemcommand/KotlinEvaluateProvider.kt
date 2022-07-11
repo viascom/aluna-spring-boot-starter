@@ -27,14 +27,12 @@ import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.scriptengine.KotlinScriptService
-import io.viascom.discord.bot.aluna.util.createTextInput
+import io.viascom.discord.bot.aluna.util.addTextField
 import io.viascom.discord.bot.aluna.util.getValueAsString
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.Modal
-import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import kotlin.math.min
@@ -57,10 +55,9 @@ class KotlinEvaluateProvider(
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
         //Show modal
-        val script: TextInput = createTextInput("script", "Kotlin Script", TextInputStyle.PARAGRAPH)
 
         val modal: Modal = Modal.create("script", "Evaluate Script")
-            .addActionRows(ActionRow.of(script))
+            .addTextField("script", "Kotlin Script", TextInputStyle.PARAGRAPH)
             .build()
 
         event.replyModal(modal).queueAndRegisterInteraction(command)
