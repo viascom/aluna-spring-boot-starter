@@ -42,35 +42,23 @@ open class InteractionEventListener(
 ) : ListenerAdapter() {
 
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
-        discordBot.asyncExecutor.execute {
-            DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.INTERACTION, NanoId.generate())
-            discordBot.commands[event.commandId]?.let { interaction -> discordBot.interactionExecutor.execute { context.getBean(interaction).run(event) } }
+        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.INTERACTION, NanoId.generate())
+        discordBot.commands[event.commandId]?.let { interaction ->
+            context.getBean(interaction).run(event)
         }
     }
 
     override fun onUserContextInteraction(event: UserContextInteractionEvent) {
-        discordBot.asyncExecutor.execute {
-            DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.INTERACTION)
-            discordBot.contextMenus[event.commandId]?.let { interaction ->
-                discordBot.interactionExecutor.execute {
-                    (context.getBean(interaction) as DiscordUserContextMenu).run(
-                        event
-                    )
-                }
-            }
+        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.INTERACTION)
+        discordBot.contextMenus[event.commandId]?.let { interaction ->
+            (context.getBean(interaction) as DiscordUserContextMenu).run(event)
         }
     }
 
     override fun onMessageContextInteraction(event: MessageContextInteractionEvent) {
-        discordBot.asyncExecutor.execute {
-            DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.INTERACTION)
-            discordBot.contextMenus[event.commandId]?.let { interaction ->
-                discordBot.interactionExecutor.execute {
-                    (context.getBean(interaction) as DiscordMessageContextMenu).run(
-                        event
-                    )
-                }
-            }
+        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.INTERACTION)
+        discordBot.contextMenus[event.commandId]?.let { interaction ->
+            (context.getBean(interaction) as DiscordMessageContextMenu).run(event)
         }
     }
 }

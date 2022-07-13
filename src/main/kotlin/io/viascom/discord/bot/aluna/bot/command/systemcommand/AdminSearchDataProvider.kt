@@ -270,7 +270,7 @@ class AdminSearchDataProvider(
         val menu = SelectMenu.create("menu:type")
             .setRequiredRange(1, 1)
 
-        adminSearchPageDataProviders.filter { it.supportedTypes.contains(type) }.sortedBy { it.pageName }.forEach {
+        adminSearchPageDataProviders.sortedBy { it.pageName }.filter { it.supportedTypes.contains(type) }.sortedBy { it.pageName }.forEach {
             menu.addOptions(SelectOption.of(it.pageName, it.pageId).withDefault(it.pageId == page))
         }
         return ActionRow.of(menu.build())

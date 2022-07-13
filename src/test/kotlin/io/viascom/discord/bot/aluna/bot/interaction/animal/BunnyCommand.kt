@@ -51,6 +51,7 @@ class BunnyCommand(
                 override fun onResponse(call: Call, response: Response) {
                     //Parse json and extract image property
                     val image = objectMapper.readValue(response.body?.string() ?: "{}", BunnyImage::class.java).media.poster
+                    response.close()
 
                     //Create a new embed
                     val builder = EmbedBuilder()

@@ -21,6 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.shardmanager
 
+import io.viascom.discord.bot.aluna.bot.event.CoroutineEventManager
 import io.viascom.discord.bot.aluna.bot.listener.*
 import io.viascom.discord.bot.aluna.property.AlunaDiscordProperties
 import io.viascom.discord.bot.aluna.property.AlunaProperties
@@ -33,6 +34,7 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy
 import net.dv8tion.jda.api.utils.cache.CacheFlag
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import kotlin.time.Duration
 
 class DefaultShardManagerBuilder(
     private val shardReadyEvent: ShardReadyEvent,
@@ -52,6 +54,7 @@ class DefaultShardManagerBuilder(
             .addEventListeners(genericInteractionListener)
             .addEventListeners(shardReadyEvent)
             .addEventListeners(interactionEventListener)
+            .setEventManagerProvider { CoroutineEventManager(timeout = Duration.INFINITE) }
             .setStatus(OnlineStatus.DO_NOT_DISTURB)
             .setActivity(Activity.playing("loading..."))
             .setBulkDeleteSplittingEnabled(true)

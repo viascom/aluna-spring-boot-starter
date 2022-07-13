@@ -21,11 +21,17 @@
 
 package io.viascom.discord.bot.aluna.bot
 
+import io.viascom.discord.bot.aluna.bot.event.CoroutineEventManager
+import io.viascom.discord.bot.aluna.bot.event.getDefaultJDAScope
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.model.EventRegisterType
 import io.viascom.discord.bot.aluna.model.ObserveInteraction
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.requests.RestAction
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
@@ -83,18 +89,6 @@ open class DiscordBot(
             true
         )
 
-    @get:JvmSynthetic
-    internal val interactionExecutor =
-        AlunaThreadPool.getDynamicThreadPool(
-            alunaProperties.thread.interactionExecutorCount,
-            alunaProperties.thread.interactionExecutorTtl,
-            "Aluna-Interaction-%d"
-        )
-
-    @get:JvmSynthetic
-    internal val asyncExecutor =
-        AlunaThreadPool.getDynamicThreadPool(alunaProperties.thread.asyncExecutorCount, alunaProperties.thread.asyncExecutorTtl, "Aluna-Async-%d")
-
     @JvmOverloads
     fun registerMessageForButtonEvents(
         messageId: String,
@@ -105,32 +99,36 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        logger.debug("Register message $messageId for button events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
-        if (!additionalData.containsKey("message.id")) {
-            additionalData["message.id"] = messageId
-        }
-
-        val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-            try {
-                context.getBean(interaction::class.java).onButtonInteractionTimeout(additionalData)
-            } catch (e: Exception) {
-                logger.debug("Could not run onButtonInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
+        runBlocking(getDefaultJDAScope().coroutineContext) {
+            logger.debug("Register message $messageId for button events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
+            if (!additionalData.containsKey("message.id")) {
+                additionalData["message.id"] = messageId
             }
-            removeMessageForButtonEvents(messageId)
-        }, duration.seconds, TimeUnit.SECONDS)
 
-        messagesToObserveButton[messageId] =
-            ObserveInteraction(
-                interaction::class,
-                interaction.uniqueId,
-                LocalDateTime.now(),
-                duration,
-                persist,
-                additionalData,
-                authorIds,
-                interactionUserOnly,
-                timeoutTask
-            )
+            val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
+                runBlocking {
+                    try {
+                        context.getBean(interaction::class.java).onButtonInteractionTimeout(additionalData)
+                    } catch (e: Exception) {
+                        logger.debug("Could not run onButtonInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
+                    }
+                    removeMessageForButtonEvents(messageId)
+                }
+            }, duration.seconds, TimeUnit.SECONDS)
+
+            messagesToObserveButton[messageId] =
+                ObserveInteraction(
+                    interaction::class,
+                    interaction.uniqueId,
+                    LocalDateTime.now(),
+                    duration,
+                    persist,
+                    additionalData,
+                    authorIds,
+                    interactionUserOnly,
+                    timeoutTask
+                )
+        }
     }
 
     @JvmOverloads
@@ -144,20 +142,65 @@ open class DiscordBot(
         interactionUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal().queue { message ->
-            logger.debug("Register message ${message.id} for button events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
+            runBlocking(getDefaultJDAScope().coroutineContext) {
+                logger.debug("Register message ${message.id} for button events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
+                if (!additionalData.containsKey("message.id")) {
+                    additionalData["message.id"] = message.id
+                }
+                val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
+                    runBlocking {
+                        try {
+                            context.getBean(interaction::class.java).onButtonInteractionTimeout(additionalData)
+                        } catch (e: Exception) {
+                            logger.debug("Could not run onButtonInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
+                        }
+                        removeMessageForButtonEvents(message.id)
+                    }
+                }, duration.seconds, TimeUnit.SECONDS)
+
+                messagesToObserveButton[message.id] =
+                    ObserveInteraction(
+                        interaction::class,
+                        interaction.uniqueId,
+                        LocalDateTime.now(),
+                        duration,
+                        persist,
+                        additionalData,
+                        authorIds,
+                        interactionUserOnly,
+                        timeoutTask
+                    )
+            }
+        }
+    }
+
+    @JvmOverloads
+    fun registerMessageForSelectEvents(
+        messageId: String,
+        interaction: DiscordInteractionHandler,
+        persist: Boolean = false,
+        duration: Duration = Duration.ofMinutes(14),
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        authorIds: ArrayList<String>? = null,
+        interactionUserOnly: Boolean = false
+    ) {
+        runBlocking(getDefaultJDAScope().coroutineContext) {
+            logger.debug("Register message $messageId for select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
             if (!additionalData.containsKey("message.id")) {
-                additionalData["message.id"] = message.id
+                additionalData["message.id"] = messageId
             }
             val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-                try {
-                    context.getBean(interaction::class.java).onButtonInteractionTimeout(additionalData)
-                } catch (e: Exception) {
-                    logger.debug("Could not run onButtonInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
+                runBlocking {
+                    try {
+                        context.getBean(interaction::class.java).onSelectMenuInteractionTimeout(additionalData)
+                    } catch (e: Exception) {
+                        logger.debug("Could not run onSelectMenuInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
+                    }
+                    removeMessageForSelectEvents(messageId)
                 }
-                removeMessageForButtonEvents(message.id)
             }, duration.seconds, TimeUnit.SECONDS)
 
-            messagesToObserveButton[message.id] =
+            messagesToObserveSelect[messageId] =
                 ObserveInteraction(
                     interaction::class,
                     interaction.uniqueId,
@@ -174,43 +217,6 @@ open class DiscordBot(
 
     @JvmOverloads
     fun registerMessageForSelectEvents(
-        messageId: String,
-        interaction: DiscordInteractionHandler,
-        persist: Boolean = false,
-        duration: Duration = Duration.ofMinutes(14),
-        additionalData: HashMap<String, Any?> = hashMapOf(),
-        authorIds: ArrayList<String>? = null,
-        interactionUserOnly: Boolean = false
-    ) {
-        logger.debug("Register message $messageId for select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
-        if (!additionalData.containsKey("message.id")) {
-            additionalData["message.id"] = messageId
-        }
-        val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-            try {
-                context.getBean(interaction::class.java).onSelectMenuInteractionTimeout(additionalData)
-            } catch (e: Exception) {
-                logger.debug("Could not run onSelectMenuInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
-            }
-            removeMessageForSelectEvents(messageId)
-        }, duration.seconds, TimeUnit.SECONDS)
-
-        messagesToObserveSelect[messageId] =
-            ObserveInteraction(
-                interaction::class,
-                interaction.uniqueId,
-                LocalDateTime.now(),
-                duration,
-                persist,
-                additionalData,
-                authorIds,
-                interactionUserOnly,
-                timeoutTask
-            )
-    }
-
-    @JvmOverloads
-    fun registerMessageForSelectEvents(
         hook: InteractionHook,
         interaction: DiscordInteractionHandler,
         persist: Boolean = false,
@@ -220,31 +226,35 @@ open class DiscordBot(
         interactionUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal().queue { message ->
-            logger.debug("Register message ${message.id} for select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
-            if (!additionalData.containsKey("message.id")) {
-                additionalData["message.id"] = message.id
-            }
-            val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-                try {
-                    context.getBean(interaction::class.java).onSelectMenuInteractionTimeout(additionalData)
-                } catch (e: Exception) {
-                    logger.debug("Could not run onSelectMenuInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
+            runBlocking(getDefaultJDAScope().coroutineContext) {
+                logger.debug("Register message ${message.id} for select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
+                if (!additionalData.containsKey("message.id")) {
+                    additionalData["message.id"] = message.id
                 }
-                removeMessageForSelectEvents(message.id)
-            }, duration.seconds, TimeUnit.SECONDS)
+                val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
+                    runBlocking {
+                        try {
+                            context.getBean(interaction::class.java).onSelectMenuInteractionTimeout(additionalData)
+                        } catch (e: Exception) {
+                            logger.debug("Could not run onSelectMenuInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
+                        }
+                        removeMessageForSelectEvents(message.id)
+                    }
+                }, duration.seconds, TimeUnit.SECONDS)
 
-            messagesToObserveSelect[message.id] =
-                ObserveInteraction(
-                    interaction::class,
-                    interaction.uniqueId,
-                    LocalDateTime.now(),
-                    duration,
-                    persist,
-                    additionalData,
-                    authorIds,
-                    interactionUserOnly,
-                    timeoutTask
-                )
+                messagesToObserveSelect[message.id] =
+                    ObserveInteraction(
+                        interaction::class,
+                        interaction.uniqueId,
+                        LocalDateTime.now(),
+                        duration,
+                        persist,
+                        additionalData,
+                        authorIds,
+                        interactionUserOnly,
+                        timeoutTask
+                    )
+            }
         }
     }
 
@@ -256,28 +266,36 @@ open class DiscordBot(
         duration: Duration = Duration.ofMinutes(14),
         additionalData: HashMap<String, Any?> = hashMapOf()
     ) {
-        logger.debug("Register user $authorId for modal events to interaction '${getInteractionName(interaction)}'")
-        val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-            try {
-                context.getBean(interaction::class.java).onModalInteractionTimeout(additionalData)
-            } catch (e: Exception) {
-                logger.debug("Could not run onModalInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
-            }
-            removeMessageForModalEvents(authorId)
-        }, duration.seconds, TimeUnit.SECONDS)
+        runBlocking(getDefaultJDAScope().coroutineContext) {
+            logger.debug("Register user $authorId for modal events to interaction '${getInteractionName(interaction)}'")
+            val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
+                runBlocking(getDefaultJDAScope().coroutineContext) {
+                    launch {
+                        try {
+                            context.getBean(interaction::class.java).onModalInteractionTimeout(additionalData)
+                        } catch (e: Exception) {
+                            logger.debug("Could not run onModalInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
+                        }
+                    }
+                    launch {
+                        removeMessageForModalEvents(authorId)
+                    }
+                }
+            }, duration.seconds, TimeUnit.SECONDS)
 
-        messagesToObserveModal[authorId] =
-            ObserveInteraction(
-                interaction::class,
-                interaction.uniqueId,
-                LocalDateTime.now(),
-                duration,
-                persist,
-                additionalData,
-                arrayListOf(authorId),
-                true,
-                timeoutTask
-            )
+            messagesToObserveModal[authorId] =
+                ObserveInteraction(
+                    interaction::class,
+                    interaction.uniqueId,
+                    LocalDateTime.now(),
+                    duration,
+                    persist,
+                    additionalData,
+                    arrayListOf(authorId),
+                    true,
+                    timeoutTask
+                )
+        }
     }
 
     fun removeMessageForButtonEvents(messageId: String) = messagesToObserveButton.remove(messageId)
@@ -299,16 +317,25 @@ open class DiscordBot(
         success: Consumer<in T>? = null
     ) {
         action.queue({
-            if (type.contains(EventRegisterType.BUTTON)) {
-                this.registerMessageForButtonEvents(hook, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+            val discordBot = this
+            runBlocking(getDefaultJDAScope().coroutineContext) {
+                launch {
+                    if (type.contains(EventRegisterType.BUTTON)) {
+                        discordBot.registerMessageForButtonEvents(hook, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                    }
+                }
+                launch {
+                    if (type.contains(EventRegisterType.SELECT)) {
+                        discordBot.registerMessageForSelectEvents(hook, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                    }
+                }
+                launch {
+                    if (type.contains(EventRegisterType.MODAL)) {
+                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, persist, duration, additionalData)
+                    }
+                }
+                success?.accept(it)
             }
-            if (type.contains(EventRegisterType.SELECT)) {
-                this.registerMessageForSelectEvents(hook, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
-            }
-            if (type.contains(EventRegisterType.MODAL)) {
-                this.registerMessageForModalEvents(interaction.author.id, interaction, persist, duration, additionalData)
-            }
-            success?.accept(it)
         }, {
             failure?.accept(it)
         })
@@ -326,12 +353,21 @@ open class DiscordBot(
         success: Consumer<in Void>? = null
     ) {
         action.queue({
-            if (type.contains(EventRegisterType.MODAL)) {
-                this.registerMessageForModalEvents(interaction.author.id, interaction, persist, duration, additionalData)
+            val discordBot = this
+            runBlocking(getDefaultJDAScope().coroutineContext) {
+                launch {
+                    if (type.contains(EventRegisterType.MODAL)) {
+                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, persist, duration, additionalData)
+                    }
+                }
+                launch {
+                    success?.accept(it)
+                }
             }
-            success?.accept(it)
         }, {
-            failure?.accept(it)
+            runBlocking(getDefaultJDAScope().coroutineContext) {
+                failure?.accept(it)
+            }
         })
     }
 
@@ -349,18 +385,33 @@ open class DiscordBot(
         success: Consumer<in InteractionHook>? = null
     ) {
         action.queue({
-            if (type.contains(EventRegisterType.BUTTON)) {
-                this.registerMessageForButtonEvents(it, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+            val discordBot = this
+            runBlocking(getDefaultJDAScope().coroutineContext) {
+
+                launch {
+                    if (type.contains(EventRegisterType.BUTTON)) {
+                        discordBot.registerMessageForButtonEvents(it, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                    }
+                }
+                launch {
+                    if (type.contains(EventRegisterType.SELECT)) {
+                        discordBot.registerMessageForSelectEvents(it, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                    }
+                }
+                launch {
+                    if (type.contains(EventRegisterType.MODAL)) {
+                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, persist, duration, additionalData)
+                    }
+                }
+                launch {
+                    success?.accept(it)
+                }
             }
-            if (type.contains(EventRegisterType.SELECT)) {
-                this.registerMessageForSelectEvents(it, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
-            }
-            if (type.contains(EventRegisterType.MODAL)) {
-                this.registerMessageForModalEvents(interaction.author.id, interaction, persist, duration, additionalData)
-            }
-            success?.accept(it)
+
         }, {
-            failure?.accept(it)
+            runBlocking(getDefaultJDAScope().coroutineContext) {
+                failure?.accept(it)
+            }
         })
     }
 
@@ -428,3 +479,16 @@ fun ReplyCallbackAction.queueAndRegisterInteraction(
     failure,
     success
 )
+
+
+/**
+ * The coroutine scope used by the underlying [CoroutineEventManager].
+ * If this instance does not use the coroutine event manager, this returns the default scope from [getDefaultJDAScope].
+ */
+val JDA.scope: CoroutineScope get() = (eventManager as? CoroutineEventManager) ?: getDefaultJDAScope()
+
+/**
+ * The coroutine scope used by the underlying [CoroutineEventManager].
+ * If this instance does not use the coroutine event manager, this returns the default scope from [getDefaultJDAScope].
+ */
+val ShardManager.scope: CoroutineScope get() = (shardCache.firstOrNull()?.eventManager as? CoroutineEventManager) ?: getDefaultJDAScope()

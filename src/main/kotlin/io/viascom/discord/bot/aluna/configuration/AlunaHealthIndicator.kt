@@ -82,11 +82,9 @@ class AlunaHealthIndicator(
         status.withDetail("productionMode", alunaProperties.productionMode)
 
         val threads = hashMapOf<String, Any>()
-        threads["interactionThreads"] = discordBot.interactionExecutor.activeCount
-        threads["asyncThreads"] = discordBot.asyncExecutor.activeCount
         threads["messagesToObserveTimeoutThreads"] = discordBot.messagesToObserveScheduledThreadPool.activeCount
-        threads["eventWaiterExecutorThreads"] = eventWaiter.executorThreadPool.activeCount
         threads["eventWaiterExecutorTimeoutThreads"] = eventWaiter.scheduledThreadPool.activeCount
+        threads["scopedObjectsTimeoutScheduler"] = interactionScope.scopedObjectsTimeoutScheduler.activeCount
 
         status.withDetail("threads", threads)
         status.withDetail("currentActiveInteractions", interactionScope.getInstanceCount())
