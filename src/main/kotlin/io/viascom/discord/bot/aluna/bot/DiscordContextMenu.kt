@@ -23,18 +23,13 @@ package io.viascom.discord.bot.aluna.bot
 
 import datadog.trace.api.Trace
 import io.viascom.discord.bot.aluna.bot.event.getDefaultIOScope
-import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionAdditionalConditions
-import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionConditions
-import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionLoadAdditionalData
-import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionMetaDataHandler
-import io.viascom.discord.bot.aluna.configuration.Experimental
+import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.model.AdditionalRequirements
 import io.viascom.discord.bot.aluna.model.DevelopmentStatus
 import io.viascom.discord.bot.aluna.model.MissingPermissions
 import io.viascom.discord.bot.aluna.model.UseScope
 import io.viascom.discord.bot.aluna.property.AlunaProperties
-import io.viascom.discord.bot.aluna.translation.MessageService
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.Permission
@@ -46,6 +41,7 @@ import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEve
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
+import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFunction
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -55,7 +51,15 @@ import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
 
-abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDataImpl(type, name), InteractionScopedObject, DiscordInteractionHandler {
+abstract class DiscordContextMenu(
+    type: Command.Type,
+    name: String,
+
+    /**
+     * Define a [LocalizationFunction] for this command. If set no null, Aluna will take the implementation of [DiscordInteractionLocalization].
+     */
+    var localizations: LocalizationFunction? = null
+) : CommandDataImpl(type, name), InteractionScopedObject, DiscordInteractionHandler {
 
     @Autowired
     lateinit var alunaProperties: AlunaProperties
@@ -79,7 +83,7 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
     override lateinit var discordBot: DiscordBot
 
     @Autowired(required = false)
-    lateinit var messageService: MessageService
+    lateinit var localizationProvider: DiscordInteractionLocalization
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
@@ -244,11 +248,13 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
         }
     }
 
-    @Experimental("This gets called by Aluna, but is currently only a preparation for Localization.")
     fun prepareLocalization() {
         if (alunaProperties.translation.enabled) {
-//            this.setLocalizationMapper(LocalizationMapper.fromFunction(localizationFunction))
-            this.toData()
+            if (localizations == null) {
+                localizations = localizationProvider.getLocalizationFunction()
+            }
+
+            this.setLocalizationFunction(localizations!!)
         }
     }
 

@@ -29,7 +29,6 @@ import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.model.*
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.property.OwnerIdProvider
-import io.viascom.discord.bot.aluna.translation.MessageService
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.Permission
@@ -44,12 +43,12 @@ import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
+import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFunction
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.MessageSource
 import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
@@ -63,7 +62,11 @@ import kotlin.reflect.jvm.isAccessible
 abstract class DiscordCommand @JvmOverloads constructor(
     name: String,
     description: String,
-    //val localizations: HashMap<Locale, Pair<String, String>> = hashMapOf(),
+
+    /**
+     * Define a [LocalizationFunction] for this command. If set no null, Aluna will take the implementation of [DiscordInteractionLocalization].
+     */
+    var localizations: LocalizationFunction? = null,
 
     /**
      * If enabled, Aluna will register an event listener for auto complete requests and link it to this command.
@@ -109,10 +112,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
     lateinit var ownerIdProvider: OwnerIdProvider
 
     @Autowired(required = false)
-    lateinit var messageService: MessageService
-
-    @Autowired(required = false)
-    private lateinit var messageSource: MessageSource
+    lateinit var localizationProvider: DiscordInteractionLocalization
 
 //    @Autowired(required = false)
 //    private lateinit var localizationFunction: LocalizationFunction
@@ -470,10 +470,13 @@ abstract class DiscordCommand @JvmOverloads constructor(
         }
     }
 
-    @Experimental("This gets called by Aluna, but is currently only a preparation for Localization.")
     fun prepareLocalization() {
         if (alunaProperties.translation.enabled) {
-//            this.setLocalizationMapper(LocalizationMapper.fromFunction(localizationFunction))
+            if (localizations == null) {
+                localizations = localizationProvider.getLocalizationFunction()
+            }
+
+            this.setLocalizationFunction(localizations!!)
             this.toData()
         }
     }
@@ -600,9 +603,6 @@ abstract class DiscordCommand @JvmOverloads constructor(
             }
         }
     }
-
-    fun MessageService.getForUser(key: String, vararg args: String): String = this.get(key, Locale.forLanguageTag(userLocale.locale), *args)
-    fun MessageService.getForServer(key: String, vararg args: String): String = this.get(key, Locale.forLanguageTag(guildLocale.locale), *args)
 
     open fun registerSubCommands(vararg elements: DiscordSubCommandElement) {
         elements.forEach { element ->

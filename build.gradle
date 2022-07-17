@@ -64,8 +64,8 @@ dependencies {
     //====== Kotlin ======
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm" //:1.6.3
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j" //:1.6.3
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j"
     compileOnly "org.jetbrains.kotlin:kotlin-script-util"
     compileOnly "org.jetbrains.kotlin:kotlin-script-runtime"
     compileOnly "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable"
