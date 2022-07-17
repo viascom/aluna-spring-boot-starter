@@ -29,7 +29,6 @@ import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.model.*
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.property.OwnerIdProvider
-import io.viascom.discord.bot.aluna.translation.MessageService
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.Permission
@@ -604,9 +603,6 @@ abstract class DiscordCommand @JvmOverloads constructor(
             }
         }
     }
-
-    fun MessageService.getForUser(key: String, vararg args: String): String = this.get(key, Locale.forLanguageTag(userLocale.locale), *args)
-    fun MessageService.getForServer(key: String, vararg args: String): String = this.get(key, Locale.forLanguageTag(guildLocale.locale), *args)
 
     open fun registerSubCommands(vararg elements: DiscordSubCommandElement) {
         elements.forEach { element ->
