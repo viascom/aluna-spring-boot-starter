@@ -94,7 +94,7 @@ dependencies {
         exclude group: "org.json", module: "json"
         //Because of https://advisory.checkmarx.net/advisory/vulnerability/Cx08fcacc9-cb99/
     }
-    api 'org.json:json:20220320'
+    api "org.json:json:20220320"
 
     //====== Testing ======
     testImplementation "org.springframework.boot:spring-boot-starter-web"
@@ -108,18 +108,18 @@ dependencies {
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17
-        freeCompilerArgs = ['-Xjvm-default=all']
+        freeCompilerArgs = ["-Xjvm-default=all"]
     }
 }
 
 //Wait for files from processResources and bootBuildInfo
 compileKotlin.inputs.files(processResources, bootBuildInfo)
 
-processResources.dependsOn 'kaptKotlin'
+processResources.dependsOn "kaptKotlin"
 processResources {
-    filesMatching(['banner.txt', 'version.txt']) {
+    filesMatching(["banner.txt", "version.txt"]) {
         filter {
-            it.replace('jda.version', "${jdaVersion}").replace('aluna.version', "${project.version}")
+            it.replace("jda.version", "${jdaVersion}").replace("aluna.version", "${project.version}")
         }
     }
 
@@ -141,7 +141,7 @@ task downloadBeautifyJsFile(type: Download) {
 }
 
 task verifyBeautifyJsFile(type: Verify, dependsOn: downloadBeautifyJsFile) {
-    src new File("build/resources/main/js/lib/", 'beautify.js')
+    src new File("build/resources/main/js/lib/", "beautify.js")
     algorithm "SHA-512"
     checksum "d7a654bae33f39c79753b8bc53acd0aad0ec1be3c229c597f5796634dd33fa5a949413330e6233acab7a4ce996e3c100538ed7214e92a5a7a5cfcb4cf4b80629"
 }
@@ -164,30 +164,30 @@ publishing {
             from components.java
 
             pom {
-                groupId = 'io.viascom.discord.bot'
-                name = 'aluna-spring-boot-starter'
-                description = 'Spring Boot Starter for JDA Discord bots.'
-                url = 'https://github.com/viascom/aluna-spring-boot-starter'
-                packaging = 'jar'
+                groupId = "io.viascom.discord.bot"
+                name = "aluna-spring-boot-starter"
+                description = "Spring Boot Starter for JDA Discord bots."
+                url = "https://github.com/viascom/aluna-spring-boot-starter"
+                packaging = "jar"
 
                 scm {
-                    url = 'https://github.com/viascom/aluna-spring-boot-starter'
-                    connection = 'scm:git://github.com/viascom/aluna-spring-boot-starter.git'
-                    developerConnection = 'scm:git://github.com/viascom/aluna-spring-boot-starter.git'
+                    url = "https://github.com/viascom/aluna-spring-boot-starter"
+                    connection = "scm:git://github.com/viascom/aluna-spring-boot-starter.git"
+                    developerConnection = "scm:git://github.com/viascom/aluna-spring-boot-starter.git"
                 }
 
                 developers {
                     developer {
-                        id = 'itsmefox'
-                        name = 'Patrick Bösch'
-                        email = 'patrick.boesch@viascom.email'
-                        organizationUrl = 'https://viascom.io/'
+                        id = "itsmefox"
+                        name = "Patrick Bösch"
+                        email = "patrick.boesch@viascom.email"
+                        organizationUrl = "https://viascom.io/"
                     }
                     developer {
-                        id = 'botscripter'
-                        name = 'Nikola Stankovic'
-                        email = 'nikola.stankovic@viascom.email'
-                        organizationUrl = 'https://viascom.io/'
+                        id = "botscripter"
+                        name = "Nikola Stankovic"
+                        email = "nikola.stankovic@viascom.email"
+                        organizationUrl = "https://viascom.io/"
                     }
                 }
             }
