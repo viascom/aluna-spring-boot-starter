@@ -55,6 +55,7 @@ class FeedbackCommand : DiscordCommand("feedback", "Add some feedback") {
                    **Text:**
                    ${event.getValueAsString("text", "*n/a*")}"""
             )
+            .setColor(0xFF00000)
 
         //Send the modal to the user. (In a productive environment this could be sent to a dedicated channel or saved into a database)
         event.replyEmbeds(embed.build()).queue()

@@ -49,20 +49,16 @@ class EventPublisher(
 
     @JvmSynthetic
     internal fun publishDiscordReadyEvent(jdaEvent: ReadyEvent) {
-        discordBot.asyncExecutor.execute {
-            logger.debug("Publishing DiscordReadyEvent")
-            val discordReadyEvent = DiscordReadyEvent(this, jdaEvent)
-            applicationEventPublisher.publishEvent(discordReadyEvent)
-        }
+        logger.debug("Publishing DiscordReadyEvent")
+        val discordReadyEvent = DiscordReadyEvent(this, jdaEvent)
+        applicationEventPublisher.publishEvent(discordReadyEvent)
     }
 
     @JvmSynthetic
     internal fun publishDiscordFirstShardReadyEvent(jdaEvent: ReadyEvent) {
-        discordBot.asyncExecutor.execute {
-            logger.debug("Publishing DiscordFirstShardReadyEvent")
-            val discordReadyEvent = DiscordFirstShardReadyEvent(this, jdaEvent)
-            applicationEventPublisher.publishEvent(discordReadyEvent)
-        }
+        logger.debug("Publishing DiscordFirstShardReadyEvent")
+        val discordReadyEvent = DiscordFirstShardReadyEvent(this, jdaEvent)
+        applicationEventPublisher.publishEvent(discordReadyEvent)
     }
 
     @JvmSynthetic
@@ -71,81 +67,70 @@ class EventPublisher(
         updatedCommands: List<KClass<out CommandDataImpl>>,
         removedCommands: List<String>
     ) {
-        discordBot.asyncExecutor.execute {
-            logger.debug("Publishing DiscordSlashCommandInitializedEvent")
-            val discordSlashCommandInitializedEvent = DiscordSlashCommandInitializedEvent(this, newCommands, updatedCommands, removedCommands)
-            applicationEventPublisher.publishEvent(discordSlashCommandInitializedEvent)
-        }
+        logger.debug("Publishing DiscordSlashCommandInitializedEvent")
+        val discordSlashCommandInitializedEvent = DiscordSlashCommandInitializedEvent(this, newCommands, updatedCommands, removedCommands)
+        applicationEventPublisher.publishEvent(discordSlashCommandInitializedEvent)
     }
 
     @JvmSynthetic
     internal fun publishDiscordAutoCompleteHandlerInitializedEvent(handlers: List<KClass<out AutoCompleteHandler>>) {
-        discordBot.asyncExecutor.execute {
-            logger.debug("Publishing DiscordAutoCompleteHandlerInitializedEvent")
-            val discordAutoCompleteHandlerInitializedEvent = DiscordAutoCompleteHandlerInitializedEvent(this, handlers)
-            applicationEventPublisher.publishEvent(discordAutoCompleteHandlerInitializedEvent)
-        }
+        logger.debug("Publishing DiscordAutoCompleteHandlerInitializedEvent")
+        val discordAutoCompleteHandlerInitializedEvent = DiscordAutoCompleteHandlerInitializedEvent(this, handlers)
+        applicationEventPublisher.publishEvent(discordAutoCompleteHandlerInitializedEvent)
     }
 
     @JvmSynthetic
     internal fun publishDiscordCommandEvent(user: User, channel: Channel, guild: Guild?, commandPath: String, command: DiscordCommand) {
-        discordBot.asyncExecutor.execute {
-            logger.debug("Publishing DiscordCommandEvent")
-            val discordCommandEvent = DiscordCommandEvent(this, user, channel, guild, commandPath, command)
-            applicationEventPublisher.publishEvent(discordCommandEvent)
-        }
+        logger.debug("Publishing DiscordCommandEvent")
+        val discordCommandEvent = DiscordCommandEvent(this, user, channel, guild, commandPath, command)
+        applicationEventPublisher.publishEvent(discordCommandEvent)
     }
 
     @JvmSynthetic
     internal fun publishDiscordMessageContextEvent(user: User, channel: Channel?, guild: Guild?, name: String, contextMenu: DiscordMessageContextMenu) {
-        discordBot.asyncExecutor.execute {
-            logger.debug("Publishing DiscordMessageContextEvent")
-            val discordMessageContextEvent = DiscordMessageContextEvent(this, user, channel, guild, name, contextMenu)
-            applicationEventPublisher.publishEvent(discordMessageContextEvent)
-        }
+        logger.debug("Publishing DiscordMessageContextEvent")
+        val discordMessageContextEvent = DiscordMessageContextEvent(this, user, channel, guild, name, contextMenu)
+        applicationEventPublisher.publishEvent(discordMessageContextEvent)
     }
 
     @JvmSynthetic
     internal fun publishDiscordUserContextEvent(user: User, channel: Channel?, guild: Guild?, name: String, contextMenu: DiscordUserContextMenu) {
-        discordBot.asyncExecutor.execute {
-            logger.debug("Publishing DiscordUserContextEvent")
-            val discordUserContextEvent = DiscordUserContextEvent(this, user, channel, guild, name, contextMenu)
-            applicationEventPublisher.publishEvent(discordUserContextEvent)
-        }
+        logger.debug("Publishing DiscordUserContextEvent")
+        val discordUserContextEvent = DiscordUserContextEvent(this, user, channel, guild, name, contextMenu)
+        applicationEventPublisher.publishEvent(discordUserContextEvent)
     }
 
     @JvmSynthetic
     internal fun publishDiscordEvent(event: GenericEvent) {
         if (alunaProperties.discord.publishEvents) {
-            discordBot.asyncExecutor.execute {
-                try {
-                    var eventClass: Class<*>? = event::class.java
 
-                    if (eventClass?.simpleName == "GatewayPingEvent" && !alunaProperties.discord.publishGatePingEvent) {
-                        return@execute
-                    }
-                    if (eventClass?.simpleName == "GuildReadyEvent" && !alunaProperties.discord.publishGuildReadyEvent) {
-                        return@execute
-                    }
+            try {
+                var eventClass: Class<*>? = event::class.java
 
-                    while (eventClass != null) {
-                        val workClass = eventClass
-                        if (workClass.simpleName !in arrayListOf("Class", "Object", "HttpRequestEvent")) {
-                            val specificEvent = Class.forName("On${workClass.simpleName}")
-                            logger.debug("Publishing ${workClass.canonicalName}")
-                            applicationEventPublisher.publishEvent(specificEvent.constructors.first().newInstance(this, event))
-                        }
-
-                        eventClass = if (alunaProperties.discord.publishOnlyFirstEvent) {
-                            null
-                        } else {
-                            eventClass.superclass
-                        }
-
-                    }
-                } catch (e: Exception) {
-                    logger.debug("Could not publish event ${event::class.simpleName}\n" + e.printStackTrace())
+                if (eventClass?.simpleName == "GatewayPingEvent" && !alunaProperties.discord.publishGatePingEvent) {
+                    return
                 }
+                if (eventClass?.simpleName == "GuildReadyEvent" && !alunaProperties.discord.publishGuildReadyEvent) {
+                    return
+                }
+
+                while (eventClass != null) {
+                    val workClass = eventClass
+                    if (workClass.simpleName !in arrayListOf("Class", "Object", "HttpRequestEvent")) {
+                        val specificEvent = Class.forName("On${workClass.simpleName}")
+                        logger.debug("Publishing ${workClass.canonicalName}")
+                        applicationEventPublisher.publishEvent(specificEvent.constructors.first().newInstance(this, event))
+                    }
+
+                    eventClass = if (alunaProperties.discord.publishOnlyFirstEvent) {
+                        null
+                    } else {
+                        eventClass.superclass
+                    }
+
+                }
+            } catch (e: Exception) {
+                logger.debug("Could not publish event ${event::class.simpleName}\n" + e.printStackTrace())
             }
         }
     }

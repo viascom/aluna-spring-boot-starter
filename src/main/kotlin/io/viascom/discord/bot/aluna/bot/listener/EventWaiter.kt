@@ -22,20 +22,20 @@
 package io.viascom.discord.bot.aluna.bot.listener
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
 import io.viascom.discord.bot.aluna.util.NanoId
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.events.Event
 import net.dv8tion.jda.api.events.GatewayPingEvent
 import net.dv8tion.jda.api.events.GenericEvent
-import net.dv8tion.jda.api.events.ShutdownEvent
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent
-import net.dv8tion.jda.api.hooks.EventListener
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.internal.utils.Checks
 import org.slf4j.LoggerFactory
@@ -53,19 +53,12 @@ import kotlin.reflect.full.isSuperclassOf
 class EventWaiter(
     private val discordBot: DiscordBot,
     private val alunaProperties: AlunaProperties
-) : EventListener {
+) : CoroutineEventListener {
 
     private var logger = LoggerFactory.getLogger(javaClass)
 
     @get:JvmSynthetic
     internal val waitingEvents: ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, ArrayList<WaitingEvent<GenericEvent>>>> = ConcurrentHashMap()
-
-    @get:JvmSynthetic
-    internal val executorThreadPool = AlunaThreadPool.getDynamicThreadPool(
-        alunaProperties.thread.eventWaiterThreadPoolCount,
-        alunaProperties.thread.eventWaiterThreadPoolTtl,
-        "Aluna-Waiter-Pool-%d"
-    )
 
     @get:JvmSynthetic
     internal val scheduledThreadPool =
@@ -77,7 +70,7 @@ class EventWaiter(
             true
         )
 
-    override fun onEvent(event: GenericEvent) {
+    override suspend fun onEvent(event: GenericEvent) {
         var eventClass: Class<*>? = event.javaClass
 
         while (eventClass != null) {
@@ -94,7 +87,7 @@ class EventWaiter(
                     val elementsToRemove = arrayListOf<Int>()
                     waitingEventElements.forEach { waitingEvent ->
                         val remove = if (waitingEvent.attempt(event)) {
-                            executorThreadPool.submit {
+                            runBlocking {
                                 try {
                                     if (SlashCommandInteractionEvent::class.isSuperclassOf(event::class)) {
                                         event as SlashCommandInteractionEvent
@@ -135,9 +128,6 @@ class EventWaiter(
 
             }
 
-            if (event is ShutdownEvent) {
-                executorThreadPool.shutdown()
-            }
             eventClass = eventClass.superclass
         }
     }
@@ -207,7 +197,7 @@ class EventWaiter(
 
                 //Create new task
                 it.timeoutTask = scheduledThreadPool.schedule({
-                    discordBot.asyncExecutor.execute {
+                   runBlocking {
                         if (waitingEvents.containsKey(it.type) && waitingEvents[it.type]!!.containsKey(id)) {
                             if (waitingEvents[it.type]!![id]!!.remove(it) && it.timeoutAction != null) {
                                 it.timeoutAction.invoke()
@@ -234,8 +224,6 @@ class EventWaiter(
             }
         }
     }
-
-    fun isShutdown(): Boolean = executorThreadPool.isShutdown
 
     inner class WaitingEvent<in T : GenericEvent>(
         private val condition: Predicate<T>,
@@ -364,7 +352,6 @@ class EventWaiter(
         id: String = NanoId.generate(), type: Class<T>, action: Consumer<T>, condition: Predicate<T>,
         timeout: Duration? = Duration.ofMinutes(14), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
     ) {
-        Checks.check(!isShutdown(), "Attempted to register a WaitingEvent while the EventWaiter's thread pool was already shut down!")
         Checks.notNull(type, "The provided type")
         Checks.notNull(condition, "The provided condition predicate")
         Checks.notNull(action, "The provided action consumer")
@@ -373,7 +360,7 @@ class EventWaiter(
 
         if (timeout != null) {
             we.timeoutTask = scheduledThreadPool.schedule({
-                discordBot.asyncExecutor.execute {
+                runBlocking {
                     if (waitingEvents.containsKey(type) && waitingEvents[type]!!.containsKey(id)) {
                         if (waitingEvents[type]!![id]!!.remove(we) && timeoutAction != null) {
                             timeoutAction.invoke()

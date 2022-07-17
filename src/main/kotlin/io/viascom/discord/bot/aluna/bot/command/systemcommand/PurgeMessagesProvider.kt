@@ -26,9 +26,9 @@ import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
-import io.viascom.discord.bot.aluna.util.createTextInput
 import io.viascom.discord.bot.aluna.util.getTypedOption
 import io.viascom.discord.bot.aluna.util.getValueAsString
+import io.viascom.discord.bot.aluna.util.textInput
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.GuildMessageChannel
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -90,7 +90,7 @@ class PurgeMessagesProvider(
         selectedChannel = channel
 
         //Show modal
-        val amount: TextInput = createTextInput("amount", "Amount of messages", TextInputStyle.SHORT)
+        val amount: TextInput = textInput("amount", "Amount of messages", TextInputStyle.SHORT)
 
         val modal: Modal = Modal.create("purge", "Purge")
             .addActionRows(ActionRow.of(amount))

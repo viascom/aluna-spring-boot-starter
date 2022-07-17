@@ -33,6 +33,7 @@ import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.ModalInteraction
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.OptionMapping
@@ -52,7 +53,6 @@ import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackA
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
-import java.util.*
 import java.util.function.Function
 
 fun Double.round(decimals: Int): Double {
@@ -235,7 +235,7 @@ fun Modal.Builder.addTextField(
     max: Int = -1,
     value: String? = null,
     required: Boolean = true
-): Modal.Builder = this.addActionRow(createTextInput(id, label, style, placeholder, min, max, value, required))
+): Modal.Builder = this.addActionRow(textInput(id, label, style, placeholder, min, max, value, required))
 
 @JvmOverloads
 fun ModalInteraction.getValueAsString(name: String, default: String? = null): String? = this.getValue(name)?.asString ?: default
@@ -247,7 +247,7 @@ fun ModalInteraction.getValueAsString(name: String, default: String? = null): St
  *
  * @return probable Locale
  */
-fun User.probableLocale(): Locale? = mutualGuilds.groupBy { it.locale }.maxByOrNull { it.value.size }?.value?.firstOrNull()?.locale
+fun User.probableLocale(): DiscordLocale? = mutualGuilds.groupBy { it.locale }.maxByOrNull { it.value.size }?.value?.firstOrNull()?.locale
 
 fun User.getMessage(messageId: String): Message? = try {
     this.openPrivateChannel().complete().retrieveMessageById(messageId).complete()
@@ -262,13 +262,13 @@ fun User.getMessage(messageId: String): Message? = try {
  *
  * @return probable Locale
  */
-fun Member.probableLocale(): Locale? = user.probableLocale()
+fun Member.probableLocale(): DiscordLocale? = user.probableLocale()
 
 fun EmbedBuilder.setColor(red: Int, green: Int, blue: Int): EmbedBuilder = this.setColor(Color(red, green, blue))
 fun EmbedBuilder.setColor(hexColor: String): EmbedBuilder = this.setColor(Color.getColor(hexColor))
 
 @JvmOverloads
-fun createSelectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {
+fun selectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {
     var option = SelectOption.of(label, value)
     description?.let { option = option.withDescription(description) }
     emoji?.let { option = option.withEmoji(emoji) }
@@ -284,10 +284,10 @@ fun SelectMenu.Builder.addOption(
     description: String? = null,
     emoji: Emoji? = null,
     isDefault: Boolean? = null
-): SelectMenu.Builder = this.addOptions(createSelectOption(label, value, description, emoji, isDefault))
+): SelectMenu.Builder = this.addOptions(selectOption(label, value, description, emoji, isDefault))
 
 @JvmOverloads
-fun createTextInput(
+fun textInput(
     id: String,
     label: String,
     style: TextInputStyle = TextInputStyle.SHORT,
@@ -318,21 +318,23 @@ fun createTextInput(
 }
 
 @JvmOverloads
-fun createPrimaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+fun primaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.PRIMARY, id, label, emoji).withDisabled(disabled)
 
 @JvmOverloads
-fun createSecondaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+fun secondaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.SECONDARY, id, label, emoji).withDisabled(disabled)
 
 @JvmOverloads
-fun createSuccessButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+fun successButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.SUCCESS, id, label, emoji).withDisabled(disabled)
 
 @JvmOverloads
-fun createDangerButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+fun dangerButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.DANGER, id, label, emoji).withDisabled(disabled)
 
 @JvmOverloads
-fun createLinkButton(url: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+fun linkButton(url: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.LINK, url, label, emoji).withDisabled(disabled)
+
+fun String.toEmoji() = Emoji.fromFormatted(this)

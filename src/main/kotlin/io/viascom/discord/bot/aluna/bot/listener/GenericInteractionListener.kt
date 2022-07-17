@@ -25,6 +25,8 @@ import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
 import io.viascom.discord.bot.aluna.util.NanoId
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
@@ -41,83 +43,71 @@ open class GenericInteractionListener(
 ) : ListenerAdapter() {
 
     override fun onCommandAutoCompleteInteraction(event: CommandAutoCompleteInteractionEvent) {
-        discordBot.asyncExecutor.execute {
-            val commandId = discordBot.commandsWithAutocomplete.firstOrNull { it == event.commandId }
-            if (commandId != null) {
-                discordBot.commands[commandId]?.let { command ->
-                    discordBot.interactionExecutor.execute {
+        runBlocking {
+            launch {
+                val commandId = discordBot.commandsWithAutocomplete.firstOrNull { it == event.commandId }
+                if (commandId != null) {
+                    discordBot.commands[commandId]?.let { command ->
                         DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, NanoId.generate())
                         context.getBean(command).onAutoCompleteEventCall(event.focusedOption.name, event)
                     }
                 }
             }
-        }
 
-        discordBot.asyncExecutor.execute {
-            val handler = discordBot.autoCompleteHandlers.entries.firstOrNull { entry ->
-                entry.key.first == event.commandId && (entry.key.second == null || entry.key.second == event.focusedOption.name)
-            }
-            if (handler != null) {
-                DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, NanoId.generate())
-                context.getBean(handler.value).onRequestCall(event)
+            launch {
+                val handler = discordBot.autoCompleteHandlers.entries.firstOrNull { entry ->
+                    entry.key.first == event.commandId && (entry.key.second == null || entry.key.second == event.focusedOption.name)
+                }
+                if (handler != null) {
+                    DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, NanoId.generate())
+                    context.getBean(handler.value).onRequestCall(event)
+                }
             }
         }
     }
 
     override fun onButtonInteraction(event: ButtonInteractionEvent) {
-        discordBot.asyncExecutor.execute {
-            if (discordBot.messagesToObserveButton.containsKey(event.message.id)) {
-                discordBot.interactionExecutor.execute commandExecutor@{
-                    val entry = discordBot.messagesToObserveButton[event.message.id]!!
-                    DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
-                    if (entry.interactionUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
-                        return@commandExecutor
-                    }
+        if (discordBot.messagesToObserveButton.containsKey(event.message.id)) {
+            val entry = discordBot.messagesToObserveButton[event.message.id]!!
+            DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
+            if (entry.interactionUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
+                return
+            }
 
-                    val result = context.getBean(entry.interaction.java).onButtonInteraction(event, entry.additionalData)
-                    if (!entry.stayActive && result) {
-                        discordBot.removeMessageForButtonEvents(event.message.id)
-                    }
-                }
+            val result = context.getBean(entry.interaction.java).onButtonInteraction(event, entry.additionalData)
+            if (!entry.stayActive && result) {
+                discordBot.removeMessageForButtonEvents(event.message.id)
             }
         }
     }
 
 
     override fun onSelectMenuInteraction(event: SelectMenuInteractionEvent) {
-        discordBot.asyncExecutor.execute {
-            if (discordBot.messagesToObserveSelect.containsKey(event.message.id)) {
-                discordBot.interactionExecutor.execute interactionExecutor@{
-                    val entry = discordBot.messagesToObserveSelect[event.message.id]!!
-                    DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
-                    if (entry.interactionUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
-                        return@interactionExecutor
-                    }
+        if (discordBot.messagesToObserveSelect.containsKey(event.message.id)) {
+            val entry = discordBot.messagesToObserveSelect[event.message.id]!!
+            DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
+            if (entry.interactionUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
+                return
+            }
 
-                    val result = context.getBean(entry.interaction.java).onSelectMenuInteraction(event, entry.additionalData)
-                    if (!entry.stayActive && result) {
-                        discordBot.removeMessageForSelectEvents(event.message.id)
-                    }
-                }
+            val result = context.getBean(entry.interaction.java).onSelectMenuInteraction(event, entry.additionalData)
+            if (!entry.stayActive && result) {
+                discordBot.removeMessageForSelectEvents(event.message.id)
             }
         }
     }
 
     override fun onModalInteraction(event: ModalInteractionEvent) {
-        discordBot.asyncExecutor.execute {
-            if (discordBot.messagesToObserveModal.containsKey(event.user.id)) {
-                discordBot.interactionExecutor.execute interactionExecutor@{
-                    val entry = discordBot.messagesToObserveModal[event.user.id]!!
-                    DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
-                    if (entry.interactionUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
-                        return@interactionExecutor
-                    }
+        if (discordBot.messagesToObserveModal.containsKey(event.user.id)) {
+            val entry = discordBot.messagesToObserveModal[event.user.id]!!
+            DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
+            if (entry.interactionUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
+                return
+            }
 
-                    val result = context.getBean(entry.interaction.java).onModalInteraction(event, entry.additionalData)
-                    if (!entry.stayActive && result) {
-                        discordBot.removeMessageForModalEvents(event.user.id)
-                    }
-                }
+            val result = context.getBean(entry.interaction.java).onModalInteraction(event, entry.additionalData)
+            if (!entry.stayActive && result) {
+                discordBot.removeMessageForModalEvents(event.user.id)
             }
         }
     }

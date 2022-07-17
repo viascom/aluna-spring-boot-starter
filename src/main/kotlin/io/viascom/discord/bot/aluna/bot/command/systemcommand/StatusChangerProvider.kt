@@ -200,14 +200,14 @@ class StatusChangerProvider(
         activitySelect.addOption("Streaming", "streaming", isDefault = ("streaming" == activityId))
         rows.add(ActionRow.of(activitySelect.build()))
 
-        val setTextButton = createPrimaryButton("set_text", "Set Text")
+        val setTextButton = primaryButton("set_text", "Set Text")
         val save =
-            createSuccessButton(
+            successButton(
                 "save",
                 "Save",
                 disabled = ((activityId != "null" && activityText.isEmpty()) || (activityId == "streaming" && !Activity.isValidStreamingUrl(activityUrl)))
             )
-        val cancel = createDangerButton("cancel", "Cancel")
+        val cancel = dangerButton("cancel", "Cancel")
         rows.add(ActionRow.of(setTextButton, save, cancel))
 
         return rows

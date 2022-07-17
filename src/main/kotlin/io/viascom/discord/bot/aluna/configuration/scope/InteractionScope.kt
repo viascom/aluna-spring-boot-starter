@@ -26,6 +26,7 @@ import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
 import io.viascom.discord.bot.aluna.util.NanoId
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -46,7 +47,8 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
 
     @get:JvmSynthetic
     internal val scopedObjects = Collections.synchronizedMap(HashMap<BeanName, HashMap<DiscordStateId, HashMap<UniqueId, ScopedObjectData>>>())
-    private var scopedObjectsTimeoutScheduler: ScheduledThreadPoolExecutor
+    @get:JvmSynthetic
+    internal var scopedObjectsTimeoutScheduler: ScheduledThreadPoolExecutor
 
     private val scopedObjectsTimeoutScheduledTask = Collections.synchronizedMap(HashMap<UniqueId, ScheduledFuture<*>>())
 
@@ -219,7 +221,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
     ): ScheduledFuture<*> {
         return scopedObjectsTimeoutScheduler.schedule({
             val discordBot: DiscordBot = context.getBean(DiscordBot::class.java) as DiscordBot
-            discordBot.asyncExecutor.execute {
+            runBlocking {
                 if (executeOnDestroy) {
                     try {
                         newObj::class.java.getDeclaredMethod("onDestroy").invoke(newObj)

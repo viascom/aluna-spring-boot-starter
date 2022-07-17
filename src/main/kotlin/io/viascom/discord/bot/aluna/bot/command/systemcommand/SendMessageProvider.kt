@@ -28,10 +28,10 @@ import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.Webhook
-import io.viascom.discord.bot.aluna.util.createTextInput
 import io.viascom.discord.bot.aluna.util.getGuildTextChannel
 import io.viascom.discord.bot.aluna.util.getPrivateChannelByUser
 import io.viascom.discord.bot.aluna.util.getValueAsString
+import io.viascom.discord.bot.aluna.util.textInput
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
@@ -58,9 +58,9 @@ class SendMessageProvider(
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
         //Show modal
-        val serverId: TextInput = createTextInput("serverId", "Server ID (0 = current or if DM)", TextInputStyle.SHORT)
-        val channelId: TextInput = createTextInput("channelId", "Channel ID (0 = current, @<id> = for DM)", TextInputStyle.SHORT)
-        val message: TextInput = createTextInput("message", "Message", TextInputStyle.PARAGRAPH)
+        val serverId: TextInput = textInput("serverId", "Server ID (0 = current or if DM)", TextInputStyle.SHORT)
+        val channelId: TextInput = textInput("channelId", "Channel ID (0 = current, @<id> = for DM)", TextInputStyle.SHORT)
+        val message: TextInput = textInput("message", "Message", TextInputStyle.PARAGRAPH)
 
         val modal: Modal = Modal.create("send_message", "Send Message")
             .addActionRows(ActionRow.of(serverId), ActionRow.of(channelId), ActionRow.of(message))

@@ -18,21 +18,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/**
+ * This class is based on CoroutineEventListener.kt from https://github.com/MinnDevelopment/jda-ktx at commit a5d840c under the Apache License, Version 2.0
+ */
 
-@file:JvmName("AlunaUtils")
-@file:JvmMultifileClass
+package io.viascom.discord.bot.aluna.bot.event
 
-package io.viascom.discord.bot.aluna.util
+import net.dv8tion.jda.api.events.GenericEvent
 
-import com.google.gson.Gson
-import kotlin.reflect.KClass
-import kotlin.reflect.full.memberProperties
+/**
+ * Identical to [EventListener][net.dv8tion.jda.api.hooks.EventListener] but uses suspending function.
+ */
+fun interface CoroutineEventListener {
+    /**
+     * The timeout [kotlin.time.Duration] to use, or [EventTimeout.Inherit] to use event manager default.
+     *
+     * This timeout decides how long a listener function is allowed to run, not when to unregister it.
+     */
+    val timeout: EventTimeout get() = EventTimeout.Inherit
 
-fun <T> Gson.fromJson(value: ByteArray, type: Class<T>): T = this.fromJson(String(value), type)
-fun Gson.toJsonByteArray(value: Any?): ByteArray = this.toJson(value).toByteArray()
-fun <T : Any> Gson.convertValue(value: Any?, type: KClass<T>): T = fromJson(toJsonByteArray(value), type.java)
-fun Gson.checkFields(data: Any, preferredObject: KClass<*>): Boolean {
-    val jsonObject = this.toJsonTree(data).asJsonObject
-    val allowedFields = preferredObject.memberProperties.map { it.name }
-    return jsonObject.keySet().all { it in allowedFields }
+    suspend fun onEvent(event: GenericEvent)
+
+    /**
+     * Unregisters this listener
+     */
+    fun cancel() {}
 }

@@ -54,14 +54,15 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
     private lateinit var latestHook: InteractionHook
 
     override fun execute(event: SlashCommandInteractionEvent) {
+        
         latestEmbed = EmbedBuilder()
             .setTitle("Interaction Demo")
             .setColor(Color.GREEN)
 
         val row1 = ActionRow.of(
-            createSuccessButton("set_text", "Set Text"),
-            createSuccessButton("set_image", "Set Image"),
-            createDangerButton("remove_image", "Remove Image")
+            successButton("set_text", "Set Text"),
+            successButton("set_image", "Set Image"),
+            dangerButton("remove_image", "Remove Image")
         )
 
         val row2 = ActionRow.of(

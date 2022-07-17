@@ -22,12 +22,16 @@
 package io.viascom.discord.bot.aluna.bot
 
 import datadog.trace.api.Trace
+import io.viascom.discord.bot.aluna.bot.event.getDefaultIOScope
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.model.*
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.property.OwnerIdProvider
+import io.viascom.discord.bot.aluna.translation.MessageService
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent
@@ -36,6 +40,7 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
@@ -55,7 +60,7 @@ import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
 
-abstract class DiscordCommand(
+abstract class DiscordCommand @JvmOverloads constructor(
     name: String,
     description: String,
 
@@ -214,14 +219,14 @@ abstract class DiscordCommand(
      *
      * *This is set by Aluna based on the information provided by Discord*
      */
-    var userLocale: Locale = Locale.ENGLISH
+    var userLocale: DiscordLocale = DiscordLocale.ENGLISH_US
 
     /**
      * Guild [Locale]
      *
      * *This is set by Aluna based on the information provided by Discord*
      */
-    var guildLocale: Locale = Locale.ENGLISH
+    var guildLocale: DiscordLocale = DiscordLocale.ENGLISH_US
 
     /**
      * Stop watch used if enabled by properties
@@ -483,7 +488,8 @@ abstract class DiscordCommand(
      * @param event The CommandEvent that triggered this Command
      */
     @Trace
-    fun run(event: SlashCommandInteractionEvent) {
+    @JvmSynthetic
+    internal fun run(event: SlashCommandInteractionEvent) {
         if (alunaProperties.debug.useStopwatch) {
             stopWatch = StopWatch()
             stopWatch!!.start()
@@ -498,7 +504,7 @@ abstract class DiscordCommand(
         channel = event.channel
         MDC.put("discord.channel", channel.id)
         author = event.user
-        MDC.put("author", "${author.id} (${author.name})")
+        MDC.put("discord.author", "${author.id} (${author.asTag})")
 
 
         userLocale = event.userLocale
@@ -548,48 +554,61 @@ abstract class DiscordCommand(
         //Load additional data for this command
         discordInteractionLoadAdditionalData.loadData(this, event)
 
-        try {
+        val command = this
+        runBlocking {
             //Run onCommandExecution in asyncExecutor to ensure it is not blocking the execution of the command itself
-            discordBot.interactionExecutor.execute {
-                discordInteractionMetaDataHandler.onCommandExecution(this, event)
+            launch(getDefaultIOScope().coroutineContext) { discordInteractionMetaDataHandler.onCommandExecution(command, event) }
+            launch(getDefaultIOScope().coroutineContext) {
+                if (alunaProperties.discord.publishDiscordCommandEvent) {
+                    eventPublisher.publishDiscordCommandEvent(author, channel, guild, event.commandPath, command)
+                }
             }
-            if (alunaProperties.discord.publishDiscordCommandEvent) {
-                eventPublisher.publishDiscordCommandEvent(author, channel, guild, event.commandPath, this)
-            }
-            logger.info("Run command /${event.commandPath}" + if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else "")
-            execute(event)
-            if (handleSubCommands) {
-                logger.debug("Handle sub command /${event.commandPath}")
-                handleSubCommandExecution(event) { onSubCommandFallback(event) }
-            }
-        } catch (e: Exception) {
+
             try {
-                onExecutionException(event, e)
-            } catch (exceptionError: Exception) {
-                discordInteractionMetaDataHandler.onGenericExecutionException(this, e, exceptionError, event)
+                logger.info("Run command /${event.commandPath}" + if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else "")
+                execute(event)
+                if (handleSubCommands) {
+                    logger.debug("Handle sub command /${event.commandPath}")
+                    handleSubCommandExecution(event) { onSubCommandFallback(event) }
+                }
+            } catch (e: Exception) {
+                try {
+                    onExecutionException(event, e)
+                } catch (exceptionError: Exception) {
+                    discordInteractionMetaDataHandler.onGenericExecutionException(command, e, exceptionError, event)
+                }
+            } finally {
+                exitCommand(event)
             }
-        } finally {
-            exitCommand(event)
-        }
-
-    }
-
-    private fun exitCommand(event: SlashCommandInteractionEvent) {
-        if (alunaProperties.debug.useStopwatch && stopWatch != null) {
-            stopWatch!!.stop()
-            MDC.put("duration", stopWatch!!.totalTimeMillis.toString())
-            logger.info("Command /${event.commandPath} (${this.author.id})${if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else ""} took ${stopWatch!!.totalTimeMillis}ms")
-            when {
-                (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the command /${event.commandPath} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
-                (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the command /${event.commandPath} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
-            }
-        }
-        discordBot.interactionExecutor.execute {
-            discordInteractionMetaDataHandler.onExitInteraction(this, stopWatch, event)
         }
     }
 
-    fun registerSubCommands(vararg elements: DiscordSubCommandElement) {
+    @JvmSynthetic
+    internal fun exitCommand(event: SlashCommandInteractionEvent) {
+        val command = this
+        runBlocking {
+            launch {
+                if (alunaProperties.debug.useStopwatch && stopWatch != null) {
+                    stopWatch!!.stop()
+                    MDC.put("duration", stopWatch!!.totalTimeMillis.toString())
+                    logger.info("Command /${event.commandPath} (${command.author.id})${if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else ""} took ${stopWatch!!.totalTimeMillis}ms")
+                    when {
+                        (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the command /${event.commandPath} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
+                        (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the command /${event.commandPath} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
+                    }
+                }
+
+            }
+            launch(getDefaultIOScope().coroutineContext) {
+                discordInteractionMetaDataHandler.onExitInteraction(command, stopWatch, event)
+            }
+        }
+    }
+
+    fun MessageService.getForUser(key: String, vararg args: String): String = this.get(key, Locale.forLanguageTag(userLocale.locale), *args)
+    fun MessageService.getForServer(key: String, vararg args: String): String = this.get(key, Locale.forLanguageTag(guildLocale.locale), *args)
+
+    open fun registerSubCommands(vararg elements: DiscordSubCommandElement) {
         elements.forEach { element ->
             subCommandElements.putIfAbsent(element.getName(), element)
 
@@ -607,7 +626,7 @@ abstract class DiscordCommand(
         }
     }
 
-    fun handleSubCommandExecution(event: SlashCommandInteractionEvent, fallback: (SlashCommandInteractionEvent) -> (Unit)) {
+    open fun handleSubCommandExecution(event: SlashCommandInteractionEvent, fallback: (SlashCommandInteractionEvent) -> (Unit)) {
         loadDynamicSubCommandElements()
 
         val path = event.commandPath.split("/")
@@ -637,7 +656,7 @@ abstract class DiscordCommand(
         firstElement.subCommands[secondLevel]!!.execute(event, null, this)
     }
 
-    fun handleSubCommand(
+    open fun handleSubCommand(
         event: GenericInteractionCreateEvent?,
         function: (DiscordSubCommand) -> (Boolean),
         fallback: (GenericInteractionCreateEvent?) -> (Boolean)
