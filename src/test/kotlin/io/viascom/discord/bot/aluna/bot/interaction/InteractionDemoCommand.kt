@@ -54,6 +54,7 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
     private lateinit var latestHook: InteractionHook
 
     override fun execute(event: SlashCommandInteractionEvent) {
+        
         latestEmbed = EmbedBuilder()
             .setTitle("Interaction Demo")
             .setColor(Color.GREEN)

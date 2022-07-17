@@ -25,6 +25,7 @@ import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.model.StringOption
 import io.viascom.discord.bot.aluna.util.addOption
+import io.viascom.discord.bot.aluna.util.getTypedOption
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
 @Interaction
@@ -37,6 +38,6 @@ class SetPreferredAnimalCommand : DiscordCommand("set-preferred-animal", "Define
     }
 
     override fun execute(event: SlashCommandInteractionEvent) {
-
+        event.reply(event.getTypedOption(animalOption, "")!!).complete()
     }
 }

@@ -18,21 +18,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/**
+ * This class is based on CoroutineEventListener.kt from https://github.com/MinnDevelopment/jda-ktx at commit a5d840c under the Apache License, Version 2.0
+ */
 
-package io.viascom.discord.bot.aluna.bot.listener
+package io.viascom.discord.bot.aluna.bot.event
 
-import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
-import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
-import io.viascom.discord.bot.aluna.event.EventPublisher
 import net.dv8tion.jda.api.events.GenericEvent
-import org.springframework.stereotype.Service
 
-@Service
-@ConditionalOnJdaEnabled
-class GenericEventPublisher(
-    private val eventPublisher: EventPublisher
-) : CoroutineEventListener {
-    override suspend fun onEvent(event: GenericEvent) {
-        eventPublisher.publishDiscordEvent(event)
-    }
+/**
+ * Identical to [EventListener][net.dv8tion.jda.api.hooks.EventListener] but uses suspending function.
+ */
+fun interface CoroutineEventListener {
+    /**
+     * The timeout [kotlin.time.Duration] to use, or [EventTimeout.Inherit] to use event manager default.
+     *
+     * This timeout decides how long a listener function is allowed to run, not when to unregister it.
+     */
+    val timeout: EventTimeout get() = EventTimeout.Inherit
+
+    suspend fun onEvent(event: GenericEvent)
+
+    /**
+     * Unregisters this listener
+     */
+    fun cancel() {}
 }

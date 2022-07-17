@@ -22,6 +22,7 @@
 package io.viascom.discord.bot.aluna.bot
 
 import datadog.trace.api.Trace
+import io.viascom.discord.bot.aluna.bot.event.getDefaultIOScope
 import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionAdditionalConditions
 import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionConditions
 import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionLoadAdditionalData
@@ -34,6 +35,8 @@ import io.viascom.discord.bot.aluna.model.MissingPermissions
 import io.viascom.discord.bot.aluna.model.UseScope
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.translation.MessageService
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -285,17 +288,24 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
         throw exception
     }
 
-    fun exitCommand(event: GenericCommandInteractionEvent) {
-        if (alunaProperties.debug.useStopwatch && stopWatch != null) {
-            stopWatch!!.stop()
-            MDC.put("duration", stopWatch!!.totalTimeMillis.toString())
-            logger.info("Context menu '${event.commandPath}' (${this.author.id})${if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else ""} took ${stopWatch!!.totalTimeMillis}ms")
-            when {
-                (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the context menu ${event.commandPath} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
-                (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the context menu ${event.commandPath} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
+    @JvmSynthetic
+    internal fun exitCommand(event: GenericCommandInteractionEvent) {
+        val command = this
+        runBlocking {
+            launch {
+                if (alunaProperties.debug.useStopwatch && stopWatch != null) {
+                    stopWatch!!.stop()
+                    MDC.put("duration", stopWatch!!.totalTimeMillis.toString())
+                    logger.info("Context menu '${event.commandPath}' (${command.author.id})${if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else ""} took ${stopWatch!!.totalTimeMillis}ms")
+                    when {
+                        (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the context menu ${event.commandPath} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
+                        (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the context menu ${event.commandPath} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
+                    }
+                }
             }
-            discordBot.interactionExecutor.execute {
-                discordInteractionMetaDataHandler.onExitInteraction(this, stopWatch, event)
+
+            launch(getDefaultIOScope().coroutineContext) {
+                discordInteractionMetaDataHandler.onExitInteraction(command, stopWatch, event)
             }
         }
     }

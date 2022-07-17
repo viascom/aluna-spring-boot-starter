@@ -39,80 +39,79 @@ import java.awt.Color
 
 @Component
 @Conditional(SendServerNotificationCondition::class)
-internal open class ServerNotificationEvent(private val discordBot: DiscordBot, private val shardManager: ShardManager, private val alunaProperties: AlunaProperties) :
-    ListenerAdapter() {
+internal open class ServerNotificationEvent(
+    private val discordBot: DiscordBot,
+    private val shardManager: ShardManager,
+    private val alunaProperties: AlunaProperties
+) : ListenerAdapter() {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onGuildJoin(event: GuildJoinEvent) {
-        discordBot.asyncExecutor.execute {
-            if (!alunaProperties.notification.serverJoin.enabled) {
-                return@execute
-            }
-
-            val server = event.guild
-            val embedMessage = EmbedBuilder()
-                .setTitle("\uD83D\uDFE2 New server **${server.name}** joined")
-                .setColor(Color.GREEN)
-                .setDescription("")
-                .setThumbnail(server.iconUrl)
-                .addField("» Server", "Name: ${server.name}\nId: ${server.id}", false)
-                .addField("» Owner", "Name: ${server.owner?.effectiveName}\nId: ${server.ownerId}", false)
-                .addField("» Locale", "Name: ${server.locale.displayName}", false)
-                .addField("» Members", "Total: ${server.memberCount}", false)
-            if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
-                embedMessage.addField("» Other Bots", server.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }, false)
-            }
-
-            val channel = shardManager.getGuildTextChannel(
-                alunaProperties.notification.serverJoin.server.toString(),
-                alunaProperties.notification.serverJoin.channel.toString()
-            )
-
-            if (channel == null) {
-                logger.warn("Aluna was not able to send a GuildJoinEvent to the defined channel.")
-                return@execute
-            }
-
-            channel.sendMessageEmbeds(embedMessage.build()).queue()
+        if (!alunaProperties.notification.serverJoin.enabled) {
+            return
         }
+
+        val server = event.guild
+        val embedMessage = EmbedBuilder()
+            .setTitle("\uD83D\uDFE2 New server **${server.name}** joined")
+            .setColor(Color.GREEN)
+            .setDescription("")
+            .setThumbnail(server.iconUrl)
+            .addField("» Server", "Name: ${server.name}\nId: ${server.id}", false)
+            .addField("» Owner", "Name: ${server.owner?.effectiveName}\nId: ${server.ownerId}", false)
+            .addField("» Locale", "Name: ${server.locale.displayName}", false)
+            .addField("» Members", "Total: ${server.memberCount}", false)
+        if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
+            embedMessage.addField("» Other Bots", server.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }, false)
+        }
+
+        val channel = shardManager.getGuildTextChannel(
+            alunaProperties.notification.serverJoin.server.toString(),
+            alunaProperties.notification.serverJoin.channel.toString()
+        )
+
+        if (channel == null) {
+            logger.warn("Aluna was not able to send a GuildJoinEvent to the defined channel.")
+            return
+        }
+
+        channel.sendMessageEmbeds(embedMessage.build()).queue()
     }
 
     override fun onGuildLeave(event: GuildLeaveEvent) {
-        discordBot.asyncExecutor.execute {
-            if (!alunaProperties.notification.serverLeave.enabled) {
-                return@execute
-            }
-
-            val server = event.guild
-            val embedMessage = EmbedBuilder()
-                .setTitle("\uD83D\uDD34 Server **${server.name}** left")
-                .setColor(Color.RED)
-                .setDescription("")
-                .setThumbnail(server.iconUrl)
-                .addField("» Server", "Name: ${server.name}\nId: ${server.id}", false)
-                .addField("» Owner", "Name: ${server.owner?.effectiveName}\nId: ${server.ownerId}", false)
-                .addField("» Locale", "Name: ${server.locale.displayName}", false)
-                .addField("» Members", "Total: ${server.memberCount}", false)
-            if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
-                embedMessage.addField(
-                    "» Other Bots",
-                    server.loadMembers().get().filter { it.user.isBot && it.user.id != server.jda.selfUser.id }.joinToString(", ") { it.user.asTag },
-                    false
-                )
-            }
-
-            val channel = shardManager.getGuildTextChannel(
-                alunaProperties.notification.serverLeave.server.toString(),
-                alunaProperties.notification.serverLeave.channel.toString()
-            )
-
-            if (channel == null) {
-                logger.warn("Aluna was not able to send a GuildLeaveEvent to the defined channel.")
-                return@execute
-            }
-
-            channel.sendMessageEmbeds(embedMessage.build()).queue()
+        if (!alunaProperties.notification.serverLeave.enabled) {
+            return
         }
+
+        val server = event.guild
+        val embedMessage = EmbedBuilder()
+            .setTitle("\uD83D\uDD34 Server **${server.name}** left")
+            .setColor(Color.RED)
+            .setDescription("")
+            .setThumbnail(server.iconUrl)
+            .addField("» Server", "Name: ${server.name}\nId: ${server.id}", false)
+            .addField("» Owner", "Name: ${server.owner?.effectiveName}\nId: ${server.ownerId}", false)
+            .addField("» Locale", "Name: ${server.locale.displayName}", false)
+            .addField("» Members", "Total: ${server.memberCount}", false)
+        if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
+            embedMessage.addField(
+                "» Other Bots",
+                server.loadMembers().get().filter { it.user.isBot && it.user.id != server.jda.selfUser.id }.joinToString(", ") { it.user.asTag },
+                false
+            )
+        }
+
+        val channel = shardManager.getGuildTextChannel(
+            alunaProperties.notification.serverLeave.server.toString(),
+            alunaProperties.notification.serverLeave.channel.toString()
+        )
+
+        if (channel == null) {
+            logger.warn("Aluna was not able to send a GuildLeaveEvent to the defined channel.")
+            return
+        }
+
+        channel.sendMessageEmbeds(embedMessage.build()).queue()
     }
 }

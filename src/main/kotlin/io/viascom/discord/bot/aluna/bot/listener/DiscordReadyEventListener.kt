@@ -54,28 +54,26 @@ internal open class DiscordReadyEventListener(
             shardManager.setActivity(null)
         }
 
-        discordBot.asyncExecutor.execute {
-            if (alunaProperties.notification.botReady.enabled) {
-                val embedMessage = EmbedBuilder()
-                    .setTitle("⚡ Bot Ready")
-                    .setColor(Color.GREEN)
-                    .setDescription("Bot is up and ready to answer interactions.")
-                    .addField("» Client-Id", alunaProperties.discord.applicationId ?: "n/a", false)
-                    .addField("» Total Interactions", interactions.size.toString(), true)
-                    .addField("» Production Mode", alunaProperties.productionMode.toString(), true)
+        if (alunaProperties.notification.botReady.enabled) {
+            val embedMessage = EmbedBuilder()
+                .setTitle("⚡ Bot Ready")
+                .setColor(Color.GREEN)
+                .setDescription("Bot is up and ready to answer interactions.")
+                .addField("» Client-Id", alunaProperties.discord.applicationId ?: "n/a", false)
+                .addField("» Total Interactions", interactions.size.toString(), true)
+                .addField("» Production Mode", alunaProperties.productionMode.toString(), true)
 
-                val channel = shardManager.getGuildTextChannel(
-                    alunaProperties.notification.botReady.server.toString(),
-                    alunaProperties.notification.botReady.channel.toString()
-                )
+            val channel = shardManager.getGuildTextChannel(
+                alunaProperties.notification.botReady.server.toString(),
+                alunaProperties.notification.botReady.channel.toString()
+            )
 
-                if (channel == null) {
-                    logger.warn("Aluna was not able to send a DiscordReadyEvent to the defined channel.")
-                    return@execute
-                }
-
-                channel.sendMessageEmbeds(embedMessage.build()).queue()
+            if (channel == null) {
+                logger.warn("Aluna was not able to send a DiscordReadyEvent to the defined channel.")
+                return
             }
+
+            channel.sendMessageEmbeds(embedMessage.build()).queue()
         }
     }
 

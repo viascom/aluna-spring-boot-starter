@@ -1,6 +1,9 @@
 package io.viascom.discord.bot.aluna.bot
 
 import datadog.trace.api.Trace
+import io.viascom.discord.bot.aluna.bot.event.getDefaultIOScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.Command
 import org.slf4j.MDC
@@ -24,7 +27,8 @@ abstract class DiscordUserContextMenu(name: String) : DiscordContextMenu(Command
      * @param event The UserContextInteractionEvent that triggered this Command
      */
     @Trace
-    fun run(event: UserContextInteractionEvent) {
+    @JvmSynthetic
+    internal fun run(event: UserContextInteractionEvent) {
         if (alunaProperties.debug.useStopwatch) {
             stopWatch = StopWatch()
             stopWatch!!.start()
@@ -38,7 +42,7 @@ abstract class DiscordUserContextMenu(name: String) : DiscordContextMenu(Command
         channel = event.channel
         channel?.let { MDC.put("discord.channel", it.id) }
         author = event.user
-        MDC.put("author", "${author.id} (${author.name})")
+        MDC.put("discord.author", "${author.id} (${author.asTag})")
 
         userLocale = event.userLocale
 
@@ -69,24 +73,27 @@ abstract class DiscordUserContextMenu(name: String) : DiscordContextMenu(Command
         //Load additional data for this interaction
         discordInteractionLoadAdditionalData.loadData(this, event)
 
-        try {
+        val command = this
+        runBlocking {
             //Run onCommandExecution in asyncExecutor to ensure it is not blocking the execution of the interaction itself
-            discordBot.interactionExecutor.execute {
-                discordInteractionMetaDataHandler.onContextMenuExecution(this, event)
+            launch(getDefaultIOScope().coroutineContext) { discordInteractionMetaDataHandler.onContextMenuExecution(command, event) }
+            launch(getDefaultIOScope().coroutineContext) {
+                if (alunaProperties.discord.publishDiscordContextEvent) {
+                    eventPublisher.publishDiscordUserContextEvent(author, channel, guild, event.commandPath, command)
+                }
             }
-            if (alunaProperties.discord.publishDiscordContextEvent) {
-                eventPublisher.publishDiscordUserContextEvent(author, channel, guild, event.commandPath, this)
-            }
-            logger.info("Run context menu '${event.commandPath}'" + if (alunaProperties.debug.showHashCode) " [${this.hashCode()}]" else "")
-            execute(event)
-        } catch (e: Exception) {
             try {
-                onExecutionException(event, e)
-            } catch (exceptionError: Exception) {
-                discordInteractionMetaDataHandler.onGenericExecutionException(this, e, exceptionError, event)
+                logger.info("Run context menu '${event.commandPath}'" + if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else "")
+                execute(event)
+            } catch (e: Exception) {
+                try {
+                    onExecutionException(event, e)
+                } catch (exceptionError: Exception) {
+                    discordInteractionMetaDataHandler.onGenericExecutionException(command, e, exceptionError, event)
+                }
+            } finally {
+                exitCommand(event)
             }
-        } finally {
-            exitCommand(event)
         }
     }
 }

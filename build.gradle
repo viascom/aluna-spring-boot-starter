@@ -10,7 +10,7 @@ plugins {
 }
 
 group "io.viascom.discord.bot"
-version "0.0.24_5.0.0-alpha.13"
+version "0.0.25_5.0.0-alpha.13_DEV"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -64,6 +64,8 @@ dependencies {
     //====== Kotlin ======
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm" //:1.6.3
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j" //:1.6.3
     compileOnly "org.jetbrains.kotlin:kotlin-script-util"
     compileOnly "org.jetbrains.kotlin:kotlin-script-runtime"
     compileOnly "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable"
