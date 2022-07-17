@@ -60,7 +60,7 @@ internal open class ServerNotificationEvent(
             .setThumbnail(server.iconUrl)
             .addField("» Server", "Name: ${server.name}\nId: ${server.id}", false)
             .addField("» Owner", "Name: ${server.owner?.effectiveName}\nId: ${server.ownerId}", false)
-            .addField("» Locale", "Name: ${server.locale.displayName}", false)
+            .addField("» Locale", "Name: ${server.locale.languageName}", false)
             .addField("» Members", "Total: ${server.memberCount}", false)
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
             embedMessage.addField("» Other Bots", server.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }, false)
@@ -92,7 +92,7 @@ internal open class ServerNotificationEvent(
             .setThumbnail(server.iconUrl)
             .addField("» Server", "Name: ${server.name}\nId: ${server.id}", false)
             .addField("» Owner", "Name: ${server.owner?.effectiveName}\nId: ${server.ownerId}", false)
-            .addField("» Locale", "Name: ${server.locale.displayName}", false)
+            .addField("» Locale", "Name: ${server.locale.languageName}", false)
             .addField("» Members", "Total: ${server.memberCount}", false)
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
             embedMessage.addField(

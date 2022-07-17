@@ -62,7 +62,7 @@ class SayHiUserMenu : DiscordUserContextMenu(
         event.deferEdit().queue()
 
         //Send a new message in the same channel
-        event.textChannel.sendMessage(event.getValueAsString("message")!!.replace("@user", target.asMention)).queue()
+        event.channel.sendMessage(event.getValueAsString("message")!!.replace("@user", target.asMention)).queue()
 
         //Let Aluna know that the event got handled and can be removed from the observer
         return true

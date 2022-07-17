@@ -43,6 +43,7 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
@@ -149,14 +150,14 @@ abstract class DiscordContextMenu(type: Command.Type, name: String) : CommandDat
      *
      * *This is set by Aluna based on the information provided by Discord*
      */
-    var userLocale: Locale = Locale.ENGLISH
+    var userLocale: DiscordLocale = DiscordLocale.ENGLISH_US
 
     /**
      * Guild [Locale]
      *
      * *This is set by Aluna based on the information provided by Discord*
      */
-    var guildLocale: Locale = Locale.ENGLISH
+    var guildLocale: DiscordLocale = DiscordLocale.ENGLISH_US
 
     /**
      * Stop watch used if enabled by properties

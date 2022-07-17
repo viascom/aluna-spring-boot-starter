@@ -69,7 +69,7 @@ class AdminSearchOverviewPage(
 
             embedBuilder.addField(
                 "Probable Locale",
-                probableLocales.joinToString("\n") { "${it.key.displayLanguage} - ${((0.0 + it.value.size) / localeMap.values.flatten().size * 100).round(1)}%" },
+                probableLocales.joinToString("\n") { "${it.key.languageName} - ${((0.0 + it.value.size) / localeMap.values.flatten().size * 100).round(1)}%" },
                 true
             )
         }
@@ -114,7 +114,7 @@ class AdminSearchOverviewPage(
             "${discordServer.owner?.asMention} | ${discordServer.owner?.effectiveName} (`${discordServer.ownerId}`)\n" +
                     "Owner on Support Server: " + (if (discordServer.owner?.user?.mutualGuilds?.any { it.id == alunaProperties.command.systemCommand.supportServer } == true) systemCommandEmojiProvider.tickEmoji().formatted + " Yes" else systemCommandEmojiProvider.crossEmoji().formatted + " No"),
             false)
-        embedBuilder.addField("Locale", discordServer.locale.displayLanguage, true)
+        embedBuilder.addField("Locale", discordServer.locale.languageName, true)
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
             embedBuilder.addField("Members", discordServer.memberCount.toString(), true)
         }

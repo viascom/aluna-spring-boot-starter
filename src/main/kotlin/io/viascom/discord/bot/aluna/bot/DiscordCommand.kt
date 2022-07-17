@@ -40,6 +40,7 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
@@ -217,14 +218,14 @@ abstract class DiscordCommand @JvmOverloads constructor(
      *
      * *This is set by Aluna based on the information provided by Discord*
      */
-    var userLocale: Locale = Locale.ENGLISH
+    var userLocale: DiscordLocale = DiscordLocale.ENGLISH_US
 
     /**
      * Guild [Locale]
      *
      * *This is set by Aluna based on the information provided by Discord*
      */
-    var guildLocale: Locale = Locale.ENGLISH
+    var guildLocale: DiscordLocale = DiscordLocale.ENGLISH_US
 
     /**
      * Stop watch used if enabled by properties
@@ -600,8 +601,8 @@ abstract class DiscordCommand @JvmOverloads constructor(
         }
     }
 
-    fun MessageService.getForUser(key: String, vararg args: String): String = this.get(key, userLocale, *args)
-    fun MessageService.getForServer(key: String, vararg args: String): String = this.get(key, guildLocale, *args)
+    fun MessageService.getForUser(key: String, vararg args: String): String = this.get(key, Locale.forLanguageTag(userLocale.locale), *args)
+    fun MessageService.getForServer(key: String, vararg args: String): String = this.get(key, Locale.forLanguageTag(guildLocale.locale), *args)
 
     open fun registerSubCommands(vararg elements: DiscordSubCommandElement) {
         elements.forEach { element ->
