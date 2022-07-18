@@ -505,13 +505,14 @@ abstract class DiscordCommand @JvmOverloads constructor(
         author = event.user
         MDC.put("discord.author", "${author.id} (${author.asTag})")
 
-
         userLocale = event.userLocale
+        MDC.put("discord.author_locale", userLocale.locale)
 
         if (guild != null) {
             member = guild!!.getMember(author)
             guildChannel = event.guildChannel
             guildLocale = event.guildLocale
+            MDC.put("discord.server_locale", guildLocale.locale)
         }
 
         //Check if this is an owner command

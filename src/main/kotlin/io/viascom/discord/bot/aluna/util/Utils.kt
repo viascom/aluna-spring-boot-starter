@@ -53,6 +53,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackA
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
+import java.util.*
 import java.util.function.Function
 
 fun Double.round(decimals: Int): Double {
@@ -338,3 +339,5 @@ fun linkButton(url: String, label: String? = null, emoji: Emoji? = null, disable
     Button.of(ButtonStyle.LINK, url, label, emoji).withDisabled(disabled)
 
 fun String.toEmoji() = Emoji.fromFormatted(this)
+
+fun DiscordLocale.toLocale() = Locale.forLanguageTag(this.locale)
