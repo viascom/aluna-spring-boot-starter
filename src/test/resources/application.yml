@@ -26,10 +26,11 @@ aluna:
   translation:
     enabled: true
     supported-discord-locals: german, english_us
+    base-path: i18n/interactions
   debug:
     use-stopwatch: true
     show-hash-code: true
-    show-translation-keys: only_missing
+    show-translation-keys: none
 
 logging:
   level:

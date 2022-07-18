@@ -187,11 +187,10 @@ class DefaultDiscordInteractionLocalization(
         }
 
         private class Bundle(val targetLocale: DiscordLocale, val resourceBundle: ResourceBundle) {
-            override fun equals(o: Any?): Boolean {
-                if (this === o) return true
-                if (o !is Bundle) return false
-                val bundle = o
-                return if (targetLocale != bundle.targetLocale) false else resourceBundle == bundle.resourceBundle
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other !is Bundle) return false
+                return if (targetLocale != other.targetLocale) false else resourceBundle == other.resourceBundle
             }
 
             override fun hashCode(): Int {

@@ -97,7 +97,7 @@ class SendMessageProvider(
             isDM = true
         }
         if (channelId == "0") {
-            channelId = event.channel?.id ?: "0"
+            channelId = event.channel.id
         }
 
         when {

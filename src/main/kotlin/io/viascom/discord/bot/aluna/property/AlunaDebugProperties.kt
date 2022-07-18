@@ -39,6 +39,9 @@ class AlunaDebugProperties {
      */
     var enableDebugConfigurationLog: Boolean = true
 
+    /**
+     * Defines if Aluna should list translations in the log on startup
+     */
     var showTranslationKeys: ShowTranslationKeys = ShowTranslationKeys.NONE
 
     enum class ShowTranslationKeys {

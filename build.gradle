@@ -9,11 +9,28 @@ plugins {
     id "de.undercouch.download" version "5.1.0"
 }
 
-group "io.viascom.discord.bot"
-version "0.0.25_5.0.0-alpha.15"
-
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
+
+ext {
+    major = 0
+    minor = 0
+    patch = 25
+
+    isCiServer = System.getenv("GITHUB_ACTIONS") != null ||
+            System.getProperty("GITHUB_ACTIONS") != null
+
+    jdaVersion = "5.0.0-alpha.16"
+    retrofitVersion = "2.9.0"
+    jacksonSpringBootVersion = "2.7.1"
+    jacksonVersion = "2.13.3"
+    ddTraceVersion = "0.104.0"
+    emojiJavaVersion = "5.1.1"
+}
+
+group "io.viascom.discord.bot"
+version = "${major}.${minor}.${patch}_${jdaVersion}${isCiServer ? "" : "-DEV"}"
+project.logger.lifecycle("Version of this build: ${version}")
 
 tasks.bootJar { enabled = false }
 tasks.jar { enabled = true }
@@ -39,25 +56,12 @@ java {
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven {
         name "m2-dv8tion"
         url "https://m2.dv8tion.net/releases"
     }
 }
-
-ext {
-    jdaVersion = "5.0.0-alpha.15"
-    retrofitVersion = "2.9.0"
-    jacksonSpringBootVersion = "2.7.1"
-    jacksonVersion = "2.13.3"
-    graalvmJsVersion = "22.1.0.1"
-    nashornCoreVersion = "15.4"
-    ddTraceVersion = "0.104.0"
-    emojiJavaVersion = "5.1.1"
-}
-
 
 dependencies {
 
