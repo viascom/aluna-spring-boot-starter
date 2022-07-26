@@ -19,16 +19,26 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.event
+package io.viascom.discord.bot.aluna.scriptengine
 
-import net.dv8tion.jda.internal.interactions.CommandDataImpl
-import org.springframework.context.ApplicationEvent
-import kotlin.reflect.KClass
+/**
+ * Kotlin script binding provider.
+ * Implement this interface in order to add additional bindings and imports to the KotlinScriptService.
+ *
+ */
+interface KotlinScriptV2BindingProvider {
 
-class DiscordSlashCommandInitializedEvent(
-    source: Any,
-    val newCommands: List<KClass<out CommandDataImpl>>,
-    val updatedCommands: List<KClass<out CommandDataImpl>>,
-    val removedCommands: List<String>
-) :
-    ApplicationEvent(source)
+    /**
+     * Get binding definitions.
+     *
+     * @return List of Bindings.
+     */
+    fun getBindings(): List<KotlinScriptV2Service.Binding>
+
+    /**
+     * Get import definitions
+     *
+     * @return List of imports
+     */
+    fun getImports(): List<String>
+}

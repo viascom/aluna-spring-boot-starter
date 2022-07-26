@@ -21,7 +21,6 @@
 
 package io.viascom.discord.bot.aluna.bot
 
-import datadog.trace.api.Trace
 import io.viascom.discord.bot.aluna.bot.event.getDefaultIOScope
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.event.EventPublisher
@@ -175,7 +174,7 @@ abstract class DiscordContextMenu(
      * @param event [ButtonInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    @Trace
+
     override fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return true
     }
@@ -183,7 +182,7 @@ abstract class DiscordContextMenu(
     /**
      * This method gets triggered, as soon as a button event observer duration timeout is reached.
      */
-    @Trace
+
     override fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
@@ -194,7 +193,7 @@ abstract class DiscordContextMenu(
      * @param event [SelectMenuInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    @Trace
+
     override fun onSelectMenuInteraction(event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return true
     }
@@ -202,7 +201,7 @@ abstract class DiscordContextMenu(
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-    @Trace
+
     override fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
@@ -213,7 +212,7 @@ abstract class DiscordContextMenu(
      * @param event [ModalInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    @Trace
+
     override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return true
     }
@@ -221,14 +220,14 @@ abstract class DiscordContextMenu(
     /**
      * This method gets triggered, as soon as a modal event observer duration timeout is reached.
      */
-    @Trace
+
     override fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
     /**
      * On destroy gets called, when the object gets destroyed after the defined beanTimoutDelay.
      */
-    @Trace
+
     open fun onDestroy() {
     }
 
@@ -277,6 +276,7 @@ abstract class DiscordContextMenu(
                     .setContent("⛔ You need to be in a voice channel yourself to execute this interaction").queue()
 
             }
+
             (missingPermissions.hasMissingPermissions) -> {
                 event.deferReply(true).setContent("⛔ I'm missing the following permission to execute this interaction:\n" +
                         missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +

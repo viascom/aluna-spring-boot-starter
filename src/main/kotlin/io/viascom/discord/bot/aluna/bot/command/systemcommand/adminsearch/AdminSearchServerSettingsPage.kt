@@ -55,11 +55,13 @@ class AdminSearchServerSettingsPage(
         embedBuilder.addField("Max Bitrate", "${discordServer.maxBitrate}", true)
         embedBuilder.addField("Max Filesize", "${discordServer.maxFileSize / 1000000} MB", true)
         embedBuilder.addField("Max Presences", "${discordServer.maxPresences}", true)
-        embedBuilder.addField("Default Notification Level", when(discordServer.defaultNotificationLevel){
-            Guild.NotificationLevel.ALL_MESSAGES -> "Every message sent in this guild will result in a message ping."
-            Guild.NotificationLevel.MENTIONS_ONLY -> "Only messages that specifically mention will result in a ping."
-            Guild.NotificationLevel.UNKNOWN -> "unknown"
-        }, true)
+        embedBuilder.addField(
+            "Default Notification Level", when (discordServer.defaultNotificationLevel) {
+                Guild.NotificationLevel.ALL_MESSAGES -> "Every message sent in this guild will result in a message ping."
+                Guild.NotificationLevel.MENTIONS_ONLY -> "Only messages that specifically mention will result in a ping."
+                Guild.NotificationLevel.UNKNOWN -> "unknown"
+            }, true
+        )
         embedBuilder.addField(
             "Explicit Content Level", when (discordServer.explicitContentLevel) {
                 Guild.ExplicitContentLevel.OFF -> systemCommandEmojiProvider.crossEmoji().formatted + " Don't scan any messages."
@@ -68,13 +70,15 @@ class AdminSearchServerSettingsPage(
                 Guild.ExplicitContentLevel.UNKNOWN -> "Unknown filter level!"
             }, true
         )
-        embedBuilder.addField("NSFW Level", when(discordServer.nsfwLevel){
-            Guild.NSFWLevel.DEFAULT -> "\uD83D\uDFE2 Discord has not rated this guild."
-            Guild.NSFWLevel.EXPLICIT -> "\uD83D\uDD1E Is classified as a NSFW server"
-            Guild.NSFWLevel.SAFE -> "\uD83D\uDFE2 Doesn't classify as a NSFW server"
-            Guild.NSFWLevel.AGE_RESTRICTED -> "\uD83D\uDD1E Is classified as NSFW and has an age restriction in place"
-            Guild.NSFWLevel.UNKNOWN -> "unknown"
-        }, true)
+        embedBuilder.addField(
+            "NSFW Level", when (discordServer.nsfwLevel) {
+                Guild.NSFWLevel.DEFAULT -> "\uD83D\uDFE2 Discord has not rated this guild."
+                Guild.NSFWLevel.EXPLICIT -> "\uD83D\uDD1E Is classified as a NSFW server"
+                Guild.NSFWLevel.SAFE -> "\uD83D\uDFE2 Doesn't classify as a NSFW server"
+                Guild.NSFWLevel.AGE_RESTRICTED -> "\uD83D\uDD1E Is classified as NSFW and has an age restriction in place"
+                Guild.NSFWLevel.UNKNOWN -> "unknown"
+            }, true
+        )
         embedBuilder.addField(
             "Required MFA Level", when (discordServer.requiredMFALevel) {
                 Guild.MFALevel.NONE -> systemCommandEmojiProvider.crossEmoji().formatted + " No"
@@ -82,21 +86,25 @@ class AdminSearchServerSettingsPage(
                 else -> "unknown"
             }, true
         )
-        embedBuilder.addField("Verification Level", when(discordServer.verificationLevel){
-            Guild.VerificationLevel.NONE -> "⚫ None"
-            Guild.VerificationLevel.LOW -> "\uD83D\uDFE2 Low"
-            Guild.VerificationLevel.MEDIUM -> "\uD83D\uDFE1 Medium"
-            Guild.VerificationLevel.HIGH -> "\uD83D\uDFE0 High"
-            Guild.VerificationLevel.VERY_HIGH -> "\uD83D\uDD34 Very High"
-            Guild.VerificationLevel.UNKNOWN -> "unknown"
-        }, true)
-        embedBuilder.addField("Booster", when(discordServer.boostTier) {
-            Guild.BoostTier.NONE -> systemCommandEmojiProvider.crossEmoji().formatted + " None"
-            Guild.BoostTier.TIER_1 -> "1️⃣ Tier 1"
-            Guild.BoostTier.TIER_2 -> "2️⃣ Tier 2"
-            Guild.BoostTier.TIER_3 -> "3️⃣ Tier 3"
-            Guild.BoostTier.UNKNOWN -> "unknown"
-        } + " (${discordServer.boostCount})", true)
+        embedBuilder.addField(
+            "Verification Level", when (discordServer.verificationLevel) {
+                Guild.VerificationLevel.NONE -> "⚫ None"
+                Guild.VerificationLevel.LOW -> "\uD83D\uDFE2 Low"
+                Guild.VerificationLevel.MEDIUM -> "\uD83D\uDFE1 Medium"
+                Guild.VerificationLevel.HIGH -> "\uD83D\uDFE0 High"
+                Guild.VerificationLevel.VERY_HIGH -> "\uD83D\uDD34 Very High"
+                Guild.VerificationLevel.UNKNOWN -> "unknown"
+            }, true
+        )
+        embedBuilder.addField(
+            "Booster", when (discordServer.boostTier) {
+                Guild.BoostTier.NONE -> systemCommandEmojiProvider.crossEmoji().formatted + " None"
+                Guild.BoostTier.TIER_1 -> "1️⃣ Tier 1"
+                Guild.BoostTier.TIER_2 -> "2️⃣ Tier 2"
+                Guild.BoostTier.TIER_3 -> "3️⃣ Tier 3"
+                Guild.BoostTier.UNKNOWN -> "unknown"
+            } + " (${discordServer.boostCount})", true
+        )
         embedBuilder.addField(
             "Boost Progress Bar",
             if (discordServer.isBoostProgressBarEnabled) systemCommandEmojiProvider.tickEmoji().formatted + " Yes" else systemCommandEmojiProvider.crossEmoji().formatted + " No",

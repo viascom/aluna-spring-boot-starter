@@ -54,7 +54,7 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
     private lateinit var latestHook: InteractionHook
 
     override fun execute(event: SlashCommandInteractionEvent) {
-        
+
         latestEmbed = EmbedBuilder()
             .setTitle("Interaction Demo")
             .setColor(Color.GREEN)
@@ -90,12 +90,14 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
                     .build()
                 event.replyModal(modal).queue()
             }
+
             "set_image" -> {
                 val modal = Modal.create("set_image", "Set Image")
                     .addTextField("url", "Url", value = latestEmbed.build().image?.url)
                     .build()
                 event.replyModal(modal).queue()
             }
+
             "remove_image" -> {
                 latestEmbed.setImage(null)
                 event.editMessageEmbeds(latestEmbed.build()).queue { latestHook = it }
@@ -118,6 +120,7 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
                 latestEmbed.setDescription(text)
                 event.editMessageEmbeds(latestEmbed.build()).queue { latestHook = it }
             }
+
             "set_image" -> {
                 val image = event.getValueAsString("url", "")
                 latestEmbed.setImage(image)

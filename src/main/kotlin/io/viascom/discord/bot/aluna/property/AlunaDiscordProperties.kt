@@ -173,7 +173,7 @@ class AlunaDiscordProperties {
         ONLINE_STATUS
     }
 
-    class CacheFlags: ArrayList<CacheFlag>()
+    class CacheFlags : ArrayList<CacheFlag>()
 
     enum class ChunkingFilter {
         ALL, NONE

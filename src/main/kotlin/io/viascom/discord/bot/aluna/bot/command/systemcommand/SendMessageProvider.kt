@@ -116,6 +116,7 @@ class SendMessageProvider(
                 }
                 return true
             }
+
             (serverId != "0" && channelId != "0") -> {
                 val channel = shardManager.getGuildTextChannel(serverId, channelId)
                 if (channel == null) {
@@ -131,6 +132,7 @@ class SendMessageProvider(
                 }
                 return true
             }
+
             else -> {
                 event.deferReply(true).queue {
                     it.editOriginal("Could not find channel $channelId on $serverId!").queue()

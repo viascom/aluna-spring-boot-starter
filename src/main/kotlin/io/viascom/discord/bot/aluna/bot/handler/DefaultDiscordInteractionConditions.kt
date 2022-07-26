@@ -106,7 +106,7 @@ class DefaultDiscordInteractionConditions : DiscordInteractionConditions {
 
         botPermissions.forEach { permission ->
             if (permission.isChannel) {
-                if (permission.name.startsWith("VOICE")) {
+                if (permission.isVoice) {
                     val voiceChannel = member?.voiceState?.channel
                     if (voiceChannel == null) {
                         missingPermissions.notInVoice = true

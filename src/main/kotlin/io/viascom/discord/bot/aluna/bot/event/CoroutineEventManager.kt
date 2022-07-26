@@ -40,8 +40,8 @@ import kotlin.time.Duration
 /**
  * Creates a suitable coroutine scope for your needs.
  *
- * @param[pool] The executor used to dispatch coroutines, uses [Dispatchers.Default] if not provided
- * @param[job] The parent job used for coroutines which can be used to cancel all children, uses [SupervisorJob] by default
+ * @param[dispatcher] The executor used to dispatch coroutines, uses [Dispatchers.Default] if not provided
+ * @param[parent] The parent job used for coroutines which can be used to cancel all children, uses [SupervisorJob] by default
  * @param[errorHandler] The [CoroutineExceptionHandler] used for handling uncaught exceptions, uses a logging handler which cancels the parent job on [Error] by default
  * @param[context] Any additional context to add to the scope, uses [EmptyCoroutineContext] by default
  *

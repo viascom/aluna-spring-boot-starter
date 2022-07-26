@@ -26,48 +26,21 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnab
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
-import org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
 
-/**
- * Kotlin script service which can be used to execute kotlin scripts during runtime.
- *
- * !! Attention: This does not provide any security or sandbox like feature. !!
- *
- * By default, all classes from the io.viascom.discord.bot.aluna.* package are imported.
- * You can directly access shardManager, discordBot, alunaProperties. If you need other binding and or imports, you have to implement KotlinScriptBindingProvider
- *
- * Default Bindings:
- * - shardManager: ShardManager
- * - discordBot: DiscordBot
- * - alunaProperties: AlunaProperties
- *
- * Default imports:
- * - io.viascom.discord.bot.aluna.*
- * - java.awt.Color
- * - java.util.*
- * - java.time.OffsetDateTime",
- * - net.dv8tion.jda.api.interactions.commands.*
- * - net.dv8tion.jda.api.interactions.commands.build.*
- * - net.dv8tion.jda.api.interactions.components.*
- * - net.dv8tion.jda.api.interactions.components.buttons.*
- * - net.dv8tion.jda.api.interactions.components.selections.*
- * - net.dv8tion.jda.api.*
- * - net.dv8tion.jda.api.entities.*
- */
 @Service
 @ConditionalOnJdaEnabled
 @ConditionalOnProperty(name = ["command.system-command.enable-kotlin-script-evaluate"], prefix = "aluna", matchIfMissing = false)
-class KotlinScriptService(
+class KotlinScriptV2Service(
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
     private val alunaProperties: AlunaProperties,
-    private val bindingProviders: List<KotlinScriptBindingProvider>
+    private val bindingProviders: List<KotlinScriptV2BindingProvider>
 ) {
 
-    private val engine = KotlinJsr223JvmLocalScriptEngineFactory().scriptEngine
+    private val engine = javax.script.ScriptEngineManager().getEngineByExtension("kts")
 
     private val imports: String
 

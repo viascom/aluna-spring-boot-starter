@@ -4,7 +4,7 @@ plugins {
     id "maven-publish"
     id "org.jetbrains.kotlin.jvm" version "1.7.10"
     id "org.jetbrains.kotlin.kapt" version "1.7.10"
-    id "org.springframework.boot" version "2.7.1"
+    id "org.springframework.boot" version "2.7.2"
     id "io.spring.dependency-management" version "1.0.12.RELEASE"
     id "de.undercouch.download" version "5.1.0"
 }
@@ -15,14 +15,13 @@ targetCompatibility = JavaVersion.VERSION_17
 ext {
     major = 0
     minor = 0
-    patch = 25
+    patch = 26
 
-    isCiServer = System.getenv("GITHUB_ACTIONS") != null ||
-            System.getProperty("GITHUB_ACTIONS") != null
+    isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
-    jdaVersion = "5.0.0-alpha.16"
+    jdaVersion = "5.0.0-alpha.17"
     retrofitVersion = "2.9.0"
-    jacksonSpringBootVersion = "2.7.1"
+    jacksonSpringBootVersion = "2.7.2"
     jacksonVersion = "2.13.3"
     ddTraceVersion = "0.104.0"
     emojiJavaVersion = "5.1.1"
@@ -89,9 +88,6 @@ dependencies {
     //====== Jackson ======
     implementation "org.springframework.boot:spring-boot-starter-json:$jacksonSpringBootVersion"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
-
-    //====== Logging ======
-    compileOnly "com.datadoghq:dd-trace-api:$ddTraceVersion"
 
     //====== Emoji Helper ======
     api("com.vdurmont:emoji-java:$emojiJavaVersion") {

@@ -120,7 +120,7 @@ class EventWaiter(
                     }
 
                 }
-                
+
                 //Cleanup waitingEvents hash map
                 if (waitingEvents[workClass]?.isEmpty() == true) {
                     waitingEvents.remove(workClass)
@@ -197,11 +197,11 @@ class EventWaiter(
 
                 //Create new task
                 it.timeoutTask = scheduledThreadPool.schedule({
-                   runBlocking {
-                        if (waitingEvents.containsKey(it.type) && waitingEvents[it.type]!!.containsKey(id)) {
-                            if (waitingEvents[it.type]!![id]!!.remove(it) && it.timeoutAction != null) {
-                                it.timeoutAction.invoke()
-                            }
+                    runBlocking {
+                        if (waitingEvents.containsKey(it.type) && waitingEvents[it.type]!!.containsKey(id) &&
+                            waitingEvents[it.type]!![id]!!.remove(it) && it.timeoutAction != null
+                        ) {
+                            it.timeoutAction.invoke()
                         }
                     }
 
@@ -361,10 +361,10 @@ class EventWaiter(
         if (timeout != null) {
             we.timeoutTask = scheduledThreadPool.schedule({
                 runBlocking {
-                    if (waitingEvents.containsKey(type) && waitingEvents[type]!!.containsKey(id)) {
-                        if (waitingEvents[type]!![id]!!.remove(we) && timeoutAction != null) {
-                            timeoutAction.invoke()
-                        }
+                    if (waitingEvents.containsKey(type) && waitingEvents[type]!!.containsKey(id) &&
+                        waitingEvents[type]!![id]!!.remove(we) && timeoutAction != null
+                    ) {
+                        timeoutAction.invoke()
                     }
                 }
 

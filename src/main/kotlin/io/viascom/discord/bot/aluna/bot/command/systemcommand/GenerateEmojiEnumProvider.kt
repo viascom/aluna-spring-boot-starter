@@ -143,12 +143,14 @@ class GenerateEmojiEnumProvider(
                         .build()
                 ).queue()
             }
+
             "remove" -> {
                 event.deferEdit().queue()
 
                 createRemoveMessage()
                 latestHook.editOriginalEmbeds(latestEmbed.build()).setActionRows(getRemoveActionRow()).queue()
             }
+
             "generate" -> {
                 val file = generateFile()
                 val name = when (selectedType) {
@@ -159,11 +161,13 @@ class GenerateEmojiEnumProvider(
                 }
                 latestHook.editOriginalEmbeds().setContent("⬇️ Generated File: ⬇️").setActionRows(arrayListOf()).addFile(file.encodeToByteArray(), name).queue()
             }
+
             "cancel-remove" -> {
                 event.deferEdit().queue()
                 createOverviewMessage()
                 latestHook.editOriginalEmbeds(latestEmbed.build()).setActionRows(getActionRow()).queue()
             }
+
             "cancel" -> {
                 event.deferEdit().queue()
                 createOverviewMessage()
@@ -183,6 +187,7 @@ class GenerateEmojiEnumProvider(
                 createOverviewMessage()
                 latestHook.editOriginalEmbeds(latestEmbed.build()).setActionRows(getActionRow()).queue()
             }
+
             "serverList" -> {
                 event.deferEdit().queue()
                 selectedServerIds.remove(event.getSelection())
@@ -237,6 +242,7 @@ class GenerateEmojiEnumProvider(
                     content += guild.emojis.sortedBy { it.name }.joinToString("\n") { "${it.asMention} `${it.asMention}`" }
                 }
             }
+
             "kotlin" -> {
                 content = """
                     import io.viascom.discord.bot.aluna.model.DiscordEmoji;
@@ -261,6 +267,7 @@ class GenerateEmojiEnumProvider(
                 content = content.dropLast(1)
                 content += "\n}"
             }
+
             "java" -> {
                 content = """
                    import io.viascom.discord.bot.aluna.model.DiscordEmoji;

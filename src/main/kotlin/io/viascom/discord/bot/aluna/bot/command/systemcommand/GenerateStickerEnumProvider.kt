@@ -143,12 +143,14 @@ class GenerateStickerEnumProvider(
                         .build()
                 ).queue()
             }
+
             "remove" -> {
                 event.deferEdit().queue()
 
                 createRemoveMessage()
                 latestHook.editOriginalEmbeds(latestEmbed.build()).setActionRows(getRemoveActionRow()).queue()
             }
+
             "generate" -> {
                 val file = generateFile()
                 val name = when (selectedType) {
@@ -159,11 +161,13 @@ class GenerateStickerEnumProvider(
                 }
                 latestHook.editOriginalEmbeds().setContent("⬇️ Generated File: ⬇️").setActionRows(arrayListOf()).addFile(file.encodeToByteArray(), name).queue()
             }
+
             "cancel-remove" -> {
                 event.deferEdit().queue()
                 createOverviewMessage()
                 latestHook.editOriginalEmbeds(latestEmbed.build()).setActionRows(getActionRow()).queue()
             }
+
             "cancel" -> {
                 event.deferEdit().queue()
                 createOverviewMessage()
@@ -183,6 +187,7 @@ class GenerateStickerEnumProvider(
                 createOverviewMessage()
                 latestHook.editOriginalEmbeds(latestEmbed.build()).setActionRows(getActionRow()).queue()
             }
+
             "serverList" -> {
                 event.deferEdit().queue()
                 selectedServerIds.remove(event.getSelection())
@@ -237,6 +242,7 @@ class GenerateStickerEnumProvider(
                     content += guild.stickers.sortedBy { it.name }.joinToString("\n") { "${it.name} `${it.id}`" }
                 }
             }
+
             "kotlin" -> {
                 content = """
                     import io.viascom.discord.bot.aluna.model.DiscordSticker;
@@ -260,6 +266,7 @@ class GenerateStickerEnumProvider(
                 content = content.dropLast(1)
                 content += "\n}"
             }
+
             "java" -> {
                 content = """
                    import io.viascom.discord.bot.aluna.model.DiscordSticker;
@@ -271,7 +278,7 @@ class GenerateStickerEnumProvider(
                    public enum MyStickers implements DiscordSticker {
                 """.trimIndent()
 
-                selectedServerIds.mapNotNull { shardManager.getGuildById(it) }.forEach {guild ->
+                selectedServerIds.mapNotNull { shardManager.getGuildById(it) }.forEach { guild ->
                     content += "\n\n    //${guild.name} (${guild.id})\n"
                     content += guild.stickers
                         .sortedBy { it.name }

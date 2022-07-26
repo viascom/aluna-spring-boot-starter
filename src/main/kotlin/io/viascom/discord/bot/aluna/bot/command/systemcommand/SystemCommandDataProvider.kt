@@ -69,5 +69,6 @@ abstract class SystemCommandDataProvider(
     open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return true
     }
+
     open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {}
 }

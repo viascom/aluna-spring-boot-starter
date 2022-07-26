@@ -17,7 +17,9 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */package io.viascom.discord.bot.aluna.bot.command.systemcommand.adminsearch
+ */
+
+package io.viascom.discord.bot.aluna.bot.command.systemcommand.adminsearch
 
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.AdminSearchDataProvider
 import net.dv8tion.jda.api.EmbedBuilder

@@ -21,7 +21,6 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
-import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.SendServerNotificationCondition
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.getGuildTextChannel
@@ -40,7 +39,6 @@ import java.awt.Color
 @Component
 @Conditional(SendServerNotificationCondition::class)
 internal open class ServerNotificationEvent(
-    private val discordBot: DiscordBot,
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties
 ) : ListenerAdapter() {

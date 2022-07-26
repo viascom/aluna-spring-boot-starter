@@ -24,14 +24,16 @@ package io.viascom.discord.bot.aluna.bot.command.systemcommand
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
+import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.Webhook
-import io.viascom.discord.bot.aluna.util.getGuildMessage
-import io.viascom.discord.bot.aluna.util.getMessage
-import io.viascom.discord.bot.aluna.util.getTypedOption
+import io.viascom.discord.bot.aluna.util.*
+import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
+import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 
 @Interaction
@@ -53,17 +55,41 @@ class ExtractMessageProvider(
         val elements = event.getTypedOption(command.argsOption)?.split("/")
 
         if (elements == null) {
-            event.reply("Please define a message link as arg to use this command.").setEphemeral(true).queue()
-            return
+            val modal = Modal.create("extract_message", "Get Message as JSON")
+                .addTextField("message_url", "Message-Link")
+                .build()
+            event.replyModal(modal).queueAndRegisterInteraction(command)
+        } else {
+            extractMessage(elements, event.user) {
+                if (it == null) {
+                    event.reply("Message not found").setEphemeral(true).queue()
+                } else {
+                    event.reply("Message Json:").setEphemeral(true).addFile(it.toByteArray(), "message.json").queue()
+                }
+            }
         }
+    }
 
+    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+        val elements = event.getValueAsString("message_url")!!.split("/")
+        extractMessage(elements, event.user) {
+            if (it == null) {
+                event.reply("Message not found").setEphemeral(true).queue()
+            } else {
+                event.reply("Message Json:").setEphemeral(true).addFile(it.toByteArray(), "message.json").queue()
+            }
+        }
+        return true
+    }
+
+    private fun extractMessage(elements: List<String>, user: User, replyHandler: (String?) -> Unit) {
         val serverId = elements[4]
         val channelId = elements[5]
         val messageId = elements[6]
 
         val message = if (channelId == "@me") {
             try {
-                event.user.getMessage(messageId)
+                user.getMessage(messageId)
             } catch (e: Exception) {
                 null
             }
@@ -76,13 +102,13 @@ class ExtractMessageProvider(
         }
 
         if (message == null) {
-            event.reply("Message not found").setEphemeral(true).queue()
+            replyHandler.invoke(null)
             return
         }
 
         val webhook = Webhook.fromMessage(message)
         val webhookJson = objectMapper.writeValueAsString(webhook)
 
-        event.reply("Message Json:").setEphemeral(true).addFile(webhookJson.toByteArray(), "message.json").queue()
+        replyHandler.invoke(webhookJson)
     }
 }

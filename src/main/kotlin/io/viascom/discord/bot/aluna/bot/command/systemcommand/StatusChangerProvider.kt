@@ -118,6 +118,7 @@ class StatusChangerProvider(
                 status = OnlineStatus.fromKey(event.getSelection())
                 showEmbed()
             }
+
             "activity" -> {
                 activityId = event.getSelection()
                 showEmbed()
@@ -137,6 +138,7 @@ class StatusChangerProvider(
                 }
                 event.replyModal(modal.build()).queue()
             }
+
             "save" -> {
                 lastHook = event.deferEdit().complete()
                 shardManager.setStatus(status)
@@ -160,6 +162,7 @@ class StatusChangerProvider(
 
                 lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(arrayListOf()).queue()
             }
+
             "cancel" -> {
                 lastHook = event.deferEdit().complete()
 

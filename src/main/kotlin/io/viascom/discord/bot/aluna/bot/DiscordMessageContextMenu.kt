@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot
 
-import datadog.trace.api.Trace
+
 import io.viascom.discord.bot.aluna.bot.event.getDefaultIOScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -31,7 +31,8 @@ import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFuncti
 import org.slf4j.MDC
 import org.springframework.util.StopWatch
 
-abstract class DiscordMessageContextMenu(name: String, localizations: LocalizationFunction? = null) : DiscordContextMenu(Command.Type.MESSAGE, name, localizations) {
+abstract class DiscordMessageContextMenu(name: String, localizations: LocalizationFunction? = null) :
+    DiscordContextMenu(Command.Type.MESSAGE, name, localizations) {
 
     /**
      * The main body method of a [DiscordContextMenu].
@@ -40,7 +41,7 @@ abstract class DiscordMessageContextMenu(name: String, localizations: Localizati
      *
      * @param event The [MessageContextInteractionEvent] that triggered this Command
      */
-    @Trace
+
     protected abstract fun execute(event: MessageContextInteractionEvent)
 
     /**
@@ -48,7 +49,7 @@ abstract class DiscordMessageContextMenu(name: String, localizations: Localizati
      *
      * @param event The MessageContextInteractionEvent that triggered this Command
      */
-    @Trace
+
     @JvmSynthetic
     internal fun run(event: MessageContextInteractionEvent) {
         if (alunaProperties.debug.useStopwatch) {

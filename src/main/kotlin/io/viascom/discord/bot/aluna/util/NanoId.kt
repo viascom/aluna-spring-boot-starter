@@ -63,7 +63,7 @@ object NanoId {
         require(!(alphabet.isEmpty() || alphabet.length >= 256)) { "alphabet must contain between 1 and 255 symbols." }
         require(size > 0) { "size must be greater than zero." }
 
-        if(alphabet.length == 1){
+        if (alphabet.length == 1) {
             return repeat(alphabet[0], size)
         }
 

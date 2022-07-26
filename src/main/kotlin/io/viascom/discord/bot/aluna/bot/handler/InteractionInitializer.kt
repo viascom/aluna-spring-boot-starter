@@ -197,14 +197,15 @@ internal open class InteractionInitializer(
         }
 
         //Register internal commands
-        if (filteredCommands.any { it.name == "system-command" }) {
-            val command = filteredCommands.first { it.name == "system-command" }
+        val systemCommandName = "system-command"
+        if (filteredCommands.any { it.name == systemCommandName }) {
+            val command = filteredCommands.first { it.name == systemCommandName }
             val server = command.specificServer?.let { shardManager.getGuildById(it) }
             val serverCommands = server?.retrieveCommands()?.complete()
 
             if (!command.alunaProperties.command.systemCommand.enabled) {
-                if (serverCommands != null && serverCommands.any { it.name == "system-command" }) {
-                    val serverCommand = serverCommands.first { it.name == "system-command" }
+                if (serverCommands != null && serverCommands.any { it.name == systemCommandName }) {
+                    val serverCommand = serverCommands.first { it.name == systemCommandName }
                     logger.debug("Removed unneeded specific command '/${serverCommand.name}'")
                     server.deleteCommandById(serverCommand.id).queue()
                 }
@@ -221,10 +222,10 @@ internal open class InteractionInitializer(
                         }
                     }
                 } else {
-                    var upsert = serverCommands != null && serverCommands.none { it.name == "system-command" }
+                    var upsert = serverCommands != null && serverCommands.none { it.name == systemCommandName }
 
                     if (!upsert) {
-                        val serverCommand = serverCommands?.firstOrNull { it.name == "system-command" }
+                        val serverCommand = serverCommands?.firstOrNull { it.name == systemCommandName }
                         if (serverCommand == null) {
                             upsert = true
                         } else {
@@ -329,6 +330,7 @@ internal open class InteractionInitializer(
                             }
                 }
             }
+
             (command.subcommands.isNotEmpty()) -> {
                 commandText += "\n" + command.subcommands.joinToString("\n") {
                     "\t--> ${it.name}"

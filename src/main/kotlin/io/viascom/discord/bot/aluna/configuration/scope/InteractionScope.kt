@@ -47,6 +47,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
 
     @get:JvmSynthetic
     internal val scopedObjects = Collections.synchronizedMap(HashMap<BeanName, HashMap<DiscordStateId, HashMap<UniqueId, ScopedObjectData>>>())
+
     @get:JvmSynthetic
     internal var scopedObjectsTimeoutScheduler: ScheduledThreadPoolExecutor
 

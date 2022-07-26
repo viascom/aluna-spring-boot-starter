@@ -26,7 +26,7 @@ import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
-import io.viascom.discord.bot.aluna.scriptengine.KotlinScriptService
+import io.viascom.discord.bot.aluna.scriptengine.KotlinScriptV2Service
 import io.viascom.discord.bot.aluna.util.addTextField
 import io.viascom.discord.bot.aluna.util.getValueAsString
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -42,7 +42,7 @@ import kotlin.math.min
 @ConditionalOnSystemCommandEnabled
 @ConditionalOnProperty(name = ["command.system-command.enable-kotlin-script-evaluate"], prefix = "aluna", matchIfMissing = false)
 class KotlinEvaluateProvider(
-    private val kotlinScriptService: KotlinScriptService,
+    private val kotlinScriptService: KotlinScriptV2Service,
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : SystemCommandDataProvider(
     "evaluate_kotlin",
