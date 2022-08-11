@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/viascom/aluna-spring-boot-starter/releases"><img src="https://img.shields.io/github/v/release/viascom/aluna-spring-boot-starter?include_prereleases&label=version"
          alt="Maven central"></a>
-  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--alpha.16-blue.svg"
+  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--alpha.17-blue.svg"
               alt="JDA-Version "></a>
   <a href="http://www.apache.org/licenses/"><img src="https://img.shields.io/badge/license-Apache_2.0-blue.svg"
          alt="license Apache 2.0"></a>
