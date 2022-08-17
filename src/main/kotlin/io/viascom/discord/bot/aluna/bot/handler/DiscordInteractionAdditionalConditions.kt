@@ -24,6 +24,7 @@ package io.viascom.discord.bot.aluna.bot.handler
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
 import io.viascom.discord.bot.aluna.model.AdditionalRequirements
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
@@ -39,6 +40,16 @@ interface DiscordInteractionAdditionalConditions {
      * @return AdditionalRequirements
      */
     fun checkForAdditionalCommandRequirements(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent): AdditionalRequirements
+
+    /**
+     * Check for additional requirements.
+     * Make sure to not block the execution for to long as the interaction needs to be acknowledged in 3 seconds.
+     *
+     * @param discordCommand Discord command instance
+     * @param event Auto complete event
+     * @return AdditionalRequirements
+     */
+    fun checkForAdditionalCommandRequirements(discordCommand: DiscordCommand, event: CommandAutoCompleteInteractionEvent): AdditionalRequirements
 
     /**
      * Check for additional requirements.

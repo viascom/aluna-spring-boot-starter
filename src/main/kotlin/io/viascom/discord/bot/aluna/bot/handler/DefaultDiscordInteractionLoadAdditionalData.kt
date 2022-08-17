@@ -31,13 +31,22 @@ class DefaultDiscordInteractionLoadAdditionalData : DiscordInteractionLoadAdditi
     override fun loadData(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent) {
     }
 
+    override fun loadDataBeforeAdditionalRequirements(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent) {
+    }
+
     override fun loadData(discordCommand: DiscordCommand, event: CommandAutoCompleteInteractionEvent) {
+    }
+
+    override fun loadDataBeforeAdditionalRequirements(discordCommand: DiscordCommand, event: CommandAutoCompleteInteractionEvent) {
     }
 
     override fun loadData(event: CommandAutoCompleteInteractionEvent) {
     }
 
     override fun loadData(contextMenu: DiscordContextMenu, event: GenericCommandInteractionEvent) {
+    }
+
+    override fun loadDataBeforeAdditionalRequirements(discordCommand: DiscordCommand, event: GenericCommandInteractionEvent) {
     }
 
 }

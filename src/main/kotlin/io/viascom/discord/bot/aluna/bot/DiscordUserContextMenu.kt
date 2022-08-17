@@ -86,6 +86,8 @@ abstract class DiscordUserContextMenu(name: String, localizations: LocalizationF
             return
         }
 
+        discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this, event)
+
         val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalContextRequirements(this, event)
         if (additionalRequirements.failed) {
             onFailedAdditionalRequirements(event, additionalRequirements)

@@ -353,6 +353,15 @@ abstract class DiscordCommand @JvmOverloads constructor(
 
     @JvmSynthetic
     internal fun onAutoCompleteEventCall(option: String, event: CommandAutoCompleteInteractionEvent) {
+        discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this, event)
+
+        //Check additional requirements for this command
+        val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
+        if (additionalRequirements.failed) {
+            onFailedAdditionalRequirements(event, additionalRequirements)
+            return
+        }
+
         discordInteractionLoadAdditionalData.loadData(this, event)
         onAutoCompleteEvent(option, event)
     }
@@ -423,6 +432,9 @@ abstract class DiscordCommand @JvmOverloads constructor(
 
     open fun onFailedAdditionalRequirements(event: SlashCommandInteractionEvent, additionalRequirements: AdditionalRequirements) {
         event.deferReply(true).setContent("⛔ Additional requirements for this command failed.").queue()
+    }
+
+    open fun onFailedAdditionalRequirements(event: CommandAutoCompleteInteractionEvent, additionalRequirements: AdditionalRequirements) {
     }
 
     open fun onExecutionException(event: SlashCommandInteractionEvent, exception: Exception) {
@@ -540,6 +552,8 @@ abstract class DiscordCommand @JvmOverloads constructor(
         }
 
         //checkForCommandCooldown(event)
+
+        discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this, event)
 
         //Check additional requirements for this command
         val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
