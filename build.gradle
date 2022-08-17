@@ -134,7 +134,7 @@ processResources {
 }
 
 task downloadBeautifyJsFile(type: Download) {
-    src "https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.3/beautify.min.js"
+    src "https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.5/beautify.min.js"
     dest "build/resources/main/js/lib/beautify.js"
     quiet true
     overwrite false
@@ -143,7 +143,7 @@ task downloadBeautifyJsFile(type: Download) {
 task verifyBeautifyJsFile(type: Verify, dependsOn: downloadBeautifyJsFile) {
     src new File("build/resources/main/js/lib/", "beautify.js")
     algorithm "SHA-512"
-    checksum "d7a654bae33f39c79753b8bc53acd0aad0ec1be3c229c597f5796634dd33fa5a949413330e6233acab7a4ce996e3c100538ed7214e92a5a7a5cfcb4cf4b80629"
+    checksum "1a8edca5b62f5354ad382c40c81789235a2e463dc936b02db346b8bb756aac62a14527f3b381b46a8ef3b57c8af60773e9cfe363df247882a097fc57a04b041d"
 }
 processResources.dependsOn verifyBeautifyJsFile
 
