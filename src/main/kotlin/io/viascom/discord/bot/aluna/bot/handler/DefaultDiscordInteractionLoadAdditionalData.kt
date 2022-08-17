@@ -40,13 +40,13 @@ class DefaultDiscordInteractionLoadAdditionalData : DiscordInteractionLoadAdditi
     override fun loadDataBeforeAdditionalRequirements(discordCommand: DiscordCommand, event: CommandAutoCompleteInteractionEvent) {
     }
 
+    override fun loadDataBeforeAdditionalRequirements(discordContextMenu: DiscordContextMenu, event: GenericCommandInteractionEvent) {
+    }
+
     override fun loadData(event: CommandAutoCompleteInteractionEvent) {
     }
 
     override fun loadData(contextMenu: DiscordContextMenu, event: GenericCommandInteractionEvent) {
-    }
-
-    override fun loadDataBeforeAdditionalRequirements(discordCommand: DiscordCommand, event: GenericCommandInteractionEvent) {
     }
 
 }
