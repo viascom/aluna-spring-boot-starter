@@ -30,7 +30,6 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemC
 import io.viascom.discord.bot.aluna.model.EventRegisterType
 import io.viascom.discord.bot.aluna.util.getSelection
 import io.viascom.discord.bot.aluna.util.getTypedOption
-import io.viascom.discord.bot.aluna.util.removeActionRows
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji
@@ -91,7 +90,7 @@ class AdminSearchDataProvider(
             discordUser = optionalDiscordUser
             selectedType = AdminSearchType.USER
             generateDiscordUser(discordUser)
-            lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(getDiscordMenu(AdminSearchType.USER))
+            lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(getDiscordMenu(AdminSearchType.USER))
                 .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
             return
         }
@@ -102,7 +101,7 @@ class AdminSearchDataProvider(
             discordServer = optionalDiscordServer
             selectedType = AdminSearchType.SERVER
             generateDiscordServer(discordServer)
-            lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(getDiscordMenu(AdminSearchType.SERVER))
+            lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(getDiscordMenu(AdminSearchType.SERVER))
                 .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
             return
         }
@@ -113,7 +112,7 @@ class AdminSearchDataProvider(
             discordRole = optionalDiscordRole
             selectedType = AdminSearchType.ROLE
             generateDiscordRole(discordRole)
-            lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(getDiscordMenu(AdminSearchType.ROLE))
+            lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(getDiscordMenu(AdminSearchType.ROLE))
                 .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
             return
         }
@@ -124,7 +123,7 @@ class AdminSearchDataProvider(
             discordChannel = optionalDiscordChannel
             selectedType = AdminSearchType.CHANNEL
             generateDiscordChannel(discordChannel)
-            lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(getDiscordMenu(AdminSearchType.CHANNEL))
+            lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(getDiscordMenu(AdminSearchType.CHANNEL))
                 .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
             return
         }
@@ -135,7 +134,7 @@ class AdminSearchDataProvider(
             discordEmote = optionalDiscordEmote
             selectedType = AdminSearchType.EMOTE
             generateDiscordEmote(discordEmote)
-            lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(getDiscordMenu(AdminSearchType.EMOTE))
+            lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(getDiscordMenu(AdminSearchType.EMOTE))
                 .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
             return
         }
@@ -154,13 +153,13 @@ class AdminSearchDataProvider(
         }
 
         val actionRows = getDiscordMenu(selectedType, page)
-        lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(actionRows).queue()
+        lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(actionRows).queue()
 
         return true
     }
 
     override fun onSelectMenuInteractionTimeout() {
-        lastHook.editOriginalEmbeds(lastEmbed.build()).removeActionRows().queue()
+        lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents().queue()
     }
 
     private fun checkForUser(id: String) = try {
@@ -226,6 +225,8 @@ class AdminSearchDataProvider(
         lastEmbed.clearFields()
         lastEmbed.setDescription("Found Discord User **${discordUser.asTag}**\nwith ID: ``${discordUser.id}``")
         lastEmbed.setThumbnail(discordUser.avatarUrl)
+        lastEmbed.setFooter(null)
+        lastEmbed.clearFields()
 
         adminSearchPageDataProviders.firstOrNull { it.supportedTypes.contains(AdminSearchType.USER) && it.pageId == page }
             ?.onUserRequest(discordUser, lastEmbed)
@@ -235,6 +236,8 @@ class AdminSearchDataProvider(
         lastEmbed.clearFields()
         lastEmbed.setDescription("Found Discord Server **${discordServer.name}**\nwith ID: ``${discordServer.id}``")
         lastEmbed.setThumbnail(discordServer.iconUrl)
+        lastEmbed.setFooter(null)
+        lastEmbed.clearFields()
 
         adminSearchPageDataProviders.firstOrNull { it.supportedTypes.contains(AdminSearchType.SERVER) && it.pageId == page }
             ?.onServerRequest(discordServer, lastEmbed)
@@ -243,6 +246,8 @@ class AdminSearchDataProvider(
     private fun generateDiscordRole(discordRole: Role, page: String = "OVERVIEW") {
         lastEmbed.clearFields()
         lastEmbed.setDescription("Found Discord Role **${discordRole.name}**\nwith ID: ``${discordRole.id}``")
+        lastEmbed.setFooter(null)
+        lastEmbed.clearFields()
         discordRole.icon?.let { lastEmbed.setThumbnail(it.iconUrl) }
 
         adminSearchPageDataProviders.firstOrNull { it.supportedTypes.contains(AdminSearchType.ROLE) && it.pageId == page }
@@ -252,6 +257,8 @@ class AdminSearchDataProvider(
     private fun generateDiscordChannel(discordChannel: Channel, page: String = "OVERVIEW") {
         lastEmbed.clearFields()
         lastEmbed.setDescription("Found Discord Channel **${discordChannel.name}**\nwith ID: ``${discordChannel.id}``")
+        lastEmbed.setFooter(null)
+        lastEmbed.clearFields()
 
         adminSearchPageDataProviders.firstOrNull { it.supportedTypes.contains(AdminSearchType.CHANNEL) && it.pageId == page }
             ?.onChannelRequest(discordChannel, lastEmbed)
@@ -261,6 +268,8 @@ class AdminSearchDataProvider(
         lastEmbed.clearFields()
         lastEmbed.setDescription("Found Discord Emote **${discordEmote.name}**\nwith ID: ``${discordEmote.id}``")
         lastEmbed.setThumbnail(discordEmote.imageUrl)
+        lastEmbed.setFooter(null)
+        lastEmbed.clearFields()
 
         adminSearchPageDataProviders.firstOrNull { it.supportedTypes.contains(AdminSearchType.EMOTE) && it.pageId == page }
             ?.onEmoteRequest(discordEmote, lastEmbed)
@@ -270,7 +279,11 @@ class AdminSearchDataProvider(
         val menu = SelectMenu.create("menu:type")
             .setRequiredRange(1, 1)
 
-        adminSearchPageDataProviders.sortedBy { it.pageName }.filter { it.supportedTypes.contains(type) }.sortedBy { it.pageName }.forEach {
+        val pages = adminSearchPageDataProviders.filter { it.supportedTypes.contains(type) }.sortedBy { it.pageName }.toCollection(arrayListOf())
+        val overviewPage = pages.first { it.pageId == "OVERVIEW" }
+        pages.remove(overviewPage)
+        pages.add(0, overviewPage)
+        pages.forEach {
             menu.addOptions(SelectOption.of(it.pageName, it.pageId).withDefault(it.pageId == page))
         }
         return ActionRow.of(menu.build())

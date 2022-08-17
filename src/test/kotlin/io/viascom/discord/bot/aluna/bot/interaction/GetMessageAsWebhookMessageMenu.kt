@@ -26,6 +26,7 @@ import io.viascom.discord.bot.aluna.bot.DiscordMessageContextMenu
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.model.Webhook
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
+import net.dv8tion.jda.api.utils.FileUpload
 
 @Interaction
 class GetMessageAsWebhookMessageMenu(
@@ -45,7 +46,7 @@ class GetMessageAsWebhookMessageMenu(
         val jsonByteArray = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(webhook)
 
         //Send the "file" together with some text back to the user
-        event.reply("Webhook json of [Message-Link](${event.target.jumpUrl}):").addFile(jsonByteArray, "message.json").queue()
+        event.reply("Webhook json of [Message-Link](${event.target.jumpUrl}):").setFiles(FileUpload.fromData(jsonByteArray, "message.json")).queue()
     }
 
 }

@@ -30,6 +30,7 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemC
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnTranslationEnabled
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
+import net.dv8tion.jda.api.utils.FileUpload
 
 @Interaction
 @ConditionalOnJdaEnabled
@@ -48,9 +49,11 @@ class MissingTranslationProvider(
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
         hook!!.sendMessage("Missing Keys:")
-            .addFile(
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(discordInteractionLocalization.getMissingTranslationKeys()),
-                "missingKeys.json"
+            .setFiles(
+                FileUpload.fromData(
+                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(discordInteractionLocalization.getMissingTranslationKeys()),
+                    "missingKeys.json"
+                )
             )
             .queue()
     }

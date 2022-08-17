@@ -63,7 +63,7 @@ class PingCommand : DiscordCommand(
 ### React to a Button
 
 ```kotlin
-event.reply("Pong\nYour locale is:${this.userLocale}").addActionRows(ActionRow.of(primaryButton("hi", "Hi")))
+event.reply("Pong\nYour locale is:${this.userLocale}").setComponents(ActionRow.of(primaryButton("hi", "Hi")))
     .queueAndRegisterInteraction(hook, this)
 
 

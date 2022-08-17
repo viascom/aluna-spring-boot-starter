@@ -39,6 +39,7 @@ import net.dv8tion.jda.api.interactions.components.ItemComponent
 import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
 import net.dv8tion.jda.api.sharding.ShardManager
+import net.dv8tion.jda.api.utils.FileUpload
 import java.awt.Color
 
 @Interaction
@@ -63,7 +64,7 @@ class GenerateStickerEnumProvider(
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
         createOverviewMessage()
-        event.replyEmbeds(latestEmbed.build()).setEphemeral(true).addActionRows(getActionRow()).queueAndRegisterInteraction(
+        event.replyEmbeds(latestEmbed.build()).setEphemeral(true).setComponents(getComponents()).queueAndRegisterInteraction(
             command,
             arrayListOf(EventRegisterType.BUTTON, EventRegisterType.SELECT, EventRegisterType.MODAL),
             true
@@ -108,7 +109,7 @@ class GenerateStickerEnumProvider(
         return rows
     }
 
-    private fun getActionRow(): ArrayList<ActionRow> {
+    private fun getComponents(): ArrayList<ActionRow> {
         val rows = arrayListOf<ActionRow>()
 
         val row1 = arrayListOf<ItemComponent>()
@@ -148,7 +149,7 @@ class GenerateStickerEnumProvider(
                 event.deferEdit().queue()
 
                 createRemoveMessage()
-                latestHook.editOriginalEmbeds(latestEmbed.build()).setActionRows(getRemoveActionRow()).queue()
+                latestHook.editOriginalEmbeds(latestEmbed.build()).setComponents(getRemoveActionRow()).queue()
             }
 
             "generate" -> {
@@ -159,19 +160,20 @@ class GenerateStickerEnumProvider(
                     "java" -> "MyStickers.java"
                     else -> "stickers.txt"
                 }
-                latestHook.editOriginalEmbeds().setContent("⬇️ Generated File: ⬇️").setActionRows(arrayListOf()).addFile(file.encodeToByteArray(), name).queue()
+                latestHook.editOriginalEmbeds().setContent("⬇️ Generated File: ⬇️").setComponents(arrayListOf())
+                    .setFiles(FileUpload.fromData(file.encodeToByteArray(), name)).queue()
             }
 
             "cancel-remove" -> {
                 event.deferEdit().queue()
                 createOverviewMessage()
-                latestHook.editOriginalEmbeds(latestEmbed.build()).setActionRows(getActionRow()).queue()
+                latestHook.editOriginalEmbeds(latestEmbed.build()).setComponents(getComponents()).queue()
             }
 
             "cancel" -> {
                 event.deferEdit().queue()
                 createOverviewMessage()
-                latestHook.editOriginalEmbeds(latestEmbed.build()).setActionRows(arrayListOf()).queue()
+                latestHook.editOriginalEmbeds(latestEmbed.build()).setComponents(arrayListOf()).queue()
             }
         }
 
@@ -185,7 +187,7 @@ class GenerateStickerEnumProvider(
                 selectedType = event.getSelection()
 
                 createOverviewMessage()
-                latestHook.editOriginalEmbeds(latestEmbed.build()).setActionRows(getActionRow()).queue()
+                latestHook.editOriginalEmbeds(latestEmbed.build()).setComponents(getComponents()).queue()
             }
 
             "serverList" -> {
@@ -193,7 +195,7 @@ class GenerateStickerEnumProvider(
                 selectedServerIds.remove(event.getSelection())
 
                 createOverviewMessage()
-                latestHook.editOriginalEmbeds(latestEmbed.build()).setActionRows(getActionRow()).queue()
+                latestHook.editOriginalEmbeds(latestEmbed.build()).setComponents(getComponents()).queue()
             }
         }
         return true
@@ -217,7 +219,7 @@ class GenerateStickerEnumProvider(
                     }
 
                     createOverviewMessage()
-                    latestHook.editOriginalEmbeds(latestEmbed.build()).setActionRows(getActionRow()).queue()
+                    latestHook.editOriginalEmbeds(latestEmbed.build()).setComponents(getComponents()).queue()
                 } else {
                     createOverviewMessage()
 
@@ -225,7 +227,7 @@ class GenerateStickerEnumProvider(
                     latestEmbed.setColor(Color.RED)
                     latestEmbed.addField("", "⛔ Server with id `$serverID` does not exist or the bot is not on it!", false)
 
-                    latestHook.editOriginalEmbeds(latestEmbed.build()).setActionRows(getActionRow()).queue()
+                    latestHook.editOriginalEmbeds(latestEmbed.build()).setComponents(getComponents()).queue()
                 }
             }
         }
