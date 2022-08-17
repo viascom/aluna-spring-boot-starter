@@ -13,6 +13,7 @@ interface SystemCommandEmojiProvider {
     fun newsEmoji(): Emoji
     fun stageChannelEmoji(): Emoji
     fun threadChannelEmoji(): Emoji
+    fun categoryEmoji(): Emoji
     fun emptyEmoji(): Emoji
 
 }
