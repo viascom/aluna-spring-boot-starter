@@ -190,7 +190,7 @@ class AdminSearchOverviewPage(
                 ChannelType.PRIVATE -> systemCommandEmojiProvider.channelLockedEmoji().formatted + " Private-Channel"
                 ChannelType.VOICE -> systemCommandEmojiProvider.voiceChannelEmoji().formatted + " Voice-Channel"
                 ChannelType.GROUP -> systemCommandEmojiProvider.emptyEmoji().formatted + " Group"
-                ChannelType.CATEGORY -> systemCommandEmojiProvider.emptyEmoji().formatted + " Category"
+                ChannelType.CATEGORY -> systemCommandEmojiProvider.categoryEmoji().formatted + " Category"
                 ChannelType.NEWS -> systemCommandEmojiProvider.newsEmoji().formatted + " News"
                 ChannelType.STAGE -> systemCommandEmojiProvider.stageChannelEmoji().formatted + " Stage"
                 ChannelType.GUILD_NEWS_THREAD -> systemCommandEmojiProvider.newsEmoji().formatted + " News Thread"

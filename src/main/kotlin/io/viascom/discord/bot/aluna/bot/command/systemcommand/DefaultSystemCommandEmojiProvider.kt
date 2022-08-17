@@ -21,5 +21,7 @@ class DefaultSystemCommandEmojiProvider : SystemCommandEmojiProvider {
 
     override fun threadChannelEmoji(): Emoji = Emoji.fromUnicode("\uD83D\uDCC1")
 
+    override fun categoryEmoji(): Emoji = Emoji.fromUnicode("\uD83D\uDDC3️")
+
     override fun emptyEmoji(): Emoji = Emoji.fromUnicode("\uD83D\uDD33")
 }
