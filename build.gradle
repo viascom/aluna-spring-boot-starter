@@ -25,6 +25,7 @@ ext {
     jacksonVersion = "2.13.3"
     ddTraceVersion = "0.104.0"
     emojiJavaVersion = "5.1.1"
+    gsonVersion = "2.9.1"
 }
 
 group "io.viascom.discord.bot"
@@ -88,6 +89,9 @@ dependencies {
     //====== Jackson ======
     implementation "org.springframework.boot:spring-boot-starter-json:$jacksonSpringBootVersion"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+
+    //====== Gson ======
+    compileOnly "com.google.code.gson:gson:$gsonVersion"
 
     //====== Emoji Helper ======
     api("com.vdurmont:emoji-java:$emojiJavaVersion") {

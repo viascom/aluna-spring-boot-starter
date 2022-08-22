@@ -24,6 +24,7 @@ package io.viascom.discord.bot.aluna.model
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.google.gson.annotations.SerializedName
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed
@@ -61,6 +62,7 @@ data class Webhook(
     @JsonInclude(Include.NON_NULL)
     data class Author(
         @JsonProperty("icon_url")
+        @SerializedName("icon_url")
         var iconUrl: String?,
         var name: String?,
         var url: String?
@@ -79,6 +81,7 @@ data class Webhook(
     @JsonInclude(Include.NON_NULL)
     data class Footer(
         @JsonProperty("icon_url")
+        @SerializedName("icon_url")
         var iconUrl: String?,
         var text: String
     )
