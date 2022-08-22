@@ -35,6 +35,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
+import net.dv8tion.jda.api.utils.FileUpload
 
 @Interaction
 @ConditionalOnJdaEnabled
@@ -64,7 +65,7 @@ class ExtractMessageProvider(
                 if (it == null) {
                     event.reply("Message not found").setEphemeral(true).queue()
                 } else {
-                    event.reply("Message Json:").setEphemeral(true).addFile(it.toByteArray(), "message.json").queue()
+                    event.reply("Message Json:").setEphemeral(true).setFiles(FileUpload.fromData(it.toByteArray(), "message.json")).queue()
                 }
             }
         }
@@ -76,7 +77,7 @@ class ExtractMessageProvider(
             if (it == null) {
                 event.reply("Message not found").setEphemeral(true).queue()
             } else {
-                event.reply("Message Json:").setEphemeral(true).addFile(it.toByteArray(), "message.json").queue()
+                event.reply("Message Json:").setEphemeral(true).setFiles(FileUpload.fromData(it.toByteArray(), "message.json")).queue()
             }
         }
         return true

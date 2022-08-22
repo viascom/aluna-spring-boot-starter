@@ -25,9 +25,10 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty
 import net.dv8tion.jda.api.EmbedBuilder
-import net.dv8tion.jda.api.MessageBuilder
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder
+import net.dv8tion.jda.api.utils.messages.MessageCreateData
 import java.time.OffsetDateTime
 
 @JsonInclude(Include.NON_NULL)
@@ -82,8 +83,8 @@ data class Webhook(
         var text: String
     )
 
-    fun toMessage(): Message {
-        val message = MessageBuilder()
+    fun toMessage(): MessageCreateData {
+        val message = MessageCreateBuilder()
         content?.let { message.setContent(it) } ?: message.setContent("")
 
         val messageEmbeds = arrayListOf<MessageEmbed>()
@@ -98,7 +99,8 @@ data class Webhook(
                 it.footer?.let { footer -> embed.setFooter(footer.text, footer.iconUrl) }
                 it.image?.let { image -> embed.setImage(image.url) }
                 it.timestamp?.let { timestamp -> embed.setTimestamp(timestamp) }
-                it.fields?.let { fields -> fields.forEach { field -> embed.addField(MessageEmbed.Field(field.name, field.value, field.inline)) } }
+                it.fields?.ifEmpty { null }
+                    ?.let { fields -> fields.forEach { field -> embed.addField(MessageEmbed.Field(field.name, field.value, field.inline)) } }
                 messageEmbeds.add(embed.build())
             }
         }

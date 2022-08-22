@@ -98,7 +98,7 @@ class StatusChangerProvider(
             )
         }
 
-        lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(getActionRow()).queueAndRegisterInteraction(
+        lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(getComponents()).queueAndRegisterInteraction(
             lastHook,
             command,
             arrayListOf(
@@ -160,7 +160,7 @@ class StatusChangerProvider(
                 lastEmbed.setThumbnail(null)
                 lastEmbed.setDescription("${systemCommandEmojiProvider.tickEmoji().formatted} Changed bot status")
 
-                lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(arrayListOf()).queue()
+                lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(arrayListOf()).queue()
             }
 
             "cancel" -> {
@@ -171,7 +171,7 @@ class StatusChangerProvider(
                 lastEmbed.setColor(Color.RED)
                 lastEmbed.setDescription("${systemCommandEmojiProvider.crossEmoji().formatted} Canceled")
 
-                lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(arrayListOf()).queue()
+                lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(arrayListOf()).queue()
             }
         }
         return true
@@ -185,7 +185,7 @@ class StatusChangerProvider(
         return true
     }
 
-    private fun getActionRow(): ArrayList<ActionRow> {
+    private fun getComponents(): ArrayList<ActionRow> {
         val rows = arrayListOf<ActionRow>()
 
         val statusSelect = SelectMenu.create("status")

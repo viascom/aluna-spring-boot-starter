@@ -46,10 +46,13 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
 import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
-import net.dv8tion.jda.api.requests.restaction.MessageAction
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageUpdateAction
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction
+import net.dv8tion.jda.api.requests.restaction.MessageEditAction
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageEditAction
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction
 import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
@@ -64,12 +67,14 @@ fun Double.round(decimals: Int): Double {
 
 fun Color.toHex(): String = String.format("#%02x%02x%02x", this.red, this.green, this.blue)
 
-fun MessageEditCallbackAction.removeActionRows() = this.setActionRows(arrayListOf())
-fun WebhookMessageUpdateAction<Message>.removeActionRows() = this.setActionRows(arrayListOf())
-fun MessageAction.removeActionRows() = this.setActionRows(arrayListOf())
-
-fun MessageAction.setStickers(vararg stickers: DiscordSticker) = this.setStickers(stickers.map { it.toSticker() })
-fun MessageAction.setStickers(stickers: Collection<DiscordSticker>) = this.setStickers(stickers.map { it.toSticker() })
+fun WebhookMessageCreateAction<Message>.removeComponents() = this.setComponents(arrayListOf())
+fun WebhookMessageEditAction<Message>.removeComponents() = this.setComponents(arrayListOf())
+fun MessageCreateAction.removeComponents() = this.setComponents(arrayListOf())
+fun MessageEditAction.removeComponents() = this.setComponents(arrayListOf())
+fun MessageEditCallbackAction.removeComponents() = this.setComponents(arrayListOf())
+fun ReplyCallbackAction.removeComponents() = this.setComponents(arrayListOf())
+fun MessageCreateAction.setStickers(vararg stickers: DiscordSticker) = this.setStickers(stickers.map { it.toSticker() })
+fun MessageCreateAction.setStickers(stickers: Collection<DiscordSticker>) = this.setStickers(stickers.map { it.toSticker() })
 fun ShardManager.getGuildTextChannel(guildId: String, channelId: String): MessageChannel? = this.getGuildById(guildId)?.getTextChannelById(channelId)
 fun ShardManager.getGuildVoiceChannel(guildId: String, channelId: String): VoiceChannel? = this.getGuildById(guildId)?.getVoiceChannelById(channelId)
 fun ShardManager.getGuildMessage(guildId: String, channelId: String, messageId: String): Message? =
