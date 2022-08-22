@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/viascom/aluna-spring-boot-starter/releases"><img src="https://img.shields.io/github/v/release/viascom/aluna-spring-boot-starter?include_prereleases&label=version"
          alt="Maven central"></a>
-  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--alpha.17-blue.svg"
+  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--alpha.18-blue.svg"
               alt="JDA-Version "></a>
   <a href="http://www.apache.org/licenses/"><img src="https://img.shields.io/badge/license-Apache_2.0-blue.svg"
          alt="license Apache 2.0"></a>
@@ -19,19 +19,19 @@
 
 *These are the versions of all exposed dependencies.*
 
-| Library     |                                         Version                                          |
-|-------------|:----------------------------------------------------------------------------------------:|
-| JDA         | <img src="https://img.shields.io/badge/5.0.0-alpha.17-orange.svg" alt="5.0.0-alpha.16"> |
-| Spring Boot |        <img src="https://img.shields.io/badge/2.7.2-brightgreen.svg" alt="2.7.1">        |
-| Kotlin      |       <img src="https://img.shields.io/badge/1.7.10-brightgreen.svg" alt="1.7.10">       |
-| emoji-java  |        <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1">        |
+| Library     |                                         Version                                         |
+|-------------|:---------------------------------------------------------------------------------------:|
+| JDA         | <img src="https://img.shields.io/badge/5.0.0-alpha.18-orange.svg" alt="5.0.0-alpha.18"> |
+| Spring Boot |       <img src="https://img.shields.io/badge/2.7.3-brightgreen.svg" alt="2.7.3">        |
+| Kotlin      |      <img src="https://img.shields.io/badge/1.7.10-brightgreen.svg" alt="1.7.10">       |
+| emoji-java  |       <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1">        |
 
 ## Download
 
 Gradle:
 ```gradle
 dependencies {
-  implementation 'io.viascom.discord.bot:aluna-spring-boot-starter:0.0.25_5.0.0-alpha.16'
+  implementation 'io.viascom.discord.bot:aluna-spring-boot-starter:0.0.28_5.0.0-alpha.18'
 }
 ```
 
@@ -39,8 +39,8 @@ Maven:
 ```xml
 <dependency>
   <groupId>io.viascom.discord.bot</groupId>
-  <artifactId>aluna-spring-boot-starter</artifactId>
-  <version>0.0.25_5.0.0-alpha.16</version>
+    <artifactId>aluna-spring-boot-starter</artifactId>
+    <version>0.0.28_5.0.0-alpha.18</version>
 </dependency>
 ```
 
