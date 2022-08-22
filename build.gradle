@@ -19,7 +19,7 @@ ext {
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
-    jdaVersion = "5.0.0-alpha.17_DEV"
+    jdaVersion = "5.0.0-alpha.18"
     retrofitVersion = "2.9.0"
     jacksonSpringBootVersion = "2.7.2"
     jacksonVersion = "2.13.3"
@@ -55,7 +55,6 @@ java {
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven {
         name "m2-dv8tion"
