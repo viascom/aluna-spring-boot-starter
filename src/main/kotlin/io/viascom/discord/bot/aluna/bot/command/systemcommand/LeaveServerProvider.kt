@@ -28,7 +28,7 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnab
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.util.dangerButton
 import io.viascom.discord.bot.aluna.util.getTypedOption
-import io.viascom.discord.bot.aluna.util.removeActionRows
+import io.viascom.discord.bot.aluna.util.removeComponents
 import io.viascom.discord.bot.aluna.util.successButton
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.Guild
@@ -80,7 +80,7 @@ class LeaveServerProvider(
         lastEmbed = EmbedBuilder()
             .setColor(Color.RED)
             .setDescription("❓ Do you really want that this Bot leaves the server **${server.name}**?")
-        lastHook.editOriginalEmbeds(lastEmbed.build()).setActionRows(
+        lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(
             ActionRow.of(
                 dangerButton("yes", "Yes"),
                 successButton("no", "No")
@@ -98,13 +98,13 @@ class LeaveServerProvider(
             } else {
                 lastEmbed.setDescription("${systemCommandEmojiProvider.crossEmoji().formatted} Canceled")
             }
-            lastHook.editOriginalEmbeds(lastEmbed.build()).removeActionRows().queue()
+            lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents().queue()
         }
         return true
     }
 
     override fun onButtonInteractionTimeout() {
-        lastHook.editOriginalEmbeds(lastEmbed.build()).removeActionRows().queue()
+        lastHook.editOriginalEmbeds(lastEmbed.build()).removeComponents().queue()
     }
 
     override fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: SystemCommand) {

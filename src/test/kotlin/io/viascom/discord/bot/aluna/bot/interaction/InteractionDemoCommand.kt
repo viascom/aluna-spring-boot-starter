@@ -76,7 +76,7 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
         )
 
         event.replyEmbeds(latestEmbed.build())
-            .addActionRows(row1, row2)
+            .addComponents(row1, row2)
             .queueAndRegisterInteraction(this, arrayListOf(EventRegisterType.BUTTON, EventRegisterType.SELECT, EventRegisterType.MODAL), persist = true) {
                 latestHook = it
             }
@@ -132,6 +132,6 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
     }
 
     override fun onDestroy() {
-        latestHook.editOriginalEmbeds(latestEmbed.build()).removeActionRows().queue()
+        latestHook.editOriginalEmbeds(latestEmbed.build()).removeComponents().queue()
     }
 }

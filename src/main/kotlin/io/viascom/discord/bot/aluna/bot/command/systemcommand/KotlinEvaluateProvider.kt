@@ -34,6 +34,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
+import net.dv8tion.jda.api.utils.FileUpload
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import kotlin.math.min
 
@@ -92,7 +93,7 @@ class KotlinEvaluateProvider(
                     "Script:\n```kotlin\n" +
                             "$script```\n" +
                             "Result:"
-                ).addFile(result.toString().encodeToByteArray(), "result.txt").queue()
+                ).setFiles(FileUpload.fromData(result.toString().encodeToByteArray(), "result.txt")).queue()
             }
 
         }
