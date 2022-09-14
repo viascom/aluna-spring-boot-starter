@@ -23,10 +23,10 @@ package io.viascom.discord.bot.aluna.bot.command.systemcommand.adminsearch
 
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.AdminSearchDataProvider
 import net.dv8tion.jda.api.EmbedBuilder
-import net.dv8tion.jda.api.entities.Channel
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Role
 import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.entities.channel.Channel
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji
 
 abstract class AdminSearchPageDataProvider(

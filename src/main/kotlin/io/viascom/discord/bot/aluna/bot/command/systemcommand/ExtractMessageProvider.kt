@@ -36,6 +36,7 @@ import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.api.utils.FileUpload
+import net.dv8tion.jda.api.utils.messages.MessageEditData
 
 @Interaction
 @ConditionalOnJdaEnabled
@@ -107,7 +108,7 @@ class ExtractMessageProvider(
             return
         }
 
-        val webhook = Webhook.fromMessage(message)
+        val webhook = Webhook.fromMessage(MessageEditData.fromMessage(message))
         val webhookJson = objectMapper.writeValueAsString(webhook)
 
         replyHandler.invoke(webhookJson)

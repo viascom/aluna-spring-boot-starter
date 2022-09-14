@@ -27,6 +27,7 @@ import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.model.Webhook
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.utils.FileUpload
+import net.dv8tion.jda.api.utils.messages.MessageEditData
 
 @Interaction
 class GetMessageAsWebhookMessageMenu(
@@ -37,7 +38,7 @@ class GetMessageAsWebhookMessageMenu(
 
     override fun execute(event: MessageContextInteractionEvent) {
         //Create a webhook model from the target message
-        val webhook = Webhook.fromMessage(event.target)
+        val webhook = Webhook.fromMessage(MessageEditData.fromMessage(event.target))
 
         /*
         Convert the model to json, so we can send it as a file to Discord.

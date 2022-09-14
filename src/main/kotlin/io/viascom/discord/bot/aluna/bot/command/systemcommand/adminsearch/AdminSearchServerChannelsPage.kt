@@ -26,8 +26,8 @@ import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandEmoji
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import net.dv8tion.jda.api.EmbedBuilder
-import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.channel.ChannelType
 import org.springframework.stereotype.Component
 
 @Component

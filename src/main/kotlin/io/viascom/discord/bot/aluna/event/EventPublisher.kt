@@ -24,9 +24,9 @@ package io.viascom.discord.bot.aluna.event
 import io.viascom.discord.bot.aluna.bot.*
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
-import net.dv8tion.jda.api.entities.Channel
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.entities.channel.Channel
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.internal.interactions.CommandDataImpl

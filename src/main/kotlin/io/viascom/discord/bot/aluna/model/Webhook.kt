@@ -26,10 +26,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
 import net.dv8tion.jda.api.EmbedBuilder
-import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
+import net.dv8tion.jda.api.utils.messages.MessageData
 import java.time.OffsetDateTime
 
 @JsonInclude(Include.NON_NULL)
@@ -113,7 +113,7 @@ data class Webhook(
     }
 
     companion object {
-        fun fromMessage(message: Message): Webhook {
+        fun fromMessage(message: MessageData): Webhook {
             val embeds = message.embeds.map { embed ->
                 val author = embed.author?.let { Author(it.iconUrl, it.name, it.url) }
                 val fields = embed.fields.ifEmpty { null }?.map { Field(it.isInline, it.name ?: "", it.value ?: "") }
@@ -124,7 +124,7 @@ data class Webhook(
                 Embed(author, embed.colorRaw, embed.description, fields, footer, image, thumbnail, embed.timestamp, embed.title, embed.url)
             }
 
-            return Webhook(message.contentRaw.ifEmpty { null }, embeds)
+            return Webhook(message.content.ifEmpty { null }, embeds)
         }
     }
 
