@@ -19,7 +19,7 @@ ext {
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
-    jdaVersion = "5.0.0-alpha.19"
+    jdaVersion = "5.0.0-alpha.20"
     retrofitVersion = "2.9.0"
     jacksonSpringBootVersion = "2.7.3"
     jacksonVersion = "2.13.4"
