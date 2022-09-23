@@ -27,10 +27,8 @@ package io.viascom.discord.bot.aluna.util
 import io.viascom.discord.bot.aluna.model.CommandOption
 import io.viascom.discord.bot.aluna.model.DiscordSticker
 import net.dv8tion.jda.api.EmbedBuilder
-import net.dv8tion.jda.api.entities.Member
-import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.entities.Message.Attachment
-import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
@@ -51,17 +49,16 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
 import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
-import net.dv8tion.jda.api.requests.restaction.MessageCreateAction
-import net.dv8tion.jda.api.requests.restaction.MessageEditAction
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageEditAction
+import net.dv8tion.jda.api.requests.restaction.*
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction
 import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
+import java.time.Duration
 import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.function.Function
 
 fun Double.round(decimals: Int): Double {
@@ -110,7 +107,41 @@ fun <T : Any> CommandDataImpl.addOptions(vararg option: CommandOption<in T>) {
     option.forEach { this.addOption(it) }
 }
 
+/**
+ * Bans the user specified by the provided {@link UserSnowflake} and deletes messages sent by the user based on the {@code deletionTimeframe}.
+ *
+ * @param  user
+ *         The {@link UserSnowflake} for the user to ban.
+ *         This can be a member or user instance or {@link User#fromId(long)}.
+ * @param  deletionTimeframe
+ *         The timeframe for the history of messages that will be deleted.
+ * @param  reason
+ *         The reason for this action which should be logged in the Guild's AuditLogs (up to 512 characters)
+ * @return {@link net.dv8tion.jda.api.requests.restaction.AuditableRestAction AuditableRestAction}
+ * @see Guild.ban ban
+ */
 @JvmOverloads
+fun Guild.ban(user: UserSnowflake, deletionTimeframe: Duration = Duration.ZERO, reason: String? = null): AuditableRestAction<Void> {
+    val action = this.ban(user, deletionTimeframe.seconds.toInt(), TimeUnit.SECONDS)
+    return if (reason != null) action.reason(reason) else action
+}
+
+/**
+ * Puts this Member in time out in this {@link net.dv8tion.jda.api.entities.Guild Guild} for a specific amount of time.
+ *
+ * @param  duration
+ *         The duration to put this Member in time out for
+ * @return {@link net.dv8tion.jda.api.requests.restaction.AuditableRestAction AuditableRestAction}
+ * @see Member.timeoutFor timeoutFor
+ */
+//This needs no @JvmOverloads as there is already a timeoutFor(duration: Duration) method
+fun Member.timeoutFor(duration: Duration, reason: String? = null): AuditableRestAction<Void> {
+    val action = this.timeoutFor(duration)
+    return if (reason != null) action.reason(reason) else action
+}
+
+@JvmOverloads
+@Suppress("UNCHECKED_CAST")
 fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<in T>, default: T? = null): T? {
     val optionData = (option as OptionData)
     return when (optionData.type) {
@@ -136,6 +167,7 @@ fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<
 }
 
 @JvmOverloads
+@Suppress("UNCHECKED_CAST")
 fun <T : Any> CommandAutoCompleteInteractionEvent.getTypedOption(option: CommandOption<in T>, default: T? = null): T? {
     val optionData = (option as OptionData)
     return when (optionData.type) {

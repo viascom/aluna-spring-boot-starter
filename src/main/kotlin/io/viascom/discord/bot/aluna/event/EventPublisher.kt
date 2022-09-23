@@ -117,7 +117,7 @@ class EventPublisher(
                 while (eventClass != null) {
                     val workClass = eventClass
                     if (workClass.simpleName !in arrayListOf("Class", "Object", "HttpRequestEvent")) {
-                        val specificEvent = Class.forName("On${workClass.simpleName}")
+                        val specificEvent = Class.forName("io.viascom.discord.bot.aluna.event.On${workClass.simpleName}")
                         logger.debug("Publishing ${workClass.canonicalName}")
                         applicationEventPublisher.publishEvent(specificEvent.constructors.first().newInstance(this, event))
                     }

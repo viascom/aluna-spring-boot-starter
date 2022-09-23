@@ -205,6 +205,7 @@ class AdminSearchOverviewPage(
                 ChannelType.GUILD_PUBLIC_THREAD -> systemCommandEmojiProvider.threadChannelEmoji().formatted + " Public Thread"
                 ChannelType.GUILD_PRIVATE_THREAD -> systemCommandEmojiProvider.threadChannelEmoji().formatted + " Private Thread"
                 ChannelType.UNKNOWN -> "Unknown"
+                else -> "Unknown"
             }, true
         )
         embedBuilder.addField("Time Created", discordChannel.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)

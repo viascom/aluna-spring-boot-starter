@@ -12,9 +12,9 @@ aluna:
     application-id: <insert-application-id>
     default-permissions:
       - VIEW_CHANNEL
-    gateway-intents: GUILD_MEMBERS,GUILD_PRESENCES,DIRECT_MESSAGE_REACTIONS,DIRECT_MESSAGES,GUILD_MESSAGES
+    gateway-intents: GUILD_MEMBERS,GUILD_PRESENCES,DIRECT_MESSAGE_REACTIONS,DIRECT_MESSAGES,GUILD_MESSAGES,MESSAGE_CONTENT
     memberCachePolicy: ALL
-    publish-events: false
+    publish-events: true
     publish-discord-command-event: true
   thread:
     scoped-objects-timeout-scheduler: 5
