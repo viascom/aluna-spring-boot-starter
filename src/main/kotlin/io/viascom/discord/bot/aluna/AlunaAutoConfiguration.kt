@@ -28,6 +28,7 @@ import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.bot.listener.*
 import io.viascom.discord.bot.aluna.bot.shardmanager.DefaultShardManagerBuilder
 import io.viascom.discord.bot.aluna.bot.shardmanager.ShardManagerBuilder
+import io.viascom.discord.bot.aluna.bot.shardmanager.ShardManagerBuilderCustomizer
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnTranslationEnabled
@@ -65,7 +66,8 @@ open class AlunaAutoConfiguration {
         genericAutoCompleteListener: GenericInteractionListener,
         eventWaiter: EventWaiter,
         genericEventPublisher: GenericEventPublisher,
-        alunaProperties: AlunaProperties
+        alunaProperties: AlunaProperties,
+        customizers: List<ShardManagerBuilderCustomizer>
     ): ShardManager {
         logger.debug("Enable DefaultShardManagerBuilder")
 
@@ -75,7 +77,8 @@ open class AlunaAutoConfiguration {
             genericAutoCompleteListener,
             eventWaiter,
             genericEventPublisher,
-            alunaProperties
+            alunaProperties,
+            customizers
         ).build()
 
         return discordBot.shardManager!!

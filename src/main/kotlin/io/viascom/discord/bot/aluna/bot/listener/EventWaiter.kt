@@ -22,6 +22,7 @@
 package io.viascom.discord.bot.aluna.bot.listener
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
@@ -87,7 +88,7 @@ class EventWaiter(
                     val elementsToRemove = arrayListOf<Int>()
                     waitingEventElements.forEach { waitingEvent ->
                         val remove = if (waitingEvent.attempt(event)) {
-                            runBlocking {
+                            runBlocking(AlunaCoroutinesDispatcher.Default) {
                                 try {
                                     if (SlashCommandInteractionEvent::class.isSuperclassOf(event::class)) {
                                         event as SlashCommandInteractionEvent
@@ -197,7 +198,7 @@ class EventWaiter(
 
                 //Create new task
                 it.timeoutTask = scheduledThreadPool.schedule({
-                    runBlocking {
+                    runBlocking(AlunaCoroutinesDispatcher.Default) {
                         if (waitingEvents.containsKey(it.type) && waitingEvents[it.type]!!.containsKey(id) &&
                             waitingEvents[it.type]!![id]!!.remove(it) && it.timeoutAction != null
                         ) {
@@ -224,6 +225,9 @@ class EventWaiter(
             }
         }
     }
+
+    fun <T : GenericEvent> hasWaiter(id: String, type: Class<in T>? = null): Boolean =
+        waitingEvents.filter { (it.key == type || type == null) && it.value.containsKey(id) }.isNotEmpty()
 
     inner class WaitingEvent<in T : GenericEvent>(
         private val condition: Predicate<T>,
@@ -360,7 +364,7 @@ class EventWaiter(
 
         if (timeout != null) {
             we.timeoutTask = scheduledThreadPool.schedule({
-                runBlocking {
+                runBlocking(AlunaCoroutinesDispatcher.Default) {
                     if (waitingEvents.containsKey(type) && waitingEvents[type]!!.containsKey(id) &&
                         waitingEvents[type]!![id]!!.remove(we) && timeoutAction != null
                     ) {

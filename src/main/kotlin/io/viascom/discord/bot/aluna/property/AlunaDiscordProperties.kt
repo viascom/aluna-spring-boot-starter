@@ -113,6 +113,13 @@ class AlunaDiscordProperties {
     var autoReconnect: Boolean = true
 
     /**
+     * If enabled, JDA will separate the bulk delete event into individual delete events, but this isn't as efficient as
+     * handling a single event would be. It is recommended that BulkDelete Splitting be disabled and that the developer
+     * should instead handle the {@link net.dv8tion.jda.api.events.message.MessageBulkDeleteEvent MessageBulkDeleteEvent}.
+     */
+    var bulkDeleteSplitting: Boolean = true
+
+    /**
      * Default permissions which are used for /system-command and invite generation
      */
     var defaultPermissions: ArrayList<Permission> = arrayListOf()

@@ -21,14 +21,17 @@
 
 package io.viascom.discord.bot.aluna.event
 
-import io.viascom.discord.bot.aluna.bot.*
+import io.viascom.discord.bot.aluna.bot.AutoCompleteHandler
+import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.DiscordMessageContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenu
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.Channel
 import net.dv8tion.jda.api.events.GenericEvent
-import net.dv8tion.jda.api.events.ReadyEvent
+import net.dv8tion.jda.api.events.session.ReadyEvent
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,7 +44,6 @@ import kotlin.reflect.KClass
 @ConditionalOnJdaEnabled
 class EventPublisher(
     private val applicationEventPublisher: ApplicationEventPublisher,
-    private val discordBot: DiscordBot,
     private val alunaProperties: AlunaProperties
 ) {
 

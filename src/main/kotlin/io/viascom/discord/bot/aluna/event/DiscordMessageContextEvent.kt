@@ -44,5 +44,4 @@ class DiscordMessageContextEvent(
     val guild: Guild?,
     val name: String,
     val contextMenu: DiscordMessageContextMenu
-) :
-    ApplicationEvent(source)
+) : ApplicationEvent(source)

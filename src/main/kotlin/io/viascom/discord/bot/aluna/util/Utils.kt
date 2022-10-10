@@ -27,6 +27,7 @@ package io.viascom.discord.bot.aluna.util
 import io.viascom.discord.bot.aluna.model.CommandOption
 import io.viascom.discord.bot.aluna.model.DiscordSticker
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.entities.Message.Attachment
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel
@@ -139,6 +140,12 @@ fun Member.timeoutFor(duration: Duration, reason: String? = null): AuditableRest
     val action = this.timeoutFor(duration)
     return if (reason != null) action.reason(reason) else action
 }
+
+fun Member.hasPermissionOverride(server: Guild, channel: GuildChannel, permission: Permission): Boolean =
+    channel.permissionContainer.permissionOverrides.any { it.allowed.contains(permission) && it.member?.id == this.id }
+
+fun Member.hasPermissionOverrides(server: Guild, channel: GuildChannel, permissions: List<Permission>): Boolean =
+    channel.permissionContainer.permissionOverrides.any { it.allowed.containsAll(permissions) && it.member?.id == this.id }
 
 @JvmOverloads
 @Suppress("UNCHECKED_CAST")

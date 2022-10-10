@@ -37,4 +37,9 @@ class AlunaThreadProperties {
      * Max amount of scheduler threads for event waiter timeout handling.
      */
     var eventWaiterTimeoutScheduler: Int = 2
+
+    /**
+     * Max amount of threads for jda callback handling.
+     */
+    var jdaCallbackThreadPool: Int = 10
 }

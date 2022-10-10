@@ -22,8 +22,9 @@
 package io.viascom.discord.bot.aluna.bot
 
 
-import io.viascom.discord.bot.aluna.bot.event.getDefaultIOScope
-import kotlinx.coroutines.launch
+import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
+import io.viascom.discord.bot.aluna.exception.AlunaInteractionRepresentationNotFoundException
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.Command
@@ -52,10 +53,23 @@ abstract class DiscordMessageContextMenu(name: String, localizations: Localizati
 
     @JvmSynthetic
     internal fun run(event: MessageContextInteractionEvent) {
+        val command = this
         if (alunaProperties.debug.useStopwatch) {
             stopWatch = StopWatch()
             stopWatch!!.start()
         }
+
+        if (!discordBot.discordRepresentations.containsKey(event.name)) {
+            val exception = AlunaInteractionRepresentationNotFoundException(event.name)
+            try {
+                onExecutionException(event, exception)
+            } catch (exceptionError: Exception) {
+                discordInteractionMetaDataHandler.onGenericExecutionException(command, exception, exceptionError, event)
+            }
+            return
+        }
+
+        discordRepresentation = discordBot.discordRepresentations[event.name]!!
 
         MDC.put("interaction", event.commandPath)
         MDC.put("uniqueId", uniqueId)
@@ -98,11 +112,10 @@ abstract class DiscordMessageContextMenu(name: String, localizations: Localizati
 
         //Load additional data for this interaction
         discordInteractionLoadAdditionalData.loadData(this, event)
-        val command = this
-        runBlocking {
+        runBlocking(AlunaCoroutinesDispatcher.Default) {
             //Run onCommandExecution in asyncExecutor to ensure it is not blocking the execution of the interaction itself
-            launch(getDefaultIOScope().coroutineContext) { discordInteractionMetaDataHandler.onContextMenuExecution(command, event) }
-            launch(getDefaultIOScope().coroutineContext) {
+            async(AlunaCoroutinesDispatcher.IO) { discordInteractionMetaDataHandler.onContextMenuExecution(command, event) }
+            async(AlunaCoroutinesDispatcher.IO) {
                 if (alunaProperties.discord.publishDiscordContextEvent) {
                     eventPublisher.publishDiscordMessageContextEvent(author, channel, guild, event.commandPath, command)
                 }

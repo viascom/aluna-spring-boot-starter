@@ -19,9 +19,20 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.event
+package io.viascom.discord.bot.aluna.bot.shardmanager
 
-import net.dv8tion.jda.api.events.session.ReadyEvent
-import org.springframework.context.ApplicationEvent
+import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
 
-class DiscordReadyEvent(source: Any, val jdaEvent: ReadyEvent) : ApplicationEvent(source)
+/**
+ * Shard manager builder customizer can be used to change properties before building a new instance.
+ * The order of the customizers is not guaranteed. If you need to have a specific oder, use @Order
+ */
+fun interface ShardManagerBuilderCustomizer {
+
+    /**
+     * Customize the ShardManagerBuilder.
+     * @param shardManagerBuilder the DefaultShardManagerBuilder to customize
+     */
+    fun customize(shardManagerBuilder: DefaultShardManagerBuilder)
+
+}

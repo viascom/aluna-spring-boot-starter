@@ -25,6 +25,7 @@ import io.viascom.discord.bot.aluna.bot.event.CoroutineEventManager
 import io.viascom.discord.bot.aluna.bot.listener.*
 import io.viascom.discord.bot.aluna.property.AlunaDiscordProperties
 import io.viascom.discord.bot.aluna.property.AlunaProperties
+import io.viascom.discord.bot.aluna.util.AlunaThreadPool
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
@@ -42,7 +43,8 @@ class DefaultShardManagerBuilder(
     private val genericInteractionListener: GenericInteractionListener,
     private val eventWaiter: EventWaiter,
     private val genericEventPublisher: GenericEventPublisher,
-    private val alunaProperties: AlunaProperties
+    private val alunaProperties: AlunaProperties,
+    private val customizers: List<ShardManagerBuilderCustomizer>
 ) : ShardManagerBuilder {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -55,9 +57,18 @@ class DefaultShardManagerBuilder(
             .addEventListeners(shardReadyEvent)
             .addEventListeners(interactionEventListener)
             .setEventManagerProvider { CoroutineEventManager(timeout = Duration.INFINITE) }
+            .setCallbackPool(
+                AlunaThreadPool.getDynamicThreadPool(
+                    0,
+                    alunaProperties.thread.jdaCallbackThreadPool,
+                    java.time.Duration.ofMinutes(1),
+                    true,
+                    "Aluna-Callback-Pool-%d"
+                )
+            )
             .setStatus(OnlineStatus.DO_NOT_DISTURB)
             .setActivity(Activity.playing("loading..."))
-            .setBulkDeleteSplittingEnabled(true)
+            .setBulkDeleteSplittingEnabled(alunaProperties.discord.bulkDeleteSplitting)
             .setShardsTotal(alunaProperties.discord.totalShards)
             .setMemberCachePolicy(
                 when (alunaProperties.discord.memberCachePolicy) {
@@ -105,6 +116,11 @@ class DefaultShardManagerBuilder(
             alunaProperties.discord.gatewayIntents.forEach {
                 shardManagerBuilder.enableIntents(it)
             }
+        }
+
+        customizers.forEach {
+            logger.debug("Run shardManagerBuilder customizer: [${it.javaClass.name}]")
+            it.customize(shardManagerBuilder)
         }
 
         return shardManagerBuilder.build()

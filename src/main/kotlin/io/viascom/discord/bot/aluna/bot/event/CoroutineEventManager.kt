@@ -26,47 +26,13 @@ package io.viascom.discord.bot.aluna.bot.event
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.scheduling.*
-import kotlinx.coroutines.slf4j.MDCContext
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.hooks.EventListener
 import net.dv8tion.jda.api.hooks.IEventManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CopyOnWriteArrayList
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration
-
-/**
- * Creates a suitable coroutine scope for your needs.
- *
- * @param[dispatcher] The executor used to dispatch coroutines, uses [Dispatchers.Default] if not provided
- * @param[parent] The parent job used for coroutines which can be used to cancel all children, uses [SupervisorJob] by default
- * @param[errorHandler] The [CoroutineExceptionHandler] used for handling uncaught exceptions, uses a logging handler which cancels the parent job on [Error] by default
- * @param[context] Any additional context to add to the scope, uses [EmptyCoroutineContext] by default
- *
- * @return[CoroutineScope]
- */
-fun getDefaultJDAScope(
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
-    parent: Job = SupervisorJob(),
-    errorHandler: CoroutineExceptionHandler? = null,
-    context: CoroutineContext = EmptyCoroutineContext
-): CoroutineScope {
-    val handler = errorHandler ?: CoroutineExceptionHandler { _, throwable ->
-        val logger: Logger = LoggerFactory.getLogger(CoroutineEventManager::class.java)
-        logger.error("Uncaught exception from coroutine", throwable)
-        if (throwable is Error) {
-            parent.cancel()
-            throw throwable
-        }
-    }
-    return CoroutineScope(dispatcher + parent + handler + context + MDCContext())
-}
-
-fun getDefaultIOScope(
-    context: CoroutineContext = EmptyCoroutineContext
-): CoroutineScope = getDefaultJDAScope(Dispatchers.IO, context = context)
 
 /**
  * EventManager implementation which supports both [EventListener] and [CoroutineEventListener].
@@ -74,7 +40,7 @@ fun getDefaultIOScope(
  * This enables [the coroutine listener extension][listener].
  */
 open class CoroutineEventManager(
-    scope: CoroutineScope = getDefaultJDAScope(),
+    scope: CoroutineScope = AlunaCoroutinesDispatcher.DefaultScope,
     /** Timeout [Duration] each event listener is allowed to run. Set to [Duration.INFINITE] for no timeout. Default: [Duration.INFINITE] */
     var timeout: Duration = Duration.INFINITE
 ) : IEventManager, CoroutineScope by scope {
@@ -88,7 +54,7 @@ open class CoroutineEventManager(
     }
 
     override fun handle(event: GenericEvent) {
-        launch {
+        launch(AlunaCoroutinesDispatcher.Default) {
             for (listener in listeners) try {
                 val actualTimeout = timeout(listener)
                 if (actualTimeout.isPositive() && actualTimeout.isFinite()) {

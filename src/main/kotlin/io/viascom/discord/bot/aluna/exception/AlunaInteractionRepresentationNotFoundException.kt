@@ -19,9 +19,7 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.event
+package io.viascom.discord.bot.aluna.exception
 
-import net.dv8tion.jda.api.events.session.ReadyEvent
-import org.springframework.context.ApplicationEvent
-
-class DiscordReadyEvent(source: Any, val jdaEvent: ReadyEvent) : ApplicationEvent(source)
+internal class AlunaInteractionRepresentationNotFoundException(val name: String) :
+    RuntimeException("Interaction with name '$name' does not exist as InteractionScopedObject")

@@ -21,6 +21,7 @@
 
 package io.viascom.discord.bot.aluna.botlist
 
+import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import kotlinx.coroutines.launch
@@ -66,11 +67,11 @@ open class BotListHandler(
 
     @Scheduled(cron = "0 */10 * * * *", zone = "UTC") //Send updates every 10 minutes
     open fun sendStats() {
-        runBlocking {
+        runBlocking(AlunaCoroutinesDispatcher.IO) {
             senders.forEach { sender ->
                 try {
                     if (alunaProperties.productionMode || !sender.onProductionModeOnly()) {
-                        launch { sender.sendStats(shardManager.guilds.size, shardManager.shardsTotal) }
+                        launch(AlunaCoroutinesDispatcher.IO) { sender.sendStats(shardManager.guilds.size, shardManager.shardsTotal) }
                     }
                 } catch (e: Exception) {
                     logger.error("Was not able to send stats to ${sender::class.qualifiedName}: " + e.stackTraceToString())

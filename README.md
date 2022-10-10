@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/viascom/aluna-spring-boot-starter/releases"><img src="https://img.shields.io/github/v/release/viascom/aluna-spring-boot-starter?include_prereleases&label=version"
          alt="Maven central"></a>
-  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--alpha.20-blue.svg"
+  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--alpha.21-blue.svg"
               alt="JDA-Version "></a>
   <a href="http://www.apache.org/licenses/"><img src="https://img.shields.io/badge/license-Apache_2.0-blue.svg"
          alt="license Apache 2.0"></a>
@@ -21,9 +21,9 @@
 
 | Library     |                                         Version                                         |
 |-------------|:---------------------------------------------------------------------------------------:|
-| JDA         | <img src="https://img.shields.io/badge/5.0.0-alpha.20-orange.svg" alt="5.0.0-alpha.20"> |
-| Spring Boot |       <img src="https://img.shields.io/badge/2.7.3-brightgreen.svg" alt="2.7.3">        |
-| Kotlin      |      <img src="https://img.shields.io/badge/1.7.10-brightgreen.svg" alt="1.7.10">       |
+| JDA         | <img src="https://img.shields.io/badge/5.0.0-alpha.21-orange.svg" alt="5.0.0-alpha.21"> |
+| Spring Boot |       <img src="https://img.shields.io/badge/2.7.4-brightgreen.svg" alt="2.7.4">        |
+| Kotlin      |      <img src="https://img.shields.io/badge/1.7.20-brightgreen.svg" alt="1.7.20">       |
 | emoji-java  |       <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1">        |
 
 ## Download
@@ -31,7 +31,7 @@
 Gradle:
 ```gradle
 dependencies {
-  implementation 'io.viascom.discord.bot:aluna-spring-boot-starter:0.0.29_5.0.0-alpha.20'
+  implementation 'io.viascom.discord.bot:aluna-spring-boot-starter:0.0.30_5.0.0-alpha.21'
 }
 ```
 
@@ -40,7 +40,7 @@ Maven:
 <dependency>
   <groupId>io.viascom.discord.bot</groupId>
     <artifactId>aluna-spring-boot-starter</artifactId>
-    <version>0.0.29_5.0.0-alpha.20</version>
+    <version>0.0.30_5.0.0-alpha.21</version>
 </dependency>
 ```
 

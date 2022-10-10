@@ -21,7 +21,6 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
-import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordReadyEvent
@@ -41,7 +40,6 @@ import java.awt.Color
 internal open class DiscordReadyEventListener(
     private val interactions: List<InteractionScopedObject>,
     private val shardManager: ShardManager,
-    private val discordBot: DiscordBot,
     private val alunaProperties: AlunaProperties
 ) : ApplicationListener<DiscordReadyEvent> {
 

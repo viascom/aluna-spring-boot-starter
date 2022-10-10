@@ -23,6 +23,7 @@ package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
+import io.viascom.discord.bot.aluna.bot.command.systemcommand.adminsearch.AdminSearchArgsProvider
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.adminsearch.AdminSearchPageDataProvider
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
@@ -54,7 +55,8 @@ import java.awt.Color
 class AdminSearchDataProvider(
     private val shardManager: ShardManager,
     private val adminSearchPageDataProviders: List<AdminSearchPageDataProvider>,
-    private val systemCommandEmojiProvider: SystemCommandEmojiProvider
+    private val systemCommandEmojiProvider: SystemCommandEmojiProvider,
+    private val adminSearchArgsProviders: List<AdminSearchArgsProvider>
 ) : SystemCommandDataProvider(
     "admin_search",
     "Admin Search",
@@ -230,6 +232,7 @@ class AdminSearchDataProvider(
         lastEmbed.setDescription("Found Discord User **${discordUser.asTag}**\nwith ID: ``${discordUser.id}``")
         lastEmbed.setThumbnail(discordUser.avatarUrl)
         lastEmbed.setFooter(null)
+        lastEmbed.setImage(null)
         lastEmbed.clearFields()
 
         adminSearchPageDataProviders.firstOrNull { it.supportedTypes.contains(AdminSearchType.USER) && it.pageId == page }
@@ -241,6 +244,7 @@ class AdminSearchDataProvider(
         lastEmbed.setDescription("Found Discord Server **${discordServer.name}**\nwith ID: ``${discordServer.id}``")
         lastEmbed.setThumbnail(discordServer.iconUrl)
         lastEmbed.setFooter(null)
+        lastEmbed.setImage(null)
         lastEmbed.clearFields()
 
         adminSearchPageDataProviders.firstOrNull { it.supportedTypes.contains(AdminSearchType.SERVER) && it.pageId == page }
@@ -251,6 +255,7 @@ class AdminSearchDataProvider(
         lastEmbed.clearFields()
         lastEmbed.setDescription("Found Discord Role **${discordRole.name}**\nwith ID: ``${discordRole.id}``")
         lastEmbed.setFooter(null)
+        lastEmbed.setImage(null)
         lastEmbed.clearFields()
         discordRole.icon?.let { lastEmbed.setThumbnail(it.iconUrl) }
 
@@ -262,6 +267,7 @@ class AdminSearchDataProvider(
         lastEmbed.clearFields()
         lastEmbed.setDescription("Found Discord Channel **${discordChannel.name}**\nwith ID: ``${discordChannel.id}``")
         lastEmbed.setFooter(null)
+        lastEmbed.setImage(null)
         lastEmbed.clearFields()
 
         adminSearchPageDataProviders.firstOrNull { it.supportedTypes.contains(AdminSearchType.CHANNEL) && it.pageId == page }
@@ -273,6 +279,7 @@ class AdminSearchDataProvider(
         lastEmbed.setDescription("Found Discord Emote **${discordEmote.name}**\nwith ID: ``${discordEmote.id}``")
         lastEmbed.setThumbnail(discordEmote.imageUrl)
         lastEmbed.setFooter(null)
+        lastEmbed.setImage(null)
         lastEmbed.clearFields()
 
         adminSearchPageDataProviders.firstOrNull { it.supportedTypes.contains(AdminSearchType.EMOTE) && it.pageId == page }
@@ -324,6 +331,12 @@ class AdminSearchDataProvider(
         if (emojis != null && emojis.isNotEmpty()) {
             event.replyChoices(emojis.map { Command.Choice(it.name + " (Emote) (${it.guild.name})", it.id) })
                 .queue()
+            return
+        }
+
+        val customArgsProvider = adminSearchArgsProviders.flatMap { it.onArgsRequest(arg) }
+        if (customArgsProvider.isNotEmpty()) {
+            event.replyChoices(customArgsProvider).queue()
             return
         }
 

@@ -24,7 +24,7 @@
 set -e
 
 PATH_TO_JDA=$1
-EVENTS=$(gfind "$PATH_TO_JDA" -name '*Event.java' -type f -printf "%f\n" | cut -d'.' -f1 | awk '{print "class On"$1"(source: Any, @Nonnull val event: "$1") : ApplicationEvent(source)"}')
+EVENTS=$(gfind "$PATH_TO_JDA" -name '*Event.java' -type f -printf "%f\n" | cut -d'.' -f1 | awk '{print "class On"$1"(source: Any, val event: "$1") : ApplicationEvent(source)"}')
 SORTED_EVENTS=$(echo "$EVENTS" | sort)
 
 HEADER=$(cat <<-END

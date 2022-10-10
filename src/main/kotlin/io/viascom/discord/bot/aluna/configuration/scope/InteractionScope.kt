@@ -23,6 +23,7 @@ package io.viascom.discord.bot.aluna.configuration.scope
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
+import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
 import io.viascom.discord.bot.aluna.util.NanoId
@@ -222,7 +223,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
     ): ScheduledFuture<*> {
         return scopedObjectsTimeoutScheduler.schedule({
             val discordBot: DiscordBot = context.getBean(DiscordBot::class.java) as DiscordBot
-            runBlocking {
+            runBlocking(AlunaCoroutinesDispatcher.Default) {
                 if (executeOnDestroy) {
                     try {
                         newObj::class.java.getDeclaredMethod("onDestroy").invoke(newObj)

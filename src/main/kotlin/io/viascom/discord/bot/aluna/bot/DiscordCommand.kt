@@ -21,13 +21,15 @@
 
 package io.viascom.discord.bot.aluna.bot
 
-import io.viascom.discord.bot.aluna.bot.event.getDefaultIOScope
+import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.event.EventPublisher
+import io.viascom.discord.bot.aluna.exception.AlunaInteractionRepresentationNotFoundException
 import io.viascom.discord.bot.aluna.model.*
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.property.OwnerIdProvider
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.Permission
@@ -150,6 +152,11 @@ abstract class DiscordCommand @JvmOverloads constructor(
     override var beanUseAutoCompleteBean: Boolean = true
     override var beanRemoveObserverOnDestroy: Boolean = true
     override var beanCallOnDestroy: Boolean = true
+
+    /**
+     * Discord representation of this interaction
+     */
+    lateinit var discordRepresentation: Command
 
     private val subCommandElements: HashMap<String, DiscordSubCommandElement> = hashMapOf()
 
@@ -500,10 +507,25 @@ abstract class DiscordCommand @JvmOverloads constructor(
 
     @JvmSynthetic
     internal fun run(event: SlashCommandInteractionEvent) {
+        val command = this
+
         if (alunaProperties.debug.useStopwatch) {
             stopWatch = StopWatch()
             stopWatch!!.start()
         }
+
+
+        if (!discordBot.discordRepresentations.containsKey(event.name)) {
+            val exception = AlunaInteractionRepresentationNotFoundException(event.name)
+            try {
+                onExecutionException(event, exception)
+            } catch (exceptionError: Exception) {
+                discordInteractionMetaDataHandler.onGenericExecutionException(command, exception, exceptionError, event)
+            }
+            return
+        }
+
+        discordRepresentation = discordBot.discordRepresentations[event.name]!!
 
         currentSubCommandPath = event.commandPath
         MDC.put("interaction", event.commandPath)
@@ -567,11 +589,10 @@ abstract class DiscordCommand @JvmOverloads constructor(
         //Load additional data for this command
         discordInteractionLoadAdditionalData.loadData(this, event)
 
-        val command = this
-        runBlocking {
-            //Run onCommandExecution in asyncExecutor to ensure it is not blocking the execution of the command itself
-            launch(getDefaultIOScope().coroutineContext) { discordInteractionMetaDataHandler.onCommandExecution(command, event) }
-            launch(getDefaultIOScope().coroutineContext) {
+        runBlocking(AlunaCoroutinesDispatcher.Default) {
+            //Run onCommandExecution in async to ensure it is not blocking the execution of the command itself
+            async(AlunaCoroutinesDispatcher.IO) { discordInteractionMetaDataHandler.onCommandExecution(command, event) }
+            async(AlunaCoroutinesDispatcher.IO) {
                 if (alunaProperties.discord.publishDiscordCommandEvent) {
                     eventPublisher.publishDiscordCommandEvent(author, channel, guild, event.commandPath, command)
                 }
@@ -599,8 +620,8 @@ abstract class DiscordCommand @JvmOverloads constructor(
     @JvmSynthetic
     internal fun exitCommand(event: SlashCommandInteractionEvent) {
         val command = this
-        runBlocking {
-            launch {
+        runBlocking(AlunaCoroutinesDispatcher.Default) {
+            launch(AlunaCoroutinesDispatcher.Default) {
                 if (alunaProperties.debug.useStopwatch && stopWatch != null) {
                     stopWatch!!.stop()
                     MDC.put("duration", stopWatch!!.totalTimeMillis.toString())
@@ -612,7 +633,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
                 }
 
             }
-            launch(getDefaultIOScope().coroutineContext) {
+            launch(AlunaCoroutinesDispatcher.IO) {
                 discordInteractionMetaDataHandler.onExitInteraction(command, stopWatch, event)
             }
         }

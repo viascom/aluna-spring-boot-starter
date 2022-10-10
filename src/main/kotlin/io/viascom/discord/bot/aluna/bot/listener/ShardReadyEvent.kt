@@ -23,7 +23,7 @@ package io.viascom.discord.bot.aluna.bot.listener
 
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.EventPublisher
-import net.dv8tion.jda.api.events.ReadyEvent
+import net.dv8tion.jda.api.events.session.ReadyEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.springframework.stereotype.Component
 

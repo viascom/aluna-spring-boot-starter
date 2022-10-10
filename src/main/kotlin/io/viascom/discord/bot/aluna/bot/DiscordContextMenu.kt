@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot
 
-import io.viascom.discord.bot.aluna.bot.event.getDefaultIOScope
+import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.model.AdditionalRequirements
@@ -114,6 +114,11 @@ abstract class DiscordContextMenu(
     override var beanUseAutoCompleteBean: Boolean = false
     override var beanRemoveObserverOnDestroy: Boolean = true
     override var beanCallOnDestroy: Boolean = true
+
+    /**
+     * Discord representation of this interaction
+     */
+    lateinit var discordRepresentation: Command
 
     /**
      * Any [Permission]s a Member must have to use this command.
@@ -302,8 +307,8 @@ abstract class DiscordContextMenu(
     @JvmSynthetic
     internal fun exitCommand(event: GenericCommandInteractionEvent) {
         val command = this
-        runBlocking {
-            launch {
+        runBlocking(AlunaCoroutinesDispatcher.Default) {
+            launch(AlunaCoroutinesDispatcher.Default) {
                 if (alunaProperties.debug.useStopwatch && stopWatch != null) {
                     stopWatch!!.stop()
                     MDC.put("duration", stopWatch!!.totalTimeMillis.toString())
@@ -315,7 +320,7 @@ abstract class DiscordContextMenu(
                 }
             }
 
-            launch(getDefaultIOScope().coroutineContext) {
+            launch(AlunaCoroutinesDispatcher.IO) {
                 discordInteractionMetaDataHandler.onExitInteraction(command, stopWatch, event)
             }
         }

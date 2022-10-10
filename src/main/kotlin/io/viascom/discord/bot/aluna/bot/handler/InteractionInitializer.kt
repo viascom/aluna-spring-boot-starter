@@ -95,6 +95,9 @@ internal open class InteractionInitializer(
 
         //Create global interactions
         shardManager.shards.first().retrieveCommands(true).queue { currentCommands ->
+            discordBot.discordRepresentations.clear()
+            discordBot.discordRepresentations.putAll(currentCommands.associateBy { it.name })
+
             val commandDataList = arrayListOf<CommandDataImpl>()
 
             commandDataList.addAll(filteredCommands)
@@ -164,6 +167,7 @@ internal open class InteractionInitializer(
                     if (discordCommand.type == Command.Type.SLASH && (discordCommand as DiscordCommand).observeAutoComplete && command.name !in discordBot.commandsWithAutocomplete) {
                         discordBot.commandsWithAutocomplete.add(command.id)
                     }
+                    discordBot.discordRepresentations[command.name] = command
                 }
             }
 

@@ -19,9 +19,12 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.event
+package io.viascom.discord.bot.aluna.bot.command.systemcommand.adminsearch
 
-import net.dv8tion.jda.api.events.session.ReadyEvent
-import org.springframework.context.ApplicationEvent
+import net.dv8tion.jda.api.interactions.commands.Command
 
-class DiscordReadyEvent(source: Any, val jdaEvent: ReadyEvent) : ApplicationEvent(source)
+abstract class AdminSearchArgsProvider {
+
+    abstract fun onArgsRequest(args: String): ArrayList<Command.Choice>
+
+}

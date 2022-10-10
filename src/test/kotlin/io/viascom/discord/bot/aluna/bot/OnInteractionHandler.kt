@@ -67,6 +67,7 @@ class OnInteractionHandler : DiscordInteractionMetaDataHandler {
         exceptionOfSpecificHandler: Exception,
         event: GenericCommandInteractionEvent
     ) {
+        throw throwableOfExecution
     }
 
     override fun onGenericExecutionException(
@@ -75,5 +76,6 @@ class OnInteractionHandler : DiscordInteractionMetaDataHandler {
         exceptionOfSpecificHandler: Exception,
         event: GenericCommandInteractionEvent
     ) {
+        throw throwableOfExecution
     }
 }

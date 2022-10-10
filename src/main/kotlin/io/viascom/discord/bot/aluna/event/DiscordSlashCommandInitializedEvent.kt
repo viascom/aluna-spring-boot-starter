@@ -30,5 +30,4 @@ class DiscordSlashCommandInitializedEvent(
     val newCommands: List<KClass<out CommandDataImpl>>,
     val updatedCommands: List<KClass<out CommandDataImpl>>,
     val removedCommands: List<String>
-) :
-    ApplicationEvent(source)
+) : ApplicationEvent(source)

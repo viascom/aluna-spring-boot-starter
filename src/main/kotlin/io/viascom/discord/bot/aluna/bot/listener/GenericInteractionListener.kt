@@ -22,6 +22,7 @@
 package io.viascom.discord.bot.aluna.bot.listener
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
 import io.viascom.discord.bot.aluna.util.NanoId
@@ -43,8 +44,8 @@ open class GenericInteractionListener(
 ) : ListenerAdapter() {
 
     override fun onCommandAutoCompleteInteraction(event: CommandAutoCompleteInteractionEvent) {
-        runBlocking {
-            launch {
+        runBlocking(AlunaCoroutinesDispatcher.Default) {
+            launch(AlunaCoroutinesDispatcher.Default) {
                 val commandId = discordBot.commandsWithAutocomplete.firstOrNull { it == event.commandId }
                 if (commandId != null) {
                     discordBot.commands[commandId]?.let { command ->
@@ -54,7 +55,7 @@ open class GenericInteractionListener(
                 }
             }
 
-            launch {
+            launch(AlunaCoroutinesDispatcher.Default) {
                 val handler = discordBot.autoCompleteHandlers.entries.firstOrNull { entry ->
                     entry.key.first == event.commandId && (entry.key.second == null || entry.key.second == event.focusedOption.name)
                 }

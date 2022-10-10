@@ -21,8 +21,8 @@
 
 package io.viascom.discord.bot.aluna.bot
 
+import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventManager
-import io.viascom.discord.bot.aluna.bot.event.getDefaultJDAScope
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.model.EventRegisterType
 import io.viascom.discord.bot.aluna.model.ObserveInteraction
@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.interactions.InteractionHook
+import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.requests.RestAction
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -65,19 +66,19 @@ open class DiscordBot(
     val autoCompleteHandlers = hashMapOf<Pair<String, String?>, Class<out AutoCompleteHandler>>()
 
     @get:JvmSynthetic
-    @set:JvmSynthetic
-    internal var messagesToObserveButton: MutableMap<String, ObserveInteraction> =
-        Collections.synchronizedMap(hashMapOf<String, ObserveInteraction>())
+    internal val discordRepresentations = hashMapOf<String, Command>()
 
     @get:JvmSynthetic
     @set:JvmSynthetic
-    internal var messagesToObserveSelect: MutableMap<String, ObserveInteraction> =
-        Collections.synchronizedMap(hashMapOf<String, ObserveInteraction>())
+    internal var messagesToObserveButton: MutableMap<String, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveInteraction>())
 
     @get:JvmSynthetic
     @set:JvmSynthetic
-    internal var messagesToObserveModal: MutableMap<String, ObserveInteraction> =
-        Collections.synchronizedMap(hashMapOf<String, ObserveInteraction>())
+    internal var messagesToObserveSelect: MutableMap<String, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveInteraction>())
+
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var messagesToObserveModal: MutableMap<String, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveInteraction>())
 
     @get:JvmSynthetic
     internal val messagesToObserveScheduledThreadPool =
@@ -99,14 +100,14 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        runBlocking(getDefaultJDAScope().coroutineContext) {
+        runBlocking(AlunaCoroutinesDispatcher.Default) {
             logger.debug("Register message $messageId for button events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
             if (!additionalData.containsKey("message.id")) {
                 additionalData["message.id"] = messageId
             }
 
             val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-                runBlocking {
+                runBlocking(AlunaCoroutinesDispatcher.Default) {
                     try {
                         context.getBean(interaction::class.java).onButtonInteractionTimeout(additionalData)
                     } catch (e: Exception) {
@@ -142,13 +143,13 @@ open class DiscordBot(
         interactionUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal().queue { message ->
-            runBlocking(getDefaultJDAScope().coroutineContext) {
+            runBlocking(AlunaCoroutinesDispatcher.Default) {
                 logger.debug("Register message ${message.id} for button events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
                 if (!additionalData.containsKey("message.id")) {
                     additionalData["message.id"] = message.id
                 }
                 val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-                    runBlocking {
+                    runBlocking(AlunaCoroutinesDispatcher.Default) {
                         try {
                             context.getBean(interaction::class.java).onButtonInteractionTimeout(additionalData)
                         } catch (e: Exception) {
@@ -184,13 +185,13 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        runBlocking(getDefaultJDAScope().coroutineContext) {
+        runBlocking(AlunaCoroutinesDispatcher.Default) {
             logger.debug("Register message $messageId for select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
             if (!additionalData.containsKey("message.id")) {
                 additionalData["message.id"] = messageId
             }
             val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-                runBlocking {
+                runBlocking(AlunaCoroutinesDispatcher.Default) {
                     try {
                         context.getBean(interaction::class.java).onSelectMenuInteractionTimeout(additionalData)
                     } catch (e: Exception) {
@@ -226,13 +227,13 @@ open class DiscordBot(
         interactionUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal().queue { message ->
-            runBlocking(getDefaultJDAScope().coroutineContext) {
+            runBlocking(AlunaCoroutinesDispatcher.Default) {
                 logger.debug("Register message ${message.id} for select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
                 if (!additionalData.containsKey("message.id")) {
                     additionalData["message.id"] = message.id
                 }
                 val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-                    runBlocking {
+                    runBlocking(AlunaCoroutinesDispatcher.Default) {
                         try {
                             context.getBean(interaction::class.java).onSelectMenuInteractionTimeout(additionalData)
                         } catch (e: Exception) {
@@ -266,18 +267,18 @@ open class DiscordBot(
         duration: Duration = Duration.ofMinutes(14),
         additionalData: HashMap<String, Any?> = hashMapOf()
     ) {
-        runBlocking(getDefaultJDAScope().coroutineContext) {
+        runBlocking(AlunaCoroutinesDispatcher.Default) {
             logger.debug("Register user $authorId for modal events to interaction '${getInteractionName(interaction)}'")
             val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-                runBlocking(getDefaultJDAScope().coroutineContext) {
-                    launch {
+                runBlocking(AlunaCoroutinesDispatcher.Default) {
+                    launch(AlunaCoroutinesDispatcher.Default) {
                         try {
                             context.getBean(interaction::class.java).onModalInteractionTimeout(additionalData)
                         } catch (e: Exception) {
                             logger.debug("Could not run onModalInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
                         }
                     }
-                    launch {
+                    launch(AlunaCoroutinesDispatcher.Default) {
                         removeMessageForModalEvents(authorId)
                     }
                 }
@@ -318,18 +319,18 @@ open class DiscordBot(
     ) {
         action.queue({
             val discordBot = this
-            runBlocking(getDefaultJDAScope().coroutineContext) {
-                launch {
+            runBlocking(AlunaCoroutinesDispatcher.Default) {
+                launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.BUTTON)) {
                         discordBot.registerMessageForButtonEvents(hook, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
                     }
                 }
-                launch {
+                launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.SELECT)) {
                         discordBot.registerMessageForSelectEvents(hook, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
                     }
                 }
-                launch {
+                launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.MODAL)) {
                         discordBot.registerMessageForModalEvents(interaction.author.id, interaction, persist, duration, additionalData)
                     }
@@ -354,18 +355,18 @@ open class DiscordBot(
     ) {
         action.queue({
             val discordBot = this
-            runBlocking(getDefaultJDAScope().coroutineContext) {
-                launch {
+            runBlocking(AlunaCoroutinesDispatcher.Default) {
+                launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.MODAL)) {
                         discordBot.registerMessageForModalEvents(interaction.author.id, interaction, persist, duration, additionalData)
                     }
                 }
-                launch {
+                launch(AlunaCoroutinesDispatcher.Default) {
                     success?.accept(it)
                 }
             }
         }, {
-            runBlocking(getDefaultJDAScope().coroutineContext) {
+            runBlocking(AlunaCoroutinesDispatcher.Default) {
                 failure?.accept(it)
             }
         })
@@ -386,30 +387,30 @@ open class DiscordBot(
     ) {
         action.queue({
             val discordBot = this
-            runBlocking(getDefaultJDAScope().coroutineContext) {
+            runBlocking(AlunaCoroutinesDispatcher.Default) {
 
-                launch {
+                launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.BUTTON)) {
                         discordBot.registerMessageForButtonEvents(it, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
                     }
                 }
-                launch {
+                launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.SELECT)) {
                         discordBot.registerMessageForSelectEvents(it, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
                     }
                 }
-                launch {
+                launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.MODAL)) {
                         discordBot.registerMessageForModalEvents(interaction.author.id, interaction, persist, duration, additionalData)
                     }
                 }
-                launch {
+                launch(AlunaCoroutinesDispatcher.Default) {
                     success?.accept(it)
                 }
             }
 
         }, {
-            runBlocking(getDefaultJDAScope().coroutineContext) {
+            runBlocking(AlunaCoroutinesDispatcher.Default) {
                 failure?.accept(it)
             }
         })
@@ -485,10 +486,10 @@ fun ReplyCallbackAction.queueAndRegisterInteraction(
  * The coroutine scope used by the underlying [CoroutineEventManager].
  * If this instance does not use the coroutine event manager, this returns the default scope from [getDefaultJDAScope].
  */
-val JDA.scope: CoroutineScope get() = (eventManager as? CoroutineEventManager) ?: getDefaultJDAScope()
+val JDA.scope: CoroutineScope get() = (eventManager as? CoroutineEventManager) ?: AlunaCoroutinesDispatcher.DefaultScope
 
 /**
  * The coroutine scope used by the underlying [CoroutineEventManager].
  * If this instance does not use the coroutine event manager, this returns the default scope from [getDefaultJDAScope].
  */
-val ShardManager.scope: CoroutineScope get() = (shardCache.firstOrNull()?.eventManager as? CoroutineEventManager) ?: getDefaultJDAScope()
+val ShardManager.scope: CoroutineScope get() = (shardCache.firstOrNull()?.eventManager as? CoroutineEventManager) ?: AlunaCoroutinesDispatcher.DefaultScope

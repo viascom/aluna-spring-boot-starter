@@ -17,7 +17,6 @@ import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicLong
-import javax.annotation.CheckReturnValue
 
 /**
  * A ThreadFactory builder, providing any combination of these features:
@@ -65,7 +64,7 @@ internal class ThreadFactoryBuilder
     /**
      * Sets daemon or not for new threads created with this ThreadFactory.
      *
-     * @param daemon whether or not new Threads created with this ThreadFactory will be daemon threads
+     * @param daemon whether new Threads created with this ThreadFactory will be daemon threads
      * @return this for the builder pattern
      */
     fun setDaemon(daemon: Boolean): ThreadFactoryBuilder {
@@ -129,7 +128,6 @@ internal class ThreadFactoryBuilder
      *
      * @return the fully constructed [ThreadFactory]
      */
-    @CheckReturnValue
     fun build(): ThreadFactory {
         return doBuild(this)
     }
