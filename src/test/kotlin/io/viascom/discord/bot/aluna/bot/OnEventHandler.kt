@@ -21,8 +21,8 @@
 
 package io.viascom.discord.bot.aluna.bot
 
-import io.viascom.discord.bot.aluna.event.OnGuildMemberUpdateNicknameEvent
-import io.viascom.discord.bot.aluna.event.OnMessageReceivedEvent
+import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
@@ -34,20 +34,17 @@ class OnEventHandler {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     /*
-    If aluna.discord.publish-events: true, all JDA events are published as Spring events. The Spring event always starts with 'On' followed by the name of the event.
-    Example:
-    MessageReceivedEvent -> OnMessageReceivedEvent
-    GuildMemberUpdateNicknameEvent -> OnGuildMemberUpdateNicknameEvent
+    If aluna.discord.publish-events: true, all JDA events are published as Spring events.
     */
 
     @EventListener
-    fun onMessageReceivedEvent(event: OnMessageReceivedEvent) {
-        logger.info("Message received: ${event.event.message.contentStripped}")
+    fun onMessageReceivedEvent(event: MessageReceivedEvent) {
+        logger.info("Message received: ${event.message.contentStripped}")
     }
 
     @EventListener
-    fun onGuildMemberUpdateNicknameEvent(event: OnGuildMemberUpdateNicknameEvent) {
-        logger.info("Member '${event.event.oldNickname}' change name to '${event.event.newNickname}'")
+    fun onGuildMemberUpdateNicknameEvent(event: GuildMemberUpdateNicknameEvent) {
+        logger.info("Member '${event.oldNickname}' change name to '${event.newNickname}'")
     }
 
 }

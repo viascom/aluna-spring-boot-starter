@@ -392,7 +392,8 @@ class AlunaPaginator(
             },
             action = { event ->
                 val hook = event.deferEdit().complete()
-                display(hook, event.getSelection().toInt())
+                this.currentPageNumber = event.getSelection().toInt()
+                display(hook, this.currentPageNumber)
             })
     }
 
@@ -411,7 +412,7 @@ class AlunaPaginator(
         }
     }
 
-    inner class CurrentPage(number: Int, total: Int, start: Int, end: Int)
+    inner class CurrentPage(val number: Int, val total: Int, val start: Int, val end: Int)
 
     enum class Columns(val amount: Int) {
         ONE(1),

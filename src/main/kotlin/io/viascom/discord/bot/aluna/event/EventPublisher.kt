@@ -36,6 +36,7 @@ import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.PayloadApplicationEvent
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
 
@@ -119,9 +120,8 @@ class EventPublisher(
                 while (eventClass != null) {
                     val workClass = eventClass
                     if (workClass.simpleName !in arrayListOf("Class", "Object", "HttpRequestEvent")) {
-                        val specificEvent = Class.forName("io.viascom.discord.bot.aluna.event.On${workClass.simpleName}")
                         logger.debug("Publishing ${workClass.canonicalName}")
-                        applicationEventPublisher.publishEvent(specificEvent.constructors.first().newInstance(this, event))
+                        applicationEventPublisher.publishEvent(PayloadApplicationEvent<Any>(event.jda, event))
                     }
 
                     eventClass = if (alunaProperties.discord.publishOnlyFirstEvent) {
