@@ -98,7 +98,7 @@ dependencies {
         exclude group: "org.json", module: "json"
         //Because of https://advisory.checkmarx.net/advisory/vulnerability/Cx08fcacc9-cb99/
     }
-    api "org.json:json:20220320"
+    api "org.json:json:20220924"
 
     //====== Testing ======
     testImplementation "org.springframework.boot:spring-boot-starter-web"
