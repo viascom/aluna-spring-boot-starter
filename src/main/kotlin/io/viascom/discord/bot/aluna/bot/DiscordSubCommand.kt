@@ -25,7 +25,8 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import java.time.Duration
@@ -38,26 +39,30 @@ abstract class DiscordSubCommand(name: String, description: String) : Subcommand
     override var beanRemoveObserverOnDestroy: Boolean = true
     override var beanCallOnDestroy: Boolean = true
 
+    @set:JvmSynthetic
+    lateinit var command: DiscordCommand
+        private set
+
+    @JvmSynthetic
+    internal fun initialize(parentCommand: DiscordCommand) {
+        command = parentCommand
+    }
+
     abstract fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: DiscordCommand)
 
     open fun initCommandOptions() {}
 
-    open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
-        return true
-    }
-
+    open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean = true
     open fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {}
-    open fun onSelectMenuInteraction(event: SelectMenuInteractionEvent): Boolean {
-        return true
-    }
 
-    open fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {}
+    open fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean = true
+    open fun onStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) {}
+
+    open fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean = true
+    open fun onEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) {}
+
     open fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: DiscordCommand) {}
 
-
-    open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
-        return true
-    }
-
+    open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean = true
     open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {}
 }

@@ -161,7 +161,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
             scopedObjects[name]!![DiscordContext.discordState!!.id]!![autoCompleteForThisCommand.key] = newScopedObjectData
 
             //Search for other beans with same uniqueId and AUTO_COMPLETE
-            scopedObjects.filter { it.value.any { it.value.containsKey(autoCompleteForThisCommand.key) } }.forEach { beanEntry ->
+            scopedObjects.filter { scopedObject -> scopedObject.value.any { it.value.containsKey(autoCompleteForThisCommand.key) } }.forEach { beanEntry ->
                 beanEntry.value.filter { it.value.containsKey(autoCompleteForThisCommand.key) }.forEach { stateEntry ->
                     stateEntry.value.forEach { scopedObject ->
                         val newSubScopedObjectData = ScopedObjectData(
@@ -243,10 +243,16 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
                                 discordBot.messagesToObserveButton.remove(it.key)
                             }
 
-                            val selectMessage = discordBot.messagesToObserveSelect.entries.firstOrNull { it.value.uniqueId == uniqueId }
-                            selectMessage?.let {
+                            val stringSelectMessage = discordBot.messagesToObserveStringSelect.entries.firstOrNull { it.value.uniqueId == uniqueId }
+                            stringSelectMessage?.let {
                                 it.value.timeoutTask?.cancel(true)
-                                discordBot.messagesToObserveSelect.remove(it.key)
+                                discordBot.messagesToObserveStringSelect.remove(it.key)
+                            }
+
+                            val entitySelectMessage = discordBot.messagesToObserveEntitySelect.entries.firstOrNull { it.value.uniqueId == uniqueId }
+                            entitySelectMessage?.let {
+                                it.value.timeoutTask?.cancel(true)
+                                discordBot.messagesToObserveEntitySelect.remove(it.key)
                             }
 
                             eventWaiter.removeWaiter(uniqueId, true)
@@ -347,7 +353,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
     }
 
     fun getInstanceCount(): Int {
-        return scopedObjects.entries.sumOf { it.value.entries.sumOf { it.value.size } }
+        return scopedObjects.entries.sumOf { scopedObject -> scopedObject.value.entries.sumOf { it.value.size } }
     }
 
     fun getTimeoutCount(): Int {

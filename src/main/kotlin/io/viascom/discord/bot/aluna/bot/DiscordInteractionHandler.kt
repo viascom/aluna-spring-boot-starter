@@ -24,7 +24,8 @@ package io.viascom.discord.bot.aluna.bot
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 
 interface DiscordInteractionHandler {
 
@@ -35,8 +36,11 @@ interface DiscordInteractionHandler {
     fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
     fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>)
 
-    fun onSelectMenuInteraction(event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
-    fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>)
+    fun onStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    fun onStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>)
+
+    fun onEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    fun onEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>)
 
     fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
     fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>)

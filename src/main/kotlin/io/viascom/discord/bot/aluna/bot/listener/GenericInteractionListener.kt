@@ -31,7 +31,8 @@ import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.stereotype.Component
@@ -83,17 +84,32 @@ open class GenericInteractionListener(
     }
 
 
-    override fun onSelectMenuInteraction(event: SelectMenuInteractionEvent) {
-        if (discordBot.messagesToObserveSelect.containsKey(event.message.id)) {
-            val entry = discordBot.messagesToObserveSelect[event.message.id]!!
+    override fun onStringSelectInteraction(event: StringSelectInteractionEvent) {
+        if (discordBot.messagesToObserveStringSelect.containsKey(event.message.id)) {
+            val entry = discordBot.messagesToObserveStringSelect[event.message.id]!!
             DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
             if (entry.interactionUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
                 return
             }
 
-            val result = context.getBean(entry.interaction.java).onSelectMenuInteraction(event, entry.additionalData)
+            val result = context.getBean(entry.interaction.java).onStringSelectInteraction(event, entry.additionalData)
             if (!entry.stayActive && result) {
-                discordBot.removeMessageForSelectEvents(event.message.id)
+                discordBot.removeMessageForStringSelectEvents(event.message.id)
+            }
+        }
+    }
+
+    override fun onEntitySelectInteraction(event: EntitySelectInteractionEvent) {
+        if (discordBot.messagesToObserveEntitySelect.containsKey(event.message.id)) {
+            val entry = discordBot.messagesToObserveEntitySelect[event.message.id]!!
+            DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
+            if (entry.interactionUserOnly && event.user.id !in (entry.authorIds ?: arrayListOf())) {
+                return
+            }
+
+            val result = context.getBean(entry.interaction.java).onEntitySelectInteraction(event, entry.additionalData)
+            if (!entry.stayActive && result) {
+                discordBot.removeMessageForEntitySelectEvents(event.message.id)
             }
         }
     }

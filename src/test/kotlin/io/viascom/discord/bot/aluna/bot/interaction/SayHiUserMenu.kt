@@ -30,8 +30,8 @@ import io.viascom.discord.bot.aluna.util.getValueAsString
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
-import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
+import net.dv8tion.jda.api.interactions.modals.Modal
 
 @Interaction
 class SayHiUserMenu : DiscordUserContextMenu(
@@ -42,7 +42,7 @@ class SayHiUserMenu : DiscordUserContextMenu(
         this.useScope = UseScope.GUILD_ONLY
     }
 
-    lateinit var target: User
+    private lateinit var target: User
 
     override fun execute(event: UserContextInteractionEvent) {
         //Save the target (in this case the user) the user clicked on

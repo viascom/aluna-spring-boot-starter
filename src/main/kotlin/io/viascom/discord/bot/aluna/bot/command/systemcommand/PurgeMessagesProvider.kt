@@ -37,9 +37,9 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.components.ActionRow
-import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
+import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 
 @Interaction
@@ -57,7 +57,7 @@ class PurgeMessagesProvider(
     false
 ) {
 
-    lateinit var selectedChannel: GuildMessageChannel
+    private lateinit var selectedChannel: GuildMessageChannel
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
         var id = event.getTypedOption(command.argsOption, "")!!

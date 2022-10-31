@@ -32,12 +32,12 @@ import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.ItemComponent
-import net.dv8tion.jda.api.interactions.components.Modal
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
+import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.api.utils.FileUpload
 import java.awt.Color
@@ -56,17 +56,17 @@ class GenerateEmojiEnumProvider(
     false
 ) {
 
-    lateinit var latestHook: InteractionHook
-    var latestEmbed: EmbedBuilder = EmbedBuilder()
+    private lateinit var latestHook: InteractionHook
+    private var latestEmbed: EmbedBuilder = EmbedBuilder()
 
-    var selectedServerIds = arrayListOf<String>()
-    var selectedType = "kotlin"
+    private var selectedServerIds = arrayListOf<String>()
+    private var selectedType = "kotlin"
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
         createOverviewMessage()
         event.replyEmbeds(latestEmbed.build()).setEphemeral(true).setComponents(getActionRow()).queueAndRegisterInteraction(
             command,
-            arrayListOf(EventRegisterType.BUTTON, EventRegisterType.SELECT, EventRegisterType.MODAL),
+            arrayListOf(EventRegisterType.BUTTON, EventRegisterType.STRING_SELECT, EventRegisterType.MODAL),
             true
         ) {
             latestHook = it
@@ -93,7 +93,7 @@ class GenerateEmojiEnumProvider(
     private fun getRemoveActionRow(): ArrayList<ActionRow> {
         val rows = arrayListOf<ActionRow>()
         val row1 = arrayListOf<ItemComponent>()
-        val serverList = SelectMenu.create("serverList")
+        val serverList = StringSelectMenu.create("serverList")
 
         selectedServerIds.mapNotNull { shardManager.getGuildById(it) }.forEach {
             serverList.addOption(it.name, it.id, it.id)
@@ -119,7 +119,7 @@ class GenerateEmojiEnumProvider(
 
         val row2 = arrayListOf<ItemComponent>()
         row2.add(
-            SelectMenu.create("type")
+            StringSelectMenu.create("type")
                 .addOption("Kotlin", "kotlin", isDefault = selectedType == "kotlin")
                 .addOption("Java", "java", isDefault = selectedType == "java")
                 .addOption("Plain Text", "text", isDefault = selectedType == "text")
@@ -180,7 +180,7 @@ class GenerateEmojiEnumProvider(
         return true
     }
 
-    override fun onSelectMenuInteraction(event: SelectMenuInteractionEvent): Boolean {
+    override fun onStringSelectMenuInteraction(event: StringSelectInteractionEvent): Boolean {
         when (event.componentId) {
             "type" -> {
                 event.deferEdit().queue()

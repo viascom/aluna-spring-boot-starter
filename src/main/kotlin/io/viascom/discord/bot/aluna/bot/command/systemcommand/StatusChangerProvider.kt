@@ -34,12 +34,12 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.components.ActionRow
-import net.dv8tion.jda.api.interactions.components.Modal
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
+import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 import java.awt.Color
 
@@ -103,14 +103,14 @@ class StatusChangerProvider(
             command,
             arrayListOf(
                 EventRegisterType.BUTTON,
-                EventRegisterType.SELECT,
+                EventRegisterType.STRING_SELECT,
                 EventRegisterType.MODAL
             ),
             true
         )
     }
 
-    override fun onSelectMenuInteraction(event: SelectMenuInteractionEvent): Boolean {
+    override fun onStringSelectMenuInteraction(event: StringSelectInteractionEvent): Boolean {
         lastHook = event.deferEdit().complete()
 
         when (event.componentId) {
@@ -188,13 +188,13 @@ class StatusChangerProvider(
     private fun getComponents(): ArrayList<ActionRow> {
         val rows = arrayListOf<ActionRow>()
 
-        val statusSelect = SelectMenu.create("status")
+        val statusSelect = StringSelectMenu.create("status")
         OnlineStatus.values().filter { it != OnlineStatus.UNKNOWN }.forEach {
             statusSelect.addOption(it.name, it.key, isDefault = (it == status))
         }
         rows.add(ActionRow.of(statusSelect.build()))
 
-        val activitySelect = SelectMenu.create("activity")
+        val activitySelect = StringSelectMenu.create("activity")
         activitySelect.addOption("Nothing", "null", isDefault = ("null" == activityId))
         activitySelect.addOption("Playing", "playing", isDefault = ("playing" == activityId))
         activitySelect.addOption("Competing", "competing", isDefault = ("competing" == activityId))

@@ -25,11 +25,13 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
+import io.viascom.discord.bot.aluna.util.toEditData
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
 import net.dv8tion.jda.api.utils.messages.MessageData
+import net.dv8tion.jda.api.utils.messages.MessageEditData
 import java.time.OffsetDateTime
 
 @JsonInclude(Include.NON_NULL)
@@ -86,7 +88,7 @@ data class Webhook(
         var text: String
     )
 
-    fun toMessage(): MessageCreateData {
+    fun toMessageCreateData(): MessageCreateData {
         val message = MessageCreateBuilder()
         content?.let { message.setContent(it) } ?: message.setContent("")
 
@@ -111,6 +113,8 @@ data class Webhook(
 
         return message.build()
     }
+
+    fun toMessageEditData(): MessageEditData = toMessageCreateData().toEditData()
 
     companion object {
         fun fromMessage(message: MessageData): Webhook {

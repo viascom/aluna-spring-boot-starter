@@ -41,7 +41,8 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
@@ -281,13 +282,12 @@ abstract class DiscordCommand @JvmOverloads constructor(
      * This method gets triggered, as soon as a select event for this command is called.
      * Make sure that you register your message id: `discordBot.registerMessageForSelectEvents(it, this)` or `.queueAndRegisterInteraction()`
      *
-     * @param event [SelectMenuInteractionEvent] this method is based on
+     * @param event [StringSelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-
-    override fun onSelectMenuInteraction(event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return if (handleSubCommands) {
-            handleSubCommand(event, { it.onSelectMenuInteraction(event) }, { onSubCommandInteractionFallback(event) })
+            handleSubCommand(event, { it.onStringSelectInteraction(event) }, { onSubCommandInteractionFallback(event) })
         } else {
             true
         }
@@ -296,11 +296,37 @@ abstract class DiscordCommand @JvmOverloads constructor(
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-
-    override fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    override fun onStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
         if (handleSubCommands) {
             handleSubCommand(null, {
-                it.onSelectMenuInteractionTimeout(additionalData)
+                it.onStringSelectInteractionTimeout(additionalData)
+                true
+            }, {
+                onSubCommandInteractionTimeoutFallback()
+                true
+            })
+        }
+    }
+
+    /**
+     * This method gets triggered, as soon as a select event for this command is called.
+     * Make sure that you register your message id: `discordBot.registerMessageForSelectEvents(it, this)` or `.queueAndRegisterInteraction()`
+     *
+     * @param event [EntitySelectInteractionEvent] this method is based on
+     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
+     */
+    override fun onEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+        return if (handleSubCommands) {
+            handleSubCommand(event, { it.onEntitySelectInteraction(event) }, { onSubCommandInteractionFallback(event) })
+        } else {
+            true
+        }
+    }
+
+    override fun onEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
+        if (handleSubCommands) {
+            handleSubCommand(null, {
+                it.onEntitySelectInteractionTimeout(additionalData)
                 true
             }, {
                 onSubCommandInteractionTimeoutFallback()
@@ -672,7 +698,8 @@ abstract class DiscordCommand @JvmOverloads constructor(
 
         //Check if it is a SubCommand
         if (firstElement::class.isSubclassOf(DiscordSubCommand::class)) {
-            (firstElement as DiscordSubCommand).execute(event, null, this)
+            (firstElement as DiscordSubCommand).initialize(this)
+            firstElement.execute(event, null, this)
             return
         }
 
@@ -684,6 +711,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
             return
         }
 
+        firstElement.subCommands[secondLevel]!!.initialize(this)
         firstElement.subCommands[secondLevel]!!.execute(event, null, this)
     }
 
@@ -705,6 +733,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
 
         //Check if it is a SubCommand
         if (firstElement::class.isSubclassOf(DiscordSubCommand::class)) {
+            (firstElement as DiscordSubCommand).initialize(this)
             return function.invoke((firstElement as DiscordSubCommand))
         }
 
@@ -715,6 +744,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
             return fallback.invoke(event)
         }
 
+        (firstElement as DiscordSubCommand).initialize(this)
         return function.invoke(firstElement.subCommands[secondLevel]!!)
     }
 }

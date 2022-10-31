@@ -31,12 +31,12 @@ import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.components.ActionRow
-import net.dv8tion.jda.api.interactions.components.Modal
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
+import net.dv8tion.jda.api.interactions.modals.Modal
 import java.awt.Color
 
 @Interaction
@@ -66,7 +66,7 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
         )
 
         val row2 = ActionRow.of(
-            SelectMenu.create("color")
+            StringSelectMenu.create("color")
                 .addOption("Green", Color.GREEN.rgb.toString())
                 .addOption("Red", Color.RED.rgb.toString())
                 .addOption("Yellow", Color.YELLOW.rgb.toString())
@@ -77,7 +77,11 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
 
         event.replyEmbeds(latestEmbed.build())
             .addComponents(row1, row2)
-            .queueAndRegisterInteraction(this, arrayListOf(EventRegisterType.BUTTON, EventRegisterType.SELECT, EventRegisterType.MODAL), persist = true) {
+            .queueAndRegisterInteraction(
+                this,
+                arrayListOf(EventRegisterType.BUTTON, EventRegisterType.STRING_SELECT, EventRegisterType.MODAL),
+                persist = true
+            ) {
                 latestHook = it
             }
     }
@@ -107,7 +111,7 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
         return true
     }
 
-    override fun onSelectMenuInteraction(event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: java.util.HashMap<String, Any?>): Boolean {
         latestEmbed.setColor(event.getSelection().toInt())
         event.editMessageEmbeds(latestEmbed.build()).queue { latestHook = it }
         return true

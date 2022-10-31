@@ -23,38 +23,26 @@ package io.viascom.discord.bot.aluna.bot.interaction
 
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
-import io.viascom.discord.bot.aluna.model.AttachmentOption
-import io.viascom.discord.bot.aluna.util.addOption
-import io.viascom.discord.bot.aluna.util.getTypedOption
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import net.dv8tion.jda.api.utils.FileUpload
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 @Interaction
-class FileUploadCommand : DiscordCommand("upload-file", "Upload a file to Aluna") {
-
-    private val fileOption = AttachmentOption("file", "Awesome file", true)
-
-    override fun initCommandOptions() {
-        this.addOption(fileOption)
-    }
+class CreateEventCommand : DiscordCommand("create-event", "Send a ping") {
 
     override fun execute(event: SlashCommandInteractionEvent) {
-        val file = event.getTypedOption(fileOption)!! //This can't be null as it is required
-
-        val text = """
-            Name: ${file.fileName} 
-            Type: ${file.contentType}
-            Extension: ${file.fileExtension}
-            """.trimIndent()
-
-        //Send initial response
-        event.reply(text).queue { hook ->
-            //Download file
-            file.proxy.download().whenComplete { t, _ ->
-                //Update the response with the downloaded file as attachment
-                hook.editOriginal(text).setFiles(FileUpload.fromData(t, file.fileName)).queue()
-            }
-
-        }
+        event.deferReply().queue()
+        event.guild!!.createScheduledEvent(
+            "New Event",
+            "Test",
+            LocalDateTime.now().plusDays(1).atOffset(ZoneOffset.UTC),
+            LocalDateTime.now().plusDays(1).plusHours(2).atOffset(ZoneOffset.UTC)
+        ).queue()
+        event.guild!!.scheduledEvents.first().manager.setDescription("Updated").queue()
+        Thread.sleep(
+            Duration.ofSeconds(20).toMillis()
+        )
+        event.guild!!.scheduledEvents.first().manager.setLocation(guild!!.getVoiceChannelById("1008810257377669210")!!).queue()
     }
 }

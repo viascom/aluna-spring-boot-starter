@@ -40,7 +40,8 @@ import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
@@ -199,19 +200,34 @@ abstract class DiscordContextMenu(
      * This method gets triggered, as soon as a select event for this interaction is called.
      * Make sure that you register your message id: `discordBot.registerMessageForSelectEvents(it, this)` or `.queueAndRegisterInteraction()`
      *
-     * @param event [SelectMenuInteractionEvent] this method is based on
+     * @param event [StringSelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-
-    override fun onSelectMenuInteraction(event: SelectMenuInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return true
     }
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
+    override fun onStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    }
 
-    override fun onSelectMenuInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    /**
+     * This method gets triggered, as soon as a select event for this interaction is called.
+     * Make sure that you register your message id: `discordBot.registerMessageForSelectEvents(it, this)` or `.queueAndRegisterInteraction()`
+     *
+     * @param event [EntitySelectInteractionEvent] this method is based on
+     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
+     */
+    override fun onEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+        return true
+    }
+
+    /**
+     * This method gets triggered, as soon as a select event observer duration timeout is reached.
+     */
+    override fun onEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
     /**

@@ -31,13 +31,13 @@ import net.dv8tion.jda.api.entities.MessageEmbed.Field
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.ItemComponent
 import net.dv8tion.jda.api.interactions.components.buttons.Button
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.requests.FluentRestAction
 import net.dv8tion.jda.api.utils.messages.*
 import java.awt.Color
@@ -257,7 +257,7 @@ class AlunaPaginator(
         val rows = ArrayList<ActionRow>()
 
         if (showSelections) {
-            val selection = SelectMenu.create("page-selection")
+            val selection = StringSelectMenu.create("page-selection")
             for (i in 1..totalPages) {
                 selection.addOptions(selectItem.apply(i).withDefault(i == pageNum))
             }
@@ -372,12 +372,12 @@ class AlunaPaginator(
     private fun registerSelectionWaiter(message: Message) {
         timeout?.let { eventWaiter.overrideTimeout(eventWaiterId, it) }
 
-        if (eventWaiter.hasWaiter(eventWaiterId, SelectMenuInteractionEvent::class.java)) {
+        if (eventWaiter.hasWaiter(eventWaiterId, StringSelectInteractionEvent::class.java)) {
             return
         }
 
         eventWaiter.waitForInteraction(
-            type = SelectMenuInteractionEvent::class.java,
+            type = StringSelectInteractionEvent::class.java,
             id = eventWaiterId,
             message = message,
             timeout = timeout,

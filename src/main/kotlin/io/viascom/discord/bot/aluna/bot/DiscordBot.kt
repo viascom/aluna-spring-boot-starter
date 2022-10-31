@@ -74,7 +74,11 @@ open class DiscordBot(
 
     @get:JvmSynthetic
     @set:JvmSynthetic
-    internal var messagesToObserveSelect: MutableMap<String, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveInteraction>())
+    internal var messagesToObserveStringSelect: MutableMap<String, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveInteraction>())
+
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var messagesToObserveEntitySelect: MutableMap<String, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveInteraction>())
 
     @get:JvmSynthetic
     @set:JvmSynthetic
@@ -176,7 +180,7 @@ open class DiscordBot(
     }
 
     @JvmOverloads
-    fun registerMessageForSelectEvents(
+    fun registerMessageForStringSelectEvents(
         messageId: String,
         interaction: DiscordInteractionHandler,
         persist: Boolean = false,
@@ -186,22 +190,22 @@ open class DiscordBot(
         interactionUserOnly: Boolean = false
     ) {
         runBlocking(AlunaCoroutinesDispatcher.Default) {
-            logger.debug("Register message $messageId for select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
+            logger.debug("Register message $messageId for string select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
             if (!additionalData.containsKey("message.id")) {
                 additionalData["message.id"] = messageId
             }
             val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
                 runBlocking(AlunaCoroutinesDispatcher.Default) {
                     try {
-                        context.getBean(interaction::class.java).onSelectMenuInteractionTimeout(additionalData)
+                        context.getBean(interaction::class.java).onStringSelectInteractionTimeout(additionalData)
                     } catch (e: Exception) {
-                        logger.debug("Could not run onSelectMenuInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
+                        logger.debug("Could not run onStringSelectInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
                     }
-                    removeMessageForSelectEvents(messageId)
+                    removeMessageForStringSelectEvents(messageId)
                 }
             }, duration.seconds, TimeUnit.SECONDS)
 
-            messagesToObserveSelect[messageId] =
+            messagesToObserveStringSelect[messageId] =
                 ObserveInteraction(
                     interaction::class,
                     interaction.uniqueId,
@@ -217,7 +221,7 @@ open class DiscordBot(
     }
 
     @JvmOverloads
-    fun registerMessageForSelectEvents(
+    fun registerMessageForStringSelectEvents(
         hook: InteractionHook,
         interaction: DiscordInteractionHandler,
         persist: Boolean = false,
@@ -226,37 +230,63 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        hook.retrieveOriginal().queue { message ->
-            runBlocking(AlunaCoroutinesDispatcher.Default) {
-                logger.debug("Register message ${message.id} for select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
-                if (!additionalData.containsKey("message.id")) {
-                    additionalData["message.id"] = message.id
-                }
-                val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-                    runBlocking(AlunaCoroutinesDispatcher.Default) {
-                        try {
-                            context.getBean(interaction::class.java).onSelectMenuInteractionTimeout(additionalData)
-                        } catch (e: Exception) {
-                            logger.debug("Could not run onSelectMenuInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
-                        }
-                        removeMessageForSelectEvents(message.id)
-                    }
-                }, duration.seconds, TimeUnit.SECONDS)
+        hook.retrieveOriginal()
+            .queue { registerMessageForStringSelectEvents(it.id, interaction, persist, duration, additionalData, authorIds, interactionUserOnly) }
+    }
 
-                messagesToObserveSelect[message.id] =
-                    ObserveInteraction(
-                        interaction::class,
-                        interaction.uniqueId,
-                        LocalDateTime.now(),
-                        duration,
-                        persist,
-                        additionalData,
-                        authorIds,
-                        interactionUserOnly,
-                        timeoutTask
-                    )
+    @JvmOverloads
+    fun registerMessageForEntitySelectEvents(
+        messageId: String,
+        interaction: DiscordInteractionHandler,
+        persist: Boolean = false,
+        duration: Duration = Duration.ofMinutes(14),
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        authorIds: ArrayList<String>? = null,
+        interactionUserOnly: Boolean = false
+    ) {
+        runBlocking(AlunaCoroutinesDispatcher.Default) {
+            logger.debug("Register message $messageId for entity select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
+            if (!additionalData.containsKey("message.id")) {
+                additionalData["message.id"] = messageId
             }
+            val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
+                runBlocking(AlunaCoroutinesDispatcher.Default) {
+                    try {
+                        context.getBean(interaction::class.java).onEntitySelectInteractionTimeout(additionalData)
+                    } catch (e: Exception) {
+                        logger.debug("Could not run onEntitySelectInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
+                    }
+                    removeMessageForStringSelectEvents(messageId)
+                }
+            }, duration.seconds, TimeUnit.SECONDS)
+
+            messagesToObserveEntitySelect[messageId] =
+                ObserveInteraction(
+                    interaction::class,
+                    interaction.uniqueId,
+                    LocalDateTime.now(),
+                    duration,
+                    persist,
+                    additionalData,
+                    authorIds,
+                    interactionUserOnly,
+                    timeoutTask
+                )
         }
+    }
+
+    @JvmOverloads
+    fun registerMessageForEntitySelectEvents(
+        hook: InteractionHook,
+        interaction: DiscordInteractionHandler,
+        persist: Boolean = false,
+        duration: Duration = Duration.ofMinutes(14),
+        additionalData: HashMap<String, Any?> = hashMapOf(),
+        authorIds: ArrayList<String>? = null,
+        interactionUserOnly: Boolean = false
+    ) {
+        hook.retrieveOriginal()
+            .queue { registerMessageForEntitySelectEvents(it.id, interaction, persist, duration, additionalData, authorIds, interactionUserOnly) }
     }
 
     @JvmOverloads
@@ -300,7 +330,8 @@ open class DiscordBot(
     }
 
     fun removeMessageForButtonEvents(messageId: String) = messagesToObserveButton.remove(messageId)
-    fun removeMessageForSelectEvents(messageId: String) = messagesToObserveSelect.remove(messageId)
+    fun removeMessageForStringSelectEvents(messageId: String) = messagesToObserveStringSelect.remove(messageId)
+    fun removeMessageForEntitySelectEvents(messageId: String) = messagesToObserveStringSelect.remove(messageId)
     fun removeMessageForModalEvents(userId: String) = messagesToObserveModal.remove(userId)
 
     @JvmOverloads
@@ -326,8 +357,13 @@ open class DiscordBot(
                     }
                 }
                 launch(AlunaCoroutinesDispatcher.Default) {
-                    if (type.contains(EventRegisterType.SELECT)) {
-                        discordBot.registerMessageForSelectEvents(hook, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                    if (type.contains(EventRegisterType.STRING_SELECT)) {
+                        discordBot.registerMessageForStringSelectEvents(hook, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                    }
+                }
+                launch(AlunaCoroutinesDispatcher.Default) {
+                    if (type.contains(EventRegisterType.ENTITY_SELECT)) {
+                        discordBot.registerMessageForEntitySelectEvents(hook, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
                     }
                 }
                 launch(AlunaCoroutinesDispatcher.Default) {
@@ -395,8 +431,13 @@ open class DiscordBot(
                     }
                 }
                 launch(AlunaCoroutinesDispatcher.Default) {
-                    if (type.contains(EventRegisterType.SELECT)) {
-                        discordBot.registerMessageForSelectEvents(it, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                    if (type.contains(EventRegisterType.STRING_SELECT)) {
+                        discordBot.registerMessageForStringSelectEvents(it, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                    }
+                }
+                launch(AlunaCoroutinesDispatcher.Default) {
+                    if (type.contains(EventRegisterType.ENTITY_SELECT)) {
+                        discordBot.registerMessageForEntitySelectEvents(it, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
                     }
                 }
                 launch(AlunaCoroutinesDispatcher.Default) {

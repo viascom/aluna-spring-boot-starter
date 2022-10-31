@@ -33,7 +33,7 @@ import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.components.Modal
+import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.api.utils.FileUpload
 import net.dv8tion.jda.api.utils.messages.MessageEditData

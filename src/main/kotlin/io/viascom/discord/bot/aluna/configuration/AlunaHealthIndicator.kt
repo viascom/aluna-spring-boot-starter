@@ -29,7 +29,8 @@ import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -93,8 +94,10 @@ class AlunaHealthIndicator(
         val interactionObserver = hashMapOf<String, Any>()
         interactionObserver["buttons"] = discordBot.messagesToObserveButton.size +
                 eventWaiter.waitingEvents.entries.filter { it.key == ButtonInteractionEvent::class.java }.count { it.value.isNotEmpty() }
-        interactionObserver["select"] = discordBot.messagesToObserveSelect.size +
-                eventWaiter.waitingEvents.entries.filter { it.key == SelectMenuInteractionEvent::class.java }.count { it.value.isNotEmpty() }
+        interactionObserver["string_select"] = discordBot.messagesToObserveStringSelect.size +
+                eventWaiter.waitingEvents.entries.filter { it.key == StringSelectInteractionEvent::class.java }.count { it.value.isNotEmpty() }
+        interactionObserver["entity_select"] = discordBot.messagesToObserveEntitySelect.size +
+                eventWaiter.waitingEvents.entries.filter { it.key == EntitySelectInteractionEvent::class.java }.count { it.value.isNotEmpty() }
         interactionObserver["modal"] = discordBot.messagesToObserveModal.size +
                 eventWaiter.waitingEvents.entries.filter { it.key == ModalInteractionEvent::class.java }.count { it.value.isNotEmpty() }
 

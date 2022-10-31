@@ -32,8 +32,8 @@ import io.viascom.discord.bot.aluna.util.getValueAsString
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
+import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.utils.FileUpload
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import kotlin.math.min

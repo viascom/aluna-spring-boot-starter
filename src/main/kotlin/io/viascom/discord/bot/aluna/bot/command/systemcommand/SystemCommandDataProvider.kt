@@ -27,7 +27,7 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import java.time.Duration
 
@@ -58,11 +58,11 @@ abstract class SystemCommandDataProvider(
     }
 
     open fun onButtonInteractionTimeout() {}
-    open fun onSelectMenuInteraction(event: SelectMenuInteractionEvent): Boolean {
+    open fun onStringSelectMenuInteraction(event: StringSelectInteractionEvent): Boolean {
         return true
     }
 
-    open fun onSelectMenuInteractionTimeout() {}
+    open fun onStringSelectInteractionTimeout() {}
     open fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: SystemCommand) {}
 
 

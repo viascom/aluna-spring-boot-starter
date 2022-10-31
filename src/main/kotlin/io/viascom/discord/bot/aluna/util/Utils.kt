@@ -30,31 +30,36 @@ import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.entities.Message.Attachment
+import net.dv8tion.jda.api.entities.channel.Channel
+import net.dv8tion.jda.api.entities.channel.concrete.Category
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.DiscordLocale
-import net.dv8tion.jda.api.interactions.ModalInteraction
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.OptionMapping
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
-import net.dv8tion.jda.api.interactions.components.Modal
 import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
+import net.dv8tion.jda.api.interactions.modals.Modal
+import net.dv8tion.jda.api.interactions.modals.ModalInteraction
 import net.dv8tion.jda.api.requests.restaction.*
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction
 import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
+import net.dv8tion.jda.api.utils.messages.MessageCreateData
+import net.dv8tion.jda.api.utils.messages.MessageEditData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
 import java.time.Duration
@@ -99,6 +104,9 @@ fun ShardManager.getPrivateMessage(channelId: String, messageId: String): Messag
         null
     }
 }
+
+fun MessageEditData.toCreateData() = MessageCreateData.fromEditData(this)
+fun MessageCreateData.toEditData() = MessageEditData.fromCreateData(this)
 
 fun <T : Any> CommandDataImpl.addOption(option: CommandOption<in T>) {
     this.addOptions(option as OptionData)
@@ -272,8 +280,27 @@ fun CommandAutoCompleteInteractionEvent.replyLongChoices(choices: Map<String, Lo
 fun CommandAutoCompleteInteractionEvent.replyDoubleChoices(choices: Map<String, Double>): AutoCompleteCallbackAction =
     this.replyChoices(choices.entries.map { Command.Choice(it.key, it.value) })
 
-fun SelectMenuInteractionEvent.getSelection(): String = this.values.first()
-fun SelectMenuInteractionEvent.getSelections(): List<String> = this.values
+fun StringSelectInteractionEvent.getSelection(): String = this.values.first()
+fun StringSelectInteractionEvent.getSelections(): List<String> = this.values
+
+fun EntitySelectInteractionEvent.getUserSelection(): User? = this.jda.shardManager?.getUserById(this.values.first().id)
+fun EntitySelectInteractionEvent.getUserSelections(): List<User?> = this.values.map { this.jda.shardManager?.getUserById(it.id) }
+
+
+inline fun <reified T : Channel> EntitySelectInteractionEvent.getChannelSelection(): T? =
+    this.jda.shardManager?.getChannelById(T::class.java, this.values.first().id)
+
+inline fun <reified T : Channel> EntitySelectInteractionEvent.getChannelSelections(): List<T?> =
+    this.values.map { this.jda.shardManager?.getChannelById(T::class.java, it.id) }
+
+
+fun EntitySelectInteractionEvent.getCategorySelection(): Category? = this.jda.shardManager?.getCategoryById(this.values.first().id)
+fun EntitySelectInteractionEvent.getCategorySelections(): List<Category?> = this.values.map { this.jda.shardManager?.getCategoryById(it.id) }
+
+
+fun EntitySelectInteractionEvent.getRoleSelection(): Role? = this.jda.shardManager?.getRoleById(this.values.first().id)
+fun EntitySelectInteractionEvent.getRoleSelections(): List<Role?> = this.values.map { this.jda.shardManager?.getRoleById(it.id) }
+
 
 @JvmOverloads
 fun Modal.Builder.addTextField(
@@ -328,13 +355,13 @@ fun selectOption(label: String, value: String, description: String? = null, emoj
 }
 
 @JvmOverloads
-fun SelectMenu.Builder.addOption(
+fun StringSelectMenu.Builder.addOption(
     label: String,
     value: String,
     description: String? = null,
     emoji: Emoji? = null,
     isDefault: Boolean? = null
-): SelectMenu.Builder = this.addOptions(selectOption(label, value, description, emoji, isDefault))
+): StringSelectMenu.Builder = this.addOptions(selectOption(label, value, description, emoji, isDefault))
 
 @JvmOverloads
 fun textInput(
@@ -358,7 +385,7 @@ fun textInput(
         builder.maxLength = max
     }
 
-    if (value != null && value.isNotBlank()) {
+    if (!value.isNullOrBlank()) {
         builder.value = value
     }
 

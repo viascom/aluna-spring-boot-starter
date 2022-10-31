@@ -40,12 +40,12 @@ import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.components.ActionRow
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.sharding.ShardManager
 import java.awt.Color
 
@@ -97,7 +97,7 @@ class AdminSearchDataProvider(
             selectedType = AdminSearchType.USER
             generateDiscordUser(discordUser)
             lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(getDiscordMenu(AdminSearchType.USER))
-                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
+                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.STRING_SELECT), true)
             return
         }
 
@@ -108,7 +108,7 @@ class AdminSearchDataProvider(
             selectedType = AdminSearchType.SERVER
             generateDiscordServer(discordServer)
             lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(getDiscordMenu(AdminSearchType.SERVER))
-                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
+                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.STRING_SELECT), true)
             return
         }
 
@@ -119,7 +119,7 @@ class AdminSearchDataProvider(
             selectedType = AdminSearchType.ROLE
             generateDiscordRole(discordRole)
             lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(getDiscordMenu(AdminSearchType.ROLE))
-                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
+                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.STRING_SELECT), true)
             return
         }
 
@@ -130,7 +130,7 @@ class AdminSearchDataProvider(
             selectedType = AdminSearchType.CHANNEL
             generateDiscordChannel(discordChannel)
             lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(getDiscordMenu(AdminSearchType.CHANNEL))
-                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
+                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.STRING_SELECT), true)
             return
         }
 
@@ -141,12 +141,12 @@ class AdminSearchDataProvider(
             selectedType = AdminSearchType.EMOTE
             generateDiscordEmote(discordEmote)
             lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(getDiscordMenu(AdminSearchType.EMOTE))
-                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.SELECT), true)
+                .queueAndRegisterInteraction(lastHook, command, arrayListOf(EventRegisterType.STRING_SELECT), true)
             return
         }
     }
 
-    override fun onSelectMenuInteraction(event: SelectMenuInteractionEvent): Boolean {
+    override fun onStringSelectMenuInteraction(event: StringSelectInteractionEvent): Boolean {
         lastHook = event.deferEdit().complete()
         val page = event.getSelection()
 
@@ -164,7 +164,7 @@ class AdminSearchDataProvider(
         return true
     }
 
-    override fun onSelectMenuInteractionTimeout() {
+    override fun onStringSelectInteractionTimeout() {
         lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents().queue()
     }
 
@@ -287,7 +287,7 @@ class AdminSearchDataProvider(
     }
 
     private fun getDiscordMenu(type: AdminSearchType, page: String = "OVERVIEW"): ActionRow {
-        val menu = SelectMenu.create("menu:type")
+        val menu = StringSelectMenu.create("menu:type")
             .setRequiredRange(1, 1)
 
         val pages = adminSearchPageDataProviders.filter { it.supportedTypes.contains(type) }.sortedBy { it.pageName }.toCollection(arrayListOf())
@@ -328,7 +328,7 @@ class AdminSearchDataProvider(
         }
 
         val emojis = checkForEmoji(arg)
-        if (emojis != null && emojis.isNotEmpty()) {
+        if (!emojis.isNullOrEmpty()) {
             event.replyChoices(emojis.map { Command.Choice(it.name + " (Emote) (${it.guild.name})", it.id) })
                 .queue()
             return
