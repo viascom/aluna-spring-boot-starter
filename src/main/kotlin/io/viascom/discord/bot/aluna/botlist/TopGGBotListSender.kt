@@ -51,8 +51,8 @@ class TopGGBotListSender(
     override fun getName(): String = "top.gg"
 
     override fun sendStats(totalServer: Int, totalShards: Int) {
-        val topGGToken = alunaProperties.botList.topggToken
-        if (topGGToken == null) {
+        val topGGToken = alunaProperties.botList.topggToken ?: ""
+        if (topGGToken.isBlank()) {
             logger.debug("Stats are not sent to top.gg because token is not set")
             return
         }
@@ -69,7 +69,7 @@ class TopGGBotListSender(
             objectMapper.writeValueAsBytes(TopGGData(shardManager.shards.map { it.guilds.size })).toRequestBody("application/json".toMediaType())
         ).header("Authorization", topGGToken).build()
 
-        httpClient.newCall(request).execute()
+        httpClient.newCall(request).execute().body?.close()
     }
 
     class TopGGData(

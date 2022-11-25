@@ -2,6 +2,7 @@ plugins {
     id "idea"
     id "java-library"
     id "maven-publish"
+    id "signing"
     id "org.jetbrains.kotlin.jvm" version "1.7.20"
     id "org.jetbrains.kotlin.kapt" version "1.7.20"
     id "org.springframework.boot" version "2.7.5"
@@ -15,7 +16,7 @@ targetCompatibility = JavaVersion.VERSION_17
 ext {
     major = 0
     minor = 0
-    patch = 31
+    patch = 32
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
@@ -29,7 +30,7 @@ ext {
 }
 
 group "io.viascom.discord.bot"
-version = "${major}.${minor}.${patch}_${jdaVersion}${isCiServer ? "" : "-DEV"}"
+version = "${major}.${minor}.${patch}_${jdaVersion}${isCiServer ? "" : "-SNAPSHOT"}"
 project.logger.lifecycle("Version of this build: ${version}")
 
 tasks.bootJar { enabled = false }
@@ -161,6 +162,18 @@ publishing {
                 password = findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
             }
         }
+        maven {
+            def releaseRepo = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotRepo = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+
+            name = "OSSRH"
+            url = isCiServer ? releaseRepo : snapshotRepo
+
+            credentials {
+                username = findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+                password = findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
+            }
+        }
     }
 
     publications {
@@ -197,4 +210,12 @@ publishing {
             }
         }
     }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
+
+tasks.withType(Sign) {
+    onlyIf { isCiServer }
 }

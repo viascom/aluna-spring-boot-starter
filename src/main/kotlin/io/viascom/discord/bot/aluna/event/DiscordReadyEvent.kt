@@ -22,6 +22,7 @@
 package io.viascom.discord.bot.aluna.event
 
 import net.dv8tion.jda.api.events.session.ReadyEvent
+import net.dv8tion.jda.api.sharding.ShardManager
 import org.springframework.context.ApplicationEvent
 
-class DiscordReadyEvent(source: Any, val jdaEvent: ReadyEvent) : ApplicationEvent(source)
+class DiscordReadyEvent(source: Any, val jdaEvent: ReadyEvent, val shardManager: ShardManager) : ApplicationEvent(source)

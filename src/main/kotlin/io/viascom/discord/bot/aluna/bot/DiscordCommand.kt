@@ -137,16 +137,29 @@ abstract class DiscordCommand @JvmOverloads constructor(
     internal var specificServer: String? = null
 
     /**
-     * If true, only users which are returned by [OwnerIdProvider.getOwnerIds] are allowed to use it.
+     * Sets whether this command should only be usable in NSFW (age-restricted) channels.
+     *
+     * Note: Age-restricted commands will not show up in direct messages by default unless the user enables them in their settings.
+     *
+     * @see <a href="https://support.discord.com/hc/en-us/articles/10123937946007" target="_blank">Age-Restricted Commands FAQ</a>
+     */
+    //var isNSFW: Boolean = false
+
+    /**
+     * Sets whether this command can only be used by users which are returned by [OwnerIdProvider.getOwnerIds].
      */
     var isOwnerCommand = false
 
     /**
-     * If true, this command is only seen by users with the administrator permission on the server by default!
-     * Aluna will set `this.defaultPermissions = DefaultMemberPermissions.DISABLED` if true.
+     * Sets whether this command can only be seen by users with the administrator permission on the server!
+     *
+     * ! Aluna will set `this.defaultPermissions = DefaultMemberPermissions.DISABLED` if true.
      */
     var isAdministratorOnlyCommand = false
 
+    /**
+     * Interaction development status
+     */
     var interactionDevelopmentStatus = DevelopmentStatus.LIVE
 
     override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
@@ -157,7 +170,9 @@ abstract class DiscordCommand @JvmOverloads constructor(
     /**
      * Discord representation of this interaction
      */
+    @set:JvmSynthetic
     lateinit var discordRepresentation: Command
+        internal set
 
     private val subCommandElements: HashMap<String, DiscordSubCommandElement> = hashMapOf()
 
@@ -170,7 +185,8 @@ abstract class DiscordCommand @JvmOverloads constructor(
 
     /**
      * The [CooldownScope][Command.CooldownScope] of the command. This defines how far from a scope cooldowns have.
-     * <br></br>Default [CooldownScope.USER][Command.CooldownScope.USER].
+     *
+     * Default [CooldownScope.USER][Command.CooldownScope.USER].
      */
     @Experimental("Cooldowns are currently not supported")
     var cooldownScope = CooldownScope.USER

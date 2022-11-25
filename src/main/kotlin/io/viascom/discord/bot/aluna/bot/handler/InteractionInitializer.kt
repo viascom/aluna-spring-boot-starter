@@ -37,9 +37,11 @@ import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationListener
+import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Service
 
 @Service
+@Order(100)
 @ConditionalOnJdaEnabled
 internal open class InteractionInitializer(
     private val commands: List<DiscordCommand>,

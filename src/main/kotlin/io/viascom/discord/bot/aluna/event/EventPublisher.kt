@@ -32,6 +32,7 @@ import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.Channel
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.session.ReadyEvent
+import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -51,16 +52,16 @@ class EventPublisher(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @JvmSynthetic
-    internal fun publishDiscordReadyEvent(jdaEvent: ReadyEvent) {
+    internal fun publishDiscordReadyEvent(jdaEvent: ReadyEvent, shardManager: ShardManager) {
         logger.debug("Publishing DiscordReadyEvent")
-        val discordReadyEvent = DiscordReadyEvent(this, jdaEvent)
+        val discordReadyEvent = DiscordReadyEvent(this, jdaEvent, shardManager)
         applicationEventPublisher.publishEvent(discordReadyEvent)
     }
 
     @JvmSynthetic
-    internal fun publishDiscordFirstShardReadyEvent(jdaEvent: ReadyEvent) {
+    internal fun publishDiscordFirstShardReadyEvent(jdaEvent: ReadyEvent, shardManager: ShardManager) {
         logger.debug("Publishing DiscordFirstShardReadyEvent")
-        val discordReadyEvent = DiscordFirstShardReadyEvent(this, jdaEvent)
+        val discordReadyEvent = DiscordFirstShardReadyEvent(this, jdaEvent, shardManager)
         applicationEventPublisher.publishEvent(discordReadyEvent)
     }
 

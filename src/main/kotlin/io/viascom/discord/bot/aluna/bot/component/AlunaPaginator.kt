@@ -68,7 +68,7 @@ class AlunaPaginator(
     val timestamp: TemporalAccessor? = null,
 
     /**
-     * This field gets added as last field to every page.
+     * This field gets added as the last field to every page.
      */
     val footerElement: Function<CurrentPage, Field?>? = null,
 

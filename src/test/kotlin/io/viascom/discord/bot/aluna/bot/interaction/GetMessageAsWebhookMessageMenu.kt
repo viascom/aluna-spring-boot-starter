@@ -32,9 +32,7 @@ import net.dv8tion.jda.api.utils.messages.MessageEditData
 @Interaction
 class GetMessageAsWebhookMessageMenu(
     private val objectMapper: ObjectMapper
-) : DiscordMessageContextMenu(
-    "Extract as Webhook"
-) {
+) : DiscordMessageContextMenu("Extract as Webhook") {
 
     override fun execute(event: MessageContextInteractionEvent) {
         //Create a webhook model from the target message

@@ -36,12 +36,12 @@ class ShardReadyEvent(private val discordReadyEventPublisher: EventPublisher) : 
 
         //If first shard is connected, trigger interaction update
         if (event.jda.shardInfo.shardId == 0) {
-            discordReadyEventPublisher.publishDiscordFirstShardReadyEvent(event)
+            discordReadyEventPublisher.publishDiscordFirstShardReadyEvent(event, event.jda.shardManager!!)
         }
 
         //Publish DiscordReadyEvent as soon as all shards are connected
         if ((event.jda.shardInfo.shardId + 1) == (event.jda.shardInfo.shardTotal)) {
-            discordReadyEventPublisher.publishDiscordReadyEvent(event)
+            discordReadyEventPublisher.publishDiscordReadyEvent(event, event.jda.shardManager!!)
         }
     }
 }

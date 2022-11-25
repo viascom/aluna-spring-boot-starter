@@ -49,8 +49,8 @@ class DiscordBotListEuBotListSender(
     override fun getName(): String = "discord-botlist.eu"
 
     override fun sendStats(totalServer: Int, totalShards: Int) {
-        val discordBotListEuToken = alunaProperties.botList.discordBotListEuToken
-        if (discordBotListEuToken == null) {
+        val discordBotListEuToken = alunaProperties.botList.discordBotListEuToken ?: ""
+        if (discordBotListEuToken.isBlank()) {
             logger.debug("Stats are not sent to discord-botlist.eu because token is not set")
             return
         }
@@ -67,6 +67,6 @@ class DiscordBotListEuBotListSender(
             "{\"serverCount\": ${shardManager.guilds.size}}".toRequestBody("application/json".toMediaType())
         ).header("Authorization", discordBotListEuToken).build()
 
-        httpClient.newCall(request).execute()
+        httpClient.newCall(request).execute().body?.close()
     }
 }

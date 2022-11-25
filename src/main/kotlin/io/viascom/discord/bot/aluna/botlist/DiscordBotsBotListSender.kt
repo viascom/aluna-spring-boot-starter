@@ -49,8 +49,8 @@ class DiscordBotsBotListSender(
     override fun getName(): String = "discord.bots.gg"
 
     override fun sendStats(totalServer: Int, totalShards: Int) {
-        val discordBotsToken = alunaProperties.botList.discordBotsToken
-        if (discordBotsToken == null) {
+        val discordBotsToken = alunaProperties.botList.discordBotsToken ?: ""
+        if (discordBotsToken.isBlank()) {
             logger.debug("Stats are not sent to discord.bots.gg because token is not set")
             return
         }
@@ -67,6 +67,6 @@ class DiscordBotsBotListSender(
             "{\"guildCount\": ${shardManager.guilds.size},\"shardCount\":${shardManager.shardsTotal}}".toRequestBody("application/json".toMediaType())
         ).header("Authorization", discordBotsToken).build()
 
-        httpClient.newCall(request).execute()
+        httpClient.newCall(request).execute().body?.close()
     }
 }

@@ -32,10 +32,12 @@ import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationListener
+import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Service
 import java.awt.Color
 
 @Service
+@Order(100)
 @ConditionalOnJdaEnabled
 internal open class DiscordReadyEventListener(
     private val interactions: List<InteractionScopedObject>,

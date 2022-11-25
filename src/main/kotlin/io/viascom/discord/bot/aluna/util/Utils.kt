@@ -27,7 +27,6 @@ package io.viascom.discord.bot.aluna.util
 import io.viascom.discord.bot.aluna.model.CommandOption
 import io.viascom.discord.bot.aluna.model.DiscordSticker
 import net.dv8tion.jda.api.EmbedBuilder
-import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.entities.Message.Attachment
 import net.dv8tion.jda.api.entities.channel.Channel
@@ -73,16 +72,59 @@ fun Double.round(decimals: Int): Double {
     return kotlin.math.round(this * multiplier) / multiplier
 }
 
+/**
+ * Get the color as a hex representation
+ *
+ * @return Color as a hex representation
+ */
 fun Color.toHex(): String = String.format("#%02x%02x%02x", this.red, this.green, this.blue)
 
+/**
+ * Get the color as a Discord integer representation
+ *
+ * @return Color as a Discord integer representation
+ */
+fun Color.toDiscordColorInt(): Int = (this.red shl 16) + (this.green shl 8) + this.blue
+
+/**
+ * Remove all components
+ */
 fun WebhookMessageCreateAction<Message>.removeComponents() = this.setComponents(arrayListOf())
+
+/**
+ * Remove all components
+ */
 fun WebhookMessageEditAction<Message>.removeComponents() = this.setComponents(arrayListOf())
+
+/**
+ * Remove all components
+ */
 fun MessageCreateAction.removeComponents() = this.setComponents(arrayListOf())
+
+/**
+ * Remove all components
+ */
 fun MessageEditAction.removeComponents() = this.setComponents(arrayListOf())
+
+/**
+ * Remove all components
+ */
 fun MessageEditCallbackAction.removeComponents() = this.setComponents(arrayListOf())
+
+/**
+ * Remove all components
+ */
 fun ReplyCallbackAction.removeComponents() = this.setComponents(arrayListOf())
 fun MessageCreateAction.setStickers(vararg stickers: DiscordSticker) = this.setStickers(stickers.map { it.toSticker() })
 fun MessageCreateAction.setStickers(stickers: Collection<DiscordSticker>) = this.setStickers(stickers.map { it.toSticker() })
+
+/**
+ * Get guild text channel
+ *
+ * @param guildId guild id
+ * @param channelId channel id
+ * @return Guild Text Channel
+ */
 fun ShardManager.getGuildTextChannel(guildId: String, channelId: String): MessageChannel? = this.getGuildById(guildId)?.getTextChannelById(channelId)
 fun ShardManager.getGuildVoiceChannel(guildId: String, channelId: String): VoiceChannel? = this.getGuildById(guildId)?.getVoiceChannelById(channelId)
 fun ShardManager.getGuildMessage(guildId: String, channelId: String, messageId: String): Message? =
@@ -104,6 +146,8 @@ fun ShardManager.getPrivateMessage(channelId: String, messageId: String): Messag
         null
     }
 }
+
+fun ShardManager.getMemberById(guildId: String, userId: String): Member? = this.getGuildById(guildId)?.getMemberById(userId)
 
 fun MessageEditData.toCreateData() = MessageCreateData.fromEditData(this)
 fun MessageCreateData.toEditData() = MessageEditData.fromCreateData(this)
@@ -148,12 +192,6 @@ fun Member.timeoutFor(duration: Duration, reason: String? = null): AuditableRest
     val action = this.timeoutFor(duration)
     return if (reason != null) action.reason(reason) else action
 }
-
-fun Member.hasPermissionOverride(server: Guild, channel: GuildChannel, permission: Permission): Boolean =
-    channel.permissionContainer.permissionOverrides.any { it.allowed.contains(permission) && it.member?.id == this.id }
-
-fun Member.hasPermissionOverrides(server: Guild, channel: GuildChannel, permissions: List<Permission>): Boolean =
-    channel.permissionContainer.permissionOverrides.any { it.allowed.containsAll(permissions) && it.member?.id == this.id }
 
 @JvmOverloads
 @Suppress("UNCHECKED_CAST")
