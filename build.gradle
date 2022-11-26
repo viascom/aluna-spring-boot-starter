@@ -187,6 +187,13 @@ publishing {
                 url = "https://github.com/viascom/aluna-spring-boot-starter"
                 packaging = "jar"
 
+                licenses {
+                    license {
+                        name = 'Apache-2.0 license'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                    }
+                }
+
                 scm {
                     url = "https://github.com/viascom/aluna-spring-boot-starter"
                     connection = "scm:git://github.com/viascom/aluna-spring-boot-starter.git"
