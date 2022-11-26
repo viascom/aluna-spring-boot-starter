@@ -6,7 +6,7 @@
 <h4 align="center">Fast and easy way to use JDA in your Spring-Boot Project</h4>
 
 <p align="center">
-  <a href="https://github.com/viascom/aluna-spring-boot-starter/releases"><img src="https://img.shields.io/github/v/release/viascom/aluna-spring-boot-starter?include_prereleases&label=version"
+  <a href="https://github.com/viascom/aluna-spring-boot-starter/releases"><img src="https://img.shields.io/maven-central/v/io.viascom.discord.bot/aluna-spring-boot-starter&label=version"
          alt="Maven central"></a>
   <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--alpha.22-blue.svg"
               alt="JDA-Version "></a>
