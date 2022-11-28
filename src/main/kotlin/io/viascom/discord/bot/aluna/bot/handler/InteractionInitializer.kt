@@ -354,10 +354,14 @@ internal open class InteractionInitializer(
                 commandData.options.size == command.options.size &&
                 commandData.subcommandGroups.all {
                     compareSubCommandGroup(
-                        SubcommandGroup(it.toData()),
+                        SubcommandGroup(command, it.toData()),
                         command.subcommandGroups.firstOrNull { sub -> sub.name == it.name })
                 } &&
-                commandData.subcommands.all { compareSubCommand(Subcommand(it.toData()), command.subcommands.firstOrNull { sub -> sub.name == it.name }) } &&
+                commandData.subcommands.all {
+                    compareSubCommand(
+                        Subcommand(command, it.toData()),
+                        command.subcommands.firstOrNull { sub -> sub.name == it.name })
+                } &&
                 commandData.subcommands.size == command.subcommands.size &&
                 commandData.defaultPermissions.permissionsRaw == command.defaultPermissions.permissionsRaw &&
                 commandData.isGuildOnly == command.isGuildOnly &&

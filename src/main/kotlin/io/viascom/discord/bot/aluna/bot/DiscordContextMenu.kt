@@ -328,10 +328,10 @@ abstract class DiscordContextMenu(
                 if (alunaProperties.debug.useStopwatch && stopWatch != null) {
                     stopWatch!!.stop()
                     MDC.put("duration", stopWatch!!.totalTimeMillis.toString())
-                    logger.info("Context menu '${event.commandPath}' (${command.author.id})${if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else ""} took ${stopWatch!!.totalTimeMillis}ms")
+                    logger.info("Context menu '${event.fullCommandName}' (${command.author.id})${if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else ""} took ${stopWatch!!.totalTimeMillis}ms")
                     when {
-                        (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the context menu ${event.commandPath} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
-                        (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the context menu ${event.commandPath} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
+                        (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the context menu ${event.fullCommandName} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
+                        (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the context menu ${event.fullCommandName} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
                     }
                 }
             }

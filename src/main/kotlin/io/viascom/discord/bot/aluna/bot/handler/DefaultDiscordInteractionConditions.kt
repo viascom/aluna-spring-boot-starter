@@ -38,7 +38,7 @@ class DefaultDiscordInteractionConditions : DiscordInteractionConditions {
     ): WrongUseScope {
         val wrongUseScope = WrongUseScope()
 
-        if (subCommandUseScope.getOrDefault(event.commandPath, UseScope.GLOBAL) != UseScope.GLOBAL && event.guild == null) {
+        if (subCommandUseScope.getOrDefault(event.fullCommandName, UseScope.GLOBAL) != UseScope.GLOBAL && event.guild == null) {
             wrongUseScope.subCommandServerOnly = true
         }
 

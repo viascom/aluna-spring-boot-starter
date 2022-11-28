@@ -137,15 +137,6 @@ abstract class DiscordCommand @JvmOverloads constructor(
     internal var specificServer: String? = null
 
     /**
-     * Sets whether this command should only be usable in NSFW (age-restricted) channels.
-     *
-     * Note: Age-restricted commands will not show up in direct messages by default unless the user enables them in their settings.
-     *
-     * @see <a href="https://support.discord.com/hc/en-us/articles/10123937946007" target="_blank">Age-Restricted Commands FAQ</a>
-     */
-    //var isNSFW: Boolean = false
-
-    /**
      * Sets whether this command can only be used by users which are returned by [OwnerIdProvider.getOwnerIds].
      */
     var isOwnerCommand = false
@@ -181,7 +172,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
      *
      * *This variable is used by the internal sub command handling.*
      */
-    private var currentSubCommandPath: String = ""
+    private var currentSubFullCommandName: String = ""
 
     /**
      * The [CooldownScope][Command.CooldownScope] of the command. This defines how far from a scope cooldowns have.
@@ -569,8 +560,8 @@ abstract class DiscordCommand @JvmOverloads constructor(
 
         discordRepresentation = discordBot.discordRepresentations[event.name]!!
 
-        currentSubCommandPath = event.commandPath
-        MDC.put("interaction", event.commandPath)
+        currentSubFullCommandName = event.fullCommandName
+        MDC.put("interaction", event.fullCommandName)
         MDC.put("uniqueId", uniqueId)
 
         guild = event.guild
@@ -636,15 +627,15 @@ abstract class DiscordCommand @JvmOverloads constructor(
             async(AlunaCoroutinesDispatcher.IO) { discordInteractionMetaDataHandler.onCommandExecution(command, event) }
             async(AlunaCoroutinesDispatcher.IO) {
                 if (alunaProperties.discord.publishDiscordCommandEvent) {
-                    eventPublisher.publishDiscordCommandEvent(author, channel, guild, event.commandPath, command)
+                    eventPublisher.publishDiscordCommandEvent(author, channel, guild, event.fullCommandName, command)
                 }
             }
 
             try {
-                logger.info("Run command /${event.commandPath}" + if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else "")
+                logger.info("Run command /${event.fullCommandName}" + if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else "")
                 execute(event)
                 if (handleSubCommands) {
-                    logger.debug("Handle sub command /${event.commandPath}")
+                    logger.debug("Handle sub command /${event.fullCommandName}")
                     handleSubCommandExecution(event) { onSubCommandFallback(event) }
                 }
             } catch (e: Exception) {
@@ -667,10 +658,10 @@ abstract class DiscordCommand @JvmOverloads constructor(
                 if (alunaProperties.debug.useStopwatch && stopWatch != null) {
                     stopWatch!!.stop()
                     MDC.put("duration", stopWatch!!.totalTimeMillis.toString())
-                    logger.info("Command /${event.commandPath} (${command.author.id})${if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else ""} took ${stopWatch!!.totalTimeMillis}ms")
+                    logger.info("Command /${event.fullCommandName} (${command.author.id})${if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else ""} took ${stopWatch!!.totalTimeMillis}ms")
                     when {
-                        (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the command /${event.commandPath} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
-                        (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the command /${event.commandPath} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
+                        (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the command /${event.fullCommandName} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
+                        (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the command /${event.fullCommandName} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
                     }
                 }
 
@@ -702,10 +693,10 @@ abstract class DiscordCommand @JvmOverloads constructor(
     open fun handleSubCommandExecution(event: SlashCommandInteractionEvent, fallback: (SlashCommandInteractionEvent) -> (Unit)) {
         loadDynamicSubCommandElements()
 
-        val path = event.commandPath.split("/")
+        val path = event.fullCommandName.split("/")
         val firstLevel = path[1]
         if (!subCommandElements.containsKey(firstLevel)) {
-            logger.debug("Command path '${event.commandPath}' not found in the registered elements")
+            logger.debug("Command path '${event.fullCommandName}' not found in the registered elements")
             fallback.invoke(event)
             return
         }
@@ -722,7 +713,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
         //Check if it is a SubCommand in a SubCommandGroup
         val secondLevel = path[2]
         if (!(firstElement as DiscordSubCommandGroup).subCommands.containsKey(secondLevel)) {
-            logger.debug("Command path '${event.commandPath}' not found in the registered elements")
+            logger.debug("Command path '${event.fullCommandName}' not found in the registered elements")
             fallback.invoke(event)
             return
         }
@@ -738,10 +729,10 @@ abstract class DiscordCommand @JvmOverloads constructor(
     ): Boolean {
         loadDynamicSubCommandElements()
 
-        val path = currentSubCommandPath.split("/")
+        val path = currentSubFullCommandName.split("/")
         val firstLevel = path[1]
         if (!subCommandElements.containsKey(firstLevel)) {
-            logger.debug("Command path '${currentSubCommandPath}' not found in the registered elements")
+            logger.debug("Command path '${currentSubFullCommandName}' not found in the registered elements")
             return fallback.invoke(event)
         }
 
@@ -756,7 +747,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
         //Check if it is a SubCommand in a SubCommandGroup
         val secondLevel = path[2]
         if (!(firstElement as DiscordSubCommandGroup).subCommands.containsKey(secondLevel)) {
-            logger.debug("Command path '${currentSubCommandPath}' not found in the registered elements")
+            logger.debug("Command path '${currentSubFullCommandName}' not found in the registered elements")
             return fallback.invoke(event)
         }
 

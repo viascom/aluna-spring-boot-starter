@@ -70,7 +70,7 @@ abstract class DiscordUserContextMenu(name: String, localizations: LocalizationF
 
         discordRepresentation = discordBot.discordRepresentations[event.name]!!
 
-        MDC.put("interaction", event.commandPath)
+        MDC.put("interaction", event.fullCommandName)
         MDC.put("uniqueId", uniqueId)
 
         guild = event.guild
@@ -116,11 +116,11 @@ abstract class DiscordUserContextMenu(name: String, localizations: LocalizationF
             async(AlunaCoroutinesDispatcher.IO) { discordInteractionMetaDataHandler.onContextMenuExecution(command, event) }
             async(AlunaCoroutinesDispatcher.IO) {
                 if (alunaProperties.discord.publishDiscordContextEvent) {
-                    eventPublisher.publishDiscordUserContextEvent(author, channel, guild, event.commandPath, command)
+                    eventPublisher.publishDiscordUserContextEvent(author, channel, guild, event.fullCommandName, command)
                 }
             }
             try {
-                logger.info("Run context menu '${event.commandPath}'" + if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else "")
+                logger.info("Run context menu '${event.fullCommandName}'" + if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else "")
                 execute(event)
             } catch (e: Exception) {
                 try {

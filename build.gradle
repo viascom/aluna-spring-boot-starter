@@ -16,11 +16,11 @@ targetCompatibility = JavaVersion.VERSION_17
 ext {
     major = 0
     minor = 0
-    patch = 32
+    patch = 33
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
-    jdaVersion = "5.0.0-alpha.22"
+    jdaVersion = "5.0.0-beta.1"
     retrofitVersion = "2.9.0"
     jacksonSpringBootVersion = "3.0.0"
     jacksonVersion = "2.14.1"
