@@ -21,9 +21,9 @@
 
 | Library     |                                       Version                                       |
 |-------------|:-----------------------------------------------------------------------------------:|
-| JDA         | <img src="https://img.shields.io/badge/5.0.0-beta.1-orange.svg" alt="5.0.0-beta.1"> |
+| JDA         | <img src="https://img.shields.io/badge/5.0.0-beta.1-yellow.svg" alt="5.0.0-beta.1"> |
 | Spring Boot |     <img src="https://img.shields.io/badge/3.0.0-brightgreen.svg" alt="3.0.0">      |
-| Kotlin      |    <img src="https://img.shields.io/badge/1.7.21-brightgreen.svg" alt="1.7.21">     |
+| Kotlin      |    <img src="https://img.shields.io/badge/1.7.22-brightgreen.svg" alt="1.7.22">     |
 | emoji-java  |     <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1">      |
 
 ## Download
