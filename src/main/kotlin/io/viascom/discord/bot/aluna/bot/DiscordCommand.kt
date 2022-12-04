@@ -693,7 +693,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
     open fun handleSubCommandExecution(event: SlashCommandInteractionEvent, fallback: (SlashCommandInteractionEvent) -> (Unit)) {
         loadDynamicSubCommandElements()
 
-        val path = event.fullCommandName.split("/")
+        val path = event.fullCommandName.split(" ")
         val firstLevel = path[1]
         if (!subCommandElements.containsKey(firstLevel)) {
             logger.debug("Command path '${event.fullCommandName}' not found in the registered elements")
@@ -729,7 +729,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
     ): Boolean {
         loadDynamicSubCommandElements()
 
-        val path = currentSubFullCommandName.split("/")
+        val path = currentSubFullCommandName.split(" ")
         val firstLevel = path[1]
         if (!subCommandElements.containsKey(firstLevel)) {
             logger.debug("Command path '${currentSubFullCommandName}' not found in the registered elements")
