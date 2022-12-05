@@ -26,7 +26,6 @@ import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import net.dv8tion.jda.api.EmbedBuilder
-import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import java.awt.Color
@@ -51,13 +50,13 @@ class DiscordPingProvider : SystemCommandDataProvider(
             .setColor(Color.ORANGE)
             .setDescription("\uD83D\uDCE1 Pinging...")
 
-        val hook = event.deferReply().complete()
+        val replyHook = event.deferReply().complete()
 
         val gatewayPing: Long = event.jda.gatewayPing
         val now = LocalDateTime.now()
         val apiPing = event.jda.restPing.complete()
 
-        hook.editOriginalEmbeds(builder.build()).queue { msg: Message ->
+        replyHook.editOriginalEmbeds(builder.build()).queue {
             builder.setTitle("Discord Connection")
                 .setDescription(
                     "❯ **Gateway Ping:** `${gatewayPing}ms`\n" +
@@ -66,7 +65,7 @@ class DiscordPingProvider : SystemCommandDataProvider(
                 )
                 .setColor(Color.GREEN)
                 .build()
-            hook.editOriginalEmbeds(builder.build()).queue()
+            replyHook.editOriginalEmbeds(builder.build()).queue()
         }
     }
 }

@@ -29,6 +29,7 @@ import io.viascom.discord.bot.aluna.exception.AlunaInteractionRepresentationNotF
 import io.viascom.discord.bot.aluna.model.*
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.property.OwnerIdProvider
+import io.viascom.discord.bot.aluna.util.InternalUtil
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -56,12 +57,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
 
 abstract class DiscordCommand @JvmOverloads constructor(
@@ -293,7 +289,10 @@ abstract class DiscordCommand @JvmOverloads constructor(
      * @param event [StringSelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    override fun onStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onStringSelectInteraction(
+        event: StringSelectInteractionEvent,
+        additionalData: HashMap<String, Any?>
+    ): Boolean {
         return if (handleSubCommands) {
             handleSubCommand(event, { it.onStringSelectInteraction(event) }, { onSubCommandInteractionFallback(event) })
         } else {
@@ -323,7 +322,10 @@ abstract class DiscordCommand @JvmOverloads constructor(
      * @param event [EntitySelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    override fun onEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onEntitySelectInteraction(
+        event: EntitySelectInteractionEvent,
+        additionalData: HashMap<String, Any?>
+    ): Boolean {
         return if (handleSubCommands) {
             handleSubCommand(event, { it.onEntitySelectInteraction(event) }, { onSubCommandInteractionFallback(event) })
         } else {
@@ -353,7 +355,10 @@ abstract class DiscordCommand @JvmOverloads constructor(
 
     override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         return if (handleSubCommands) {
-            handleSubCommand(event, { it.onModalInteraction(event, additionalData) }, { onSubCommandInteractionFallback(event) })
+            handleSubCommand(
+                event,
+                { it.onModalInteraction(event, additionalData) },
+                { onSubCommandInteractionFallback(event) })
         } else {
             true
         }
@@ -399,7 +404,8 @@ abstract class DiscordCommand @JvmOverloads constructor(
         discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this, event)
 
         //Check additional requirements for this command
-        val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
+        val additionalRequirements =
+            discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
         if (additionalRequirements.failed) {
             onFailedAdditionalRequirements(event, additionalRequirements)
             return
@@ -473,11 +479,17 @@ abstract class DiscordCommand @JvmOverloads constructor(
         }
     }
 
-    open fun onFailedAdditionalRequirements(event: SlashCommandInteractionEvent, additionalRequirements: AdditionalRequirements) {
+    open fun onFailedAdditionalRequirements(
+        event: SlashCommandInteractionEvent,
+        additionalRequirements: AdditionalRequirements
+    ) {
         event.deferReply(true).setContent("⛔ Additional requirements for this command failed.").queue()
     }
 
-    open fun onFailedAdditionalRequirements(event: CommandAutoCompleteInteractionEvent, additionalRequirements: AdditionalRequirements) {
+    open fun onFailedAdditionalRequirements(
+        event: CommandAutoCompleteInteractionEvent,
+        additionalRequirements: AdditionalRequirements
+    ) {
     }
 
     open fun onExecutionException(event: SlashCommandInteractionEvent, exception: Exception) {
@@ -511,29 +523,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
         }
 
         if (subCommandElements.isEmpty()) {
-            val fields = arrayListOf<KProperty1<out DiscordCommand, *>>()
-
-            //Search in constructor
-            (this::class.primaryConstructor ?: this::class.constructors.first()).parameters.forEach {
-                if (it.findAnnotation<SubCommandElement>() != null &&
-                    (it.type.classifier as KClass<*>).isSubclassOf(DiscordSubCommandElement::class)
-                ) {
-                    val field = this::class.memberProperties.firstOrNull { member -> member.name == it.name }
-                        ?: throw IllegalArgumentException("Couldn't access ${it.name} parameter because it is not a property. To fix this, make sure that your parameter is defined as property.")
-                    fields.add(field)
-                }
-            }
-
-            //Search properties
-            this::class.memberProperties.filter {
-                it.findAnnotation<SubCommandElement>() != null && (it.returnType.classifier as KClass<*>).isSubclassOf(
-                    DiscordSubCommandElement::class
-                )
-            }.forEach {
-                fields.add(it)
-            }
-
-            fields.distinctBy { it.name }.forEach { field ->
+            InternalUtil.getSubCommandElements(this).forEach { field ->
                 field.isAccessible = true
                 registerSubCommands(field.getter.call(this) as DiscordSubCommandElement)
             }
@@ -614,14 +604,16 @@ abstract class DiscordCommand @JvmOverloads constructor(
         }
 
         //Check needed user permissions for this command
-        val missingUserPermissions = discordInteractionConditions.checkForNeededUserPermissions(this, userPermissions, event)
+        val missingUserPermissions =
+            discordInteractionConditions.checkForNeededUserPermissions(this, userPermissions, event)
         if (missingUserPermissions.hasMissingPermissions) {
             onMissingUserPermission(event, missingUserPermissions)
             return
         }
 
         //Check needed bot permissions for this command
-        val missingBotPermissions = discordInteractionConditions.checkForNeededBotPermissions(this, botPermissions, event)
+        val missingBotPermissions =
+            discordInteractionConditions.checkForNeededBotPermissions(this, botPermissions, event)
         if (missingBotPermissions.hasMissingPermissions) {
             onMissingBotPermission(event, missingBotPermissions)
             return
@@ -632,7 +624,8 @@ abstract class DiscordCommand @JvmOverloads constructor(
         discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this, event)
 
         //Check additional requirements for this command
-        val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
+        val additionalRequirements =
+            discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
         if (additionalRequirements.failed) {
             onFailedAdditionalRequirements(event, additionalRequirements)
             return
@@ -709,7 +702,10 @@ abstract class DiscordCommand @JvmOverloads constructor(
         }
     }
 
-    open fun handleSubCommandExecution(event: SlashCommandInteractionEvent, fallback: (SlashCommandInteractionEvent) -> (Unit)) {
+    open fun handleSubCommandExecution(
+        event: SlashCommandInteractionEvent,
+        fallback: (SlashCommandInteractionEvent) -> (Unit)
+    ) {
         loadDynamicSubCommandElements()
 
         val path = event.fullCommandName.split(" ")
@@ -760,7 +756,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
         //Check if it is a SubCommand
         if (firstElement::class.isSubclassOf(DiscordSubCommand::class)) {
             (firstElement as DiscordSubCommand).initialize(this)
-            return function.invoke((firstElement as DiscordSubCommand))
+            return function.invoke(firstElement)
         }
 
         //Check if it is a SubCommand in a SubCommandGroup

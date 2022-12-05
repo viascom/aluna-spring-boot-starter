@@ -46,7 +46,7 @@ class KotlinScriptV2Service(
 
     init {
         val os = System.getProperty("os.name").lowercase()
-        if (os?.startsWith("win") == true) {
+        if (os.startsWith("win")) {
             setIdeaIoUseFallback()
         }
 
