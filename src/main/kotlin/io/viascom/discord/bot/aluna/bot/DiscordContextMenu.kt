@@ -94,7 +94,7 @@ abstract class DiscordContextMenu(
     /**
      * This gets set by the CommandContext automatically and should not be changed
      */
-    override lateinit var uniqueId: String
+    override var uniqueId: String = ""
 
     /**
      * If true, this command is only seen by users with the administrator permission on the server by default!

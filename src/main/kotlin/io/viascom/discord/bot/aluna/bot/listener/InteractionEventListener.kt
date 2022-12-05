@@ -42,21 +42,36 @@ open class InteractionEventListener(
 ) : ListenerAdapter() {
 
     override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
-        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.INTERACTION, NanoId.generate())
+        DiscordContext.setDiscordState(
+            event.user.id,
+            event.guild?.id,
+            DiscordContext.Type.INTERACTION,
+            NanoId.generate()
+        )
         discordBot.commands[event.commandId]?.let { interaction ->
             context.getBean(interaction).run(event)
         }
     }
 
     override fun onUserContextInteraction(event: UserContextInteractionEvent) {
-        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.INTERACTION)
+        DiscordContext.setDiscordState(
+            event.user.id,
+            event.guild?.id,
+            DiscordContext.Type.INTERACTION,
+            NanoId.generate()
+        )
         discordBot.contextMenus[event.commandId]?.let { interaction ->
             (context.getBean(interaction) as DiscordUserContextMenu).run(event)
         }
     }
 
     override fun onMessageContextInteraction(event: MessageContextInteractionEvent) {
-        DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.INTERACTION)
+        DiscordContext.setDiscordState(
+            event.user.id,
+            event.guild?.id,
+            DiscordContext.Type.INTERACTION,
+            NanoId.generate()
+        )
         discordBot.contextMenus[event.commandId]?.let { interaction ->
             (context.getBean(interaction) as DiscordMessageContextMenu).run(event)
         }

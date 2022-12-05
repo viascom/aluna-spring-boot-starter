@@ -24,6 +24,6 @@ package io.viascom.discord.bot.aluna.bot
 import java.lang.annotation.Inherited
 
 @Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.VALUE_PARAMETER)
+@Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.PROPERTY, AnnotationTarget.FIELD)
 @Inherited
 annotation class SubCommandElement

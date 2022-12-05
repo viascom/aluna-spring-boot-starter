@@ -68,7 +68,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
     override fun get(name: String, objectFactory: ObjectFactory<*>): Any {
         //If state id is not set, a new instance is returned
         if (DiscordContext.discordState?.id == null) {
-            logger.debug("[$name]\t- ${DiscordContext.discordState} -> new instance (because id is null)")
+            logger.debug("[$name] - ${DiscordContext.discordState} -> new instance (because id is null)")
             val newObj = objectFactory.getObject() as InteractionScopedObject
             newObj.uniqueId = ""
             return newObj
@@ -88,7 +88,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
 
         //If uniqueId is present we return the corresponding bean and reset the timeout
         if (DiscordContext.discordState?.uniqueId != null && scopedObjects[name]!![DiscordContext.discordState!!.id]!!.containsKey(DiscordContext.discordState?.uniqueId)) {
-            logger.debug("[$name]\t- ${DiscordContext.discordState} -> found uniqueId and return")
+            logger.debug("[$name] - ${DiscordContext.discordState} -> found uniqueId and return")
             val data = scopedObjects[name]!![DiscordContext.discordState!!.id]!![DiscordContext.discordState!!.uniqueId]!!
             val timeout = createTimeoutDestroy(
                 name,
@@ -111,7 +111,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
                 val data = scopedObjects[name]!![DiscordContext.discordState!!.id]!!.entries.first { it.value.type == DiscordContext.Type.AUTO_COMPLETE }
 
                 DiscordContext.discordState!!.uniqueId = data.key
-                logger.debug("[$name]\t- ${DiscordContext.discordState} -> found auto-complete instance by uniqueId and return")
+                logger.debug("[$name] - ${DiscordContext.discordState} -> found auto-complete instance by uniqueId and return")
 
                 val timeout = createTimeoutDestroy(
                     name,
@@ -127,7 +127,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
                 DiscordContext.discordState!!.uniqueId = DiscordContext.discordState!!.uniqueId ?: NanoId.generate()
                 val newObj = objectFactory.getObject() as InteractionScopedObject
                 newObj.uniqueId = DiscordContext.discordState!!.uniqueId!!
-                logger.debug("[$name]\t- ${DiscordContext.discordState} -> new instance (for auto-complete)")
+                logger.debug("[$name] - ${DiscordContext.discordState} -> new instance (for auto-complete)")
                 scopedObjects[name]!![DiscordContext.discordState!!.id]!![newObj.uniqueId] =
                     ScopedObjectData(DiscordContext.discordState?.type ?: DiscordContext.Type.AUTO_COMPLETE, newObj)
 
@@ -149,7 +149,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
             scopedObjects[name]!![DiscordContext.discordState!!.id]!!.entries.firstOrNull { it.value.type == DiscordContext.Type.AUTO_COMPLETE }
         if (autoCompleteForThisCommand != null && loadBeanUseAutoCompleteBean(autoCompleteForThisCommand.value.obj, false)) {
             DiscordContext.discordState!!.uniqueId = autoCompleteForThisCommand.key
-            logger.debug("[$name]\t- ${DiscordContext.discordState} -> found auto-complete (use for command)")
+            logger.debug("[$name] - ${DiscordContext.discordState} -> found auto-complete (use for command)")
             //Found existing auto complete bean we can use
 
             //Change type to COMMAND
@@ -195,7 +195,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
 
             //No bean exists, so we create one
             DiscordContext.discordState!!.uniqueId = DiscordContext.discordState!!.uniqueId ?: NanoId.generate()
-            logger.debug("[$name]\t- ${DiscordContext.discordState} -> new instance")
+            logger.debug("[$name] - ${DiscordContext.discordState} -> new instance")
             val newObj = objectFactory.getObject() as InteractionScopedObject
             newObj.uniqueId = DiscordContext.discordState!!.uniqueId!!
             scopedObjects[name]!![DiscordContext.discordState!!.id]!![DiscordContext.discordState!!.uniqueId!!] =

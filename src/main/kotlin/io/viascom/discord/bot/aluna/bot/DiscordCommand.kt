@@ -57,6 +57,7 @@ import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
@@ -123,7 +124,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
     /**
      * This gets set by the CommandContext automatically and should not be changed
      */
-    override lateinit var uniqueId: String
+    override var uniqueId: String = ""
 
     /**
      * Defines the use scope of this command.
@@ -510,13 +511,31 @@ abstract class DiscordCommand @JvmOverloads constructor(
         }
 
         if (subCommandElements.isEmpty()) {
-            this::class.primaryConstructor!!.parameters.forEach {
-                if (it.findAnnotation<SubCommandElement>() != null && (it.type.classifier as KClass<*>).isSubclassOf(DiscordSubCommandElement::class)) {
+            val fields = arrayListOf<KProperty1<out DiscordCommand, *>>()
+
+            //Search in constructor
+            (this::class.primaryConstructor ?: this::class.constructors.first()).parameters.forEach {
+                if (it.findAnnotation<SubCommandElement>() != null &&
+                    (it.type.classifier as KClass<*>).isSubclassOf(DiscordSubCommandElement::class)
+                ) {
                     val field = this::class.memberProperties.firstOrNull { member -> member.name == it.name }
                         ?: throw IllegalArgumentException("Couldn't access ${it.name} parameter because it is not a property. To fix this, make sure that your parameter is defined as property.")
-                    field.isAccessible = true
-                    registerSubCommands(field.getter.call(this) as DiscordSubCommandElement)
+                    fields.add(field)
                 }
+            }
+
+            //Search properties
+            this::class.memberProperties.filter {
+                it.findAnnotation<SubCommandElement>() != null && (it.returnType.classifier as KClass<*>).isSubclassOf(
+                    DiscordSubCommandElement::class
+                )
+            }.forEach {
+                fields.add(it)
+            }
+
+            fields.distinctBy { it.name }.forEach { field ->
+                field.isAccessible = true
+                registerSubCommands(field.getter.call(this) as DiscordSubCommandElement)
             }
         }
     }
