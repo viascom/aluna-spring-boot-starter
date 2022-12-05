@@ -31,7 +31,7 @@
 Gradle:
 ```gradle
 dependencies {
-  implementation 'io.viascom.discord.bot:aluna-spring-boot-starter:0.0.34_5.0.0-beta.1'
+  implementation 'io.viascom.discord.bot:aluna-spring-boot-starter:0.0.35_5.0.0-beta.1'
 }
 ```
 
@@ -40,7 +40,7 @@ Maven:
 <dependency>
   <groupId>io.viascom.discord.bot</groupId>
     <artifactId>aluna-spring-boot-starter</artifactId>
-    <version>0.0.34_5.0.0-beta.1</version>
+    <version>0.0.35_5.0.0-beta.1</version>
 </dependency>
 ```
 
