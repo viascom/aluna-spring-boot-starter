@@ -27,4 +27,4 @@ jobs:
           reviewers: nik-sta, itsmefox
       
       - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/wrapper-validation-action@v1.0.5
