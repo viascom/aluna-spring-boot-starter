@@ -100,7 +100,7 @@ This project is developed by [Viascom](https://github.com/viascom) using the [Se
 ## Authors
 
 * **Patrick Bösch** - *Initial work* - [itsmefox](https://github.com/itsmefox)
-* **Nikola Stanković** - *Initial work* - [botscripter](https://github.com/botscripter)
+* **Nikola Stanković** - *Initial work* - [nik-sta](https://github.com/nik-sta)
 
 See also the list of [contributors](https://github.com/viascom/aluna-spring-boot-starter/contributors) who participated in this project. 💕
 
