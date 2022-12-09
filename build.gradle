@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id "idea"
     id "java-library"
@@ -16,11 +18,11 @@ targetCompatibility = JavaVersion.VERSION_17
 ext {
     major = 0
     minor = 0
-    patch = 35
+    patch = 36
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
-    jdaVersion = "5.0.0-beta.1"
+    jdaVersion = "5.0.0-beta.2"
     retrofitVersion = "2.9.0"
     jacksonSpringBootVersion = "3.0.0"
     jacksonVersion = "2.14.1"
@@ -109,7 +111,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-compiler-embeddable"
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+tasks.withType(KotlinCompile).configureEach {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17
         freeCompilerArgs = ["-Xjvm-default=all"]
@@ -214,6 +216,6 @@ signing {
     sign publishing.publications.mavenJava
 }
 
-tasks.withType(Sign) {
+tasks.withType(Sign).configureEach {
     onlyIf { isCiServer }
 }

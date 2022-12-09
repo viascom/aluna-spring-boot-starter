@@ -366,7 +366,8 @@ internal open class InteractionInitializer(
                 commandData.defaultPermissions.permissionsRaw == command.defaultPermissions.permissionsRaw &&
                 commandData.isGuildOnly == command.isGuildOnly &&
                 commandData.nameLocalizations.toMap() == command.nameLocalizations.toMap() &&
-                commandData.descriptionLocalizations.toMap() == command.descriptionLocalizations.toMap()
+                commandData.descriptionLocalizations.toMap() == command.descriptionLocalizations.toMap() &&
+                commandData.isNSFW == command.isNSFW
     }
 
     private fun compareSubCommandGroup(groupData: SubcommandGroup, group: SubcommandGroup?): Boolean {

@@ -56,6 +56,7 @@ internal class ThreadFactoryBuilder
      * @return this for the builder pattern
      */
     fun setNameFormat(nameFormat: String): ThreadFactoryBuilder {
+        @Suppress("UNUSED_VARIABLE")
         val unused = format(nameFormat, 0) // fail fast if the format is bad or null
         this.nameFormat = nameFormat
         return this
