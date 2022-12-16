@@ -46,16 +46,16 @@ class TopGGBotListSender(
 
     override fun onProductionModeOnly(): Boolean = true
 
-    override fun isEnabled(): Boolean = alunaProperties.botList.topggToken != null
+    override fun isEnabled(): Boolean = alunaProperties.botList.topggToken?.enabled == true
 
     override fun getName(): String = "top.gg"
+    override fun isValid(): Boolean = alunaProperties.botList.topggToken?.token != null
+
+    override fun getValidationErrors(): List<String> =
+        arrayListOf("Stats are not sent to top.gg because token (aluna.botList.topggToken.token) is not set")
 
     override fun sendStats(totalServer: Int, totalShards: Int) {
-        val topGGToken = alunaProperties.botList.topggToken ?: ""
-        if (topGGToken.isBlank()) {
-            logger.debug("Stats are not sent to top.gg because token is not set")
-            return
-        }
+        val topGGToken = alunaProperties.botList.topggToken?.token ?: ""
 
         logger.debug("Send stats to top.gg")
 
@@ -65,9 +65,11 @@ class TopGGBotListSender(
             .readTimeout(120, TimeUnit.SECONDS)
             .build()
 
-        val request = Request.Builder().url("https://top.gg/api/bots/${alunaProperties.discord.applicationId}/stats").post(
-            objectMapper.writeValueAsBytes(TopGGData(shardManager.shards.map { it.guilds.size })).toRequestBody("application/json".toMediaType())
-        ).header("Authorization", topGGToken).build()
+        val request =
+            Request.Builder().url("https://top.gg/api/bots/${alunaProperties.discord.applicationId}/stats").post(
+                objectMapper.writeValueAsBytes(TopGGData(shardManager.shards.map { it.guilds.size }))
+                    .toRequestBody("application/json".toMediaType())
+            ).header("Authorization", topGGToken).build()
 
         httpClient.newCall(request).execute().body?.close()
     }

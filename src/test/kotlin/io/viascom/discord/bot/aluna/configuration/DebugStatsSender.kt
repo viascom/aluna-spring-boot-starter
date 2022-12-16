@@ -33,6 +33,10 @@ class DebugStatsSender : BotListSender {
 
     override fun getName(): String = "bots.viascom.io"
 
+    override fun isValid(): Boolean = true
+
+    override fun getValidationErrors(): List<String> = arrayListOf()
+
     override fun sendStats(totalServer: Int, totalShards: Int) {
         //logger.debug("Send super fancy stats to internal service")
     }

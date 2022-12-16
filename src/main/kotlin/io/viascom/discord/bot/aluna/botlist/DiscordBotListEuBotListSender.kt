@@ -44,16 +44,17 @@ class DiscordBotListEuBotListSender(
 
     override fun onProductionModeOnly(): Boolean = true
 
-    override fun isEnabled(): Boolean = alunaProperties.botList.discordBotListEuToken != null
+    override fun isEnabled(): Boolean = alunaProperties.botList.discordBotListEuToken?.enabled == true
 
     override fun getName(): String = "discord-botlist.eu"
 
+    override fun isValid(): Boolean = alunaProperties.botList.discordBotListEuToken?.token != null
+
+    override fun getValidationErrors(): List<String> =
+        arrayListOf("Stats are not sent to discord-botlist.eu because token (aluna.botList.discordBotListEuToken.token) is not set")
+
     override fun sendStats(totalServer: Int, totalShards: Int) {
-        val discordBotListEuToken = alunaProperties.botList.discordBotListEuToken ?: ""
-        if (discordBotListEuToken.isBlank()) {
-            logger.debug("Stats are not sent to discord-botlist.eu because token is not set")
-            return
-        }
+        val discordBotListEuToken = alunaProperties.botList.discordBotListEuToken?.token ?: ""
 
         logger.debug("Send stats to discord-botlist.eu")
 

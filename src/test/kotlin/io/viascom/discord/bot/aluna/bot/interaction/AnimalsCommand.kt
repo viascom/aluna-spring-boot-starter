@@ -27,14 +27,17 @@ import io.viascom.discord.bot.aluna.bot.SubCommandElement
 import io.viascom.discord.bot.aluna.bot.interaction.animal.BunnyCommand
 import io.viascom.discord.bot.aluna.bot.interaction.animal.ForestSubCommandGroup
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import org.springframework.beans.factory.annotation.Autowired
 
 @Interaction
 class AnimalsCommand(
     @SubCommandElement
     private val forestSubCommandGroup: ForestSubCommandGroup,
-    @SubCommandElement
-    private val bunnyCommand: BunnyCommand
 ) : DiscordCommand("animal", "Show images of animals", handleSubCommands = true) {
+
+    @Autowired
+    @SubCommandElement
+    private lateinit var bunnyCommand: BunnyCommand
 
     override fun execute(event: SlashCommandInteractionEvent) {
 

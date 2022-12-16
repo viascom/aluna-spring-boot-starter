@@ -44,22 +44,31 @@ open class BotListHandler(
 
     init {
         val enabledSenders = senders.filter { it.isEnabled() }
-        if (alunaProperties.productionMode && enabledSenders.isNotEmpty()) {
+        val validSenders = enabledSenders.filter { it.isValid() }
+        val invalidSenders = enabledSenders.filter { !it.isValid() }
+
+        invalidSenders.forEach { sender ->
+            logger.warn(
+                "BotListSender ${sender.getName()} is not valid and will therefore not be used:\n" + sender.getValidationErrors()
+                    .joinToString("\n") { "- $it" })
+        }
+
+        if (alunaProperties.productionMode && validSenders.isNotEmpty()) {
             logger.info("Your bot stats are sent every 10 min to [${enabledSenders.joinToString(", ") { it.getName() }}]")
         }
 
-        if (!alunaProperties.productionMode && enabledSenders.any { it.onProductionModeOnly() }) {
+        if (!alunaProperties.productionMode && validSenders.any { it.onProductionModeOnly() }) {
             logger.info(
                 "Your bot stats will be sent every 10 min to [${
-                    enabledSenders.filter { it.onProductionModeOnly() }.joinToString(", ") { it.getName() }
+                    validSenders.filter { it.onProductionModeOnly() }.joinToString(", ") { it.getName() }
                 }] in production mode only."
             )
         }
 
-        if (!alunaProperties.productionMode && enabledSenders.any { !it.onProductionModeOnly() }) {
+        if (!alunaProperties.productionMode && validSenders.any { !it.onProductionModeOnly() }) {
             logger.info(
                 "Your bot stats are sent every 10 min to [${
-                    enabledSenders.filter { !it.onProductionModeOnly() }.joinToString(", ") { it.getName() }
+                    validSenders.filter { !it.onProductionModeOnly() }.joinToString(", ") { it.getName() }
                 }]"
             )
         }
@@ -68,10 +77,15 @@ open class BotListHandler(
     @Scheduled(cron = "0 */10 * * * *", zone = "UTC") //Send updates every 10 minutes
     open fun sendStats() {
         runBlocking(AlunaCoroutinesDispatcher.IO) {
-            senders.forEach { sender ->
+            senders.filter { it.isEnabled() && it.isValid() }.forEach { sender ->
                 try {
                     if (alunaProperties.productionMode || !sender.onProductionModeOnly()) {
-                        launch(AlunaCoroutinesDispatcher.IO) { sender.sendStats(shardManager.guilds.size, shardManager.shardsTotal) }
+                        launch(AlunaCoroutinesDispatcher.IO) {
+                            sender.sendStats(
+                                shardManager.guilds.size,
+                                shardManager.shardsTotal
+                            )
+                        }
                     }
                 } catch (e: Exception) {
                     logger.error("Was not able to send stats to ${sender::class.qualifiedName}: " + e.stackTraceToString())

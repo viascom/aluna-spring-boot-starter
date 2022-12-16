@@ -401,6 +401,11 @@ abstract class DiscordCommand @JvmOverloads constructor(
 
     @JvmSynthetic
     internal fun onAutoCompleteEventCall(option: String, event: CommandAutoCompleteInteractionEvent) {
+        setProperties(event)
+
+        currentSubFullCommandName = event.fullCommandName
+        MDC.put("interaction", event.fullCommandName)
+
         discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this, event)
 
         //Check additional requirements for this command
@@ -413,6 +418,26 @@ abstract class DiscordCommand @JvmOverloads constructor(
 
         discordInteractionLoadAdditionalData.loadData(this, event)
         onAutoCompleteEvent(option, event)
+    }
+
+    @JvmSynthetic
+    internal fun setProperties(event: GenericInteractionCreateEvent) {
+        MDC.put("uniqueId", uniqueId)
+
+        guild = event.guild
+        guild?.let { MDC.put("discord.server", "${it.id} (${it.name})") }
+        author = event.user
+        MDC.put("discord.author", "${author.id} (${author.asTag})")
+
+        userLocale = event.userLocale
+        MDC.put("discord.author_locale", userLocale.locale)
+
+        if (guild != null) {
+            member = guild!!.getMember(author)
+            guildChannel = event.guildChannel
+            guildLocale = event.guildLocale
+            MDC.put("discord.server_locale", guildLocale.locale)
+        }
     }
 
     /**
@@ -556,7 +581,6 @@ abstract class DiscordCommand @JvmOverloads constructor(
             stopWatch!!.start()
         }
 
-
         if (!discordBot.discordRepresentations.containsKey(event.name)) {
             val exception = AlunaInteractionRepresentationNotFoundException(event.name)
             try {
@@ -569,26 +593,12 @@ abstract class DiscordCommand @JvmOverloads constructor(
 
         discordRepresentation = discordBot.discordRepresentations[event.name]!!
 
+        setProperties(event)
+
         currentSubFullCommandName = event.fullCommandName
         MDC.put("interaction", event.fullCommandName)
-        MDC.put("uniqueId", uniqueId)
-
-        guild = event.guild
-        guild?.let { MDC.put("discord.server", "${it.id} (${it.name})") }
         channel = event.channel
         MDC.put("discord.channel", channel.id)
-        author = event.user
-        MDC.put("discord.author", "${author.id} (${author.asTag})")
-
-        userLocale = event.userLocale
-        MDC.put("discord.author_locale", userLocale.locale)
-
-        if (guild != null) {
-            member = guild!!.getMember(author)
-            guildChannel = event.guildChannel
-            guildLocale = event.guildLocale
-            MDC.put("discord.server_locale", guildLocale.locale)
-        }
 
         //Check if this is an owner command
         if (isOwnerCommand && author.idLong !in ownerIdProvider.getOwnerIds()) {

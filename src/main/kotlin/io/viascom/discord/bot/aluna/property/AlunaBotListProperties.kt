@@ -26,27 +26,30 @@ class AlunaBotListProperties {
     /**
      * bots.ondiscord.xyz token
      */
-    var botsOnDiscordToken: String? = null
+    var botsOnDiscordToken: Configuration? = null
 
     /**
      * discord.bots.gg token
      */
-    var discordBotsToken: String? = null
+    var discordBotsToken: Configuration? = null
 
     /**
      * discordbotlist.com token
      */
-    var discordBotListToken: String? = null
+    var discordBotListToken: Configuration? = null
 
     /**
      * discord-botlist.eu token
      */
-    var discordBotListEuToken: String? = null
+    var discordBotListEuToken: Configuration? = null
 
     /**
      * Top.gg token
      */
-    var topggToken: String? = null
+    var topggToken: Configuration? = null
 
-
+    class Configuration {
+        var enabled: Boolean = false
+        var token: String? = null
+    }
 }

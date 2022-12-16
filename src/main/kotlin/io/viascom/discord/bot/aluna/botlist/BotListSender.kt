@@ -28,6 +28,11 @@ interface BotListSender {
     fun isEnabled(): Boolean
 
     fun getName(): String
+
+    fun isValid(): Boolean
+
+    fun getValidationErrors(): List<String>
+
     fun sendStats(totalServer: Int, totalShards: Int)
 
 }

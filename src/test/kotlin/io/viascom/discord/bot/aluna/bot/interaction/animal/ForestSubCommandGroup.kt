@@ -24,9 +24,12 @@ package io.viascom.discord.bot.aluna.bot.interaction.animal
 import io.viascom.discord.bot.aluna.bot.DiscordSubCommandGroup
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.SubCommandElement
+import org.springframework.beans.factory.annotation.Autowired
 
 @Interaction
-class ForestSubCommandGroup(
+class ForestSubCommandGroup : DiscordSubCommandGroup("forest", "Forest animals") {
+
+    @Autowired
     @SubCommandElement
-    private val foxCommand: FoxCommand
-) : DiscordSubCommandGroup("forest", "Forest animals")
+    private lateinit var foxCommand: FoxCommand
+}
