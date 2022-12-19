@@ -44,17 +44,17 @@ class DiscordBotListBotListSender(
 
     override fun onProductionModeOnly(): Boolean = true
 
-    override fun isEnabled(): Boolean = alunaProperties.botList.discordBotListToken?.enabled == true
+    override fun isEnabled(): Boolean = alunaProperties.botList.discordBotList?.enabled == true
 
     override fun getName(): String = "discordbotlist.com"
 
-    override fun isValid(): Boolean = alunaProperties.botList.discordBotListToken?.token != null
+    override fun isValid(): Boolean = alunaProperties.botList.discordBotList?.token != null
 
     override fun getValidationErrors(): List<String> =
-        arrayListOf("Stats are not sent to discordbotlist.com because token (aluna.botList.discordBotListToken.token) is not set")
+        arrayListOf("Stats are not sent to discordbotlist.com because token (aluna.botList.discordBotList.token) is not set")
 
     override fun sendStats(totalServer: Int, totalShards: Int) {
-        val discordBotListToken = alunaProperties.botList.discordBotListToken?.token ?: ""
+        val discordBotListToken = alunaProperties.botList.discordBotList?.token ?: ""
 
         logger.debug("Send stats to discordbotlist.com")
 

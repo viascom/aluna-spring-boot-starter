@@ -46,16 +46,16 @@ class TopGGBotListSender(
 
     override fun onProductionModeOnly(): Boolean = true
 
-    override fun isEnabled(): Boolean = alunaProperties.botList.topggToken?.enabled == true
+    override fun isEnabled(): Boolean = alunaProperties.botList.topgg?.enabled == true
 
     override fun getName(): String = "top.gg"
-    override fun isValid(): Boolean = alunaProperties.botList.topggToken?.token != null
+    override fun isValid(): Boolean = alunaProperties.botList.topgg?.token != null
 
     override fun getValidationErrors(): List<String> =
-        arrayListOf("Stats are not sent to top.gg because token (aluna.botList.topggToken.token) is not set")
+        arrayListOf("Stats are not sent to top.gg because token (aluna.botList.topgg.token) is not set")
 
     override fun sendStats(totalServer: Int, totalShards: Int) {
-        val topGGToken = alunaProperties.botList.topggToken?.token ?: ""
+        val topGGToken = alunaProperties.botList.topgg?.token ?: ""
 
         logger.debug("Send stats to top.gg")
 

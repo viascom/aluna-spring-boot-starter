@@ -102,6 +102,7 @@ class AlunaHealthIndicator(
                 eventWaiter.waitingEvents.entries.filter { it.key == ModalInteractionEvent::class.java }.count { it.value.isNotEmpty() }
 
         status.withDetail("interactionObserver", interactionObserver)
+        status.withDetail("serversTotal", shardManager.guilds.size)
         status.withDetail("shardsTotal", shardManager.shardsTotal)
 
         val shards = arrayListOf<ShardDetail>()

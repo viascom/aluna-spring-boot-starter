@@ -24,29 +24,29 @@ package io.viascom.discord.bot.aluna.property
 class AlunaBotListProperties {
 
     /**
-     * bots.ondiscord.xyz token
+     * bots.ondiscord.xyz
      */
-    var botsOnDiscordToken: Configuration? = null
+    var botsOnDiscord: Configuration? = null
 
     /**
-     * discord.bots.gg token
+     * discord.bots.gg
      */
-    var discordBotsToken: Configuration? = null
+    var discordBots: Configuration? = null
 
     /**
-     * discordbotlist.com token
+     * discordbotlist.com
      */
-    var discordBotListToken: Configuration? = null
+    var discordBotList: Configuration? = null
 
     /**
-     * discord-botlist.eu token
+     * discord-botlist.eu
      */
-    var discordBotListEuToken: Configuration? = null
+    var discordBotListEu: Configuration? = null
 
     /**
-     * Top.gg token
+     * Top.gg
      */
-    var topggToken: Configuration? = null
+    var topgg: Configuration? = null
 
     class Configuration {
         var enabled: Boolean = false
