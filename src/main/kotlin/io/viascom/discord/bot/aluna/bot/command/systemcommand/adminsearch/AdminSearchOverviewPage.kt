@@ -131,7 +131,6 @@ class AdminSearchOverviewPage(
             } else {
                 embedBuilder.addField("Other Bots", otherBots, false)
             }
-
         }
     }
 

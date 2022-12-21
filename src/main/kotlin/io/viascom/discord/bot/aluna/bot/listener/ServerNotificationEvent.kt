@@ -25,6 +25,7 @@ import io.viascom.discord.bot.aluna.configuration.condition.SendServerNotificati
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.getGuildTextChannel
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
@@ -38,7 +39,7 @@ import java.awt.Color
 
 @Component
 @Conditional(SendServerNotificationCondition::class)
-internal open class ServerNotificationEvent(
+open class ServerNotificationEvent(
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties
 ) : ListenerAdapter() {
@@ -61,7 +62,12 @@ internal open class ServerNotificationEvent(
             .addField("» Locale", "Name: ${server.locale.languageName}", false)
             .addField("» Members", "Total: ${server.memberCount}", false)
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
-            embedMessage.addField("» Other Bots", server.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }, false)
+            val otherBots = server.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }
+            if (otherBots.length > MessageEmbed.VALUE_MAX_LENGTH) {
+                embedMessage.addField("» Other Bots", "Server has ${otherBots.length} bots", false)
+            } else {
+                embedMessage.addField("» Other Bots", otherBots, false)
+            }
         }
 
         val channel = shardManager.getGuildTextChannel(
@@ -93,11 +99,12 @@ internal open class ServerNotificationEvent(
             .addField("» Locale", "Name: ${server.locale.languageName}", false)
             .addField("» Members", "Total: ${server.memberCount}", false)
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
-            embedMessage.addField(
-                "» Other Bots",
-                server.loadMembers().get().filter { it.user.isBot && it.user.id != server.jda.selfUser.id }.joinToString(", ") { it.user.asTag },
-                false
-            )
+            val otherBots = server.loadMembers().get().filter { it.user.isBot && it.user.id != server.jda.selfUser.id }.joinToString(", ") { it.user.asTag }
+            if (otherBots.length > MessageEmbed.VALUE_MAX_LENGTH) {
+                embedMessage.addField("» Other Bots", "Server has ${otherBots.length} bots", false)
+            } else {
+                embedMessage.addField("» Other Bots", otherBots, false)
+            }
         }
 
         val channel = shardManager.getGuildTextChannel(

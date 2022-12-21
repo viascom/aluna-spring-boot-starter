@@ -56,9 +56,9 @@ class LeaveServerProvider(
     true
 ) {
 
-    lateinit var lastHook: InteractionHook
-    lateinit var lastEmbed: EmbedBuilder
-    lateinit var selectedServer: Guild
+    private lateinit var lastHook: InteractionHook
+    private lateinit var lastEmbed: EmbedBuilder
+    private lateinit var selectedServer: Guild
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
         lastHook = hook!!
