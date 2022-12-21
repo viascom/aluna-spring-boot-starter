@@ -18,7 +18,7 @@ targetCompatibility = JavaVersion.VERSION_17
 ext {
     major = 0
     minor = 0
-    patch = 40
+    patch = 41
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 

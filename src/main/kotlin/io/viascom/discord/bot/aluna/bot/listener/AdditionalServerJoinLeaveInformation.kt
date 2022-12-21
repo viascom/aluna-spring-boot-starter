@@ -19,14 +19,14 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.configuration.condition
+package io.viascom.discord.bot.aluna.bot.listener
 
-import org.springframework.context.annotation.Condition
-import org.springframework.context.annotation.ConditionContext
-import org.springframework.core.type.AnnotatedTypeMetadata
+import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.MessageEmbed.Field
 
-class SendServerNotificationCondition : Condition {
-    override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata) =
-        context.environment.getProperty("aluna.notification.server-join.enabled", Boolean::class.java) == true ||
-                context.environment.getProperty("aluna.notification.server-leave.enabled", Boolean::class.java) == true
+interface AdditionalServerJoinLeaveInformation {
+
+    fun getAdditionalServerJoinInformation(server: Guild): List<Field>
+    fun getAdditionalServerLeaveInformation(server: Guild): List<Field>
+
 }

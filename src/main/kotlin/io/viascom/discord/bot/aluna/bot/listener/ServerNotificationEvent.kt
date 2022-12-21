@@ -21,6 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.SendServerNotificationCondition
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.getGuildTextChannel
@@ -38,10 +39,12 @@ import org.springframework.stereotype.Component
 import java.awt.Color
 
 @Component
+@ConditionalOnJdaEnabled
 @Conditional(SendServerNotificationCondition::class)
 open class ServerNotificationEvent(
     private val shardManager: ShardManager,
-    private val alunaProperties: AlunaProperties
+    private val alunaProperties: AlunaProperties,
+    private val additionalInformation: List<AdditionalServerJoinLeaveInformation>
 ) : ListenerAdapter() {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -68,6 +71,14 @@ open class ServerNotificationEvent(
             } else {
                 embedMessage.addField("» Other Bots", otherBots, false)
             }
+        }
+
+        try {
+            additionalInformation.flatMap { it.getAdditionalServerJoinInformation(server) }.forEach {
+                embedMessage.addField(it)
+            }
+        } catch (e: Exception) {
+            logger.warn("Aluna was not able to get additional server information.\n" + e.printStackTrace())
         }
 
         val channel = shardManager.getGuildTextChannel(
@@ -105,6 +116,14 @@ open class ServerNotificationEvent(
             } else {
                 embedMessage.addField("» Other Bots", otherBots, false)
             }
+        }
+
+        try {
+            additionalInformation.flatMap { it.getAdditionalServerLeaveInformation(server) }.forEach {
+                embedMessage.addField(it)
+            }
+        } catch (e: Exception) {
+            logger.warn("Aluna was not able to get additional server information.\n" + e.printStackTrace())
         }
 
         val channel = shardManager.getGuildTextChannel(
