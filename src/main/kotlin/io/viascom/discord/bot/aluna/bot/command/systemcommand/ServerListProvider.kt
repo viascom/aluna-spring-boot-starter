@@ -80,24 +80,24 @@ class ServerListProvider(
             }
 
             "members_asc" -> {
-                sortedServers = servers.sortedBy { it.memberCount }.map { "${it.name} (`${it.id}`) - **${it.memberCount}**" }
+                sortedServers = servers.sortedBy { it.memberCount }.map { "**${it.memberCount}** - ${it.name} (`${it.id}`)" }
                 sortingText = "Member Count *(ascending)*"
             }
 
             "members_desc" -> {
-                sortedServers = servers.sortedByDescending { it.memberCount }.map { "${it.name} (`${it.id}`) - **${it.memberCount}**" }
+                sortedServers = servers.sortedByDescending { it.memberCount }.map { "**${it.memberCount}** - ${it.name} (`${it.id}`)" }
                 sortingText = "Member Count *(descending)*"
             }
 
             "join-time_asc" -> {
                 sortedServers = servers.sortedBy { it.selfMember.timeJoined }
-                    .map { "${it.name} (`${it.id}`) ${it.selfMember.timeJoined.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME)}" }
+                    .map { "${it.selfMember.timeJoined.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME)} - ${it.name} (`${it.id}`)" }
                 sortingText = "Bot Join Time *(ascending)*"
             }
 
             "join-time_desc" -> {
                 sortedServers = servers.sortedByDescending { it.selfMember.timeJoined }
-                    .map { "${it.name} (`${it.id}`) ${it.selfMember.timeJoined.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME)}" }
+                    .map { "${it.selfMember.timeJoined.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME)} - ${it.name} (`${it.id}`)" }
                 sortingText = "Bot Join Time *(descending)*"
             }
 
@@ -110,14 +110,14 @@ class ServerListProvider(
 
         val paginator = AlunaPaginator(
             eventWaiter,
-            elementsPerPage = 10,
+            elementsPerPage = 5,
             showBulkSkipButtons = true,
             bulkSkipNumber = 5,
             wrapPageEnds = true,
             columns = AlunaPaginator.Columns.ONE,
             color = { Color.MAGENTA },
             description = {
-                "All servers sorted by $sortingText\n" +
+                "All servers sorted by $sortingText.\n" +
                         "Total servers: ${shardManager.guilds.size}"
             }
         )
