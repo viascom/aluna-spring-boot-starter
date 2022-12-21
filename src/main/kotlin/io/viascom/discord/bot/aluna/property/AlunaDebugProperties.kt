@@ -40,6 +40,12 @@ class AlunaDebugProperties {
     var enableDebugConfigurationLog: Boolean = true
 
     /**
+     * Hide the bot token in debug configuration log. Only set this to true if you want Aluna to print the token for debug purposes.
+     * No matter what you select here, the Debug Configuration Log and its content is only printed in not production mode.
+     */
+    var hideTokenInDebugConfigurationLog: Boolean = true
+
+    /**
      * Defines if Aluna should list translations in the log on startup
      */
     var showTranslationKeys: ShowTranslationKeys = ShowTranslationKeys.NONE

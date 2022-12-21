@@ -25,15 +25,11 @@
 package io.viascom.discord.bot.aluna.util
 
 import io.viascom.discord.bot.aluna.model.CommandOption
-import io.viascom.discord.bot.aluna.model.DiscordSticker
-import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.entities.Message.Attachment
 import net.dv8tion.jda.api.entities.channel.Channel
 import net.dv8tion.jda.api.entities.channel.concrete.Category
-import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -54,11 +50,7 @@ import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.interactions.modals.ModalInteraction
 import net.dv8tion.jda.api.requests.restaction.*
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction
-import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
-import net.dv8tion.jda.api.utils.messages.MessageCreateData
-import net.dv8tion.jda.api.utils.messages.MessageEditData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
 import java.time.Duration
@@ -86,71 +78,7 @@ fun Color.toHex(): String = String.format("#%02x%02x%02x", this.red, this.green,
  */
 fun Color.toDiscordColorInt(): Int = (this.red shl 16) + (this.green shl 8) + this.blue
 
-/**
- * Remove all components
- */
-fun WebhookMessageCreateAction<Message>.removeComponents() = this.setComponents(arrayListOf())
-
-/**
- * Remove all components
- */
-fun WebhookMessageEditAction<Message>.removeComponents() = this.setComponents(arrayListOf())
-
-/**
- * Remove all components
- */
-fun MessageCreateAction.removeComponents() = this.setComponents(arrayListOf())
-
-/**
- * Remove all components
- */
-fun MessageEditAction.removeComponents() = this.setComponents(arrayListOf())
-
-/**
- * Remove all components
- */
-fun MessageEditCallbackAction.removeComponents() = this.setComponents(arrayListOf())
-
-/**
- * Remove all components
- */
-fun ReplyCallbackAction.removeComponents() = this.setComponents(arrayListOf())
-fun MessageCreateAction.setStickers(vararg stickers: DiscordSticker) = this.setStickers(stickers.map { it.toSticker() })
-fun MessageCreateAction.setStickers(stickers: Collection<DiscordSticker>) = this.setStickers(stickers.map { it.toSticker() })
-
-/**
- * Get guild text channel
- *
- * @param guildId guild id
- * @param channelId channel id
- * @return Guild Text Channel
- */
-fun ShardManager.getGuildTextChannel(guildId: String, channelId: String): MessageChannel? = this.getGuildById(guildId)?.getTextChannelById(channelId)
-fun ShardManager.getGuildVoiceChannel(guildId: String, channelId: String): VoiceChannel? = this.getGuildById(guildId)?.getVoiceChannelById(channelId)
-fun ShardManager.getGuildMessage(guildId: String, channelId: String, messageId: String): Message? =
-    this.getGuildTextChannel(guildId, channelId)?.retrieveMessageById(messageId)?.complete()
-
-fun ShardManager.getPrivateChannelByUser(userId: String): MessageChannel? = this.retrieveUserById(userId).complete()?.openPrivateChannel()?.complete()
-fun ShardManager.getPrivateMessageByUser(userId: String, messageId: String): Message? {
-    return try {
-        getPrivateChannelByUser(userId)?.retrieveMessageById(messageId)?.complete()
-    } catch (e: Exception) {
-        null
-    }
-}
-
-fun ShardManager.getPrivateMessage(channelId: String, messageId: String): Message? {
-    return try {
-        getPrivateChannelById(channelId)?.retrieveMessageById(messageId)?.complete()
-    } catch (e: Exception) {
-        null
-    }
-}
-
 fun ShardManager.getMemberById(guildId: String, userId: String): Member? = this.getGuildById(guildId)?.getMemberById(userId)
-
-fun MessageEditData.toCreateData() = MessageCreateData.fromEditData(this)
-fun MessageCreateData.toEditData() = MessageEditData.fromCreateData(this)
 
 fun <T : Any> CommandDataImpl.addOption(option: CommandOption<in T>) {
     this.addOptions(option as OptionData)
@@ -364,12 +292,6 @@ fun ModalInteraction.getValueAsString(name: String, default: String? = null): St
  */
 fun User.probableLocale(): DiscordLocale? = mutualGuilds.groupBy { it.locale }.maxByOrNull { it.value.size }?.value?.firstOrNull()?.locale
 
-fun User.getMessage(messageId: String): Message? = try {
-    this.openPrivateChannel().complete().retrieveMessageById(messageId).complete()
-} catch (e: Exception) {
-    null
-}
-
 /**
  * Get the probable locale of a user based on the most common locale of the mutual servers.
  *
@@ -378,9 +300,6 @@ fun User.getMessage(messageId: String): Message? = try {
  * @return probable Locale
  */
 fun Member.probableLocale(): DiscordLocale? = user.probableLocale()
-
-fun EmbedBuilder.setColor(red: Int, green: Int, blue: Int): EmbedBuilder = this.setColor(Color(red, green, blue))
-fun EmbedBuilder.setColor(hexColor: String): EmbedBuilder = this.setColor(Color.getColor(hexColor))
 
 @JvmOverloads
 fun selectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {

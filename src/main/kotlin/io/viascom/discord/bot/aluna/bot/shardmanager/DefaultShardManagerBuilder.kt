@@ -28,6 +28,7 @@ import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.Activity
+import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.api.utils.ChunkingFilter
@@ -112,7 +113,13 @@ class DefaultShardManagerBuilder(
         }
 
         if (alunaProperties.discord.gatewayIntents.isNotEmpty()) {
-            logger.debug("Enable Intents: [${alunaProperties.discord.gatewayIntents.joinToString(", ") { it.name }}]")
+            val privilegedIntents = alunaProperties.discord.gatewayIntents
+                .filter { it in arrayListOf(GatewayIntent.GUILD_PRESENCES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS) }
+            logger.debug("Enable additional Intents: [${alunaProperties.discord.gatewayIntents.filter { it !in privilegedIntents }.joinToString(", ") { it.name }}]")
+            if (privilegedIntents.isNotEmpty()) {
+                logger.debug("Enable additional Privileged Intents: [${privilegedIntents.joinToString(", ") { it.name }}]")
+            }
+
             alunaProperties.discord.gatewayIntents.forEach {
                 shardManagerBuilder.enableIntents(it)
             }

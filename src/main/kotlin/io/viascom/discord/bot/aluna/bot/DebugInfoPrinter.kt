@@ -21,6 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot
 
+import io.viascom.discord.bot.aluna.configuration.AlunaHealthIndicator
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.property.ModeratorIdProvider
@@ -28,8 +29,10 @@ import io.viascom.discord.bot.aluna.property.OwnerIdProvider
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
+import org.springframework.boot.autoconfigure.web.ServerProperties
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationListener
+import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.stereotype.Service
 
 @Service
@@ -40,7 +43,8 @@ class DebugInfoPrinter(
     private val contextMenus: List<DiscordContextMenu>,
     private val alunaProperties: AlunaProperties,
     private val ownerIdProvider: OwnerIdProvider,
-    private val moderatorIdProvider: ModeratorIdProvider
+    private val moderatorIdProvider: ModeratorIdProvider,
+    private val context: ConfigurableApplicationContext
 ) : ApplicationListener<ApplicationStartedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -49,24 +53,39 @@ class DebugInfoPrinter(
         if (!alunaProperties.productionMode) {
             var permission = 0L
             alunaProperties.discord.defaultPermissions.forEach { permission = permission or it.rawValue }
+            val token = if (!alunaProperties.debug.hideTokenInDebugConfigurationLog) {
+                "-> token:           ${alunaProperties.discord.token}\n"
+            } else ""
             val invite = if (alunaProperties.discord.applicationId != null) {
                 "https://discordapp.com/oauth2/authorize?client_id=${alunaProperties.discord.applicationId}&scope=bot%20applications.commands&permissions=$permission"
             } else {
                 "<Please add an applicationId to see this invite link!>"
             }
+            val healthIndicator = try {
+                context.getBean(AlunaHealthIndicator::class.java)
+            } catch (e: Exception) {
+                null
+            }
+            val actuator = if (healthIndicator != null) {
+                val serverProperties = context.getBean(ServerProperties::class.java)
+                "-> healthIndicator: http://localhost:${serverProperties.port}/actuator/health/aluna\n"
+            } else ""
             logger.info(
                 """
                 
                 ###############################################
                                 Configuration
-                -> interaction:   ${commands.size + contextMenus.size}
-                -> ownerIds:      ${ownerIdProvider.getOwnerIds().joinToString { it.toString() }.ifBlank { "n/a" }}
-                -> modIds:        ${moderatorIdProvider.getModeratorIds().joinToString { it.toString() }.ifBlank { "n/a" }}
-                -> applicationId: ${alunaProperties.discord.applicationId ?: "n/a"}
-                -> token:         ${alunaProperties.discord.token}
-                -> invite:        $invite
-                ###############################################
-            """.trimIndent()
+                -> interaction:     ${commands.size + contextMenus.size}
+                -> healthIndicator:
+                -> ownerIds:        ${ownerIdProvider.getOwnerIds().joinToString { it.toString() }.ifBlank { "<not defined>" }}
+                -> modIds:          ${moderatorIdProvider.getModeratorIds().joinToString { it.toString() }.ifBlank { "<not defined>" }}
+                -> applicationId:   ${alunaProperties.discord.applicationId ?: "<not defined>"}
+                -> invite:          $invite
+                """.trimIndent() + "\n" +
+                        token +
+                        actuator +
+                        "###############################################"
+
             )
         }
     }

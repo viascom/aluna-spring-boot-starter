@@ -33,6 +33,7 @@ import io.viascom.discord.bot.aluna.util.toHex
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.Role
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.Channel
@@ -124,7 +125,13 @@ class AdminSearchOverviewPage(
         embedBuilder.addField("Features", discordServer.features.joinToString(" | "), false)
 
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
-            embedBuilder.addField("Other Bots", discordServer.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }, false)
+            val otherBots = discordServer.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }
+            if (otherBots.length > MessageEmbed.VALUE_MAX_LENGTH) {
+                embedBuilder.addField("Other Bots", "Server has ${otherBots.length} bots", false)
+            } else {
+                embedBuilder.addField("Other Bots", otherBots, false)
+            }
+
         }
     }
 

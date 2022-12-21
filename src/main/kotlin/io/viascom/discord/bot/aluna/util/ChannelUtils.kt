@@ -27,10 +27,14 @@ package io.viascom.discord.bot.aluna.util
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
+import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.entities.channel.concrete.Category
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildChannel
+import net.dv8tion.jda.api.sharding.ShardManager
 
 /**
  * Sort text channels by comparator
@@ -83,4 +87,34 @@ fun Guild.getChannelsWithBotAndMember(member: Member, type: ArrayList<ChannelTyp
     return aleevaChannels
         .filter { member.hasChannelPermission(it, Permission.VIEW_CHANNEL) }
         .sortedBy { (it as StandardGuildChannel).position }
+}
+
+
+/**
+ * Get guild text channel
+ *
+ * @param guildId guild id
+ * @param channelId channel id
+ * @return Guild Text Channel
+ */
+fun ShardManager.getGuildTextChannel(guildId: String, channelId: String): MessageChannel? = this.getGuildById(guildId)?.getTextChannelById(channelId)
+fun ShardManager.getGuildVoiceChannel(guildId: String, channelId: String): VoiceChannel? = this.getGuildById(guildId)?.getVoiceChannelById(channelId)
+fun ShardManager.getGuildMessage(guildId: String, channelId: String, messageId: String): Message? =
+    this.getGuildTextChannel(guildId, channelId)?.retrieveMessageById(messageId)?.complete()
+
+fun ShardManager.getPrivateChannelByUser(userId: String): MessageChannel? = this.retrieveUserById(userId).complete()?.openPrivateChannel()?.complete()
+fun ShardManager.getPrivateMessageByUser(userId: String, messageId: String): Message? {
+    return try {
+        getPrivateChannelByUser(userId)?.retrieveMessageById(messageId)?.complete()
+    } catch (e: Exception) {
+        null
+    }
+}
+
+fun ShardManager.getPrivateMessage(channelId: String, messageId: String): Message? {
+    return try {
+        getPrivateChannelById(channelId)?.retrieveMessageById(messageId)?.complete()
+    } catch (e: Exception) {
+        null
+    }
 }

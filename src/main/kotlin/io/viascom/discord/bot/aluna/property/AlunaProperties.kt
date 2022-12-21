@@ -86,4 +86,11 @@ class AlunaProperties {
      * Should Aluna register interactions in production mode which are in interactionDevelopmentStatus == IN_DEVELOPMENT
      */
     var includeInDevelopmentInteractions: Boolean = false
+
+    /**
+     * Should Aluna enable its actuator health indicator
+     *
+     * Url: /actuator/health/aluna
+     */
+    var enableActuatorHealthIndicator: Boolean = true
 }

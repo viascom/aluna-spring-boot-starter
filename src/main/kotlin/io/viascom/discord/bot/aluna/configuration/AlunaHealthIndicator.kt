@@ -38,6 +38,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.HealthIndicator
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.stereotype.Component
 
@@ -45,6 +46,7 @@ import org.springframework.stereotype.Component
 @ConditionalOnWebApplication
 @ConditionalOnClass(HealthIndicator::class)
 @ConditionalOnJdaEnabled
+@ConditionalOnProperty(name = ["enable-actuator-health-indicator"], prefix = "aluna", matchIfMissing = true)
 class AlunaHealthIndicator(
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,

@@ -24,9 +24,7 @@
 
 package io.viascom.discord.bot.aluna.util
 
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
-import java.time.ZoneId
+import java.time.*
 
 enum class TimestampFormat(val format: String) {
     SHORT_TIME("t"),
@@ -38,10 +36,36 @@ enum class TimestampFormat(val format: String) {
     RELATIVE_TIME("R")
 }
 
+/**
+ * Convert to discord timestamp. This method will use the LocalDateTime at UTC.
+ *
+ * @param format Format of the timestamp
+ * @return Discord timestamp
+ */
 fun LocalDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String =
     "<t:${this.toUnixTimestamp()}:${format.format}>"
 
+/**
+ * Convert to discord timestamp.
+ *
+ * @param format Format of the timestamp
+ * @return Discord timestamp
+ */
 fun OffsetDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String =
     "<t:${this.toEpochSecond()}:${format.format}>"
 
-fun LocalDateTime.toUnixTimestamp(): Long = this.atZone(ZoneId.systemDefault()).toEpochSecond()
+/**
+ * Convert to discord timestamp.
+ *
+ * @param format Format of the timestamp
+ * @return Discord timestamp
+ */
+fun ZonedDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String =
+    "<t:${this.toEpochSecond()}:${format.format}>"
+
+/**
+ * Convert to unix timestamp. This method will use the LocalDateTime at UTC.
+ *
+ * @return Epoch Seconds
+ */
+fun LocalDateTime.toUnixTimestamp(): Long = this.toEpochSecond(ZoneOffset.UTC)
