@@ -23,12 +23,14 @@ package io.viascom.discord.bot.aluna.bot
 
 import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.bot.handler.*
+import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.model.AdditionalRequirements
 import io.viascom.discord.bot.aluna.model.DevelopmentStatus
 import io.viascom.discord.bot.aluna.model.MissingPermissions
 import io.viascom.discord.bot.aluna.model.UseScope
 import io.viascom.discord.bot.aluna.property.AlunaProperties
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.Permission
@@ -51,6 +53,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
@@ -86,6 +89,9 @@ abstract class DiscordContextMenu(
     @Autowired
     override lateinit var discordBot: DiscordBot
 
+    @Autowired
+    private lateinit var configurableListableBeanFactory: ConfigurableListableBeanFactory
+
     @Autowired(required = false)
     lateinit var localizationProvider: DiscordInteractionLocalization
 
@@ -114,6 +120,7 @@ abstract class DiscordContextMenu(
     override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
     override var beanUseAutoCompleteBean: Boolean = false
     override var beanRemoveObserverOnDestroy: Boolean = true
+    override var beanResetObserverTimeoutOnBeanExtend: Boolean = true
     override var beanCallOnDestroy: Boolean = true
 
     /**
@@ -339,6 +346,57 @@ abstract class DiscordContextMenu(
             launch(AlunaCoroutinesDispatcher.IO) {
                 discordInteractionMetaDataHandler.onExitInteraction(command, stopWatch, event)
             }
+        }
+    }
+
+    /**
+     * Destroy this bean instance. This will remove the bean from the interaction scope as well as remove the bean timout.
+     *
+     * @param removeObservers Remove all observers
+     * @param removeObserverTimeouts Remove all observer timeouts
+     * @param callOnDestroy Call onDestroy of this bean
+     * @param callButtonTimeout Call onButtonInteractionTimeout of this bean
+     * @param callStringSelectTimeout Call onStringSelectInteractionTimeout of this bean
+     * @param callEntitySelectTimeout Call onEntitySelectInteractionTimeout of this bean
+     * @param callModalTimeout Call onModalInteractionTimeout of this bean
+     */
+    fun destroyThisInstance(
+        removeObservers: Boolean = true,
+        removeObserverTimeouts: Boolean = true,
+        callOnDestroy: Boolean = false,
+        callButtonTimeout: Boolean = false,
+        callStringSelectTimeout: Boolean = false,
+        callEntitySelectTimeout: Boolean = false,
+        callModalTimeout: Boolean = false
+    ) {
+        val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
+        interactionScope.removeByUniqueId(uniqueId)
+
+        val buttonObserver = discordBot.messagesToObserveButton.entries.firstOrNull { it.value.uniqueId == uniqueId }
+        val stringSelectObserver = discordBot.messagesToObserveStringSelect.entries.firstOrNull { it.value.uniqueId == uniqueId }
+        val entitySelectObserver = discordBot.messagesToObserveEntitySelect.entries.firstOrNull { it.value.uniqueId == uniqueId }
+        val modalObserver = discordBot.messagesToObserveModal.entries.firstOrNull { it.value.uniqueId == uniqueId }
+
+        if (removeObservers) {
+            buttonObserver?.key?.let { discordBot.messagesToObserveButton.remove(it) }
+            stringSelectObserver?.key?.let { discordBot.messagesToObserveStringSelect.remove(it) }
+            entitySelectObserver?.key?.let { discordBot.messagesToObserveEntitySelect.remove(it) }
+            modalObserver?.key?.let { discordBot.messagesToObserveModal.remove(it) }
+        }
+
+        if (removeObserverTimeouts) {
+            buttonObserver?.value?.timeoutTask?.cancel(true)
+            stringSelectObserver?.value?.timeoutTask?.cancel(true)
+            entitySelectObserver?.value?.timeoutTask?.cancel(true)
+            modalObserver?.value?.timeoutTask?.cancel(true)
+        }
+
+        runBlocking(AlunaCoroutinesDispatcher.Default) {
+            async { if (callOnDestroy) onDestroy() }
+            async { if (callButtonTimeout) buttonObserver?.let { onButtonInteractionTimeout(it.value.additionalData) } }
+            async { if (callStringSelectTimeout) stringSelectObserver?.let { onStringSelectInteractionTimeout(it.value.additionalData) } }
+            async { if (callEntitySelectTimeout) entitySelectObserver?.let { onEntitySelectInteractionTimeout(it.value.additionalData) } }
+            async { if (callModalTimeout) modalObserver?.let { onModalInteractionTimeout(it.value.additionalData) } }
         }
     }
 }

@@ -19,19 +19,20 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.bot
+package io.viascom.discord.bot.aluna.model
 
-import io.viascom.discord.bot.aluna.event.DiscordReadyEvent
-import net.dv8tion.jda.api.OnlineStatus
-import net.dv8tion.jda.api.sharding.ShardManager
-import org.springframework.context.ApplicationListener
-import org.springframework.stereotype.Component
+import io.viascom.discord.bot.aluna.util.toHex
+import java.awt.Color
 
-@Component
-class StatusHandler(
-    private val shardManager: ShardManager,
-) : ApplicationListener<DiscordReadyEvent> {
-    override fun onApplicationEvent(event: DiscordReadyEvent) {
-        shardManager.setStatus(OnlineStatus.ONLINE)
-    }
-}
+class ReleaseNotes(
+    val title: String = "Release Notes - {now:LONG_DATE_TIME}",
+    val description: String = "",
+    val color: String = Color.BLUE.toHex(),
+    val thumbnail: String? = null,
+    val image: String? = null,
+    val creator: String = "",
+    val newCommands: List<String> = arrayListOf(),
+    val newFeatures: List<String> = arrayListOf(),
+    val bugFixes: List<String> = arrayListOf(),
+    val internalChanges: List<String> = arrayListOf()
+)

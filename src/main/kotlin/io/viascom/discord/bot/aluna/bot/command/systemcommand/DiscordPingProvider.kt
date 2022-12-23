@@ -21,18 +21,18 @@
 
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
+import org.springframework.stereotype.Component
 import java.awt.Color
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-@Interaction
+@Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 class DiscordPingProvider : SystemCommandDataProvider(

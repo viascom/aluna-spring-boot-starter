@@ -21,7 +21,6 @@
 
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
@@ -36,9 +35,10 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.utils.FileUpload
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.stereotype.Component
 import kotlin.math.min
 
-@Interaction
+@Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 @ConditionalOnProperty(name = ["command.system-command.enable-kotlin-script-evaluate"], prefix = "aluna", matchIfMissing = false)

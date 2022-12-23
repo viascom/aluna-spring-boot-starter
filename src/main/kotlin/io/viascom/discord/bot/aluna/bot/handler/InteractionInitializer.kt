@@ -108,7 +108,7 @@ internal open class InteractionInitializer(
 
             val commandsToRemove = currentCommands.filter { command ->
                 commandDataList.filter {
-                    if (it.type == Command.Type.SLASH) {
+                    if (it.type == Type.SLASH) {
                         (it as DiscordCommand).useScope in arrayListOf(UseScope.GLOBAL, UseScope.GUILD_ONLY)
                     } else {
                         true
@@ -123,7 +123,7 @@ internal open class InteractionInitializer(
 
             val commandsToUpdate = currentCommands.filter { it.name !in commandsToRemove.map { it.name } }.filter { command ->
                 commandDataList.filter {
-                    if (it.type == Command.Type.SLASH) {
+                    if (it.type == Type.SLASH) {
                         (it as DiscordCommand).useScope in arrayListOf(UseScope.GLOBAL, UseScope.GUILD_ONLY)
                     } else {
                         (it as DiscordContextMenu).useScope in arrayListOf(UseScope.GLOBAL, UseScope.GUILD_ONLY)
@@ -140,7 +140,7 @@ internal open class InteractionInitializer(
 
             val commandsToAdd = commandDataList
                 .filter {
-                    if (it.type == Command.Type.SLASH) {
+                    if (it.type == Type.SLASH) {
                         (it as DiscordCommand).useScope in arrayListOf(UseScope.GLOBAL, UseScope.GUILD_ONLY)
                     } else {
                         true
@@ -158,15 +158,15 @@ internal open class InteractionInitializer(
 
             commandsToAdd.forEach { discordCommand ->
                 shardManager.shards.first().upsertCommand(discordCommand).queue { command ->
-                    if (discordCommand.type == Command.Type.SLASH) {
+                    if (discordCommand.type == Type.SLASH) {
                         printCommand((discordCommand as DiscordCommand))
                         discordBot.commands[command.id] = discordCommand.javaClass
                     }
-                    if (discordCommand.type != Command.Type.SLASH) {
+                    if (discordCommand.type != Type.SLASH) {
                         logger.debug("Register context menu '${(discordCommand as DiscordContextMenu).name}'")
                         discordBot.contextMenus[command.id] = discordCommand.javaClass
                     }
-                    if (discordCommand.type == Command.Type.SLASH && (discordCommand as DiscordCommand).observeAutoComplete && command.name !in discordBot.commandsWithAutocomplete) {
+                    if (discordCommand.type == Type.SLASH && (discordCommand as DiscordCommand).observeAutoComplete && command.name !in discordBot.commandsWithAutocomplete) {
                         discordBot.commandsWithAutocomplete.add(command.id)
                     }
                     discordBot.discordRepresentations[command.name] = command
@@ -174,7 +174,7 @@ internal open class InteractionInitializer(
             }
 
             shardManager.shards.first().retrieveCommands(true).queue { command ->
-                command.filter { it.type == Command.Type.SLASH }.filter { it.name in commands.map { it.name } }.forEach { filteredCommand ->
+                command.filter { it.type == Type.SLASH }.filter { it.name in commands.map { it.name } }.forEach { filteredCommand ->
                     try {
                         discordBot.commands.computeIfAbsent(filteredCommand.id) { commands.first { it.name == filteredCommand.name }.javaClass }
                         if (commands.first { it.name == filteredCommand.name }.observeAutoComplete && filteredCommand.id !in discordBot.commandsWithAutocomplete) {
@@ -185,7 +185,7 @@ internal open class InteractionInitializer(
                     }
                 }
 
-                command.filter { it.type != Command.Type.SLASH }.filter { it.name in contextMenus.map { it.name } }.forEach { filteredCommand ->
+                command.filter { it.type != Type.SLASH }.filter { it.name in contextMenus.map { it.name } }.forEach { filteredCommand ->
                     try {
                         discordBot.contextMenus.computeIfAbsent(filteredCommand.id) { contextMenus.first { it.name == filteredCommand.name }.javaClass }
                     } catch (e: Exception) {
@@ -194,8 +194,8 @@ internal open class InteractionInitializer(
                 }
 
                 eventPublisher.publishDiscordSlashCommandInitializedEvent(
-                    commandsToAdd.filter { it.type == Command.Type.SLASH }.map { it::class },
-                    commandsToUpdate.filter { it.type == Command.Type.SLASH }
+                    commandsToAdd.filter { it.type == Type.SLASH }.map { it::class },
+                    commandsToUpdate.filter { it.type == Type.SLASH }
                         .map { discordCommand -> commandDataList.first { it.name == discordCommand.name } }
                         .map { it::class },
                     commandsToRemove.map { it.name })

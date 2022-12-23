@@ -205,6 +205,17 @@ fun EmbedBuilder.addFields(vararg fields: MessageEmbed.Field): EmbedBuilder {
     return this
 }
 
+/**
+ * Adds Fields to the embed.
+ *
+ * @param fields Fields to add
+ * @return the builder after the field has been added
+ */
+fun EmbedBuilder.addFields(fields: Collection<MessageEmbed.Field>): EmbedBuilder {
+    fields.forEach { this.addField(it) }
+    return this
+}
+
 fun EmbedBuilder.setColor(red: Int, green: Int, blue: Int): EmbedBuilder = this.setColor(Color(red, green, blue))
 fun EmbedBuilder.setColor(hexColor: String): EmbedBuilder = this.setColor(Color.getColor(hexColor))
 

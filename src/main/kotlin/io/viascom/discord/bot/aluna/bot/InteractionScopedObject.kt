@@ -46,6 +46,11 @@ interface InteractionScopedObject {
     var beanRemoveObserverOnDestroy: Boolean
 
     /**
+     * Should observer timeouts be reset if bean timeout gets reset.
+     */
+    var beanResetObserverTimeoutOnBeanExtend: Boolean
+
+    /**
      * Should onDestroy be called if the bean gets destroyed.
      */
     var beanCallOnDestroy: Boolean

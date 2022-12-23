@@ -21,7 +21,6 @@
 
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.adminsearch.AdminSearchArgsProvider
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.adminsearch.AdminSearchPageDataProvider
@@ -47,9 +46,10 @@ import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.sharding.ShardManager
+import org.springframework.stereotype.Component
 import java.awt.Color
 
-@Interaction
+@Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 class AdminSearchDataProvider(

@@ -23,6 +23,7 @@ package io.viascom.discord.bot.aluna.bot
 
 import io.viascom.discord.bot.aluna.configuration.AlunaHealthIndicator
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import io.viascom.discord.bot.aluna.event.DiscordSlashCommandInitializedEvent
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.property.ModeratorIdProvider
 import io.viascom.discord.bot.aluna.property.OwnerIdProvider
@@ -30,7 +31,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.boot.autoconfigure.web.ServerProperties
-import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.stereotype.Service
@@ -39,17 +39,16 @@ import org.springframework.stereotype.Service
 @ConditionalOnJdaEnabled
 @ConditionalOnExpression("\${aluna.debug.enable-debug-configuration-log:true} && \${aluna.production-mode:false} == false")
 class DebugInfoPrinter(
-    private val commands: List<DiscordCommand>,
-    private val contextMenus: List<DiscordContextMenu>,
+    private val discordBot: DiscordBot,
     private val alunaProperties: AlunaProperties,
     private val ownerIdProvider: OwnerIdProvider,
     private val moderatorIdProvider: ModeratorIdProvider,
     private val context: ConfigurableApplicationContext
-) : ApplicationListener<ApplicationStartedEvent> {
+) : ApplicationListener<DiscordSlashCommandInitializedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onApplicationEvent(event: ApplicationStartedEvent) {
+    override fun onApplicationEvent(event: DiscordSlashCommandInitializedEvent) {
         if (!alunaProperties.productionMode) {
             var permission = 0L
             alunaProperties.discord.defaultPermissions.forEach { permission = permission or it.rawValue }
@@ -75,8 +74,7 @@ class DebugInfoPrinter(
                 
                 ###############################################
                                 Configuration
-                -> interaction:     ${commands.size + contextMenus.size}
-                -> healthIndicator:
+                -> interaction:     ${discordBot.commands.size + discordBot.contextMenus.size}
                 -> ownerIds:        ${ownerIdProvider.getOwnerIds().joinToString { it.toString() }.ifBlank { "<not defined>" }}
                 -> modIds:          ${moderatorIdProvider.getModeratorIds().joinToString { it.toString() }.ifBlank { "<not defined>" }}
                 -> applicationId:   ${alunaProperties.discord.applicationId ?: "<not defined>"}

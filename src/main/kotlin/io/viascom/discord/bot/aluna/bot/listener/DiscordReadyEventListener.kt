@@ -21,9 +21,9 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
-import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
+import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
-import io.viascom.discord.bot.aluna.event.DiscordReadyEvent
+import io.viascom.discord.bot.aluna.event.DiscordSlashCommandInitializedEvent
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.getGuildTextChannel
 import net.dv8tion.jda.api.EmbedBuilder
@@ -40,14 +40,14 @@ import java.awt.Color
 @Order(100)
 @ConditionalOnJdaEnabled
 internal open class DiscordReadyEventListener(
-    private val interactions: List<InteractionScopedObject>,
+    private val discordBot: DiscordBot,
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties
-) : ApplicationListener<DiscordReadyEvent> {
+) : ApplicationListener<DiscordSlashCommandInitializedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onApplicationEvent(event: DiscordReadyEvent) {
+    override fun onApplicationEvent(event: DiscordSlashCommandInitializedEvent) {
         if (alunaProperties.discord.setStatusToOnlineWhenReady) {
             //Set status to online and remove activity
             shardManager.setStatus(OnlineStatus.ONLINE)
@@ -60,7 +60,7 @@ internal open class DiscordReadyEventListener(
                 .setColor(Color.GREEN)
                 .setDescription("Bot is up and ready to answer interactions.")
                 .addField("» Client-Id", alunaProperties.discord.applicationId ?: "n/a", false)
-                .addField("» Total Interactions", interactions.size.toString(), true)
+                .addField("» Total Interactions", (discordBot.commands.size + discordBot.contextMenus.size).toString(), true)
                 .addField("» Production Mode", alunaProperties.productionMode.toString(), true)
 
             val channel = shardManager.getGuildTextChannel(

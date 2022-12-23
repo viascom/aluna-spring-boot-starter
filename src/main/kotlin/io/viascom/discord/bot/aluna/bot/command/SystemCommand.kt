@@ -34,6 +34,7 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.Command
 
@@ -117,6 +118,14 @@ class SystemCommand(
 
     override fun onStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
         selectedProvider?.onStringSelectInteractionTimeout()
+    }
+
+    override fun onEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: java.util.HashMap<String, Any?>): Boolean {
+        return selectedProvider?.onEntitySelectInteraction(event) ?: true
+    }
+
+    override fun onEntitySelectInteractionTimeout(additionalData: java.util.HashMap<String, Any?>) {
+        selectedProvider?.onEntitySelectInteractionTimeout()
     }
 
     override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {

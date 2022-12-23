@@ -22,9 +22,11 @@
 package io.viascom.discord.bot.aluna.configuration.scope
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.bot.DiscordInteractionHandler
 import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
 import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
+import io.viascom.discord.bot.aluna.model.ObserveInteraction
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
 import io.viascom.discord.bot.aluna.util.NanoId
 import kotlinx.coroutines.runBlocking
@@ -97,7 +99,8 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
                 loadTimeoutDelay(data.obj, Duration.ofMinutes(14)),
                 loadBeanCallOnDestroy(data.obj, true)
             )
-            resetTimeoutDestroy(DiscordContext.discordState!!.uniqueId!!, timeout)
+            resetTimeoutDestroy(name, DiscordContext.discordState!!.uniqueId!!, timeout)
+            resetObserverTimeouts(name, DiscordContext.discordState!!.uniqueId!!, data.obj)
             return data.obj
         }
 
@@ -120,7 +123,8 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
                     Duration.ofMinutes(5),
                     false
                 )
-                resetTimeoutDestroy(data.key, timeout)
+                resetTimeoutDestroy(name, data.key, timeout)
+                resetObserverTimeouts(name, DiscordContext.discordState!!.uniqueId!!, data.value.obj)
                 return data.value.obj
             } else {
                 //No bean exists, so we create one
@@ -138,8 +142,8 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
                     Duration.ofMinutes(5),
                     false
                 )
-                resetTimeoutDestroy(DiscordContext.discordState!!.uniqueId!!, timeout)
-
+                resetTimeoutDestroy(name, DiscordContext.discordState!!.uniqueId!!, timeout)
+                resetObserverTimeouts(name, DiscordContext.discordState!!.uniqueId!!, newObj)
                 return newObj
             }
         }
@@ -228,13 +232,13 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
                     try {
                         newObj::class.java.getDeclaredMethod("onDestroy").invoke(newObj)
                     } catch (e: NoSuchMethodException) {
-                        logger.debug("onDestroy does not exist for $newObj")
+                        logger.debug("[$name] - ${DiscordContext.discordState} -> onDestroy does not exist for $newObj")
                     } catch (e: Exception) {
-                        logger.debug("Could not invoke onDestroy for ${newObj}\n${e.stackTraceToString()}")
+                        logger.debug("[$name] - ${DiscordContext.discordState} -> could not invoke onDestroy for ${newObj}\n${e.stackTraceToString()}")
                     }
                     try {
                         if (loadObserverWaiterOnDestroy(newObj, true)) {
-                            logger.debug("Remove observer & eventWaiters if existing for this instance.")
+                            logger.debug("[$name] - ${DiscordContext.discordState} -> remove observer & eventWaiters if existing for this instance.")
                             val eventWaiter: EventWaiter = context.getBean(EventWaiter::class.java) as EventWaiter
 
                             val buttonMessage = discordBot.messagesToObserveButton.entries.firstOrNull { it.value.uniqueId == uniqueId }
@@ -255,10 +259,16 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
                                 discordBot.messagesToObserveEntitySelect.remove(it.key)
                             }
 
+                            val modalMessage = discordBot.messagesToObserveModal.entries.firstOrNull { it.value.uniqueId == uniqueId }
+                            modalMessage?.let {
+                                it.value.timeoutTask?.cancel(true)
+                                discordBot.messagesToObserveModal.remove(it.key)
+                            }
+
                             eventWaiter.removeWaiter(uniqueId, true)
                         }
                     } catch (e: Exception) {
-                        logger.debug("Could not remove observer for ${newObj}\"\n${e.stackTraceToString()}")
+                        logger.debug("[$name] - ${DiscordContext.discordState} -> could not remove observer for ${newObj}\"\n${e.stackTraceToString()}")
                     }
                 }
                 //Remove element from scope cache
@@ -275,9 +285,59 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
         }, delay.seconds, TimeUnit.SECONDS)
     }
 
-    private fun resetTimeoutDestroy(uniqueId: String, newScheduledFuture: ScheduledFuture<*>) {
+    private fun resetTimeoutDestroy(name: String, uniqueId: String, newScheduledFuture: ScheduledFuture<*>) {
+        logger.debug("[$name] - ${DiscordContext.discordState} -> reset bean timeout")
         scopedObjectsTimeoutScheduledTask[uniqueId]?.cancel(true)
         scopedObjectsTimeoutScheduledTask[uniqueId] = newScheduledFuture
+    }
+
+    private fun resetObserverTimeouts(name: String, uniqueId: String, newObj: Any) {
+        if (newObj !is DiscordInteractionHandler) {
+            logger.debug("[$name] - ${DiscordContext.discordState} -> object is not a DiscordInteractionHandler -> skip observer reset")
+            return
+        }
+
+        if (!loadResetObserverTimeoutOnBeanExtend(newObj, true)) {
+            logger.debug("[$name] - ${DiscordContext.discordState} -> observer reset on bean reset is disabled -> skip observer reset")
+            return
+        }
+
+        //Set observers if needed
+        val discordBot: DiscordBot = context.getBean(DiscordBot::class.java) as DiscordBot
+        val buttonMessage = discordBot.messagesToObserveButton.entries.firstOrNull { it.value.uniqueId == uniqueId }
+        buttonMessage?.let { observer ->
+            logger.debug("[$name] - ${DiscordContext.discordState} -> reset button interaction timeout for message ${observer.key}")
+            observer.value.timeoutTask?.cancel(true)
+            observer.value.timeoutTask = ObserveInteraction.scheduleButtonTimeout(newObj, observer.value.duration, observer.key, discordBot, logger, observer.value.additionalData)
+        }
+
+        val stringSelectMessage = discordBot.messagesToObserveStringSelect.entries.firstOrNull { it.value.uniqueId == uniqueId }
+        stringSelectMessage?.let { observer ->
+            logger.debug("[$name] - ${DiscordContext.discordState} -> reset string select interaction timeout for message ${observer.key}")
+            observer.value.timeoutTask?.cancel(true)
+            observer.value.timeoutTask =
+                ObserveInteraction.scheduleStringSelectTimeout(newObj, observer.value.duration, observer.key, discordBot, logger, observer.value.additionalData)
+        }
+
+        val entitySelectMessage = discordBot.messagesToObserveEntitySelect.entries.firstOrNull { it.value.uniqueId == uniqueId }
+        entitySelectMessage?.let { observer ->
+            logger.debug("[$name] - ${DiscordContext.discordState} -> reset entity select interaction timeout for message ${observer.key}")
+            observer.value.timeoutTask?.cancel(true)
+            observer.value.timeoutTask =
+                ObserveInteraction.scheduleEntitySelectTimeout(newObj, observer.value.duration, observer.key, discordBot, logger, observer.value.additionalData)
+        }
+
+        val modalMessage = discordBot.messagesToObserveModal.entries.firstOrNull { it.value.uniqueId == uniqueId }
+        modalMessage?.let { observer ->
+            if (observer.value.authorIds?.firstOrNull() == null) {
+                logger.debug("[$name] - ${DiscordContext.discordState} -> can not reset modal timeout as author id is no set in observer.")
+                return@let
+            }
+            logger.debug("[$name] - ${DiscordContext.discordState} -> reset modal interaction timeout for message ${observer.key}")
+            observer.value.timeoutTask?.cancel(true)
+            observer.value.timeoutTask =
+                ObserveInteraction.scheduleModalTimeout(newObj, observer.value.duration, observer.value.authorIds!!.first(), discordBot, logger, observer.value.additionalData)
+        }
     }
 
     private fun loadTimeoutDelay(obj: Any, default: Duration, clazz: Class<*> = obj::class.java): Duration {
@@ -300,6 +360,20 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
                 loadObserverWaiterOnDestroy(obj, default, clazz.superclass)
             } else {
                 val declaredField = clazz.getDeclaredField("beanRemoveObserverOnDestroy")
+                declaredField.isAccessible = true
+                declaredField.get(obj) as Boolean
+            }
+        } catch (e: Exception) {
+            default
+        }
+    }
+
+    private fun loadResetObserverTimeoutOnBeanExtend(obj: Any, default: Boolean, clazz: Class<*> = obj::class.java): Boolean {
+        return try {
+            if (clazz.declaredFields.none { it.name == "beanResetObserverTimeoutOnBeanExtend" } && clazz != CommandDataImpl::class.java) {
+                loadResetObserverTimeoutOnBeanExtend(obj, default, clazz.superclass)
+            } else {
+                val declaredField = clazz.getDeclaredField("beanResetObserverTimeoutOnBeanExtend")
                 declaredField.isAccessible = true
                 declaredField.get(obj) as Boolean
             }
@@ -337,8 +411,23 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
     }
 
     override fun remove(name: String): Any? {
+        logger.debug("[$name] - ${DiscordContext.discordState} -> remove bean")
         DiscordContext.discordState?.uniqueId?.let { scopedObjectsTimeoutScheduledTask[it]!!.cancel(true) }
         return scopedObjects.getOrElse(name) { null }?.remove(DiscordContext.discordState?.id)
+    }
+
+    fun removeByUniqueId(uniqueId: String) {
+        logger.debug("[$uniqueId] -> remove beans by unique id")
+        scopedObjectsTimeoutScheduledTask[uniqueId]!!.cancel(true)
+
+        //Remove all scopedObjects for a given unique id
+        scopedObjects.filter { (_, innerMap) ->
+            innerMap.values.any { innerInnerMap ->
+                innerInnerMap.keys.any { keys ->
+                    keys == uniqueId
+                }
+            }
+        }.forEach { scopedObjects.remove(it.key) }
     }
 
     override fun registerDestructionCallback(name: String, callback: Runnable) {

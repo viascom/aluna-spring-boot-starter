@@ -22,7 +22,6 @@
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
@@ -37,8 +36,9 @@ import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.api.utils.FileUpload
 import net.dv8tion.jda.api.utils.messages.MessageEditData
+import org.springframework.stereotype.Component
 
-@Interaction
+@Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 class ExtractMessageProvider(

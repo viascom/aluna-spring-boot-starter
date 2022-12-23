@@ -37,6 +37,7 @@ abstract class DiscordSubCommand(name: String, description: String) : Subcommand
     override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
     override var beanUseAutoCompleteBean: Boolean = true
     override var beanRemoveObserverOnDestroy: Boolean = true
+    override var beanResetObserverTimeoutOnBeanExtend: Boolean = true
     override var beanCallOnDestroy: Boolean = true
 
     @set:JvmSynthetic
@@ -65,4 +66,27 @@ abstract class DiscordSubCommand(name: String, description: String) : Subcommand
 
     open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean = true
     open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {}
+
+    /**
+     * Destroy this bean instance. This will remove the bean from the interaction scope as well as remove the bean timout.
+     *
+     * @param removeObservers Remove all observers
+     * @param removeObserverTimeouts Remove all observer timeouts
+     * @param callOnDestroy Call onDestroy of this bean
+     * @param callButtonTimeout Call onButtonInteractionTimeout of this bean
+     * @param callStringSelectTimeout Call onStringSelectInteractionTimeout of this bean
+     * @param callEntitySelectTimeout Call onEntitySelectInteractionTimeout of this bean
+     * @param callModalTimeout Call onModalInteractionTimeout of this bean
+     */
+    fun destroyThisInstance(
+        removeObservers: Boolean = true,
+        removeObserverTimeouts: Boolean = true,
+        callOnDestroy: Boolean = false,
+        callButtonTimeout: Boolean = false,
+        callStringSelectTimeout: Boolean = false,
+        callEntitySelectTimeout: Boolean = false,
+        callModalTimeout: Boolean = false
+    ) {
+        command.destroyThisInstance(removeObservers, removeObserverTimeouts, callOnDestroy, callButtonTimeout, callStringSelectTimeout, callEntitySelectTimeout, callModalTimeout)
+    }
 }

@@ -62,4 +62,19 @@ class SystemCommandProperties {
      * Enable kotlin script evaluation feature. If this is enabled, you need to run your application with a JDK.
      */
     var enableKotlinScriptEvaluate: Boolean = false
+
+    @NestedConfigurationProperty
+    var releaseNotes: ReleaseNoteProperties = ReleaseNoteProperties()
+}
+
+class ReleaseNoteProperties {
+    /**
+     * Channel where the bot should post release notes by default.
+     */
+    var channel: String? = null
+
+    var newCommandEmote: String = "⌨️"
+    var newFeatureEmote: String = "\uD83E\uDDE9"
+    var bugFixEmote: String = "\uD83D\uDC1B"
+    var internalChangeEmote: String = "⚙️"
 }

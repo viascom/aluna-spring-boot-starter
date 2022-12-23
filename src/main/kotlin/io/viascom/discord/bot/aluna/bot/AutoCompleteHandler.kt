@@ -57,6 +57,7 @@ abstract class AutoCompleteHandler @JvmOverloads constructor(val commands: Array
     override var beanTimoutDelay: Duration = Duration.ofMinutes(5)
     override var beanUseAutoCompleteBean: Boolean = false
     override var beanRemoveObserverOnDestroy: Boolean = false
+    override var beanResetObserverTimeoutOnBeanExtend: Boolean = true
     override var beanCallOnDestroy: Boolean = false
 
     /**

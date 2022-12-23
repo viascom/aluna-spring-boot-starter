@@ -27,6 +27,7 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import java.time.Duration
@@ -50,6 +51,7 @@ abstract class SystemCommandDataProvider(
     override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
     override var beanUseAutoCompleteBean: Boolean = true
     override var beanRemoveObserverOnDestroy: Boolean = false
+    override var beanResetObserverTimeoutOnBeanExtend: Boolean = true
     override var beanCallOnDestroy: Boolean = false
 
     abstract fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand)
@@ -63,6 +65,11 @@ abstract class SystemCommandDataProvider(
     }
 
     open fun onStringSelectInteractionTimeout() {}
+    open fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
+        return true
+    }
+
+    open fun onEntitySelectInteractionTimeout() {}
     open fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: SystemCommand) {}
 
 
@@ -71,4 +78,5 @@ abstract class SystemCommandDataProvider(
     }
 
     open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {}
+
 }

@@ -64,9 +64,9 @@ class DiscordBotListEuBotListSender(
             .readTimeout(120, TimeUnit.SECONDS)
             .build()
 
-        val request = Request.Builder().url("https://api.discord-botlist.eu/v1/update").post(
+        val request = Request.Builder().url("https://api.discord-botlist.eu/v1/update").patch(
             "{\"serverCount\": ${shardManager.guilds.size}}".toRequestBody("application/json".toMediaType())
-        ).header("Authorization", discordBotListEuToken).build()
+        ).header("Authorization", "Bearer $discordBotListEuToken").build()
 
         httpClient.newCall(request).execute().body?.close()
     }

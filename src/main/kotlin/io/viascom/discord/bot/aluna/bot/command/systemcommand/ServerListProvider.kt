@@ -21,7 +21,6 @@
 
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
-import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.component.AlunaPaginator
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
@@ -36,9 +35,10 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.sharding.ShardManager
+import org.springframework.stereotype.Component
 import java.awt.Color
 
-@Interaction
+@Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 class ServerListProvider(

@@ -34,6 +34,7 @@ abstract class DiscordSubCommandGroup(name: String, description: String) : Subco
     override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
     override var beanUseAutoCompleteBean: Boolean = true
     override var beanRemoveObserverOnDestroy: Boolean = true
+    override var beanResetObserverTimeoutOnBeanExtend: Boolean = true
     override var beanCallOnDestroy: Boolean = true
 
     val subCommands: HashMap<String, DiscordSubCommand> = hashMapOf()

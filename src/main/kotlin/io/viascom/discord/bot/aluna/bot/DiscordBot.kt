@@ -44,7 +44,6 @@ import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
-import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
@@ -104,22 +103,12 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
+        val discordBot = this
         runBlocking(AlunaCoroutinesDispatcher.Default) {
             logger.debug("Register message $messageId for button events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
             if (!additionalData.containsKey("message.id")) {
                 additionalData["message.id"] = messageId
             }
-
-            val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-                runBlocking(AlunaCoroutinesDispatcher.Default) {
-                    try {
-                        context.getBean(interaction::class.java).onButtonInteractionTimeout(additionalData)
-                    } catch (e: Exception) {
-                        logger.debug("Could not run onButtonInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
-                    }
-                    removeMessageForButtonEvents(messageId)
-                }
-            }, duration.seconds, TimeUnit.SECONDS)
 
             messagesToObserveButton[messageId] =
                 ObserveInteraction(
@@ -131,7 +120,7 @@ open class DiscordBot(
                     additionalData,
                     authorIds,
                     interactionUserOnly,
-                    timeoutTask
+                    ObserveInteraction.scheduleButtonTimeout(interaction, duration, messageId, discordBot, logger, additionalData)
                 )
         }
     }
@@ -146,37 +135,9 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        hook.retrieveOriginal().queue { message ->
-            runBlocking(AlunaCoroutinesDispatcher.Default) {
-                logger.debug("Register message ${message.id} for button events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
-                if (!additionalData.containsKey("message.id")) {
-                    additionalData["message.id"] = message.id
-                }
-                val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-                    runBlocking(AlunaCoroutinesDispatcher.Default) {
-                        try {
-                            context.getBean(interaction::class.java).onButtonInteractionTimeout(additionalData)
-                        } catch (e: Exception) {
-                            logger.debug("Could not run onButtonInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
-                        }
-                        removeMessageForButtonEvents(message.id)
-                    }
-                }, duration.seconds, TimeUnit.SECONDS)
+        hook.retrieveOriginal()
+            .queue { registerMessageForButtonEvents(it.id, interaction, persist, duration, additionalData, authorIds, interactionUserOnly) }
 
-                messagesToObserveButton[message.id] =
-                    ObserveInteraction(
-                        interaction::class,
-                        interaction.uniqueId,
-                        LocalDateTime.now(),
-                        duration,
-                        persist,
-                        additionalData,
-                        authorIds,
-                        interactionUserOnly,
-                        timeoutTask
-                    )
-            }
-        }
     }
 
     @JvmOverloads
@@ -189,21 +150,12 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
+        val discordBot = this
         runBlocking(AlunaCoroutinesDispatcher.Default) {
             logger.debug("Register message $messageId for string select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
             if (!additionalData.containsKey("message.id")) {
                 additionalData["message.id"] = messageId
             }
-            val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-                runBlocking(AlunaCoroutinesDispatcher.Default) {
-                    try {
-                        context.getBean(interaction::class.java).onStringSelectInteractionTimeout(additionalData)
-                    } catch (e: Exception) {
-                        logger.debug("Could not run onStringSelectInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
-                    }
-                    removeMessageForStringSelectEvents(messageId)
-                }
-            }, duration.seconds, TimeUnit.SECONDS)
 
             messagesToObserveStringSelect[messageId] =
                 ObserveInteraction(
@@ -215,7 +167,7 @@ open class DiscordBot(
                     additionalData,
                     authorIds,
                     interactionUserOnly,
-                    timeoutTask
+                    ObserveInteraction.scheduleStringSelectTimeout(interaction, duration, messageId, discordBot, logger, additionalData)
                 )
         }
     }
@@ -244,21 +196,12 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
+        val discordBot = this
         runBlocking(AlunaCoroutinesDispatcher.Default) {
             logger.debug("Register message $messageId for entity select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
             if (!additionalData.containsKey("message.id")) {
                 additionalData["message.id"] = messageId
             }
-            val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-                runBlocking(AlunaCoroutinesDispatcher.Default) {
-                    try {
-                        context.getBean(interaction::class.java).onEntitySelectInteractionTimeout(additionalData)
-                    } catch (e: Exception) {
-                        logger.debug("Could not run onEntitySelectInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
-                    }
-                    removeMessageForStringSelectEvents(messageId)
-                }
-            }, duration.seconds, TimeUnit.SECONDS)
 
             messagesToObserveEntitySelect[messageId] =
                 ObserveInteraction(
@@ -270,7 +213,7 @@ open class DiscordBot(
                     additionalData,
                     authorIds,
                     interactionUserOnly,
-                    timeoutTask
+                    ObserveInteraction.scheduleEntitySelectTimeout(interaction, duration, messageId, discordBot, logger, additionalData)
                 )
         }
     }
@@ -297,22 +240,9 @@ open class DiscordBot(
         duration: Duration = Duration.ofMinutes(14),
         additionalData: HashMap<String, Any?> = hashMapOf()
     ) {
+        val discordBot = this
         runBlocking(AlunaCoroutinesDispatcher.Default) {
             logger.debug("Register user $authorId for modal events to interaction '${getInteractionName(interaction)}'")
-            val timeoutTask = messagesToObserveScheduledThreadPool.schedule({
-                runBlocking(AlunaCoroutinesDispatcher.Default) {
-                    launch(AlunaCoroutinesDispatcher.Default) {
-                        try {
-                            context.getBean(interaction::class.java).onModalInteractionTimeout(additionalData)
-                        } catch (e: Exception) {
-                            logger.debug("Could not run onModalInteractionTimeout for interaction '${getInteractionName(interaction)}'\n${e.stackTraceToString()}")
-                        }
-                    }
-                    launch(AlunaCoroutinesDispatcher.Default) {
-                        removeMessageForModalEvents(authorId)
-                    }
-                }
-            }, duration.seconds, TimeUnit.SECONDS)
 
             messagesToObserveModal[authorId] =
                 ObserveInteraction(
@@ -324,7 +254,7 @@ open class DiscordBot(
                     additionalData,
                     arrayListOf(authorId),
                     true,
-                    timeoutTask
+                    ObserveInteraction.scheduleModalTimeout(interaction, duration, authorId, discordBot, logger, additionalData)
                 )
         }
     }
@@ -457,7 +387,8 @@ open class DiscordBot(
         })
     }
 
-    private fun getInteractionName(interaction: DiscordInteractionHandler): String {
+    @JvmSynthetic
+    internal fun getInteractionName(interaction: DiscordInteractionHandler): String {
         val field = interaction::class.memberProperties.first { it.name == "name" }
         field.isAccessible = true
         return field.getter.call(interaction) as String

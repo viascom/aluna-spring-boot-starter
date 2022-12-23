@@ -22,7 +22,6 @@
 package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.SystemCommand
 import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionLocalization
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
@@ -31,8 +30,9 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnTransla
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.utils.FileUpload
+import org.springframework.stereotype.Component
 
-@Interaction
+@Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 @ConditionalOnTranslationEnabled
