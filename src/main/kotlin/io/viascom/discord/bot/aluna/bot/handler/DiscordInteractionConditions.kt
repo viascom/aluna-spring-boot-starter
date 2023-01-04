@@ -24,27 +24,10 @@ package io.viascom.discord.bot.aluna.bot.handler
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
 import io.viascom.discord.bot.aluna.model.MissingPermissions
-import io.viascom.discord.bot.aluna.model.UseScope
-import io.viascom.discord.bot.aluna.model.WrongUseScope
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 
 interface DiscordInteractionConditions {
-
-    /**
-     * Check the use scope for the command.
-     * Make sure to not block the execution for to long as the command needs to be acknowledged in 3 seconds.
-     *
-     * @param discordCommand Discord command instance
-     * @param subCommandUseScope Use scope of the sub commands
-     * @param event Generic interaction event
-     * @return WrongUseScope
-     */
-    fun checkUseScope(
-        discordCommand: DiscordCommand,
-        subCommandUseScope: HashMap<String, UseScope>,
-        event: GenericCommandInteractionEvent
-    ): WrongUseScope
 
     /**
      * Check if the user has all the needed permissions.

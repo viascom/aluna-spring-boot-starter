@@ -23,6 +23,7 @@ package io.viascom.discord.bot.aluna.bot
 
 import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventManager
+import io.viascom.discord.bot.aluna.bot.handler.CooldownScope
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.model.EventRegisterType
 import io.viascom.discord.bot.aluna.model.ObserveInteraction
@@ -39,10 +40,10 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 import java.util.function.Consumer
 import kotlin.reflect.full.memberProperties
@@ -51,37 +52,39 @@ import kotlin.reflect.jvm.isAccessible
 @Service
 @ConditionalOnJdaEnabled
 open class DiscordBot(
-    private val context: ConfigurableApplicationContext,
-    private val alunaProperties: AlunaProperties
+    alunaProperties: AlunaProperties
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     var shardManager: ShardManager? = null
 
-    val commands = hashMapOf<String, Class<DiscordCommand>>()
-    val contextMenus = hashMapOf<String, Class<DiscordContextMenu>>()
-    val commandsWithAutocomplete = arrayListOf<String>()
-    val autoCompleteHandlers = hashMapOf<Pair<String, String?>, Class<out AutoCompleteHandler>>()
+    val commands = hashMapOf<InteractionId, Class<DiscordCommand>>()
+    val contextMenus = hashMapOf<InteractionId, Class<DiscordContextMenu>>()
+    val commandsWithAutocomplete = arrayListOf<InteractionId>()
+    val autoCompleteHandlers = hashMapOf<Pair<InteractionId, OptionName?>, Class<out AutoCompleteHandler>>()
 
     @get:JvmSynthetic
-    internal val discordRepresentations = hashMapOf<String, Command>()
+    internal val discordRepresentations = hashMapOf<InteractionName, Command>()
 
     @get:JvmSynthetic
-    @set:JvmSynthetic
-    internal var messagesToObserveButton: MutableMap<String, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveInteraction>())
-
-    @get:JvmSynthetic
-    @set:JvmSynthetic
-    internal var messagesToObserveStringSelect: MutableMap<String, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveInteraction>())
+    internal val cooldowns = hashMapOf<CooldownKey, LastUsage>()
 
     @get:JvmSynthetic
     @set:JvmSynthetic
-    internal var messagesToObserveEntitySelect: MutableMap<String, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveInteraction>())
+    internal var messagesToObserveButton: MutableMap<MessageId, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<MessageId, ObserveInteraction>())
 
     @get:JvmSynthetic
     @set:JvmSynthetic
-    internal var messagesToObserveModal: MutableMap<String, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<String, ObserveInteraction>())
+    internal var messagesToObserveStringSelect: MutableMap<MessageId, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<MessageId, ObserveInteraction>())
+
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var messagesToObserveEntitySelect: MutableMap<MessageId, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<MessageId, ObserveInteraction>())
+
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var messagesToObserveModal: MutableMap<MessageId, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<MessageId, ObserveInteraction>())
 
     @get:JvmSynthetic
     internal val messagesToObserveScheduledThreadPool =
@@ -92,6 +95,53 @@ open class DiscordBot(
             "Aluna-Message-Observer-Timeout-Pool-%d",
             true
         )
+
+    fun getDiscordCommandByName(name: String): Command? {
+        return discordRepresentations.getOrElse(name) { null }
+    }
+
+    fun getDiscordCommandByClass(clazz: Class<DiscordCommand>): Command? {
+        return commands.entries.firstOrNull { it.value == clazz }?.key?.let { discordRepresentations[it] }
+    }
+
+    fun getCooldownKey(scope: CooldownScope, interactionId: InteractionId, userId: String? = null, channelId: String? = null, guildId: String? = null): CooldownKey {
+        return when (scope) {
+            CooldownScope.USER -> "$interactionId:U:$userId"
+            CooldownScope.CHANNEL -> "$interactionId:C:$channelId"
+            CooldownScope.GUILD -> "$interactionId:G:$guildId"
+            CooldownScope.USER_GUILD -> "$interactionId:U:$userId|G:$guildId"
+            CooldownScope.GLOBAL -> "$interactionId:A"
+            CooldownScope.NO_COOLDOWN -> ""
+        }
+    }
+
+    /**
+     * Check if the cooldown is active.
+     *
+     * This method will remove the expired cooldown for the given key.
+     *
+     * @param key
+     * @param cooldown
+     * @return
+     */
+    fun isCooldownActive(key: CooldownKey, cooldown: Duration): Boolean {
+        //If not known, there is no cooldown
+        if (!cooldowns.contains(key)) {
+            return false
+        }
+
+        if (cooldowns[key]?.plusNanos(cooldown.toNanos())?.isAfter(LocalDateTime.now(ZoneOffset.UTC)) == true) {
+            return true
+        }
+
+        cooldowns.remove(key)
+
+        return false
+    }
+
+    fun getCooldown(key: CooldownKey): LocalDateTime? {
+        return cooldowns[key]
+    }
 
     @JvmOverloads
     fun registerMessageForButtonEvents(
@@ -393,7 +443,15 @@ open class DiscordBot(
         field.isAccessible = true
         return field.getter.call(interaction) as String
     }
+
 }
+
+internal typealias InteractionId = String
+internal typealias InteractionName = String
+internal typealias OptionName = String
+internal typealias CooldownKey = String
+internal typealias MessageId = String
+internal typealias LastUsage = LocalDateTime
 
 fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
     hook: InteractionHook,

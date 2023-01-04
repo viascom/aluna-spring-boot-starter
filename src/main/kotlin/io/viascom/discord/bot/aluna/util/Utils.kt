@@ -40,6 +40,7 @@ import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.OptionMapping
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
 import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption
@@ -85,6 +86,14 @@ fun <T : Any> CommandDataImpl.addOption(option: CommandOption<in T>) {
 }
 
 fun <T : Any> CommandDataImpl.addOptions(vararg option: CommandOption<in T>) {
+    option.forEach { this.addOption(it) }
+}
+
+fun <T : Any> SubcommandData.addOption(option: CommandOption<in T>) {
+    this.addOptions(option as OptionData)
+}
+
+fun <T : Any> SubcommandData.addOptions(vararg option: CommandOption<in T>) {
     option.forEach { this.addOption(it) }
 }
 

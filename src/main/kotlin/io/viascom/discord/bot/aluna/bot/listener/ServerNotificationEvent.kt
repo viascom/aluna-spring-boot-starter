@@ -76,8 +76,7 @@ open class ServerNotificationEvent(
                 //Update the message as soon as possible
                 server.findMembers { it.user.isBot }
                     .onSuccess {
-                        val otherBots = server.loadMembers().get().filter { it.user.isBot }
-                        message.editMessageEmbeds(createServerMessage(true, server, true, otherBots).build()).queue()
+                        message.editMessageEmbeds(createServerMessage(true, server, true, it).build()).queue()
                     }
                     .onError {
                         message.editMessageEmbeds(createServerMessage(true, server, false).build()).queue()
@@ -171,8 +170,7 @@ open class ServerNotificationEvent(
                 //Update the message as soon as possible
                 server.findMembers { it.user.isBot && it.user.id != server.jda.selfUser.id }
                     .onSuccess {
-                        val otherBots = server.loadMembers().get().filter { it.user.isBot }
-                        message.editMessageEmbeds(createServerMessage(false, server, true, otherBots).build()).queue()
+                        message.editMessageEmbeds(createServerMessage(false, server, true, it).build()).queue()
                     }
                     .onError {
                         message.editMessageEmbeds(createServerMessage(false, server, false).build()).queue()

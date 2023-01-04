@@ -23,19 +23,25 @@ package io.viascom.discord.bot.aluna.bot
 
 import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.bot.handler.*
-import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.exception.AlunaInteractionRepresentationNotFoundException
-import io.viascom.discord.bot.aluna.model.*
+import io.viascom.discord.bot.aluna.model.AdditionalRequirements
+import io.viascom.discord.bot.aluna.model.DevelopmentStatus
+import io.viascom.discord.bot.aluna.model.MissingPermissions
+import io.viascom.discord.bot.aluna.model.UseScope
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.property.OwnerIdProvider
 import io.viascom.discord.bot.aluna.util.InternalUtil
+import io.viascom.discord.bot.aluna.util.TimestampFormat
+import io.viascom.discord.bot.aluna.util.toDiscordTimestamp
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.Permission
-import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.Member
+import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent
@@ -58,6 +64,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.util.StopWatch
 import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.isAccessible
@@ -151,6 +159,11 @@ abstract class DiscordCommand @JvmOverloads constructor(
     var isAdministratorOnlyCommand = false
 
     /**
+     * Sets whether this command should redirect auto complete events to the corresponding sub commands
+     */
+    var redirectAutoCompleteEventsToSubCommands: Boolean = true
+
+    /**
      * Interaction development status
      */
     var interactionDevelopmentStatus = DevelopmentStatus.LIVE
@@ -178,15 +191,11 @@ abstract class DiscordCommand @JvmOverloads constructor(
     private var currentSubFullCommandName: String = ""
 
     /**
-     * The [CooldownScope][Command.CooldownScope] of the command. This defines how far from a scope cooldowns have.
-     *
-     * Default [CooldownScope.USER][Command.CooldownScope.USER].
+     * The [CooldownScope][CooldownScope] of the command.
      */
-    @Experimental("Cooldowns are currently not supported")
-    var cooldownScope = CooldownScope.USER
+    var cooldownScope = CooldownScope.NO_COOLDOWN
 
-    @Experimental("Cooldowns are currently not supported")
-    var cooldown = 0
+    var cooldown: Duration = Duration.ZERO
 
     /**
      * Any [Permission]s a Member must have to use this command.
@@ -201,8 +210,6 @@ abstract class DiscordCommand @JvmOverloads constructor(
      *These are only checked in a [Guild] environment.
      */
     var botPermissions = arrayListOf<Permission>()
-
-    var subCommandUseScope = hashMapOf<String, UseScope>()
 
     /**
      * [MessageChannel] in which the command was used in.
@@ -423,7 +430,15 @@ abstract class DiscordCommand @JvmOverloads constructor(
         }
 
         discordInteractionLoadAdditionalData.loadData(this, event)
-        onAutoCompleteEvent(option, event)
+
+        if (handleSubCommands && redirectAutoCompleteEventsToSubCommands) {
+            handleSubCommand(event, {
+                it.onAutoCompleteEvent(option, event)
+                true
+            }, { onSubCommandInteractionFallback(event) })
+        } else {
+            onAutoCompleteEvent(option, event)
+        }
     }
 
     @JvmSynthetic
@@ -474,12 +489,6 @@ abstract class DiscordCommand @JvmOverloads constructor(
         event.deferReply(true).setContent("⛔ This command is to powerful for you.").queue()
     }
 
-    open fun onWrongUseScope(event: SlashCommandInteractionEvent, wrongUseScope: WrongUseScope) {
-        if (wrongUseScope.subCommandServerOnly) {
-            event.deferReply(true).setContent("⛔ This command can only be used on a server directly.").queue()
-        }
-    }
-
     open fun onMissingUserPermission(event: SlashCommandInteractionEvent, missingPermissions: MissingPermissions) {
         val textChannelPermissions = missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" }
         val voiceChannelPermissions = missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" }
@@ -515,6 +524,15 @@ abstract class DiscordCommand @JvmOverloads constructor(
         additionalRequirements: AdditionalRequirements
     ) {
         event.deferReply(true).setContent("⛔ Additional requirements for this command failed.").queue()
+    }
+
+    open fun onCooldownStillActive(
+        event: SlashCommandInteractionEvent,
+        lastUse: LocalDateTime
+    ) {
+        event.deferReply(true)
+            .setContent("⛔ This interaction is still on cooldown and will be usable ${lastUse.plusNanos(cooldown.toNanos()).toDiscordTimestamp(TimestampFormat.RELATIVE_TIME)}.")
+            .queue()
     }
 
     open fun onFailedAdditionalRequirements(
@@ -612,13 +630,6 @@ abstract class DiscordCommand @JvmOverloads constructor(
             return
         }
 
-        //Check use scope of this command
-        val wrongUseScope = discordInteractionConditions.checkUseScope(this, subCommandUseScope, event)
-        if (wrongUseScope.wrongUseScope) {
-            onWrongUseScope(event, wrongUseScope)
-            return
-        }
-
         //Check needed user permissions for this command
         val missingUserPermissions =
             discordInteractionConditions.checkForNeededUserPermissions(this, userPermissions, event)
@@ -646,6 +657,17 @@ abstract class DiscordCommand @JvmOverloads constructor(
             onFailedAdditionalRequirements(event, additionalRequirements)
             return
         }
+
+        //Check for cooldown
+        val cooldownKey = discordBot.getCooldownKey(cooldownScope, discordRepresentation.id, author.id, channel.id, guild?.id)
+        if (cooldownScope != CooldownScope.NO_COOLDOWN) {
+            if (discordBot.isCooldownActive(cooldownKey, cooldown)) {
+                onCooldownStillActive(event, discordBot.cooldowns[cooldownKey]!!)
+                return
+            }
+        }
+        discordBot.cooldowns[cooldownKey] = LocalDateTime.now(ZoneOffset.UTC)
+
 
         //Load additional data for this command
         discordInteractionLoadAdditionalData.loadData(this, event)
@@ -701,21 +723,31 @@ abstract class DiscordCommand @JvmOverloads constructor(
     }
 
     open fun registerSubCommands(vararg elements: DiscordSubCommandElement) {
-        elements.forEach { element ->
-            subCommandElements.putIfAbsent(element.getName(), element)
-
-            if (element::class.isSubclassOf(DiscordSubCommand::class)) {
-                element as DiscordSubCommand
-                element.initCommandOptions()
-                this.addSubcommands(element)
+        elements
+            .filter { element ->
+                when {
+                    alunaProperties.includeInDevelopmentInteractions -> true
+                    alunaProperties.productionMode && (element::class.isSubclassOf(DiscordSubCommand::class)) && (element as DiscordSubCommand).interactionDevelopmentStatus == DevelopmentStatus.IN_DEVELOPMENT -> false
+                    alunaProperties.productionMode && (element::class.isSubclassOf(DiscordSubCommandGroup::class)) && (element as DiscordSubCommandGroup).interactionDevelopmentStatus == DevelopmentStatus.IN_DEVELOPMENT -> false
+                    else -> true
+                }
             }
+            .forEach { element ->
+                subCommandElements.putIfAbsent(element.getName(), element)
 
-            if (element::class.isSubclassOf(DiscordSubCommandGroup::class)) {
-                element as DiscordSubCommandGroup
-                element.initSubCommands()
-                this.addSubcommandGroups(element)
+                if (element::class.isSubclassOf(DiscordSubCommand::class)) {
+                    element as DiscordSubCommand
+                    element.parentCommand = this
+                    element.initCommandOptions()
+                    this.addSubcommands(element)
+                }
+
+                if (element::class.isSubclassOf(DiscordSubCommandGroup::class)) {
+                    element as DiscordSubCommandGroup
+                    element.initSubCommands()
+                    this.addSubcommandGroups(element)
+                }
             }
-        }
     }
 
     open fun handleSubCommandExecution(
@@ -725,6 +757,8 @@ abstract class DiscordCommand @JvmOverloads constructor(
         loadDynamicSubCommandElements()
 
         val path = event.fullCommandName.split(" ")
+        discordRepresentation = discordBot.discordRepresentations[path[0]]!!
+
         val firstLevel = path[1]
         if (!subCommandElements.containsKey(firstLevel)) {
             logger.debug("Command path '${event.fullCommandName}' not found in the registered elements")
@@ -736,8 +770,8 @@ abstract class DiscordCommand @JvmOverloads constructor(
 
         //Check if it is a SubCommand
         if (firstElement::class.isSubclassOf(DiscordSubCommand::class)) {
-            (firstElement as DiscordSubCommand).initialize(this)
-            firstElement.execute(event, null, this)
+            (firstElement as DiscordSubCommand).initialize(event.fullCommandName, this, discordRepresentation)
+            firstElement.run(event)
             return
         }
 
@@ -749,8 +783,8 @@ abstract class DiscordCommand @JvmOverloads constructor(
             return
         }
 
-        firstElement.subCommands[secondLevel]!!.initialize(this)
-        firstElement.subCommands[secondLevel]!!.execute(event, null, this)
+        firstElement.subCommands[secondLevel]!!.initialize(event.fullCommandName, this, discordRepresentation)
+        firstElement.subCommands[secondLevel]!!.run(event)
     }
 
     open fun handleSubCommand(
@@ -761,6 +795,8 @@ abstract class DiscordCommand @JvmOverloads constructor(
         loadDynamicSubCommandElements()
 
         val path = currentSubFullCommandName.split(" ")
+        discordRepresentation = discordBot.discordRepresentations[path[0]]!!
+
         val firstLevel = path[1]
         if (!subCommandElements.containsKey(firstLevel)) {
             logger.debug("Command path '${currentSubFullCommandName}' not found in the registered elements")
@@ -771,7 +807,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
 
         //Check if it is a SubCommand
         if (firstElement::class.isSubclassOf(DiscordSubCommand::class)) {
-            (firstElement as DiscordSubCommand).initialize(this)
+            (firstElement as DiscordSubCommand).initialize(currentSubFullCommandName, this, discordRepresentation)
             return function.invoke(firstElement)
         }
 
@@ -782,7 +818,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
             return fallback.invoke(event)
         }
 
-        (firstElement as DiscordSubCommand).initialize(this)
+        (firstElement as DiscordSubCommand).initialize(currentSubFullCommandName, this, discordRepresentation)
         return function.invoke(firstElement.subCommands[secondLevel]!!)
     }
 

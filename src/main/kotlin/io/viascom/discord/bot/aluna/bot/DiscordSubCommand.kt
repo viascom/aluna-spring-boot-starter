@@ -21,35 +21,99 @@
 
 package io.viascom.discord.bot.aluna.bot
 
+import io.viascom.discord.bot.aluna.bot.handler.CooldownScope
+import io.viascom.discord.bot.aluna.model.DevelopmentStatus
+import io.viascom.discord.bot.aluna.model.UseScope
+import io.viascom.discord.bot.aluna.util.TimestampFormat
+import io.viascom.discord.bot.aluna.util.toDiscordTimestamp
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
-import net.dv8tion.jda.api.interactions.InteractionHook
+import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 abstract class DiscordSubCommand(name: String, description: String) : SubcommandData(name, description), InteractionScopedObject, DiscordSubCommandElement {
 
+    @Autowired
+    lateinit var discordBot: DiscordBot
+
+    /**
+     * This gets set by the CommandContext automatically and should not be changed
+     */
     override lateinit var uniqueId: String
+
     override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
     override var beanUseAutoCompleteBean: Boolean = true
     override var beanRemoveObserverOnDestroy: Boolean = true
     override var beanResetObserverTimeoutOnBeanExtend: Boolean = true
     override var beanCallOnDestroy: Boolean = true
 
+    /**
+     * The [CooldownScope][CooldownScope] of the command.
+     */
+    var cooldownScope = CooldownScope.NO_COOLDOWN
+
+    var cooldown: Duration = Duration.ZERO
+
+    var useScope = UseScope.GLOBAL
+
     @set:JvmSynthetic
-    lateinit var command: DiscordCommand
-        private set
+    lateinit var parentCommand: DiscordCommand
+        internal set
+
+    /**
+     * Discord representation of this interaction
+     */
+    @set:JvmSynthetic
+    lateinit var discordRepresentation: Command.Subcommand
+        internal set
+
+    /**
+     * Interaction development status
+     */
+    var interactionDevelopmentStatus = DevelopmentStatus.LIVE
 
     @JvmSynthetic
-    internal fun initialize(parentCommand: DiscordCommand) {
-        command = parentCommand
+    internal fun initialize(currentSubFullCommandName: String, parentCommand: DiscordCommand, parentDiscordRepresentation: Command) {
+        this.parentCommand = parentCommand
+
+        val elements = currentSubFullCommandName.split(" ")
+        discordRepresentation = when (elements.size) {
+            2 -> parentDiscordRepresentation.subcommands.firstOrNull { it.name == elements[1] }
+            3 -> parentDiscordRepresentation.subcommandGroups.firstOrNull { it.name == elements[1] }?.subcommands?.firstOrNull { it.name == elements[2] }
+            else -> null
+        } ?: throw IllegalArgumentException("Could not find Discord Representation of this command based on: $currentSubFullCommandName")
     }
 
-    abstract fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: DiscordCommand)
+    abstract fun execute(event: SlashCommandInteractionEvent)
+
+    @JvmSynthetic
+    internal fun run(event: SlashCommandInteractionEvent) {
+        //Check use scope of this command
+        if (!event.isFromGuild && useScope == UseScope.GUILD_ONLY) {
+            onWrongUseScope(event)
+            return
+        }
+
+        //Check for cooldown
+        val cooldownKey = discordBot.getCooldownKey(cooldownScope, discordRepresentation.id, parentCommand.author.id, parentCommand.channel.id, parentCommand.guild?.id)
+        if (cooldownScope != CooldownScope.NO_COOLDOWN) {
+            if (discordBot.isCooldownActive(cooldownKey, cooldown)) {
+                onCooldownStillActive(event, discordBot.cooldowns[cooldownKey]!!)
+                return
+            }
+        }
+        discordBot.cooldowns[cooldownKey] = LocalDateTime.now(ZoneOffset.UTC)
+
+        execute(event)
+    }
 
     open fun initCommandOptions() {}
 
@@ -62,10 +126,23 @@ abstract class DiscordSubCommand(name: String, description: String) : Subcommand
     open fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean = true
     open fun onEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) {}
 
-    open fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: DiscordCommand) {}
+    open fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {}
 
     open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean = true
     open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {}
+
+    open fun onCooldownStillActive(
+        event: SlashCommandInteractionEvent,
+        lastUse: LocalDateTime
+    ) {
+        event.deferReply(true)
+            .setContent("⛔ This interaction is still on cooldown and will be usable ${lastUse.plusNanos(cooldown.toNanos()).toDiscordTimestamp(TimestampFormat.RELATIVE_TIME)}.")
+            .queue()
+    }
+
+    open fun onWrongUseScope(event: SlashCommandInteractionEvent) {
+        event.deferReply(true).setContent("⛔ This command can only be used on a server directly.").queue()
+    }
 
     /**
      * Destroy this bean instance. This will remove the bean from the interaction scope as well as remove the bean timout.
@@ -87,6 +164,14 @@ abstract class DiscordSubCommand(name: String, description: String) : Subcommand
         callEntitySelectTimeout: Boolean = false,
         callModalTimeout: Boolean = false
     ) {
-        command.destroyThisInstance(removeObservers, removeObserverTimeouts, callOnDestroy, callButtonTimeout, callStringSelectTimeout, callEntitySelectTimeout, callModalTimeout)
+        parentCommand.destroyThisInstance(
+            removeObservers,
+            removeObserverTimeouts,
+            callOnDestroy,
+            callButtonTimeout,
+            callStringSelectTimeout,
+            callEntitySelectTimeout,
+            callModalTimeout
+        )
     }
 }

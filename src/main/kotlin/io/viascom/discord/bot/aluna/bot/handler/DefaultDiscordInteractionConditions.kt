@@ -24,26 +24,10 @@ package io.viascom.discord.bot.aluna.bot.handler
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
 import io.viascom.discord.bot.aluna.model.MissingPermissions
-import io.viascom.discord.bot.aluna.model.UseScope
-import io.viascom.discord.bot.aluna.model.WrongUseScope
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 
 class DefaultDiscordInteractionConditions : DiscordInteractionConditions {
-
-    override fun checkUseScope(
-        discordCommand: DiscordCommand,
-        subCommandUseScope: HashMap<String, UseScope>,
-        event: GenericCommandInteractionEvent
-    ): WrongUseScope {
-        val wrongUseScope = WrongUseScope()
-
-        if (subCommandUseScope.getOrDefault(event.fullCommandName, UseScope.GLOBAL) != UseScope.GLOBAL && event.guild == null) {
-            wrongUseScope.subCommandServerOnly = true
-        }
-
-        return wrongUseScope
-    }
 
     override fun checkForNeededUserPermissions(
         discordCommand: DiscordCommand,

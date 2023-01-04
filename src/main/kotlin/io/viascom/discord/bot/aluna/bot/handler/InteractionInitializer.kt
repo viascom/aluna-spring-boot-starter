@@ -119,6 +119,7 @@ internal open class InteractionInitializer(
             commandsToRemove.forEach {
                 logger.debug("Removed unneeded interaction '${it.name}'")
                 shardManager.shards.first().deleteCommandById(it.id).queue()
+                discordBot.discordRepresentations.remove(it.name)
             }
 
             val commandsToUpdate = currentCommands.filter { it.name !in commandsToRemove.map { it.name } }.filter { command ->
@@ -135,7 +136,9 @@ internal open class InteractionInitializer(
                 logger.debug("Update interaction '${discordCommand.name}'")
                 val editCommand = shardManager.shards.first().editCommandById(discordCommand.id)
                 editCommand.clearOptions()
-                editCommand.apply(commandDataList.first { it.name == discordCommand.name && it.type == discordCommand.type }).queue()
+                editCommand.apply(commandDataList.first { it.name == discordCommand.name && it.type == discordCommand.type }).queue {
+                    discordBot.discordRepresentations[it.name] = it
+                }
             }
 
             val commandsToAdd = commandDataList
@@ -214,6 +217,7 @@ internal open class InteractionInitializer(
                     val serverCommand = serverCommands.first { it.name == systemCommandName }
                     logger.debug("Removed unneeded specific command '/${serverCommand.name}'")
                     server.deleteCommandById(serverCommand.id).queue()
+                    discordBot.discordRepresentations.remove(serverCommand.name)
                 }
             } else {
 
@@ -225,6 +229,7 @@ internal open class InteractionInitializer(
                             printCommand(command)
                             discordBot.commands[command.uniqueId] = command.javaClass
                             discordBot.commandsWithAutocomplete.add(command.uniqueId)
+                            discordBot.discordRepresentations[it.name] = it
                         }
                     }
                 } else {
@@ -244,6 +249,7 @@ internal open class InteractionInitializer(
                             printCommand(command, true)
                             discordBot.commands[discordCommand.id] = command.javaClass
                             discordBot.commandsWithAutocomplete.add(discordCommand.id)
+                            discordBot.discordRepresentations[discordCommand.name] = discordCommand
                         }
                     }
                 }

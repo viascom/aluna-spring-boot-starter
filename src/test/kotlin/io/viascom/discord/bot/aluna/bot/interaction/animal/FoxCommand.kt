@@ -22,12 +22,10 @@
 package io.viascom.discord.bot.aluna.bot.interaction.animal
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.DiscordSubCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import net.dv8tion.jda.api.interactions.InteractionHook
 import okhttp3.*
 import java.awt.Color
 import java.io.IOException
@@ -37,7 +35,7 @@ class FoxCommand(
     private val objectMapper: ObjectMapper
 ) : DiscordSubCommand("fox", "Show image of a fox") {
 
-    override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: DiscordCommand) {
+    override fun execute(event: SlashCommandInteractionEvent) {
 
         //Acknowledge event and defer the reply
         event.deferReply().queue { interactionHook ->

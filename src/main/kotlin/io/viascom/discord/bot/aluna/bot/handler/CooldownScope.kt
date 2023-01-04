@@ -25,5 +25,5 @@ import io.viascom.discord.bot.aluna.configuration.Experimental
 
 @Experimental("Cooldowns are currently not supported")
 enum class CooldownScope {
-    USER, CHANNEL, GUILD, USER_GUILD, GLOBAL
+    NO_COOLDOWN, USER, CHANNEL, GUILD, USER_GUILD, GLOBAL
 }

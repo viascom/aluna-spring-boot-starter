@@ -158,6 +158,15 @@ fun splitListInFields(values: List<String>, name: String = "", inline: Boolean =
     return fields
 }
 
+/**
+ * Replace mentions to be displayed with id instead of the resolved version of discord.
+ *
+ * @param input String with mentions to replace
+ * @return String with replaced mentions
+ */
+fun demention(input: String): String {
+    return input.replace("<@", "<@\u200B")
+}
 
 /**
  * Remove all components

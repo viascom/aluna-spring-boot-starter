@@ -21,6 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot
 
+import io.viascom.discord.bot.aluna.model.DevelopmentStatus
 import io.viascom.discord.bot.aluna.util.InternalUtil
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData
 import java.time.Duration
@@ -30,7 +31,11 @@ abstract class DiscordSubCommandGroup(name: String, description: String) : Subco
     InteractionScopedObject,
     DiscordSubCommandElement {
 
+    /**
+     * This gets set by the CommandContext automatically and should not be changed
+     */
     override lateinit var uniqueId: String
+
     override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
     override var beanUseAutoCompleteBean: Boolean = true
     override var beanRemoveObserverOnDestroy: Boolean = true
@@ -38,6 +43,11 @@ abstract class DiscordSubCommandGroup(name: String, description: String) : Subco
     override var beanCallOnDestroy: Boolean = true
 
     val subCommands: HashMap<String, DiscordSubCommand> = hashMapOf()
+
+    /**
+     * Interaction development status
+     */
+    var interactionDevelopmentStatus = DevelopmentStatus.LIVE
 
     @JvmSynthetic
     internal fun initSubCommands() {
