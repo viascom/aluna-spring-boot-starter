@@ -27,7 +27,7 @@ ext {
     jacksonSpringBootVersion = "3.0.1"
     jacksonVersion = "2.14.1"
     emojiJavaVersion = "5.1.1"
-    gsonVersion = "2.10"
+    gsonVersion = "2.10.1"
 }
 
 group "io.viascom.discord.bot"
