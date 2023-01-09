@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.botlist
 
-interface BotListSender {
+interface BotStatsSender {
 
     fun onProductionModeOnly(): Boolean
 

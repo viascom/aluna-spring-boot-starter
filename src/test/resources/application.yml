@@ -1,6 +1,8 @@
 spring:
   application:
     name: Aluna-Test
+server:
+  port: ${PORT:8000}
 
 aluna:
   production-mode: false
@@ -31,6 +33,14 @@ aluna:
     use-stopwatch: true
     show-hash-code: true
     show-translation-keys: none
+  bot-stats:
+    topgg:
+      enabled: true
+  notification:
+    server-join:
+      enabled: true
+      server: 562533026135932949
+      channel: 923978164529688626
 
 logging:
   level:

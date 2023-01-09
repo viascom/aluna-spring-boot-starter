@@ -34,8 +34,8 @@ import org.springframework.stereotype.Service
 
 @Service
 @ConditionalOnJdaEnabled
-open class BotListHandler(
-    private val senders: List<BotListSender>,
+open class BotStatsHandler(
+    private val senders: List<BotStatsSender>,
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties,
 ) {
@@ -48,9 +48,7 @@ open class BotListHandler(
         val invalidSenders = enabledSenders.filter { !it.isValid() }
 
         invalidSenders.forEach { sender ->
-            logger.warn(
-                "BotListSender ${sender.getName()} is not valid and will therefore not be used:\n" + sender.getValidationErrors()
-                    .joinToString("\n") { "- $it" })
+            logger.warn("BotStatsSender ${sender.getName()} is not valid and will therefore not be used:\n" + sender.getValidationErrors().joinToString("\n") { "- $it" })
         }
 
         if (alunaProperties.productionMode && validSenders.isNotEmpty()) {
@@ -59,18 +57,12 @@ open class BotListHandler(
 
         if (!alunaProperties.productionMode && validSenders.any { it.onProductionModeOnly() }) {
             logger.info(
-                "Your bot stats will be sent every 10 min to [${
-                    validSenders.filter { it.onProductionModeOnly() }.joinToString(", ") { it.getName() }
-                }] in production mode only."
+                "Your bot stats will be sent every 10 min to [${validSenders.filter { it.onProductionModeOnly() }.joinToString(", ") { it.getName() }}] in production mode only."
             )
         }
 
         if (!alunaProperties.productionMode && validSenders.any { !it.onProductionModeOnly() }) {
-            logger.info(
-                "Your bot stats are sent every 10 min to [${
-                    validSenders.filter { !it.onProductionModeOnly() }.joinToString(", ") { it.getName() }
-                }]"
-            )
+            logger.info("Your bot stats are sent every 10 min to [${validSenders.filter { !it.onProductionModeOnly() }.joinToString(", ") { it.getName() }}]")
         }
     }
 

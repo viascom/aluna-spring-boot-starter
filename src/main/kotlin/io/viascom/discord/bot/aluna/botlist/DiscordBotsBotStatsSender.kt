@@ -21,7 +21,6 @@
 
 package io.viascom.discord.bot.aluna.botlist
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -36,28 +35,28 @@ import java.util.concurrent.TimeUnit
 
 @Component
 @ConditionalOnJdaEnabled
-class TopGGBotListSender(
+class DiscordBotsBotStatsSender(
     private val alunaProperties: AlunaProperties,
-    private val shardManager: ShardManager,
-    private val objectMapper: ObjectMapper
-) : BotListSender {
+    private val shardManager: ShardManager
+) : BotStatsSender {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onProductionModeOnly(): Boolean = true
 
-    override fun isEnabled(): Boolean = alunaProperties.botList.topgg?.enabled == true
+    override fun isEnabled(): Boolean = alunaProperties.botStats.discordBots?.enabled == true
 
-    override fun getName(): String = "top.gg"
-    override fun isValid(): Boolean = alunaProperties.botList.topgg?.token != null
+    override fun getName(): String = "discord.bots.gg"
+
+    override fun isValid(): Boolean = alunaProperties.botStats.discordBots?.token != null
 
     override fun getValidationErrors(): List<String> =
-        arrayListOf("Stats are not sent to top.gg because token (aluna.botList.topgg.token) is not set")
+        arrayListOf("Stats are not sent to discord.bots.gg because token (aluna.botStats.discordBots.token) is not set")
 
     override fun sendStats(totalServer: Int, totalShards: Int) {
-        val topGGToken = alunaProperties.botList.topgg?.token ?: ""
+        val discordBotsToken = alunaProperties.botStats.discordBots?.token ?: ""
 
-        logger.debug("Send stats to top.gg")
+        logger.debug("Send stats to discord.bots.gg")
 
         val httpClient = OkHttpClient.Builder()
             .connectTimeout(20, TimeUnit.SECONDS)
@@ -65,16 +64,10 @@ class TopGGBotListSender(
             .readTimeout(120, TimeUnit.SECONDS)
             .build()
 
-        val request =
-            Request.Builder().url("https://top.gg/api/bots/${alunaProperties.discord.applicationId}/stats").post(
-                objectMapper.writeValueAsBytes(TopGGData(shardManager.shards.map { it.guilds.size }))
-                    .toRequestBody("application/json".toMediaType())
-            ).header("Authorization", topGGToken).build()
+        val request = Request.Builder().url("https://discord.bots.gg/api/v1/bots/${alunaProperties.discord.applicationId}/stats").post(
+            "{\"guildCount\": ${shardManager.guilds.size},\"shardCount\":${shardManager.shardsTotal}}".toRequestBody("application/json".toMediaType())
+        ).header("Authorization", discordBotsToken).build()
 
         httpClient.newCall(request).execute().body?.close()
     }
-
-    class TopGGData(
-        val shards: List<Int>
-    )
 }

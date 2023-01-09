@@ -35,26 +35,26 @@ import java.util.concurrent.TimeUnit
 
 @Component
 @ConditionalOnJdaEnabled
-class DiscordBotListBotListSender(
+class DiscordBotListBotStatsSender(
     private val alunaProperties: AlunaProperties,
     private val shardManager: ShardManager
-) : BotListSender {
+) : BotStatsSender {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onProductionModeOnly(): Boolean = true
 
-    override fun isEnabled(): Boolean = alunaProperties.botList.discordBotList?.enabled == true
+    override fun isEnabled(): Boolean = alunaProperties.botStats.discordBotList?.enabled == true
 
     override fun getName(): String = "discordbotlist.com"
 
-    override fun isValid(): Boolean = alunaProperties.botList.discordBotList?.token != null
+    override fun isValid(): Boolean = alunaProperties.botStats.discordBotList?.token != null
 
     override fun getValidationErrors(): List<String> =
-        arrayListOf("Stats are not sent to discordbotlist.com because token (aluna.botList.discordBotList.token) is not set")
+        arrayListOf("Stats are not sent to discordbotlist.com because token (aluna.botStats.discordBotList.token) is not set")
 
     override fun sendStats(totalServer: Int, totalShards: Int) {
-        val discordBotListToken = alunaProperties.botList.discordBotList?.token ?: ""
+        val discordBotListToken = alunaProperties.botStats.discordBotList?.token ?: ""
 
         logger.debug("Send stats to discordbotlist.com")
 

@@ -44,10 +44,10 @@ class AlunaProperties {
     var notification: AlunaNotificationProperties = AlunaNotificationProperties()
 
     /**
-     * BotLists settings
+     * BotStats settings
      */
     @NestedConfigurationProperty
-    var botList: AlunaBotListProperties = AlunaBotListProperties()
+    var botStats: AlunaBotStatsProperties = AlunaBotStatsProperties()
 
     /**
      * BotLists settings

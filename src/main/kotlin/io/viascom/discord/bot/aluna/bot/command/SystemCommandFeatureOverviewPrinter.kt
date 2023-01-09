@@ -43,8 +43,7 @@ class SystemCommandFeatureOverviewPrinter : ApplicationListener<ApplicationStart
         if (systemCommand) {
             val allFunctions = event.applicationContext.getBeansOfType(SystemCommandDataProvider::class.java)
             val enabledFunctionsDefinition =
-                event.applicationContext.environment.getProperty("aluna.command.system-command.enabled-functions", ArrayList::class.java)
-                    ?: arrayListOf<String>()
+                event.applicationContext.environment.getProperty("aluna.command.system-command.enabled-functions", ArrayList::class.java) ?: arrayListOf<String>()
 
             val enabledFunctions = allFunctions.values.filter { it.id in enabledFunctionsDefinition || enabledFunctionsDefinition.isEmpty() }
 
@@ -52,16 +51,13 @@ class SystemCommandFeatureOverviewPrinter : ApplicationListener<ApplicationStart
                 logger.debug("Enabled /system-command functions: [" + allFunctions.values.joinToString(", ") { it.id } + "]")
             } else {
                 logger.debug("Enabled /system-command functions: [" + enabledFunctions.joinToString(", ") { it.id } + "]")
-                logger.debug("Disabled /system-command functions: [" + allFunctions.values.filter { it.id !in enabledFunctionsDefinition }
-                    .joinToString(", ") { it.id } + "]")
+                logger.debug("Disabled /system-command functions: [" + allFunctions.values.filter { it.id !in enabledFunctionsDefinition }.joinToString(", ") { it.id } + "]")
             }
 
             val allowedModFunctionsDefinition =
-                event.applicationContext.environment.getProperty("aluna.command.system-command.allowed-for-moderators-functions", ArrayList::class.java)
-                    ?: arrayListOf<String>()
+                event.applicationContext.environment.getProperty("aluna.command.system-command.allowed-for-moderators-functions", ArrayList::class.java) ?: arrayListOf<String>()
 
-            val allowedModFunctions =
-                allFunctions.filter { it.value.id in allowedModFunctionsDefinition || allowedModFunctionsDefinition.isEmpty() }.filter { it.value.allowMods }
+            val allowedModFunctions = allFunctions.filter { it.value.id in allowedModFunctionsDefinition || allowedModFunctionsDefinition.isEmpty() }.filter { it.value.allowMods }
 
             logger.debug("Allowed for moderators /system-command functions: [" + allowedModFunctions.values.joinToString(", ") { it.id } + "]")
         }

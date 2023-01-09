@@ -73,8 +73,7 @@ class SystemCommand(
 
         selectedProvider = dataProviders.filter {
             it.id in (alunaProperties.command.systemCommand.enabledFunctions ?: arrayListOf()) || alunaProperties.command.systemCommand.enabledFunctions == null
-        }
-            .firstOrNull { it.id == event.getTypedOption(commandOption, "") }
+        }.firstOrNull { it.id == event.getTypedOption(commandOption, "") }
 
         if (selectedProvider == null) {
             event.reply("Command not found!").setEphemeral(true).queue()
@@ -82,9 +81,8 @@ class SystemCommand(
         }
 
         //Check if it is an owner or (mod and mod is allowed)
-        if (event.user.idLong !in ownerIdProvider.getOwnerIds() && !(isModAllowed(selectedProvider!!) && event.user.idLong in moderatorIdProvider.getModeratorIdsForCommandPath(
-                "system-command/${selectedProvider!!.id}"
-            ))
+        if (event.user.idLong !in ownerIdProvider.getOwnerIds() && !(isModAllowed(selectedProvider!!) &&
+                    event.user.idLong in moderatorIdProvider.getModeratorIdsForCommandPath("system-command/${selectedProvider!!.id}"))
         ) {
             event.deferReply(true).setContent("${systemCommandEmojiProvider.crossEmoji().formatted} This command is to powerful for you.").queue()
             return
@@ -158,8 +156,7 @@ class SystemCommand(
                     event.user.idLong in ownerIdProvider.getOwnerIds() || (isModAllowed(it) && event.user.idLong in moderatorIdProvider.getModeratorIdsForCommandPath(
                         "system-command/${it.id}"
                     ))
-                }
-                    .filter { it.name.lowercase().contains(input.lowercase()) || it.id.lowercase().contains(input.lowercase()) }
+                }.filter { it.name.lowercase().contains(input.lowercase()) || it.id.lowercase().contains(input.lowercase()) }
             }.take(25).sortedBy { it.name }.map {
                 Command.Choice(it.name, it.id)
             }

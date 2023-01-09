@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.property
 
-class AlunaBotListProperties {
+class AlunaBotStatsProperties {
 
     /**
      * bots.ondiscord.xyz

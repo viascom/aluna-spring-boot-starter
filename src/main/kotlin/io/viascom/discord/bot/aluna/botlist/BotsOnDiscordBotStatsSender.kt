@@ -35,28 +35,28 @@ import java.util.concurrent.TimeUnit
 
 @Component
 @ConditionalOnJdaEnabled
-class DiscordBotsBotListSender(
+class BotsOnDiscordBotStatsSender(
     private val alunaProperties: AlunaProperties,
     private val shardManager: ShardManager
-) : BotListSender {
+) : BotStatsSender {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onProductionModeOnly(): Boolean = true
 
-    override fun isEnabled(): Boolean = alunaProperties.botList.discordBots?.enabled == true
+    override fun isEnabled(): Boolean = alunaProperties.botStats.botsOnDiscord?.enabled == true
 
-    override fun getName(): String = "discord.bots.gg"
+    override fun getName(): String = "bots.ondiscord.xyz"
 
-    override fun isValid(): Boolean = alunaProperties.botList.discordBots?.token != null
+    override fun isValid(): Boolean = alunaProperties.botStats.botsOnDiscord?.token != null
 
     override fun getValidationErrors(): List<String> =
-        arrayListOf("Stats are not sent to discord.bots.gg because token (aluna.botList.discordBots.token) is not set")
+        arrayListOf("Stats are not sent to bots.ondiscord.xyz because token (aluna.botStats.botsOnDiscord.token) is not set")
 
     override fun sendStats(totalServer: Int, totalShards: Int) {
-        val discordBotsToken = alunaProperties.botList.discordBots?.token ?: ""
+        val botsOnDiscordToken = alunaProperties.botStats.botsOnDiscord?.token ?: ""
 
-        logger.debug("Send stats to discord.bots.gg")
+        logger.debug("Send stats to bots.ondiscord.xyz")
 
         val httpClient = OkHttpClient.Builder()
             .connectTimeout(20, TimeUnit.SECONDS)
@@ -64,9 +64,10 @@ class DiscordBotsBotListSender(
             .readTimeout(120, TimeUnit.SECONDS)
             .build()
 
-        val request = Request.Builder().url("https://discord.bots.gg/api/v1/bots/${alunaProperties.discord.applicationId}/stats").post(
-            "{\"guildCount\": ${shardManager.guilds.size},\"shardCount\":${shardManager.shardsTotal}}".toRequestBody("application/json".toMediaType())
-        ).header("Authorization", discordBotsToken).build()
+        val request = Request.Builder()
+            .url("https://bots.ondiscord.xyz/bot-api/bots/${alunaProperties.discord.applicationId}/guilds").post(
+                "{\"guildCount\": ${shardManager.guilds.size}}".toRequestBody("application/json".toMediaType())
+            ).header("Authorization", botsOnDiscordToken).build()
 
         httpClient.newCall(request).execute().body?.close()
     }

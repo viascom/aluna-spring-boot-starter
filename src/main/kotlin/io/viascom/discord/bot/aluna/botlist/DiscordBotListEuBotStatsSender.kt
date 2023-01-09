@@ -35,28 +35,28 @@ import java.util.concurrent.TimeUnit
 
 @Component
 @ConditionalOnJdaEnabled
-class BotsOnDiscordBotListSender(
+class DiscordBotListEuBotStatsSender(
     private val alunaProperties: AlunaProperties,
     private val shardManager: ShardManager
-) : BotListSender {
+) : BotStatsSender {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onProductionModeOnly(): Boolean = true
 
-    override fun isEnabled(): Boolean = alunaProperties.botList.botsOnDiscord?.enabled == true
+    override fun isEnabled(): Boolean = alunaProperties.botStats.discordBotListEu?.enabled == true
 
-    override fun getName(): String = "bots.ondiscord.xyz"
+    override fun getName(): String = "discord-botlist.eu"
 
-    override fun isValid(): Boolean = alunaProperties.botList.botsOnDiscord?.token != null
+    override fun isValid(): Boolean = alunaProperties.botStats.discordBotListEu?.token != null
 
     override fun getValidationErrors(): List<String> =
-        arrayListOf("Stats are not sent to bots.ondiscord.xyz because token (aluna.botList.botsOnDiscord.token) is not set")
+        arrayListOf("Stats are not sent to discord-botlist.eu because token (aluna.botStats.discordBotListEu.token) is not set")
 
     override fun sendStats(totalServer: Int, totalShards: Int) {
-        val botsOnDiscordToken = alunaProperties.botList.botsOnDiscord?.token ?: ""
+        val discordBotListEuToken = alunaProperties.botStats.discordBotListEu?.token ?: ""
 
-        logger.debug("Send stats to bots.ondiscord.xyz")
+        logger.debug("Send stats to discord-botlist.eu")
 
         val httpClient = OkHttpClient.Builder()
             .connectTimeout(20, TimeUnit.SECONDS)
@@ -64,10 +64,9 @@ class BotsOnDiscordBotListSender(
             .readTimeout(120, TimeUnit.SECONDS)
             .build()
 
-        val request = Request.Builder()
-            .url("https://bots.ondiscord.xyz/bot-api/bots/${alunaProperties.discord.applicationId}/guilds").post(
-                "{\"guildCount\": ${shardManager.guilds.size}}".toRequestBody("application/json".toMediaType())
-            ).header("Authorization", botsOnDiscordToken).build()
+        val request = Request.Builder().url("https://api.discord-botlist.eu/v1/update").patch(
+            "{\"serverCount\": ${shardManager.guilds.size}}".toRequestBody("application/json".toMediaType())
+        ).header("Authorization", "Bearer $discordBotListEuToken").build()
 
         httpClient.newCall(request).execute().body?.close()
     }

@@ -21,11 +21,11 @@
 
 package io.viascom.discord.bot.aluna.configuration
 
-import io.viascom.discord.bot.aluna.botlist.BotListSender
+import io.viascom.discord.bot.aluna.botlist.BotStatsSender
 import org.springframework.stereotype.Component
 
 @Component
-class DebugStatsSender : BotListSender {
+class DebugStatsSender : BotStatsSender {
 
     override fun onProductionModeOnly(): Boolean = false
 
