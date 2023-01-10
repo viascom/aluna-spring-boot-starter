@@ -27,10 +27,7 @@ import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.Webhook
-import io.viascom.discord.bot.aluna.util.getGuildTextChannel
-import io.viascom.discord.bot.aluna.util.getPrivateChannelByUser
-import io.viascom.discord.bot.aluna.util.getValueAsString
-import io.viascom.discord.bot.aluna.util.textInput
+import io.viascom.discord.bot.aluna.util.*
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
@@ -60,10 +57,11 @@ class SendMessageProvider(
         //Show modal
         val serverId: TextInput = textInput("serverId", "Server ID (0 = current or if DM)", TextInputStyle.SHORT)
         val channelId: TextInput = textInput("channelId", "Channel ID (0 = current, @<id> = for DM)", TextInputStyle.SHORT)
+        val messageReferenceId: TextInput = textInput("messageReferenceId", "Message Reference ID (Only works on server)", TextInputStyle.SHORT)
         val message: TextInput = textInput("message", "Message", TextInputStyle.PARAGRAPH)
 
         val modal: Modal = Modal.create("send_message", "Send Message")
-            .addActionRows(ActionRow.of(serverId), ActionRow.of(channelId), ActionRow.of(message))
+            .addActionRows(ActionRow.of(serverId), ActionRow.of(channelId), ActionRow.of(messageReferenceId), ActionRow.of(message))
             .build()
 
         event.replyModal(modal).queueAndRegisterInteraction(command)
@@ -72,6 +70,7 @@ class SendMessageProvider(
     override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         var serverId = event.getValueAsString("serverId", "0")!!
         var channelId = event.getValueAsString("channelId", "0")!!
+        var messageReferenceId = event.getValueAsString("messageReferenceId", "")!!
         var isDM = false
         val message = event.getValueAsString("message")!!
         val messageObj = if (message.startsWith("{")) {
@@ -126,7 +125,20 @@ class SendMessageProvider(
                     return true
                 }
 
-                channel.sendMessage(messageObj).queue()
+                val newMessage = channel.sendMessage(messageObj)
+
+                if (messageReferenceId != "") {
+                    val refMessage = shardManager.getGuildMessage(serverId, channelId, messageReferenceId)
+                    if (refMessage == null) {
+                        event.deferReply(true).queue {
+                            it.editOriginal("Could not find message reference ${messageReferenceId} in channel $channelId on $serverId!").queue()
+                        }
+                        return true
+                    }
+                    newMessage.setMessageReference(messageReferenceId)
+                }
+                newMessage.queue()
+
                 event.deferReply(true).queue {
                     it.editOriginal("Message Sent!").queue()
                 }
