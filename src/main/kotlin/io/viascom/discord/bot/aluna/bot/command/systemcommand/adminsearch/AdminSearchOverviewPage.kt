@@ -43,6 +43,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji
+import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.springframework.stereotype.Component
@@ -58,7 +59,8 @@ class AdminSearchOverviewPage(
         AdminSearchDataProvider.AdminSearchType.SERVER,
         AdminSearchDataProvider.AdminSearchType.ROLE,
         AdminSearchDataProvider.AdminSearchType.CHANNEL,
-        AdminSearchDataProvider.AdminSearchType.EMOTE
+        AdminSearchDataProvider.AdminSearchType.EMOTE,
+        AdminSearchDataProvider.AdminSearchType.INTERACTION_COMMAND
     )
 ) {
 
@@ -336,5 +338,49 @@ class AdminSearchOverviewPage(
         embedBuilder.addField(
             "Is Managed", (if (discordEmote.isManaged) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted, true
         )
+    }
+
+    override fun onInteractionCommandRequest(discordCommand: Command, embedBuilder: EmbedBuilder) {
+        embedBuilder.addField("ID", discordCommand.id, true)
+        embedBuilder.addField("Name", discordCommand.name, true)
+
+        val type = when (discordCommand.type) {
+            Command.Type.UNKNOWN -> "Unknown"
+            Command.Type.SLASH -> "Slash-Command"
+            Command.Type.USER -> "Context-Menu User"
+            Command.Type.MESSAGE -> "Context-Menu Message"
+        }
+        embedBuilder.addField("Type", type, true)
+
+        if (discordCommand.type == Command.Type.SLASH) {
+            embedBuilder.addField("Description", discordCommand.description, false)
+
+            if (discordCommand.subcommands.isEmpty() || discordCommand.subcommandGroups.isEmpty()) {
+                embedBuilder.addField("Mention", discordCommand.asMention, true)
+            }
+        }
+
+        embedBuilder.addField("Time Created", discordCommand.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
+        embedBuilder.addField("Time Modified", discordCommand.timeModified.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
+        embedBuilder.addField(
+            "Is Guild Only",
+            (if (discordCommand.isGuildOnly) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
+            true
+        )
+        embedBuilder.addField("Is NSFW", (if (discordCommand.isNSFW) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted, true)
+
+        if (discordCommand.type == Command.Type.SLASH) {
+            var subCommands = ""
+            discordCommand.subcommands.forEach {
+                subCommands += "- ${it.name} (${it.asMention})\n"
+            }
+            discordCommand.subcommandGroups.forEach {
+                subCommands += "\uD83D\uDCC1 ${it.name}\n"
+                it.subcommands.forEach {
+                    subCommands += "\u2063 └ ${it.name} (${it.asMention})\n"
+                }
+            }
+            embedBuilder.addField("Sub-Commands", subCommands, false)
+        }
     }
 }

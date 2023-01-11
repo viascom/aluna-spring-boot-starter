@@ -98,7 +98,7 @@ class LeaveServerProvider(
             } else {
                 lastEmbed.setDescription("${systemCommandEmojiProvider.crossEmoji().formatted} Canceled")
             }
-            lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents().queue()
+            lastHook.editOriginalEmbeds(lastEmbed.build()).removeComponents().queue()
         }
         return true
     }

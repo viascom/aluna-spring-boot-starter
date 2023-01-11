@@ -28,6 +28,7 @@ import net.dv8tion.jda.api.entities.Role
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.Channel
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji
+import net.dv8tion.jda.api.interactions.commands.Command
 
 abstract class AdminSearchPageDataProvider(
     val pageId: String,
@@ -40,4 +41,5 @@ abstract class AdminSearchPageDataProvider(
     open fun onRoleRequest(discordRole: Role, embedBuilder: EmbedBuilder) {}
     open fun onChannelRequest(discordChannel: Channel, embedBuilder: EmbedBuilder) {}
     open fun onEmoteRequest(discordEmote: RichCustomEmoji, embedBuilder: EmbedBuilder) {}
+    open fun onInteractionCommandRequest(discordCommand: Command, embedBuilder: EmbedBuilder) {}
 }

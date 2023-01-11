@@ -42,7 +42,7 @@ abstract class SystemCommandDataProvider(
      */
     var supportArgsAutoComplete: Boolean = false,
     /**
-     * Should Aluna keep the event open or not. If not, Aluna will acknowledge the event before calling execute() and hook is in this case null.
+     * Should Aluna keep the event open or not. If not, Aluna will acknowledge the event before calling execute() and hook is in this case provided.
      */
     var autoAcknowledgeEvent: Boolean = true
 ) : InteractionScopedObject {

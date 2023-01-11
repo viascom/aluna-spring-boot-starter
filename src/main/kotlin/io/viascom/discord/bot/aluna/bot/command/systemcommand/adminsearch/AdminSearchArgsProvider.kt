@@ -25,6 +25,6 @@ import net.dv8tion.jda.api.interactions.commands.Command
 
 abstract class AdminSearchArgsProvider {
 
-    abstract fun onArgsRequest(args: String): ArrayList<Command.Choice>
+    abstract fun onArgsRequest(args: String): HashMap<Command.Choice, Double>
 
 }
