@@ -130,6 +130,13 @@ fun Member.timeoutFor(duration: Duration, reason: String? = null): AuditableRest
     return if (reason != null) action.reason(reason) else action
 }
 
+fun User.tryToSendDM(message: String, then: Runnable) {
+    try {
+        this.openPrivateChannel().queue({ pc -> pc.sendMessage(message).queue({ then.run() }) { then.run() } }) { then.run() }
+    } catch (ignore: Exception) {
+    }
+}
+
 @JvmOverloads
 @Suppress("UNCHECKED_CAST")
 fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<in T>, default: T? = null): T? {

@@ -56,7 +56,7 @@ class DebugInfoPrinter(
                 "-> token:           ${alunaProperties.discord.token}\n"
             } else ""
             val invite = if (alunaProperties.discord.applicationId != null) {
-                "https://discordapp.com/oauth2/authorize?client_id=${alunaProperties.discord.applicationId}&scope=bot%20applications.commands&permissions=$permission"
+                "https://discord.com/oauth2/authorize?client_id=${alunaProperties.discord.applicationId}&scope=bot%20applications.commands&permissions=$permission"
             } else {
                 "<Please add an applicationId to see this invite link!>"
             }
@@ -78,6 +78,7 @@ class DebugInfoPrinter(
                 -> ownerIds:        ${ownerIdProvider.getOwnerIds().joinToString { it.toString() }.ifBlank { "<not defined>" }}
                 -> modIds:          ${moderatorIdProvider.getModeratorIds().joinToString { it.toString() }.ifBlank { "<not defined>" }}
                 -> applicationId:   ${alunaProperties.discord.applicationId ?: "<not defined>"}
+                -> supportServer:   ${alunaProperties.discord.supportServer ?: "<not defined>"}
                 -> invite:          $invite
                 """.trimIndent() + "\n" +
                         token +

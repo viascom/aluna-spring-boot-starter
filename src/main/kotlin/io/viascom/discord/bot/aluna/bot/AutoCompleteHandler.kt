@@ -59,6 +59,7 @@ abstract class AutoCompleteHandler @JvmOverloads constructor(val commands: Array
     override var beanRemoveObserverOnDestroy: Boolean = false
     override var beanResetObserverTimeoutOnBeanExtend: Boolean = true
     override var beanCallOnDestroy: Boolean = false
+    override var freshInstance: Boolean = true
 
     /**
      * This method gets triggered, as soon as an auto complete event for the option is called.

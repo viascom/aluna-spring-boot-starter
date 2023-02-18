@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,32 +19,17 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.property
+package io.viascom.discord.bot.aluna.event
 
-class AlunaThreadProperties {
+import net.dv8tion.jda.api.events.session.ReadyEvent
+import net.dv8tion.jda.api.sharding.ShardManager
+import org.springframework.context.ApplicationEvent
 
-    /**
-     * Max amount of scheduler threads for timeout handling on interaction observers.
-     */
-    var messagesToObserveScheduledThreadPool: Int = 2
-
-    /**
-     * Max amount of scheduler threads for timeout handling on discord scoped objects.
-     */
-    var scopedObjectsTimeoutScheduler: Int = 2
-
-    /**
-     * Max amount of scheduler threads for event waiter timeout handling.
-     */
-    var eventWaiterTimeoutScheduler: Int = 2
-
-    /**
-     * Max amount of threads for jda callback handling.
-     */
-    var jdaCallbackThreadPool: Int = 10
-
-    /**
-     * Max amount of threads for event publish handling.
-     */
-    var eventThreadPool: Int = 10
-}
+/**
+ * Discord all shards ready event. This gets triggered as soon as all shards are connected. If subset is used, this is only triggered on the last node.
+ *
+ * @property jdaEvent
+ * @property shardManager
+ *
+ */
+class DiscordAllShardsReadyEvent(source: Any, val jdaEvent: ReadyEvent, val shardManager: ShardManager) : ApplicationEvent(source)

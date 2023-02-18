@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,32 +19,15 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.property
+package io.viascom.discord.bot.aluna.configuration.condition
 
-class AlunaThreadProperties {
+import io.viascom.discord.bot.aluna.property.AlunaDiscordProperties
+import org.springframework.context.annotation.Condition
+import org.springframework.context.annotation.ConditionContext
+import org.springframework.core.type.AnnotatedTypeMetadata
 
-    /**
-     * Max amount of scheduler threads for timeout handling on interaction observers.
-     */
-    var messagesToObserveScheduledThreadPool: Int = 2
-
-    /**
-     * Max amount of scheduler threads for timeout handling on discord scoped objects.
-     */
-    var scopedObjectsTimeoutScheduler: Int = 2
-
-    /**
-     * Max amount of scheduler threads for event waiter timeout handling.
-     */
-    var eventWaiterTimeoutScheduler: Int = 2
-
-    /**
-     * Max amount of threads for jda callback handling.
-     */
-    var jdaCallbackThreadPool: Int = 10
-
-    /**
-     * Max amount of threads for event publish handling.
-     */
-    var eventThreadPool: Int = 10
+class AlunaShutdownHookCondition : Condition {
+    override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata) =
+        (context.environment.getProperty("aluna.discord.shutdown-hook", AlunaDiscordProperties.ShutdownHook::class.java)
+            ?: AlunaDiscordProperties.ShutdownHook.JDA) == AlunaDiscordProperties.ShutdownHook.ALUNA
 }

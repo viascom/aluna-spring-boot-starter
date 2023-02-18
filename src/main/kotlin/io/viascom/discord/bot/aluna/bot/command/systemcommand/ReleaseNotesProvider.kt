@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -152,15 +152,9 @@ class ReleaseNotesProvider(
     }
 
     private fun replaceText(input: String): String {
-        return input
-            .replace("\\{now:(SHORT_TIME|LONG_TIME|SHORT_DATE|LONG_DATE|SHORT_DATE_TIME|LONG_DATE_TIME|RELATIVE_TIME)}".toRegex()) { match ->
-                TimestampFormat.values().firstOrNull { it.name == match.groupValues[1] }?.let { LocalDateTime.now().toDiscordTimestamp(it) } ?: match.groupValues[0]
-            }
-            .replace("/([\\w-]+)".toRegex()) { match ->
-                val commandName = match.groupValues[1]
-                val command = discordBot.discordRepresentations.entries.firstOrNull { it.key == commandName }?.value
-                command?.asMention ?: match.groupValues[0]
-            }
+        return input.replace("\\{now:(SHORT_TIME|LONG_TIME|SHORT_DATE|LONG_DATE|SHORT_DATE_TIME|LONG_DATE_TIME|RELATIVE_TIME)}".toRegex()) { match ->
+            TimestampFormat.values().firstOrNull { it.name == match.groupValues[1] }?.let { LocalDateTime.now().toDiscordTimestamp(it) } ?: match.groupValues[0]
+        }
     }
 
     private fun createSelectChannelMessage() {

@@ -44,10 +44,14 @@ class AlunaDiscordProperties {
     var applicationId: String? = null
 
     /**
-     * This will set the total amount of shards the DefaultShardManager should use.
-     * <p> If this is set to -1 JDA will automatically retrieve the recommended amount of shards from discord (default behavior).
+     * Defines the support server which will be used for certain information..
      */
-    var totalShards: Int = -1
+    var supportServer: String? = null
+
+    /**
+     * Sharding configuration
+     */
+    var sharding: Sharding = Sharding()
 
     /**
      * Intents which enable specific events from the discord gateway.
@@ -92,10 +96,15 @@ class AlunaDiscordProperties {
     var memberCachePolicy: MemberCachePolicyType = MemberCachePolicyType.ONLINE
 
     /**
+     * Flags used to disable cache services for JDA.
+     */
+    var cacheFlagsDisabled: ArrayList<CacheFlag> = arrayListOf()
+
+    /**
      * Flags used to enable cache services for JDA.
      * <br>Check the flag descriptions to see which intents are required to use them.
      */
-    var cacheFlags: ArrayList<CacheFlag> = arrayListOf()
+    var cacheFlagsEnabled: ArrayList<CacheFlag> = arrayListOf()
 
     /**
      * Filter function for member chunking of guilds.
@@ -159,6 +168,39 @@ class AlunaDiscordProperties {
      */
     var setStatusToOnlineWhenReady: Boolean = true
 
+    var shutdownHook: ShutdownHook = ShutdownHook.JDA
+
+    class Sharding {
+        var type: Type = Type.SINGLE
+
+        /**
+         * This will set the total amount of shards the DefaultShardManager should use.
+         * <p> If this is set to -1 JDA will automatically retrieve the recommended amount of shards from discord (default behavior).
+         */
+        var totalShards: Int = -1
+
+        var fromShard: Int = 0
+        var shardAmount: Int = 1
+
+        var grouping: Grouping = Grouping()
+
+        enum class Type {
+            SINGLE, SUBSET
+        }
+
+        class Grouping {
+            var enabled: Boolean = false
+
+            /**
+             * Only change this if really have to.
+             * This will lead to IDENTIFY errors if you are not allowed to use a higher concurrency.
+             * Which in the longer run will eat up your allowed session start limit.
+             * Concurrency higher than 1 is only granted to bigger bots with at least 150'000 servers.
+             */
+            var concurrency: Int = 1
+        }
+    }
+
     enum class MemberCachePolicyType {
         NONE,
         ALL,
@@ -171,18 +213,28 @@ class AlunaDiscordProperties {
     }
 
     enum class CacheFlag {
+        ALL,
         ACTIVITY,
         VOICE_STATE,
         EMOJI,
         CLIENT_STATUS,
         MEMBER_OVERRIDES,
         ROLE_TAGS,
-        ONLINE_STATUS
+        ONLINE_STATUS,
+        FORUM_TAGS,
+        SCHEDULED_EVENTS,
+        STICKER
     }
 
     class CacheFlags : ArrayList<CacheFlag>()
 
     enum class ChunkingFilter {
         ALL, NONE
+    }
+
+    enum class ShutdownHook {
+        JDA,
+        ALUNA,
+        NONE
     }
 }

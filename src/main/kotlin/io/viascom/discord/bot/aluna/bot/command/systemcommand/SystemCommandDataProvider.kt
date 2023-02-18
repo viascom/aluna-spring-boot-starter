@@ -53,6 +53,7 @@ abstract class SystemCommandDataProvider(
     override var beanRemoveObserverOnDestroy: Boolean = false
     override var beanResetObserverTimeoutOnBeanExtend: Boolean = true
     override var beanCallOnDestroy: Boolean = false
+    override var freshInstance: Boolean = true
 
     abstract fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand)
     open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {

@@ -18,12 +18,12 @@ aluna:
     memberCachePolicy: ALL
     publish-events: true
     publish-discord-command-event: true
+    support-server: <insert-support-server>
   thread:
     scoped-objects-timeout-scheduler: 5
   command:
     system-command:
       enabled: true
-      support-server: <insert-support-server>
       enable-kotlin-script-evaluate: true
   translation:
     enabled: true
@@ -45,7 +45,7 @@ aluna:
 logging:
   level:
     io.viascom.discord.bot.aluna: DEBUG
-    io.viascom.discord.bot.aluna.bot.event: DEBUG
+    io.viascom.discord.bot.aluna.bot.event: INFO
     io.viascom.discord.bot.aluna.event.EventPublisher: INFO
     io.viascom.discord.bot.aluna.configuration.scope.InteractionScope: INFO
     io.viascom.discord.bot.aluna.botlist: INFO

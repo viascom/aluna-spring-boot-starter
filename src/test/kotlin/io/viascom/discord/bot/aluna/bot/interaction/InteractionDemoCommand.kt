@@ -80,7 +80,7 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
             .queueAndRegisterInteraction(
                 this,
                 arrayListOf(EventRegisterType.BUTTON, EventRegisterType.STRING_SELECT, EventRegisterType.MODAL),
-                persist = true
+                multiUse = true
             ) {
                 latestHook = it
             }

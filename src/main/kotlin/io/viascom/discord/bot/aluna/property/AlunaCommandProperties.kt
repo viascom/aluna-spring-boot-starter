@@ -43,11 +43,6 @@ class SystemCommandProperties {
     var server: String? = null
 
     /**
-     * Defines the support server which will be used for certain information..
-     */
-    var supportServer: String? = null
-
-    /**
      * Define which system command features should be enabled. If not defined, all implementations of SystemCommandDataProvider are available.
      * Functions: admin_search, extract_message, evaluate_kotlin, leave_server, purge_messages, send_message
      */

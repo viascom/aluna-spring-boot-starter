@@ -54,4 +54,10 @@ interface InteractionScopedObject {
      * Should onDestroy be called if the bean gets destroyed.
      */
     var beanCallOnDestroy: Boolean
+
+    /**
+     * If true, this instance got freshly created by Spring
+     */
+    var freshInstance: Boolean
+
 }

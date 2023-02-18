@@ -84,7 +84,7 @@ class AdminSearchOverviewPage(
         ).addField("Flags", discordUser.flags.joinToString(", ") { it.getName() }, true)
             .addField("Time Created", discordUser.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true).addField(
                 "On Support Server",
-                (if (mutualServers.any { it.id == alunaProperties.command.systemCommand.supportServer }) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
+                (if (mutualServers.any { it.id == alunaProperties.discord.supportServer }) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
                 true
             ).addField("Avatar-URL", "[Link](${discordUser.effectiveAvatarUrl})", true)
 
@@ -108,7 +108,7 @@ class AdminSearchOverviewPage(
         embedBuilder.addField("ID", discordServer.id, true)
         embedBuilder.addField("Name", discordServer.name, true)
         embedBuilder.addField("Owner",
-            "${discordServer.owner?.asMention} | ${discordServer.owner?.effectiveName} (`${discordServer.ownerId}`)\n" + "Owner on Support Server: " + (if (discordServer.owner?.user?.mutualGuilds?.any { it.id == alunaProperties.command.systemCommand.supportServer } == true) systemCommandEmojiProvider.tickEmoji().formatted + " Yes" else systemCommandEmojiProvider.crossEmoji().formatted + " No"),
+            "${discordServer.owner?.asMention} | ${discordServer.owner?.effectiveName} (`${discordServer.ownerId}`)\n" + "Owner on Support Server: " + (if (discordServer.owner?.user?.mutualGuilds?.any { it.id == alunaProperties.discord.supportServer } == true) systemCommandEmojiProvider.tickEmoji().formatted + " Yes" else systemCommandEmojiProvider.crossEmoji().formatted + " No"),
             false)
         embedBuilder.addField("Locale", discordServer.locale.languageName, true)
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {

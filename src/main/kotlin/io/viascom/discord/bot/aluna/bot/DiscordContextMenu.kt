@@ -122,6 +122,7 @@ abstract class DiscordContextMenu(
     override var beanRemoveObserverOnDestroy: Boolean = true
     override var beanResetObserverTimeoutOnBeanExtend: Boolean = true
     override var beanCallOnDestroy: Boolean = true
+    override var freshInstance: Boolean = true
 
     /**
      * Discord representation of this interaction
@@ -347,6 +348,11 @@ abstract class DiscordContextMenu(
                 discordInteractionMetaDataHandler.onExitInteraction(command, stopWatch, event)
             }
         }
+    }
+
+    fun updateMessageIdForScope(messageId: String) {
+        val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
+        interactionScope.setMessageIdForInstance(uniqueId, messageId)
     }
 
     /**

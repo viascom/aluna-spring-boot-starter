@@ -21,6 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
+import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.SendServerNotificationCondition
 import io.viascom.discord.bot.aluna.property.AlunaProperties
@@ -31,9 +32,9 @@ import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.MessageEmbed
+import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent
-import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
@@ -49,11 +50,18 @@ open class ServerNotificationEvent(
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties,
     private val additionalInformation: List<AdditionalServerJoinLeaveInformation>
-) : ListenerAdapter() {
+) : CoroutineEventListener {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onGuildJoin(event: GuildJoinEvent) {
+    override suspend fun onEvent(event: GenericEvent) {
+        when (event) {
+            is GuildJoinEvent -> onGuildJoin(event)
+            is GuildLeaveEvent -> onGuildLeave(event)
+        }
+    }
+
+    private fun onGuildJoin(event: GuildJoinEvent) {
         if (!alunaProperties.notification.serverJoin.enabled) {
             return
         }
@@ -80,6 +88,40 @@ open class ServerNotificationEvent(
                     }
                     .onError {
                         message.editMessageEmbeds(createServerMessage(true, server, false).build()).queue()
+                    }
+            }
+
+        }
+    }
+
+    private fun onGuildLeave(event: GuildLeaveEvent) {
+        if (!alunaProperties.notification.serverLeave.enabled) {
+            return
+        }
+
+        val server = event.guild
+        val embedMessage = createServerMessage(true, server)
+
+        val channel = shardManager.getGuildTextChannel(
+            alunaProperties.notification.serverLeave.server.toString(),
+            alunaProperties.notification.serverLeave.channel.toString()
+        )
+
+        if (channel == null) {
+            logger.warn("Aluna was not able to send a GuildLeaveEvent to the defined channel.")
+            return
+        }
+
+        channel.sendMessageEmbeds(embedMessage.build()).queue { message ->
+            if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
+                //Update the message as soon as possible
+                server.findMembers { it.user.isBot && it.user.id != server.jda.selfUser.id }
+                    .onSuccess {
+                        message.editMessageEmbeds(createServerMessage(false, server, true, it).build()).queue()
+                    }
+                    .onError {
+                        message.editMessageEmbeds(createServerMessage(false, server, false).build()).queue()
+                        logger.warn("Aluna was not able to load other bots: ${it.message}")
                     }
             }
 
@@ -137,7 +179,13 @@ open class ServerNotificationEvent(
         }
 
         try {
-            additionalInformation.flatMap { it.getAdditionalServerJoinInformation(server) }.forEach {
+            additionalInformation.flatMap {
+                if (serverJoin) {
+                    it.getAdditionalServerJoinInformation(server)
+                } else {
+                    it.getAdditionalServerLeaveInformation(server)
+                }
+            }.forEach {
                 embedMessage.addField(it)
             }
         } catch (e: Exception) {
@@ -145,38 +193,5 @@ open class ServerNotificationEvent(
         }
 
         return embedMessage
-    }
-
-    override fun onGuildLeave(event: GuildLeaveEvent) {
-        if (!alunaProperties.notification.serverLeave.enabled) {
-            return
-        }
-
-        val server = event.guild
-        val embedMessage = createServerMessage(true, server)
-
-        val channel = shardManager.getGuildTextChannel(
-            alunaProperties.notification.serverLeave.server.toString(),
-            alunaProperties.notification.serverLeave.channel.toString()
-        )
-
-        if (channel == null) {
-            logger.warn("Aluna was not able to send a GuildLeaveEvent to the defined channel.")
-            return
-        }
-
-        channel.sendMessageEmbeds(embedMessage.build()).queue { message ->
-            if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
-                //Update the message as soon as possible
-                server.findMembers { it.user.isBot && it.user.id != server.jda.selfUser.id }
-                    .onSuccess {
-                        message.editMessageEmbeds(createServerMessage(false, server, true, it).build()).queue()
-                    }
-                    .onError {
-                        message.editMessageEmbeds(createServerMessage(false, server, false).build()).queue()
-                    }
-            }
-
-        }
     }
 }

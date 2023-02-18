@@ -21,6 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
+import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -32,24 +33,25 @@ import org.springframework.stereotype.Service
 
 @Service
 @ConditionalOnJdaEnabled
-class ListenerRegistration(private val listeners: List<ListenerAdapter>, private val shardManager: ShardManager) :
+class ListenerRegistration(private val coroutineListeners: List<CoroutineEventListener>, private val listeners: List<ListenerAdapter>, private val shardManager: ShardManager) :
     ApplicationListener<ApplicationStartedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onApplicationEvent(event: ApplicationStartedEvent) {
-        val listenersToRegister = listeners.filterNot {
+        val combinedListener = arrayListOf<Any>()
+        combinedListener.addAll(listeners)
+        combinedListener.addAll(coroutineListeners)
+
+        val listenersToRegister = combinedListener.filterNot {
             //Filter out static registered listeners
-            it::class.java.canonicalName.startsWith("io.viascom.discord.bot.aluna.bot.listener") &&
-                    it::class.java.canonicalName != ServerNotificationEvent::class.java.canonicalName
+            it::class.java.canonicalName.startsWith("io.viascom.discord.bot.aluna.bot.listener") && it::class.java.canonicalName != ServerNotificationEvent::class.java.canonicalName
         }
-        val internalListeners = listeners.filter {
-            it::class.java.canonicalName.startsWith("io.viascom.discord.bot.aluna.bot.listener") &&
-                    it::class.java.canonicalName != ServerNotificationEvent::class.java.canonicalName
+        val internalListeners = combinedListener.filter {
+            it::class.java.canonicalName.startsWith("io.viascom.discord.bot.aluna.bot.listener") && it::class.java.canonicalName != ServerNotificationEvent::class.java.canonicalName
         }
-        logger.debug(
-            "Register internal listeners: [${GenericEventPublisher::class.java.canonicalName}, ${EventWaiter::class.java.canonicalName}, " +
-                    internalListeners.joinToString(", ") { it::class.java.canonicalName } + "]")
+
+        logger.debug("Register internal listeners: [" + internalListeners.joinToString(", ") { it::class.java.canonicalName } + "]")
         if (listenersToRegister.isNotEmpty()) {
             logger.debug("Register listeners:\n" + listenersToRegister.joinToString("\n") { "- ${it::class.java.canonicalName}" })
             shardManager.addEventListener(*listenersToRegister.toTypedArray())

@@ -73,6 +73,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
             logger.debug("[$name] - ${DiscordContext.discordState} -> new instance (because id is null)")
             val newObj = objectFactory.getObject() as InteractionScopedObject
             newObj.uniqueId = ""
+            newObj.freshInstance = true
             return newObj
         }
 
@@ -101,6 +102,29 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
             )
             resetTimeoutDestroy(name, DiscordContext.discordState!!.uniqueId!!, timeout)
             resetObserverTimeouts(name, DiscordContext.discordState!!.uniqueId!!, data.obj)
+            (data.obj as InteractionScopedObject).freshInstance = false
+
+            if (DiscordContext.discordState?.messageId != null) {
+                data.messageId = DiscordContext.discordState!!.messageId
+            }
+
+            return data.obj
+        }
+
+        //If messageId is present we return the corresponding bean and reset the timeout
+        if (DiscordContext.discordState?.messageId != null && scopedObjects[name]!![DiscordContext.discordState!!.id]!!.any { it.value.messageId == DiscordContext.discordState?.messageId }) {
+            logger.debug("[$name] - ${DiscordContext.discordState} -> found messageId and return")
+            val data = scopedObjects[name]!![DiscordContext.discordState!!.id]!!.values.first { it.messageId == DiscordContext.discordState?.messageId }
+            val timeout = createTimeoutDestroy(
+                name,
+                data.obj,
+                DiscordContext.discordState!!.uniqueId!!,
+                loadTimeoutDelay(data.obj, Duration.ofMinutes(14)),
+                loadBeanCallOnDestroy(data.obj, true)
+            )
+            resetTimeoutDestroy(name, DiscordContext.discordState!!.uniqueId!!, timeout)
+            resetObserverTimeouts(name, DiscordContext.discordState!!.uniqueId!!, data.obj)
+            (data.obj as InteractionScopedObject).freshInstance = false
             return data.obj
         }
 
@@ -125,12 +149,14 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
                 )
                 resetTimeoutDestroy(name, data.key, timeout)
                 resetObserverTimeouts(name, DiscordContext.discordState!!.uniqueId!!, data.value.obj)
+                (data.value.obj as InteractionScopedObject).freshInstance = false
                 return data.value.obj
             } else {
                 //No bean exists, so we create one
                 DiscordContext.discordState!!.uniqueId = DiscordContext.discordState!!.uniqueId ?: NanoId.generate()
                 val newObj = objectFactory.getObject() as InteractionScopedObject
                 newObj.uniqueId = DiscordContext.discordState!!.uniqueId!!
+                newObj.freshInstance = true
                 logger.debug("[$name] - ${DiscordContext.discordState} -> new instance (for auto-complete)")
                 scopedObjects[name]!![DiscordContext.discordState!!.id]!![newObj.uniqueId] =
                     ScopedObjectData(DiscordContext.discordState?.type ?: DiscordContext.Type.AUTO_COMPLETE, newObj)
@@ -160,6 +186,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
             val newScopedObjectData = ScopedObjectData(
                 DiscordContext.Type.INTERACTION,
                 scopedObjects[name]!![DiscordContext.discordState!!.id]!![autoCompleteForThisCommand.key]!!.obj,
+                scopedObjects[name]!![DiscordContext.discordState!!.id]!![autoCompleteForThisCommand.key]!!.messageId,
                 scopedObjects[name]!![DiscordContext.discordState!!.id]!![autoCompleteForThisCommand.key]!!.creationDate
             )
             scopedObjects[name]!![DiscordContext.discordState!!.id]!![autoCompleteForThisCommand.key] = newScopedObjectData
@@ -171,6 +198,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
                         val newSubScopedObjectData = ScopedObjectData(
                             DiscordContext.Type.INTERACTION,
                             scopedObjects[beanEntry.key]!![stateEntry.key]!![scopedObject.key]!!.obj,
+                            scopedObjects[beanEntry.key]!![stateEntry.key]!![scopedObject.key]!!.messageId,
                             scopedObjects[beanEntry.key]!![stateEntry.key]!![scopedObject.key]!!.creationDate
                         )
                         scopedObjects[beanEntry.key]!![stateEntry.key]!![scopedObject.key] = newSubScopedObjectData
@@ -190,6 +218,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
             )
 
             scopedObjectsTimeoutScheduledTask[autoCompleteForThisCommand.key] = timeout
+            (autoCompleteForThisCommand.value.obj as InteractionScopedObject).freshInstance = true
             return autoCompleteForThisCommand.value.obj
         } else {
             //Remove auto complete if not re-use
@@ -202,6 +231,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
             logger.debug("[$name] - ${DiscordContext.discordState} -> new instance")
             val newObj = objectFactory.getObject() as InteractionScopedObject
             newObj.uniqueId = DiscordContext.discordState!!.uniqueId!!
+            newObj.freshInstance = true
             scopedObjects[name]!![DiscordContext.discordState!!.id]!![DiscordContext.discordState!!.uniqueId!!] =
                 ScopedObjectData(DiscordContext.discordState?.type ?: DiscordContext.Type.OTHER, newObj)
 
@@ -430,6 +460,21 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
         }.forEach { scopedObjects.remove(it.key) }
     }
 
+    fun setMessageIdForInstance(uniqueId: UniqueId, messageId: String) {
+        try {
+            val obj = scopedObjects.values.firstOrNull { it.containsKey(DiscordContext.discordState!!.id) }?.get(DiscordContext.discordState!!.id)?.get(uniqueId)
+            if (obj == null) {
+                logger.debug("[$uniqueId] -> id does not exist")
+                return
+            }
+
+            logger.debug("[$uniqueId] -> set message id to $messageId")
+            obj.messageId = messageId
+        } catch (e: Exception) {
+            logger.debug("[$uniqueId] -> set message id to $messageId failed")
+        }
+    }
+
     override fun registerDestructionCallback(name: String, callback: Runnable) {
     }
 
@@ -452,8 +497,8 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
 
 object DiscordContext {
     private val CONTEXT = NamedInheritableThreadLocal<Data>("discord")
-    fun setDiscordState(userId: String, serverId: String? = null, type: Type = Type.OTHER, uniqueId: String? = null) {
-        CONTEXT.set(Data(userId + ":" + (serverId ?: ""), type, uniqueId))
+    fun setDiscordState(userId: String, serverId: String? = null, type: Type = Type.OTHER, uniqueId: String? = null, messageId: String? = null) {
+        CONTEXT.set(Data(userId + ":" + (serverId ?: ""), type, uniqueId, messageId))
     }
 
     var discordState: Data?
@@ -467,12 +512,13 @@ object DiscordContext {
     }
 
     class Data(
-        val id: String,
+        val id: DiscordStateId,
         val type: Type = Type.OTHER,
-        var uniqueId: String? = null
+        var uniqueId: String? = null,
+        var messageId: String? = null
     ) {
         override fun toString(): String {
-            return "[id='$id', uniqueId='$uniqueId', type='$type']"
+            return "[id='$id', uniqueId='$uniqueId', messageId='$messageId', type='$type']"
         }
     }
 
@@ -484,6 +530,7 @@ object DiscordContext {
 internal class ScopedObjectData(
     var type: DiscordContext.Type,
     val obj: Any,
+    var messageId: String? = null,
     var creationDate: LocalDateTime = LocalDateTime.now()
 ) {
     override fun toString(): String {

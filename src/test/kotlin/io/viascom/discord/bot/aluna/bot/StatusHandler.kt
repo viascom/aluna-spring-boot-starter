@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,17 +21,15 @@
 
 package io.viascom.discord.bot.aluna.bot
 
-import io.viascom.discord.bot.aluna.event.DiscordReadyEvent
+import io.viascom.discord.bot.aluna.event.DiscordNodeReadyEvent
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
 
 @Component
-class StatusHandler(
-    private val shardManager: ShardManager,
-) : ApplicationListener<DiscordReadyEvent> {
-    override fun onApplicationEvent(event: DiscordReadyEvent) {
+class StatusHandler(private val shardManager: ShardManager) : ApplicationListener<DiscordNodeReadyEvent> {
+    override fun onApplicationEvent(event: DiscordNodeReadyEvent) {
         shardManager.setStatus(OnlineStatus.ONLINE)
     }
 }

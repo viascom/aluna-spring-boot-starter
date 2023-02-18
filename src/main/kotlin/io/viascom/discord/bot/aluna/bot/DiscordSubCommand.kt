@@ -54,6 +54,7 @@ abstract class DiscordSubCommand(name: String, description: String) : Subcommand
     override var beanRemoveObserverOnDestroy: Boolean = true
     override var beanResetObserverTimeoutOnBeanExtend: Boolean = true
     override var beanCallOnDestroy: Boolean = true
+    override var freshInstance: Boolean = true
 
     /**
      * The [CooldownScope][CooldownScope] of the command.
@@ -142,6 +143,10 @@ abstract class DiscordSubCommand(name: String, description: String) : Subcommand
 
     open fun onWrongUseScope(event: SlashCommandInteractionEvent) {
         event.deferReply(true).setContent("⛔ This command can only be used on a server directly.").queue()
+    }
+
+    fun updateMessageIdForScope(messageId: String) {
+        parentCommand.updateMessageIdForScope(messageId)
     }
 
     /**

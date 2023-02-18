@@ -45,6 +45,7 @@ class PropertiesListener : ApplicationListener<ApplicationContextInitializedEven
     private val gatewayIntentsPath = "aluna.discord.gateway-intents"
     private val memberCachePolicyPath = "aluna.discord.member-cache-policy"
     private val chunkingFilterPath = "aluna.discord.chunking-filter"
+    private val discordShardingPath = "aluna.discord.sharding"
 
     override fun onApplicationEvent(event: ApplicationContextInitializedEvent) {
         //Check if jda is disabled
@@ -137,6 +138,38 @@ class PropertiesListener : ApplicationListener<ApplicationContextInitializedEven
             )
         }
 
+
+        //Check if
+        val shardingType = event.applicationContext.environment.getProperty("$discordShardingPath.type", AlunaDiscordProperties.Sharding.Type::class.java)
+            ?: AlunaDiscordProperties.Sharding.Type.SINGLE
+        if (shardingType == AlunaDiscordProperties.Sharding.Type.SUBSET) {
+            val totalShards = event.applicationContext.environment.getProperty("$discordShardingPath.total-shards", Int::class.java) ?: -1
+            val fromShard = event.applicationContext.environment.getProperty("$discordShardingPath.from-shard", Int::class.java) ?: 0
+            val shardAmount = event.applicationContext.environment.getProperty("$discordShardingPath.shard-amount", Int::class.java) ?: 1
+
+            when {
+                totalShards < 1 -> throw AlunaPropertiesException(
+                    "Aluna configuration is not valid",
+                    "$discordShardingPath.total-shards",
+                    totalShards.toString(),
+                    "Total has to be 1 or higher!"
+                )
+
+                fromShard < 0 -> throw AlunaPropertiesException(
+                    "Aluna configuration is not valid",
+                    "$discordShardingPath.from-shard",
+                    fromShard.toString(),
+                    "Has to be 0 or higher!"
+                )
+
+                shardAmount < 1 -> throw AlunaPropertiesException(
+                    "Aluna configuration is not valid",
+                    "$discordShardingPath.shard-amount",
+                    shardAmount.toString(),
+                    "Amount has to be 1 or higher!"
+                )
+            }
+        }
 
     }
 

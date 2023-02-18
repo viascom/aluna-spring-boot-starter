@@ -94,9 +94,14 @@ abstract class DiscordCommand @JvmOverloads constructor(
      *
      * The Top-Level command can not be used (limitation of Discord), but Aluna will nevertheless always call [execute] on the top-level command before executing the sub command method if you need to do some general stuff.
      */
-    val handleSubCommands: Boolean = false
-) : CommandDataImpl(name, description),
-    SlashCommandData, InteractionScopedObject, DiscordInteractionHandler {
+    val handleSubCommands: Boolean = false,
+
+    /**
+     * If enabled, Aluna will direct matching interactions to this command.
+     * If a matching instance of this command (based on uniqueId or message) is found, the corresponding method is called. If not, a new instance gets created.
+     */
+    val handlePersistentInteractions: Boolean = false
+) : CommandDataImpl(name, description), SlashCommandData, InteractionScopedObject, DiscordInteractionHandler {
 
     @Autowired
     lateinit var alunaProperties: AlunaProperties
@@ -173,6 +178,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
     override var beanRemoveObserverOnDestroy: Boolean = true
     override var beanResetObserverTimeoutOnBeanExtend: Boolean = true
     override var beanCallOnDestroy: Boolean = true
+    override var freshInstance: Boolean = true
 
     /**
      * Discord representation of this interaction
@@ -822,6 +828,11 @@ abstract class DiscordCommand @JvmOverloads constructor(
         return function.invoke(firstElement.subCommands[secondLevel]!!)
     }
 
+    fun updateMessageIdForScope(messageId: String) {
+        val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
+        interactionScope.setMessageIdForInstance(uniqueId, messageId)
+    }
+
     /**
      * Destroy this bean instance. This will remove the bean from the interaction scope as well as remove the bean timout.
      *
@@ -871,5 +882,38 @@ abstract class DiscordCommand @JvmOverloads constructor(
             async { if (callEntitySelectTimeout) entitySelectObserver?.let { onEntitySelectInteractionTimeout(it.value.additionalData) } }
             async { if (callModalTimeout) modalObserver?.let { onModalInteractionTimeout(it.value.additionalData) } }
         }
+    }
+
+    @JvmSynthetic
+    internal fun onButtonGlobalInteraction(event: ButtonInteractionEvent) {
+        this.onButtonInteraction(event, hashMapOf())
+    }
+
+    @JvmSynthetic
+    internal fun onStringSelectGlobalInteraction(event: StringSelectInteractionEvent) {
+        this.onStringSelectInteraction(event, hashMapOf())
+    }
+
+    @JvmSynthetic
+    internal fun onEntitySelectGlobalInteraction(event: EntitySelectInteractionEvent) {
+        this.onEntitySelectInteraction(event, hashMapOf())
+    }
+
+    @JvmSynthetic
+    internal fun onModalGlobalInteraction(event: ModalInteractionEvent) {
+        this.onModalInteraction(event, hashMapOf())
+    }
+
+    fun generateGlobalInteractionId(componentId: String): String {
+        if (componentId.length + 43 > 100) {
+            throw IllegalArgumentException("componentId can not be longer than 57 characters")
+        }
+        return "/${this.discordRepresentation.id}:${this.uniqueId}:$componentId"
+    }
+
+    fun extractGlobalInteractionId(componentId: String): String {
+        val commandId = componentId.split(":")[0]
+        val uniqueId = componentId.split(":")[1]
+        return componentId.substring(commandId.length + 1 + uniqueId.length + 1)
     }
 }

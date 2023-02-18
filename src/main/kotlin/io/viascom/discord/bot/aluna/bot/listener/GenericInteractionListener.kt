@@ -23,17 +23,18 @@ package io.viascom.discord.bot.aluna.bot.listener
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
+import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
 import io.viascom.discord.bot.aluna.util.NanoId
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
-import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.stereotype.Component
 
@@ -42,9 +43,19 @@ import org.springframework.stereotype.Component
 open class GenericInteractionListener(
     private val discordBot: DiscordBot,
     private val context: ConfigurableApplicationContext,
-) : ListenerAdapter() {
+) : CoroutineEventListener {
 
-    override fun onCommandAutoCompleteInteraction(event: CommandAutoCompleteInteractionEvent) {
+    override suspend fun onEvent(event: GenericEvent) {
+        when (event) {
+            is CommandAutoCompleteInteractionEvent -> onCommandAutoCompleteInteraction(event)
+            is ButtonInteractionEvent -> onButtonInteraction(event)
+            is StringSelectInteractionEvent -> onStringSelectInteraction(event)
+            is EntitySelectInteractionEvent -> onEntitySelectInteraction(event)
+            is ModalInteractionEvent -> onModalInteraction(event)
+        }
+    }
+
+    private fun onCommandAutoCompleteInteraction(event: CommandAutoCompleteInteractionEvent) {
         runBlocking(AlunaCoroutinesDispatcher.Default) {
             launch(AlunaCoroutinesDispatcher.Default) {
                 val commandId = discordBot.commandsWithAutocomplete.firstOrNull { it == event.commandId }
@@ -68,7 +79,7 @@ open class GenericInteractionListener(
         }
     }
 
-    override fun onButtonInteraction(event: ButtonInteractionEvent) {
+    private fun onButtonInteraction(event: ButtonInteractionEvent) {
         if (discordBot.messagesToObserveButton.containsKey(event.message.id)) {
             val entry = discordBot.messagesToObserveButton[event.message.id]!!
             DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
@@ -84,7 +95,7 @@ open class GenericInteractionListener(
     }
 
 
-    override fun onStringSelectInteraction(event: StringSelectInteractionEvent) {
+    private fun onStringSelectInteraction(event: StringSelectInteractionEvent) {
         if (discordBot.messagesToObserveStringSelect.containsKey(event.message.id)) {
             val entry = discordBot.messagesToObserveStringSelect[event.message.id]!!
             DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
@@ -99,7 +110,7 @@ open class GenericInteractionListener(
         }
     }
 
-    override fun onEntitySelectInteraction(event: EntitySelectInteractionEvent) {
+    private fun onEntitySelectInteraction(event: EntitySelectInteractionEvent) {
         if (discordBot.messagesToObserveEntitySelect.containsKey(event.message.id)) {
             val entry = discordBot.messagesToObserveEntitySelect[event.message.id]!!
             DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)
@@ -114,7 +125,7 @@ open class GenericInteractionListener(
         }
     }
 
-    override fun onModalInteraction(event: ModalInteractionEvent) {
+    private fun onModalInteraction(event: ModalInteractionEvent) {
         if (discordBot.messagesToObserveModal.containsKey(event.user.id)) {
             val entry = discordBot.messagesToObserveModal[event.user.id]!!
             DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.OTHER, entry.uniqueId)

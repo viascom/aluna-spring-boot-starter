@@ -21,17 +21,18 @@
 
 package io.viascom.discord.bot.aluna
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.DefaultSystemCommandEmojiProvider
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandEmojiProvider
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.bot.listener.*
-import io.viascom.discord.bot.aluna.bot.shardmanager.DefaultShardManagerBuilder
-import io.viascom.discord.bot.aluna.bot.shardmanager.ShardManagerBuilder
-import io.viascom.discord.bot.aluna.bot.shardmanager.ShardManagerBuilderCustomizer
+import io.viascom.discord.bot.aluna.bot.shardmanager.*
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnAlunaShutdownHook
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnTranslationEnabled
+import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.property.*
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
@@ -61,24 +62,30 @@ open class AlunaAutoConfiguration {
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean(ShardManagerBuilder::class)
     open fun defaultShardManagerBuilder(
-        shardReadyEvent: ShardReadyEvent,
         interactionEventListener: InteractionEventListener,
         genericAutoCompleteListener: GenericInteractionListener,
+        interactionComponentEventListener: InteractionComponentEventListener,
         eventWaiter: EventWaiter,
         genericEventPublisher: GenericEventPublisher,
+        eventPublisher: EventPublisher,
         alunaProperties: AlunaProperties,
-        customizers: List<ShardManagerBuilderCustomizer>
+        customizers: List<ShardManagerBuilderCustomizer>,
+        objectMapper: ObjectMapper,
+        discordBot: DiscordBot
     ): ShardManager {
         logger.debug("Enable DefaultShardManagerBuilder")
 
         discordBot.shardManager = discordBot.shardManager ?: DefaultShardManagerBuilder(
-            shardReadyEvent,
             interactionEventListener,
             genericAutoCompleteListener,
+            interactionComponentEventListener,
             eventWaiter,
             genericEventPublisher,
+            eventPublisher,
             alunaProperties,
-            customizers
+            customizers,
+            objectMapper,
+            discordBot
         ).build()
 
         return discordBot.shardManager!!
@@ -87,9 +94,9 @@ open class AlunaAutoConfiguration {
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnBean(ShardManagerBuilder::class)
-    open fun customShardManagerBuilder(shardReadyEvent: ShardManagerBuilder): ShardManager {
-        logger.debug("Enable custom ShardManagerBuilder: ${shardReadyEvent.javaClass.name}")
-        discordBot.shardManager = shardReadyEvent.build()
+    open fun customShardManagerBuilder(shardManagerBuilder: ShardManagerBuilder): ShardManager {
+        logger.debug("Enable custom ShardManagerBuilder: ${shardManagerBuilder.javaClass.name}")
+        discordBot.shardManager = shardManagerBuilder.build()
         return discordBot.shardManager!!
     }
 
@@ -107,6 +114,15 @@ open class AlunaAutoConfiguration {
     open fun defaultDiscordInteractionAdditionalConditions(): DiscordInteractionAdditionalConditions {
         logger.debug("Enable DefaultDiscordInteractionAdditionalConditions")
         return DefaultDiscordInteractionAdditionalConditions()
+    }
+
+    @Bean
+    @ConditionalOnJdaEnabled
+    @ConditionalOnMissingBean
+    @ConditionalOnAlunaShutdownHook
+    open fun defaultBotShutdownHook(shardManager: ShardManager, alunaProperties: AlunaProperties): BotShutdownHook {
+        logger.debug("Enable DefaultBotShutdownHook")
+        return DefaultBotShutdownHook(shardManager, alunaProperties)
     }
 
     @Bean

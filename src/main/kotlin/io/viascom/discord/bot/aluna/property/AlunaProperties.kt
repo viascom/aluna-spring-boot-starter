@@ -93,4 +93,6 @@ class AlunaProperties {
      * Url: /actuator/health/aluna
      */
     var enableActuatorHealthIndicator: Boolean = true
+
+    var nodeNumber: Int = 0
 }

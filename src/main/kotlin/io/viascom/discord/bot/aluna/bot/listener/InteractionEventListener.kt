@@ -24,13 +24,14 @@ package io.viascom.discord.bot.aluna.bot.listener
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.DiscordMessageContextMenu
 import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenu
+import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
 import io.viascom.discord.bot.aluna.util.NanoId
+import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
-import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.stereotype.Component
 
@@ -39,9 +40,17 @@ import org.springframework.stereotype.Component
 open class InteractionEventListener(
     private val discordBot: DiscordBot,
     private val context: ConfigurableApplicationContext
-) : ListenerAdapter() {
+) : CoroutineEventListener {
 
-    override fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
+    override suspend fun onEvent(event: GenericEvent) {
+        when (event) {
+            is SlashCommandInteractionEvent -> onSlashCommandInteraction(event)
+            is UserContextInteractionEvent -> onUserContextInteraction(event)
+            is MessageContextInteractionEvent -> onMessageContextInteraction(event)
+        }
+    }
+
+    private fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
         DiscordContext.setDiscordState(
             event.user.id,
             event.guild?.id,
@@ -53,7 +62,7 @@ open class InteractionEventListener(
         }
     }
 
-    override fun onUserContextInteraction(event: UserContextInteractionEvent) {
+    private fun onUserContextInteraction(event: UserContextInteractionEvent) {
         DiscordContext.setDiscordState(
             event.user.id,
             event.guild?.id,
@@ -65,7 +74,7 @@ open class InteractionEventListener(
         }
     }
 
-    override fun onMessageContextInteraction(event: MessageContextInteractionEvent) {
+    private fun onMessageContextInteraction(event: MessageContextInteractionEvent) {
         DiscordContext.setDiscordState(
             event.user.id,
             event.guild?.id,

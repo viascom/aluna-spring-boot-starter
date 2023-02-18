@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,27 +21,26 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
+import io.viascom.discord.bot.aluna.bot.shardmanager.BotShutdownHook
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnAlunaShutdownHook
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
-import io.viascom.discord.bot.aluna.event.EventPublisher
-import net.dv8tion.jda.api.events.session.ReadyEvent
-import net.dv8tion.jda.api.hooks.ListenerAdapter
-import org.springframework.stereotype.Component
+import net.dv8tion.jda.api.sharding.ShardManager
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.boot.context.event.ApplicationStartedEvent
+import org.springframework.context.ApplicationListener
+import org.springframework.stereotype.Service
 
-@Component
+@Service
 @ConditionalOnJdaEnabled
-class ShardReadyEvent(private val discordReadyEventPublisher: EventPublisher) : ListenerAdapter() {
+@ConditionalOnAlunaShutdownHook
+class ShutdownHookRegistration(private val botShutdownHook: BotShutdownHook, private val shardManager: ShardManager) : ApplicationListener<ApplicationStartedEvent> {
 
-    override fun onReady(event: ReadyEvent) {
-        super.onReady(event)
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-        //If first shard is connected, trigger interaction update
-        if (event.jda.shardInfo.shardId == 0) {
-            discordReadyEventPublisher.publishDiscordFirstShardReadyEvent(event, event.jda.shardManager!!)
-        }
-
-        //Publish DiscordReadyEvent as soon as all shards are connected
-        if ((event.jda.shardInfo.shardId + 1) == (event.jda.shardInfo.shardTotal)) {
-            discordReadyEventPublisher.publishDiscordReadyEvent(event, event.jda.shardManager!!)
-        }
+    override fun onApplicationEvent(event: ApplicationStartedEvent) {
+        logger.debug("Register shutdown hook: ${botShutdownHook::class.qualifiedName}")
+        Runtime.getRuntime().addShutdownHook(botShutdownHook)
     }
+
 }

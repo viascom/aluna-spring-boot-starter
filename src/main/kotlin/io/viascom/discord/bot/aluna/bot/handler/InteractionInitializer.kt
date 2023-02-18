@@ -25,12 +25,10 @@ import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
-import io.viascom.discord.bot.aluna.event.DiscordFirstShardReadyEvent
+import io.viascom.discord.bot.aluna.event.DiscordMainShardConnectedEvent
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.model.DevelopmentStatus
-import io.viascom.discord.bot.aluna.model.UseScope
 import io.viascom.discord.bot.aluna.property.AlunaProperties
-import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.Command.*
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
@@ -50,11 +48,16 @@ internal open class InteractionInitializer(
     private val discordBot: DiscordBot,
     private val eventPublisher: EventPublisher,
     private val alunaProperties: AlunaProperties
-) : ApplicationListener<DiscordFirstShardReadyEvent> {
+) : ApplicationListener<DiscordMainShardConnectedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onApplicationEvent(event: DiscordFirstShardReadyEvent) {
+    override fun onApplicationEvent(event: DiscordMainShardConnectedEvent) {
+        if (discordBot.interactionsInitialized) {
+            return
+        }
+        discordBot.interactionsInitialized = true
+
         initSlashCommands()
     }
 
@@ -66,6 +69,7 @@ internal open class InteractionInitializer(
             when {
                 (alunaProperties.includeInDevelopmentInteractions) -> true
                 (alunaProperties.productionMode && it.interactionDevelopmentStatus == DevelopmentStatus.IN_DEVELOPMENT) -> false
+                (alunaProperties.command.systemCommand.enabled && alunaProperties.command.systemCommand.server != null && it.name == "system-command") -> false
                 else -> true
             }
         }.map {
@@ -95,100 +99,35 @@ internal open class InteractionInitializer(
             it
         }.toCollection(arrayListOf())
 
-        //Create global interactions
-        shardManager.shards.first().retrieveCommands(true).queue { currentCommands ->
-            discordBot.discordRepresentations.clear()
-            discordBot.discordRepresentations.putAll(currentCommands.associateBy { it.name })
 
-            val commandDataList = arrayListOf<CommandDataImpl>()
+        val interactionToUpdate = arrayListOf<CommandDataImpl>()
+        interactionToUpdate.addAll(filteredCommands)
+        interactionToUpdate.addAll(filteredContext)
 
-            commandDataList.addAll(filteredCommands)
-            commandDataList.addAll(filteredContext)
+        val currentInteractions = shardManager.shards.first().retrieveCommands(true).complete()
 
+        shardManager.shards.first().updateCommands()
+            .addCommands(interactionToUpdate)
+            .queue { updatedCommands ->
+                discordBot.discordRepresentations.clear()
+                discordBot.discordRepresentations.putAll(updatedCommands.associateBy { it.name })
 
-            val commandsToRemove = currentCommands.filter { command ->
-                commandDataList.filter {
-                    if (it.type == Type.SLASH) {
-                        (it as DiscordCommand).useScope in arrayListOf(UseScope.GLOBAL, UseScope.GUILD_ONLY)
-                    } else {
-                        true
-                    }
-                }.none { command.name == it.name && command.type == it.type }
-            }
-
-            commandsToRemove.forEach {
-                logger.debug("Removed unneeded interaction '${it.name}'")
-                shardManager.shards.first().deleteCommandById(it.id).queue()
-                discordBot.discordRepresentations.remove(it.name)
-            }
-
-            val commandsToUpdate = currentCommands.filter { it.name !in commandsToRemove.map { it.name } }.filter { command ->
-                commandDataList.filter {
-                    if (it.type == Type.SLASH) {
-                        (it as DiscordCommand).useScope in arrayListOf(UseScope.GLOBAL, UseScope.GUILD_ONLY)
-                    } else {
-                        (it as DiscordContextMenu).useScope in arrayListOf(UseScope.GLOBAL, UseScope.GUILD_ONLY)
-                    }
-                }.none { compareCommands(it, command) }
-            }
-
-            commandsToUpdate.forEach { discordCommand ->
-                logger.debug("Update interaction '${discordCommand.name}'")
-                val editCommand = shardManager.shards.first().editCommandById(discordCommand.id)
-                editCommand.clearOptions()
-                editCommand.apply(commandDataList.first { it.name == discordCommand.name && it.type == discordCommand.type }).queue {
-                    discordBot.discordRepresentations[it.name] = it
-                }
-            }
-
-            val commandsToAdd = commandDataList
-                .filter {
-                    if (it.type == Type.SLASH) {
-                        (it as DiscordCommand).useScope in arrayListOf(UseScope.GLOBAL, UseScope.GUILD_ONLY)
-                    } else {
-                        true
-                    }
-                }
-                .filter { commandData ->
-                    commandData.name !in commandsToUpdate.map { it.name }
-                }
-                .filter { commandData ->
-                    commandData.name !in commandsToRemove.map { it.name }
-                }
-                .filter { commandData ->
-                    commandData.name !in currentCommands.map { it.name }
-                }
-
-            commandsToAdd.forEach { discordCommand ->
-                shardManager.shards.first().upsertCommand(discordCommand).queue { command ->
-                    if (discordCommand.type == Type.SLASH) {
-                        printCommand((discordCommand as DiscordCommand))
-                        discordBot.commands[command.id] = discordCommand.javaClass
-                    }
-                    if (discordCommand.type != Type.SLASH) {
-                        logger.debug("Register context menu '${(discordCommand as DiscordContextMenu).name}'")
-                        discordBot.contextMenus[command.id] = discordCommand.javaClass
-                    }
-                    if (discordCommand.type == Type.SLASH && (discordCommand as DiscordCommand).observeAutoComplete && command.name !in discordBot.commandsWithAutocomplete) {
-                        discordBot.commandsWithAutocomplete.add(command.id)
-                    }
-                    discordBot.discordRepresentations[command.name] = command
-                }
-            }
-
-            shardManager.shards.first().retrieveCommands(true).queue { command ->
-                command.filter { it.type == Type.SLASH }.filter { it.name in commands.map { it.name } }.forEach { filteredCommand ->
+                updatedCommands.filter { it.type == Type.SLASH }.filter { it.name in commands.map { it.name } }.forEach { filteredCommand ->
                     try {
                         discordBot.commands.computeIfAbsent(filteredCommand.id) { commands.first { it.name == filteredCommand.name }.javaClass }
+
                         if (commands.first { it.name == filteredCommand.name }.observeAutoComplete && filteredCommand.id !in discordBot.commandsWithAutocomplete) {
                             discordBot.commandsWithAutocomplete.add(filteredCommand.id)
+                        }
+                        if (commands.first { it.name == filteredCommand.name }.handlePersistentInteractions && filteredCommand.id !in discordBot.commandsWithPersistentInteractions) {
+                            discordBot.commandsWithPersistentInteractions.add(filteredCommand.id)
                         }
                     } catch (e: Exception) {
                         logger.error("Could not add command '${filteredCommand.name}' to available commands")
                     }
                 }
 
-                command.filter { it.type != Type.SLASH }.filter { it.name in contextMenus.map { it.name } }.forEach { filteredCommand ->
+                updatedCommands.filter { it.type != Type.SLASH }.filter { it.name in contextMenus.map { it.name } }.forEach { filteredCommand ->
                     try {
                         discordBot.contextMenus.computeIfAbsent(filteredCommand.id) { contextMenus.first { it.name == filteredCommand.name }.javaClass }
                     } catch (e: Exception) {
@@ -196,138 +135,46 @@ internal open class InteractionInitializer(
                     }
                 }
 
+                val changedAndNewCommands = updatedCommands.filter { it.id !in currentInteractions.map { it.id } }
+
+                val newCommands = changedAndNewCommands.filter { it.name !in currentInteractions.map { it.name } }
+                val changedCommands = changedAndNewCommands.filter { it.name in currentInteractions.map { it.name } }
+                val removedCommands = currentInteractions.filter { it.id !in updatedCommands.map { it.id } }
+
+                interactionToUpdate.filter { it.name in newCommands.map { it.name } }.forEach {
+                    printCommand((it as DiscordCommand))
+                }
+                changedCommands.forEach {
+                    logger.debug("Update interaction '${it.name}'")
+                }
+                removedCommands.forEach {
+                    logger.debug("Removed unneeded interaction '${it.name}'")
+                }
+
+                if (newCommands.isEmpty() && changedCommands.isEmpty() && removedCommands.isEmpty()) {
+                    logger.debug("All interactions are up to date")
+                }
+
                 eventPublisher.publishDiscordSlashCommandInitializedEvent(
-                    commandsToAdd.filter { it.type == Type.SLASH }.map { it::class },
-                    commandsToUpdate.filter { it.type == Type.SLASH }
-                        .map { discordCommand -> commandDataList.first { it.name == discordCommand.name } }
-                        .map { it::class },
-                    commandsToRemove.map { it.name })
+                    interactionToUpdate.filter { it.name in newCommands.map { it.name } }.map { it::class },
+                    interactionToUpdate.filter { it.name in changedCommands.map { it.name } }.map { it::class },
+                    removedCommands.map { it.name })
+            }
+
+        //Check if we need /system-command
+        if (alunaProperties.command.systemCommand.enabled && alunaProperties.command.systemCommand.server != null) {
+
+            val server = shardManager.getGuildById(alunaProperties.command.systemCommand.server!!)
+            val systemCommand = commands.firstOrNull { it.name == "system-command" } ?: throw IllegalArgumentException()
+
+            server!!.updateCommands().addCommands(systemCommand).queue { discordCommands ->
+                val discordCommand = discordCommands.first { it.name == systemCommand.name }
+                printCommand(systemCommand, true)
+                discordBot.commands[discordCommand.id] = systemCommand.javaClass
+                discordBot.commandsWithAutocomplete.add(discordCommand.id)
+                discordBot.discordRepresentations[discordCommand.name] = discordCommand
             }
         }
-
-        //Register internal commands
-        val systemCommandName = "system-command"
-        if (filteredCommands.any { it.name == systemCommandName }) {
-            val command = filteredCommands.first { it.name == systemCommandName }
-            val server = command.specificServer?.let { shardManager.getGuildById(it) }
-            val serverCommands = server?.retrieveCommands()?.complete()
-
-            if (!command.alunaProperties.command.systemCommand.enabled) {
-                if (serverCommands != null && serverCommands.any { it.name == systemCommandName }) {
-                    val serverCommand = serverCommands.first { it.name == systemCommandName }
-                    logger.debug("Removed unneeded specific command '/${serverCommand.name}'")
-                    server.deleteCommandById(serverCommand.id).queue()
-                    discordBot.discordRepresentations.remove(serverCommand.name)
-                }
-            } else {
-
-                //Check if system command should be global
-                if (server == null) {
-                    val serverCommand = shardManager.shards.first().retrieveCommands(true).complete().firstOrNull { it.name == command.name }
-                    if (serverCommand != null && !compareCommands(command, serverCommand)) {
-                        shardManager.shards.first().upsertCommand(command).queue {
-                            printCommand(command)
-                            discordBot.commands[command.uniqueId] = command.javaClass
-                            discordBot.commandsWithAutocomplete.add(command.uniqueId)
-                            discordBot.discordRepresentations[it.name] = it
-                        }
-                    }
-                } else {
-                    var upsert = serverCommands != null && serverCommands.none { it.name == systemCommandName }
-
-                    if (!upsert) {
-                        val serverCommand = serverCommands?.firstOrNull { it.name == systemCommandName }
-                        if (serverCommand == null) {
-                            upsert = true
-                        } else {
-                            upsert = !compareCommands(command, serverCommand)
-                        }
-                    }
-
-                    if (upsert) {
-                        server.upsertCommand(command).queue { discordCommand ->
-                            printCommand(command, true)
-                            discordBot.commands[discordCommand.id] = command.javaClass
-                            discordBot.commandsWithAutocomplete.add(discordCommand.id)
-                            discordBot.discordRepresentations[discordCommand.name] = discordCommand
-                        }
-                    }
-                }
-            }
-
-
-        }
-
-        /* This does currently not work for 100% as if a command is changed to another server, Aluna has no idea
-        where to remove the old command as this information can only be obtained by checking every server individually.
-
-
-        //Create per guild Commands
-        val commandDataList = arrayListOf<CommandDataImpl>()
-        commandDataList.addAll(filteredCommands)
-
-        val specificCommands = commandDataList
-            .filter { it.type == Command.Type.SLASH }
-            .filter { (it as DiscordCommand).useScope in arrayListOf(DiscordCommand.UseScope.GUILD_SPECIFIC) }
-            .filter { (it as DiscordCommand).specificServer != null }
-
-        val serverCommands = specificCommands
-            .distinctBy { (it as DiscordCommand).specificServer }
-            .associate {
-                Pair((it as DiscordCommand).specificServer, shardManager.getServer(it.specificServer!!)?.retrieveCommands()?.complete() ?: arrayListOf())
-            }
-
-        val commandsToRemove = arrayListOf<Command>()
-        serverCommands.forEach { commands ->
-            if (specificCommands.none { (it as DiscordCommand).specificServer == commands.key }) {
-                commandsToRemove.addAll(commands.value)
-                return@forEach
-            }
-
-            serverCommands[commands.key]?.forEach { command ->
-                if (commandDataList.none { compareCommands(it, command) }) {
-                    commandsToRemove.addAll(commands.value)
-                }
-            }
-        }
-
-        commandsToRemove.forEach {
-            logger.debug("Removed unneeded specific command '/${it.name}'")
-            shardManager.shards.first().deleteCommandById(it.id).queue()
-        }
-
-        var commandsToUpdateOrAdd: HashMap<String, ArrayList<CommandData>> = hashMapOf()
-        specificCommands.forEach { command ->
-            val commandDatas = serverCommands[(command as DiscordCommand).specificServer!!]
-
-            if (commandDatas?.isNotEmpty() == true) {
-                commandDatas.forEach { commandData ->
-                    if (!compareCommands(command, commandData)) {
-                        if (commandsToUpdateOrAdd.containsKey(command.specificServer!!)) {
-                            commandsToUpdateOrAdd[command.specificServer!!]!!.add(command)
-                        } else {
-                            commandsToUpdateOrAdd[command.specificServer!!] = arrayListOf(command)
-                        }
-                    }
-                }
-            } else {
-                if (commandsToUpdateOrAdd.containsKey(command.specificServer!!)) {
-                    commandsToUpdateOrAdd[command.specificServer!!]!!.add(command)
-                } else {
-                    commandsToUpdateOrAdd[command.specificServer!!] = arrayListOf(command)
-                }
-            }
-        }
-
-        commandsToUpdateOrAdd.forEach {
-            val server = shardManager.getGuildById(it.key)
-            it.value.forEach {
-                server?.upsertCommand(it)?.queue { discordCommand ->
-                    printCommand((it as DiscordCommand), true)
-                    discordBot.commands[it.name] = it.javaClass
-                }
-            }
-        }*/
     }
 
     private fun printCommand(command: DiscordCommand, isSpecific: Boolean = false) {
@@ -351,61 +198,6 @@ internal open class InteractionInitializer(
         }
 
         logger.debug(commandText)
-    }
-
-    private fun compareCommands(commandData: CommandDataImpl, command: Command): Boolean {
-        return commandData.name == command.name &&
-                commandData.description == command.description &&
-                commandData.options.all { compareOptions(Option(it.toData()), command.options.firstOrNull { sub -> sub.name == it.name }) } &&
-                commandData.options.size == command.options.size &&
-                commandData.subcommandGroups.all {
-                    compareSubCommandGroup(
-                        SubcommandGroup(command, it.toData()),
-                        command.subcommandGroups.firstOrNull { sub -> sub.name == it.name })
-                } &&
-                commandData.subcommands.all {
-                    compareSubCommand(
-                        Subcommand(command, it.toData()),
-                        command.subcommands.firstOrNull { sub -> sub.name == it.name })
-                } &&
-                commandData.subcommands.size == command.subcommands.size &&
-                commandData.defaultPermissions.permissionsRaw == command.defaultPermissions.permissionsRaw &&
-                commandData.isGuildOnly == command.isGuildOnly &&
-                commandData.nameLocalizations.toMap() == command.nameLocalizations.toMap() &&
-                commandData.descriptionLocalizations.toMap() == command.descriptionLocalizations.toMap() &&
-                commandData.isNSFW == command.isNSFW
-    }
-
-    private fun compareSubCommandGroup(groupData: SubcommandGroup, group: SubcommandGroup?): Boolean {
-        if (group == null) {
-            return false
-        }
-
-        return groupData == group &&
-                groupData.nameLocalizations.toMap() == group.nameLocalizations.toMap() &&
-                groupData.descriptionLocalizations.toMap() == group.descriptionLocalizations.toMap() &&
-                groupData.subcommands.all { compareSubCommand(it, group.subcommands.firstOrNull { sub -> sub.name == it.name }) } &&
-                groupData.subcommands.size == group.subcommands.size
-    }
-
-    private fun compareSubCommand(commandData: Subcommand, subCommand: Subcommand?): Boolean {
-        if (subCommand == null) {
-            return false
-        }
-        return commandData == subCommand &&
-                commandData.nameLocalizations.toMap() == subCommand.nameLocalizations.toMap() &&
-                commandData.descriptionLocalizations.toMap() == subCommand.descriptionLocalizations.toMap() &&
-                commandData.options.all { compareOptions(it, subCommand.options.firstOrNull { sub -> sub.name == it.name }) } &&
-                commandData.options.size == subCommand.options.size
-    }
-
-    private fun compareOptions(optionData: Option, option: Option?): Boolean {
-        if (option == null) {
-            return false
-        }
-        return optionData == option &&
-                optionData.nameLocalizations.toMap() == option.nameLocalizations.toMap() &&
-                optionData.descriptionLocalizations.toMap() == option.descriptionLocalizations.toMap()
     }
 
 }

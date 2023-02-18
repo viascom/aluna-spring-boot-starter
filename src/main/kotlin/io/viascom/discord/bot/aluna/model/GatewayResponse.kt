@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,32 +19,30 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.property
+package io.viascom.discord.bot.aluna.model
 
-class AlunaThreadProperties {
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
+import java.time.LocalDateTime
 
-    /**
-     * Max amount of scheduler threads for timeout handling on interaction observers.
-     */
-    var messagesToObserveScheduledThreadPool: Int = 2
+class GatewayResponse(
+    val shards: Int,
+    @JsonProperty("session_start_limit")
+    val sessionStartLimit: SessionStartLimit
+) {
+    class SessionStartLimit(
+        val total: Int,
+        var remaining: Int,
 
-    /**
-     * Max amount of scheduler threads for timeout handling on discord scoped objects.
-     */
-    var scopedObjectsTimeoutScheduler: Int = 2
+        @set:JsonProperty("reset_after")
+        @get:JsonIgnore
+        var resetAfter: Int,
 
-    /**
-     * Max amount of scheduler threads for event waiter timeout handling.
-     */
-    var eventWaiterTimeoutScheduler: Int = 2
+        @JsonProperty("max_concurrency")
+        val maxConcurrency: Int
+    ) {
 
-    /**
-     * Max amount of threads for jda callback handling.
-     */
-    var jdaCallbackThreadPool: Int = 10
+        var resetTimestamp: LocalDateTime? = null
 
-    /**
-     * Max amount of threads for event publish handling.
-     */
-    var eventThreadPool: Int = 10
+    }
 }

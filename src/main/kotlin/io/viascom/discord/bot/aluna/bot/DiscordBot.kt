@@ -25,8 +25,11 @@ import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventManager
 import io.viascom.discord.bot.aluna.bot.handler.CooldownScope
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
 import io.viascom.discord.bot.aluna.model.EventRegisterType
+import io.viascom.discord.bot.aluna.model.GatewayResponse
 import io.viascom.discord.bot.aluna.model.ObserveInteraction
+import io.viascom.discord.bot.aluna.property.AlunaDiscordProperties
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +43,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
@@ -52,16 +56,22 @@ import kotlin.reflect.jvm.isAccessible
 @Service
 @ConditionalOnJdaEnabled
 open class DiscordBot(
-    alunaProperties: AlunaProperties
+    private val alunaProperties: AlunaProperties,
+    private val configurableListableBeanFactory: ConfigurableListableBeanFactory
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     var shardManager: ShardManager? = null
 
+    @set:JvmSynthetic
+    var interactionsInitialized: Boolean = false
+        internal set
+
     val commands = hashMapOf<InteractionId, Class<DiscordCommand>>()
     val contextMenus = hashMapOf<InteractionId, Class<DiscordContextMenu>>()
     val commandsWithAutocomplete = arrayListOf<InteractionId>()
+    val commandsWithPersistentInteractions = arrayListOf<InteractionId>()
     val autoCompleteHandlers = hashMapOf<Pair<InteractionId, OptionName?>, Class<out AutoCompleteHandler>>()
 
     @get:JvmSynthetic
@@ -95,6 +105,18 @@ open class DiscordBot(
             "Aluna-Message-Observer-Timeout-Pool-%d",
             true
         )
+
+    @set:JvmSynthetic
+    var totalShards: Int = 1
+        internal set
+
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var coroutineEventManager: CoroutineEventManager = CoroutineEventManager(timeout = kotlin.time.Duration.INFINITE)
+
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var sessionStartLimits: GatewayResponse.SessionStartLimit? = null
 
     fun getDiscordCommandByName(name: String): Command? {
         return discordRepresentations.getOrElse(name) { null }
@@ -143,11 +165,21 @@ open class DiscordBot(
         return cooldowns[key]
     }
 
+    fun isMasterNode(): Boolean {
+        return if (alunaProperties.discord.sharding.type == AlunaDiscordProperties.Sharding.Type.SUBSET) {
+            alunaProperties.discord.sharding.fromShard == 0
+        } else true
+    }
+
+    fun getNodeNumber(): Int {
+        return alunaProperties.nodeNumber
+    }
+
     @JvmOverloads
     fun registerMessageForButtonEvents(
         messageId: String,
         interaction: DiscordInteractionHandler,
-        persist: Boolean = false,
+        multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
         additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
@@ -166,12 +198,15 @@ open class DiscordBot(
                     interaction.uniqueId,
                     LocalDateTime.now(),
                     duration,
-                    persist,
+                    multiUse,
                     additionalData,
                     authorIds,
                     interactionUserOnly,
                     ObserveInteraction.scheduleButtonTimeout(interaction, duration, messageId, discordBot, logger, additionalData)
                 )
+
+            val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
+            interactionScope.setMessageIdForInstance(interaction.uniqueId, messageId)
         }
     }
 
@@ -179,14 +214,14 @@ open class DiscordBot(
     fun registerMessageForButtonEvents(
         hook: InteractionHook,
         interaction: DiscordInteractionHandler,
-        persist: Boolean = false,
+        multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
         additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal()
-            .queue { registerMessageForButtonEvents(it.id, interaction, persist, duration, additionalData, authorIds, interactionUserOnly) }
+            .queue { registerMessageForButtonEvents(it.id, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly) }
 
     }
 
@@ -194,7 +229,7 @@ open class DiscordBot(
     fun registerMessageForStringSelectEvents(
         messageId: String,
         interaction: DiscordInteractionHandler,
-        persist: Boolean = false,
+        multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
         additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
@@ -213,12 +248,15 @@ open class DiscordBot(
                     interaction.uniqueId,
                     LocalDateTime.now(),
                     duration,
-                    persist,
+                    multiUse,
                     additionalData,
                     authorIds,
                     interactionUserOnly,
                     ObserveInteraction.scheduleStringSelectTimeout(interaction, duration, messageId, discordBot, logger, additionalData)
                 )
+
+            val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
+            interactionScope.setMessageIdForInstance(interaction.uniqueId, messageId)
         }
     }
 
@@ -226,21 +264,21 @@ open class DiscordBot(
     fun registerMessageForStringSelectEvents(
         hook: InteractionHook,
         interaction: DiscordInteractionHandler,
-        persist: Boolean = false,
+        multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
         additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal()
-            .queue { registerMessageForStringSelectEvents(it.id, interaction, persist, duration, additionalData, authorIds, interactionUserOnly) }
+            .queue { registerMessageForStringSelectEvents(it.id, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly) }
     }
 
     @JvmOverloads
     fun registerMessageForEntitySelectEvents(
         messageId: String,
         interaction: DiscordInteractionHandler,
-        persist: Boolean = false,
+        multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
         additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
@@ -259,12 +297,15 @@ open class DiscordBot(
                     interaction.uniqueId,
                     LocalDateTime.now(),
                     duration,
-                    persist,
+                    multiUse,
                     additionalData,
                     authorIds,
                     interactionUserOnly,
                     ObserveInteraction.scheduleEntitySelectTimeout(interaction, duration, messageId, discordBot, logger, additionalData)
                 )
+
+            val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
+            interactionScope.setMessageIdForInstance(interaction.uniqueId, messageId)
         }
     }
 
@@ -272,21 +313,21 @@ open class DiscordBot(
     fun registerMessageForEntitySelectEvents(
         hook: InteractionHook,
         interaction: DiscordInteractionHandler,
-        persist: Boolean = false,
+        multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
         additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal()
-            .queue { registerMessageForEntitySelectEvents(it.id, interaction, persist, duration, additionalData, authorIds, interactionUserOnly) }
+            .queue { registerMessageForEntitySelectEvents(it.id, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly) }
     }
 
     @JvmOverloads
     fun registerMessageForModalEvents(
         authorId: String,
         interaction: DiscordInteractionHandler,
-        persist: Boolean = false,
+        multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
         additionalData: HashMap<String, Any?> = hashMapOf()
     ) {
@@ -300,7 +341,7 @@ open class DiscordBot(
                     interaction.uniqueId,
                     LocalDateTime.now(),
                     duration,
-                    persist,
+                    multiUse,
                     additionalData,
                     arrayListOf(authorId),
                     true,
@@ -320,7 +361,7 @@ open class DiscordBot(
         hook: InteractionHook,
         interaction: DiscordInteractionHandler,
         type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
-        persist: Boolean = false,
+        multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
         additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = arrayListOf(interaction.author.id),
@@ -333,28 +374,28 @@ open class DiscordBot(
             runBlocking(AlunaCoroutinesDispatcher.Default) {
                 launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.BUTTON)) {
-                        discordBot.registerMessageForButtonEvents(hook, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                        discordBot.registerMessageForButtonEvents(hook, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly)
                     }
                 }
                 launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.STRING_SELECT)) {
-                        discordBot.registerMessageForStringSelectEvents(hook, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                        discordBot.registerMessageForStringSelectEvents(hook, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly)
                     }
                 }
                 launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.ENTITY_SELECT)) {
-                        discordBot.registerMessageForEntitySelectEvents(hook, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                        discordBot.registerMessageForEntitySelectEvents(hook, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly)
                     }
                 }
                 launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.MODAL)) {
-                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, persist, duration, additionalData)
+                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, multiUse, duration, additionalData)
                     }
                 }
                 success?.accept(it)
             }
         }, {
-            failure?.accept(it)
+            failure?.accept(it) ?: throw Exception(it)
         })
     }
 
@@ -363,7 +404,7 @@ open class DiscordBot(
         action: RestAction<Void>,
         interaction: DiscordInteractionHandler,
         type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.MODAL),
-        persist: Boolean = false,
+        multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
         additionalData: HashMap<String, Any?> = hashMapOf(),
         failure: Consumer<in Throwable>? = null,
@@ -374,7 +415,7 @@ open class DiscordBot(
             runBlocking(AlunaCoroutinesDispatcher.Default) {
                 launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.MODAL)) {
-                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, persist, duration, additionalData)
+                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, multiUse, duration, additionalData)
                     }
                 }
                 launch(AlunaCoroutinesDispatcher.Default) {
@@ -383,7 +424,7 @@ open class DiscordBot(
             }
         }, {
             runBlocking(AlunaCoroutinesDispatcher.Default) {
-                failure?.accept(it)
+                failure?.accept(it) ?: throw Exception(it)
             }
         })
     }
@@ -393,7 +434,7 @@ open class DiscordBot(
         action: ReplyCallbackAction,
         interaction: DiscordInteractionHandler,
         type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
-        persist: Boolean = false,
+        multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
         additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = arrayListOf(interaction.author.id),
@@ -407,22 +448,22 @@ open class DiscordBot(
 
                 launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.BUTTON)) {
-                        discordBot.registerMessageForButtonEvents(it, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                        discordBot.registerMessageForButtonEvents(it, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly)
                     }
                 }
                 launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.STRING_SELECT)) {
-                        discordBot.registerMessageForStringSelectEvents(it, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                        discordBot.registerMessageForStringSelectEvents(it, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly)
                     }
                 }
                 launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.ENTITY_SELECT)) {
-                        discordBot.registerMessageForEntitySelectEvents(it, interaction, persist, duration, additionalData, authorIds, interactionUserOnly)
+                        discordBot.registerMessageForEntitySelectEvents(it, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly)
                     }
                 }
                 launch(AlunaCoroutinesDispatcher.Default) {
                     if (type.contains(EventRegisterType.MODAL)) {
-                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, persist, duration, additionalData)
+                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, multiUse, duration, additionalData)
                     }
                 }
                 launch(AlunaCoroutinesDispatcher.Default) {
@@ -432,7 +473,58 @@ open class DiscordBot(
 
         }, {
             runBlocking(AlunaCoroutinesDispatcher.Default) {
-                failure?.accept(it)
+                failure?.accept(it) ?: throw Exception(it)
+            }
+        })
+    }
+
+    @JvmOverloads
+    fun <T : Any> queueAndSetMessageId(
+        action: RestAction<T>, hook: InteractionHook, interaction: DiscordInteractionHandler, failure: Consumer<in Throwable>? = null, success: Consumer<in T>? = null
+    ) {
+        action.queue({
+            runBlocking(AlunaCoroutinesDispatcher.Default) {
+                launch(AlunaCoroutinesDispatcher.Default) {
+                    hook.retrieveOriginal().queue {
+                        val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
+                        interactionScope.setMessageIdForInstance(interaction.uniqueId, it.id)
+                    }
+                }
+
+                launch(AlunaCoroutinesDispatcher.Default) {
+                    success?.accept(it)
+                }
+            }
+        }, {
+            runBlocking(AlunaCoroutinesDispatcher.Default) {
+                failure?.accept(it) ?: throw Exception(it)
+            }
+        })
+    }
+
+    @JvmOverloads
+    fun queueAndSetMessageId(
+        action: ReplyCallbackAction,
+        interaction: DiscordInteractionHandler,
+        failure: Consumer<in Throwable>? = null,
+        success: Consumer<in InteractionHook>? = null
+    ) {
+        action.queue({
+            runBlocking(AlunaCoroutinesDispatcher.Default) {
+                launch(AlunaCoroutinesDispatcher.Default) {
+                    it.retrieveOriginal().queue {
+                        val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
+                        interactionScope.setMessageIdForInstance(interaction.uniqueId, it.id)
+                    }
+                }
+
+                launch(AlunaCoroutinesDispatcher.Default) {
+                    success?.accept(it)
+                }
+            }
+        }, {
+            runBlocking(AlunaCoroutinesDispatcher.Default) {
+                failure?.accept(it) ?: throw Exception(it)
             }
         })
     }
@@ -457,7 +549,7 @@ fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
     hook: InteractionHook,
     interaction: DiscordInteractionHandler,
     type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
-    persist: Boolean = false,
+    multiUse: Boolean = false,
     duration: Duration = Duration.ofMinutes(14),
     additionalData: HashMap<String, Any?> = hashMapOf(),
     authorIds: ArrayList<String>? = arrayListOf(interaction.author.id),
@@ -469,7 +561,7 @@ fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
     hook,
     interaction,
     type,
-    persist,
+    multiUse,
     duration,
     additionalData,
     authorIds,
@@ -481,17 +573,24 @@ fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
 fun RestAction<Void>.queueAndRegisterInteraction(
     interaction: DiscordInteractionHandler,
     type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.MODAL),
-    persist: Boolean = false,
+    multiUse: Boolean = false,
     duration: Duration = Duration.ofMinutes(14),
     additionalData: HashMap<String, Any?> = hashMapOf(),
     failure: Consumer<in Throwable>? = null,
     success: Consumer<in Void>? = null
-) = interaction.discordBot.queueAndRegisterInteraction(this, interaction, type, persist, duration, additionalData, failure, success)
+) = interaction.discordBot.queueAndRegisterInteraction(this, interaction, type, multiUse, duration, additionalData, failure, success)
+
+fun <T : Any> RestAction<T>.queueAndSetMessageId(
+    hook: InteractionHook,
+    interaction: DiscordInteractionHandler,
+    failure: Consumer<in Throwable>? = null,
+    success: Consumer<in T>? = null
+) = interaction.discordBot.queueAndSetMessageId(this, hook, interaction, failure, success)
 
 fun ReplyCallbackAction.queueAndRegisterInteraction(
     interaction: DiscordInteractionHandler,
     type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
-    persist: Boolean = false,
+    multiUse: Boolean = false,
     duration: Duration = Duration.ofMinutes(14),
     additionalData: HashMap<String, Any?> = hashMapOf(),
     authorIds: ArrayList<String>? = arrayListOf(interaction.author.id),
@@ -502,7 +601,7 @@ fun ReplyCallbackAction.queueAndRegisterInteraction(
     this,
     interaction,
     type,
-    persist,
+    multiUse,
     duration,
     additionalData,
     authorIds,
@@ -511,6 +610,11 @@ fun ReplyCallbackAction.queueAndRegisterInteraction(
     success
 )
 
+fun ReplyCallbackAction.queueAndSetMessageId(
+    interaction: DiscordInteractionHandler,
+    failure: Consumer<in Throwable>? = null,
+    success: Consumer<in InteractionHook>? = null
+) = interaction.discordBot.queueAndSetMessageId(this, interaction, failure, success)
 
 /**
  * The coroutine scope used by the underlying [CoroutineEventManager].

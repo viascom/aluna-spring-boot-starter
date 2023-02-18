@@ -25,6 +25,8 @@ import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
+import io.viascom.discord.bot.aluna.event.EventPublisher
+import io.viascom.discord.bot.aluna.property.AlunaDiscordProperties
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -35,12 +37,16 @@ import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
+import org.springframework.boot.SpringBootVersion
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.HealthIndicator
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
+import org.springframework.core.SpringVersion
 import org.springframework.stereotype.Component
+import java.util.concurrent.ThreadPoolExecutor
+
 
 @Component
 @ConditionalOnWebApplication
@@ -51,14 +57,22 @@ class AlunaHealthIndicator(
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
     private val eventWaiter: EventWaiter,
+    private val eventPublisher: EventPublisher,
     private val alunaProperties: AlunaProperties,
     private val configurableListableBeanFactory: ConfigurableListableBeanFactory
 ) : HealthIndicator {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private val alunaVersion: String
+    private val jdaVersion: String
 
     init {
         logger.debug("Register AlunaHealthIndicator")
+
+        val versions = this::class.java.classLoader.getResource("version.txt")?.readText()?.split("\n")
+        val internalVersion = this::class.java.getPackage().implementationVersion
+        alunaVersion = versions?.getOrElse(0) { _ -> internalVersion } ?: internalVersion
+        jdaVersion = versions?.getOrElse(1) { _ -> "n/a" } ?: "n/a"
     }
 
     override fun health(): Health {
@@ -76,18 +90,24 @@ class AlunaHealthIndicator(
 
         val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
 
-        shardManager.shards.first().status
-        status.withDetail("clientId", alunaProperties.discord.applicationId)
+        status.withDetail("nodeNumber", alunaProperties.nodeNumber)
+        status.withDetail("clientId", alunaProperties.discord.applicationId ?: "n/a")
+        status.withDetail("supportServer", alunaProperties.discord.supportServer ?: "n/a")
         status.withDetail("commandsTotal", discordBot.commands.size)
         status.withDetail("commands", discordBot.commands.mapValues { it.value.name })
         status.withDetail("contextMenuTotal", discordBot.contextMenus.size)
         status.withDetail("contextMenus", discordBot.contextMenus.mapValues { it.value.name })
+        status.withDetail("autoCompleteHandlers", discordBot.autoCompleteHandlers.mapValues { it.value.name })
+        status.withDetail("commandsWithAutocomplete", discordBot.commandsWithAutocomplete)
+        status.withDetail("commandsWithGlobalInteractions", discordBot.commandsWithPersistentInteractions)
+        status.withDetail("interactionsInitialized", discordBot.interactionsInitialized)
         status.withDetail("productionMode", alunaProperties.productionMode)
 
         val threads = hashMapOf<String, Any>()
-        threads["messagesToObserveTimeoutThreads"] = discordBot.messagesToObserveScheduledThreadPool.activeCount
-        threads["eventWaiterExecutorTimeoutThreads"] = eventWaiter.scheduledThreadPool.activeCount
-        threads["scopedObjectsTimeoutScheduler"] = interactionScope.scopedObjectsTimeoutScheduler.activeCount
+        threads["messagesToObserveTimeoutThreads"] = getThreadPoolDetail(discordBot.messagesToObserveScheduledThreadPool)
+        threads["eventWaiterExecutorTimeoutThreads"] = getThreadPoolDetail(eventWaiter.scheduledThreadPool)
+        threads["scopedObjectsTimeoutScheduler"] = getThreadPoolDetail(interactionScope.scopedObjectsTimeoutScheduler)
+        threads["eventThreadPool"] = getThreadPoolDetail(eventPublisher.eventThreadPool)
 
         status.withDetail("threads", threads)
         status.withDetail("currentActiveInteractions", interactionScope.getInstanceCount())
@@ -105,18 +125,85 @@ class AlunaHealthIndicator(
 
         status.withDetail("interactionObserver", interactionObserver)
         status.withDetail("serversTotal", shardManager.guilds.size)
-        status.withDetail("shardsTotal", shardManager.shardsTotal)
+        status.withDetail("averageGatewayPing", shardManager.averageGatewayPing)
+        status.withDetail("sharding", getSharding(shardManager, alunaProperties))
+        status.withDetail("sessionStartLimit", discordBot.sessionStartLimits)
 
+        status.withDetail("versions", Versions())
+
+        return status.build()
+    }
+
+    private fun getThreadPoolDetail(executor: ThreadPoolExecutor): ThreadPoolDetail {
+        return ThreadPoolDetail(
+            executor.poolSize,
+            executor.activeCount,
+            executor.corePoolSize,
+            executor.largestPoolSize,
+            executor.maximumPoolSize,
+            executor.taskCount,
+            executor.completedTaskCount,
+            executor.isTerminating,
+            executor.isTerminated,
+            executor.isShutdown
+        )
+    }
+
+    class ThreadPoolDetail(
+        val poolSize: Int,
+        val activeCount: Int,
+        val corePoolSize: Int,
+        val largestPoolSize: Int,
+        val maximumPoolSize: Int,
+        val taskCount: Long,
+        val completedTaskCount: Long,
+        val isTerminating: Boolean,
+        val isTerminated: Boolean,
+        val isShutdown: Boolean
+    )
+
+    private fun getSharding(shardManager: ShardManager, alunaProperties: AlunaProperties): Sharding {
         val shards = arrayListOf<ShardDetail>()
 
         shardManager.shards.forEachIndexed { index, jda ->
             shards.add(ShardDetail(index, jda.status, jda.guilds.size))
         }
 
-        status.withDetail("shards", shards)
-
-        return status.build()
+        return Sharding(
+            shardManager.shardsTotal,
+            shardManager.shardsQueued,
+            shardManager.shardsRunning,
+            alunaProperties.discord.sharding.type,
+            if (alunaProperties.discord.sharding.type == AlunaDiscordProperties.Sharding.Type.SINGLE) {
+                0
+            } else {
+                alunaProperties.discord.sharding.fromShard
+            },
+            if (alunaProperties.discord.sharding.type == AlunaDiscordProperties.Sharding.Type.SINGLE) {
+                shardManager.shardsTotal - 1
+            } else {
+                alunaProperties.discord.sharding.fromShard + alunaProperties.discord.sharding.shardAmount
+            },
+            shards
+        )
     }
+
+    class Sharding(
+        val total: Int,
+        val queued: Int,
+        val running: Int,
+        val type: AlunaDiscordProperties.Sharding.Type,
+        val from: Int,
+        val to: Int,
+        val shards: ArrayList<ShardDetail>
+    )
+
+    inner class Versions(
+        val aluna: String = alunaVersion,
+        val jda: String = jdaVersion,
+        val spring: String = SpringVersion.getVersion() ?: "n/a",
+        val springBoot: String = SpringBootVersion.getVersion() ?: "n/a",
+    )
 
     class ShardDetail(
         val id: Int,

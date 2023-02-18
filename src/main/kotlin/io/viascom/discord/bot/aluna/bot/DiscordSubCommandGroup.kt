@@ -41,6 +41,7 @@ abstract class DiscordSubCommandGroup(name: String, description: String) : Subco
     override var beanRemoveObserverOnDestroy: Boolean = true
     override var beanResetObserverTimeoutOnBeanExtend: Boolean = true
     override var beanCallOnDestroy: Boolean = true
+    override var freshInstance: Boolean = true
 
     val subCommands: HashMap<String, DiscordSubCommand> = hashMapOf()
 
