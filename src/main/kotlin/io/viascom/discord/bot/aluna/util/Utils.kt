@@ -49,9 +49,8 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.interactions.modals.ModalInteraction
-import net.dv8tion.jda.api.requests.restaction.*
+import net.dv8tion.jda.api.requests.restaction.AuditableRestAction
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction
-import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
 import java.time.Duration
@@ -78,8 +77,6 @@ fun Color.toHex(): String = String.format("#%02x%02x%02x", this.red, this.green,
  * @return Color as a Discord integer representation
  */
 fun Color.toDiscordColorInt(): Int = (this.red shl 16) + (this.green shl 8) + this.blue
-
-fun ShardManager.getMemberById(guildId: String, userId: String): Member? = this.getGuildById(guildId)?.getMemberById(userId)
 
 fun <T : Any> CommandDataImpl.addOption(option: CommandOption<in T>) {
     this.addOptions(option as OptionData)
@@ -114,27 +111,6 @@ fun <T : Any> SubcommandData.addOptions(vararg option: CommandOption<in T>) {
 fun Guild.ban(user: UserSnowflake, deletionTimeframe: Duration = Duration.ZERO, reason: String? = null): AuditableRestAction<Void> {
     val action = this.ban(user, deletionTimeframe.seconds.toInt(), TimeUnit.SECONDS)
     return if (reason != null) action.reason(reason) else action
-}
-
-/**
- * Puts this Member in time out in this {@link net.dv8tion.jda.api.entities.Guild Guild} for a specific amount of time.
- *
- * @param  duration
- *         The duration to put this Member in time out for
- * @return {@link net.dv8tion.jda.api.requests.restaction.AuditableRestAction AuditableRestAction}
- * @see Member.timeoutFor timeoutFor
- */
-//This needs no @JvmOverloads as there is already a timeoutFor(duration: Duration) method
-fun Member.timeoutFor(duration: Duration, reason: String? = null): AuditableRestAction<Void> {
-    val action = this.timeoutFor(duration)
-    return if (reason != null) action.reason(reason) else action
-}
-
-fun User.tryToSendDM(message: String, then: Runnable) {
-    try {
-        this.openPrivateChannel().queue({ pc -> pc.sendMessage(message).queue({ then.run() }) { then.run() } }) { then.run() }
-    } catch (ignore: Exception) {
-    }
 }
 
 @JvmOverloads
@@ -298,24 +274,6 @@ fun Modal.Builder.addTextField(
 
 @JvmOverloads
 fun ModalInteraction.getValueAsString(name: String, default: String? = null): String? = this.getValue(name)?.asString ?: default
-
-/**
- * Get the probable locale of a user based on the most common locale of the mutual servers.
- *
- * !! This will only work if your bot has access to mutualGuilds which is bound to the GUILD_MEMBERS intent !!
- *
- * @return probable Locale
- */
-fun User.probableLocale(): DiscordLocale? = mutualGuilds.groupBy { it.locale }.maxByOrNull { it.value.size }?.value?.firstOrNull()?.locale
-
-/**
- * Get the probable locale of a user based on the most common locale of the mutual servers.
- *
- * !! This will only work if your bot has access to mutualGuilds which is bound to the GUILD_MEMBERS intent !!
- *
- * @return probable Locale
- */
-fun Member.probableLocale(): DiscordLocale? = user.probableLocale()
 
 @JvmOverloads
 fun selectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {

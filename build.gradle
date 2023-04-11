@@ -18,11 +18,11 @@ targetCompatibility = JavaVersion.VERSION_17
 ext {
     major = 0
     minor = 0
-    patch = 44
+    patch = 45
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
-    jdaVersion = "5.0.0-beta.6"
+    jdaVersion = "5.0.0-beta.8"
     retrofitVersion = "2.9.0"
     jacksonSpringBootVersion = "3.0.5"
     jacksonVersion = "2.14.2"
@@ -59,10 +59,6 @@ java {
 
 repositories {
     mavenCentral()
-    maven {
-        name "m2-dv8tion"
-        url "https://m2.dv8tion.net/releases"
-    }
 }
 
 dependencies {
