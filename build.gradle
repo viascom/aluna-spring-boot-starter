@@ -38,8 +38,7 @@ tasks.bootJar { enabled = false }
 tasks.jar { enabled = true }
 
 jar {
-    baseName "aluna-spring-boot-starter"
-    archiveClassifier.set("")
+    archiveFileName.set("aluna-spring-boot-starter.jar")
 
     manifest {
         attributes "Implementation-Version": "${project.version}"
