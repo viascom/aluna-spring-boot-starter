@@ -7,7 +7,8 @@ on:
 
 jobs:
   update-gradle-wrapper:
-    runs-on: ubuntu-latest
+    name: Daily check to upgrade Gradle Wrapper
+    runs-on: self-hosted
 
     steps:
       - name: Setup timezone
@@ -24,7 +25,4 @@ jobs:
         uses: gradle-update/update-gradle-wrapper-action@v1
         with:
           labels: dependencies, gradle
-          reviewers: nik-sta, itsmefox
-      
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v1.0.5
+          reviewers: botscripter

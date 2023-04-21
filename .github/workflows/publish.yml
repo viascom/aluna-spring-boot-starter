@@ -6,7 +6,8 @@ on:
 
 jobs:
   publish-release:
-    runs-on: ubuntu-latest
+    name: Publish Aluna Artifacts
+    runs-on: self-hosted
 
     steps:
       - name: Setup timezone

@@ -11,7 +11,8 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: Build Pipeline
+    runs-on: self-hosted
 
     steps:
       - name: Setup timezone
