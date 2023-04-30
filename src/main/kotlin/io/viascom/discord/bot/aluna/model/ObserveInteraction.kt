@@ -21,9 +21,9 @@
 
 package io.viascom.discord.bot.aluna.model
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.DiscordInteractionHandler
-import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
@@ -55,15 +55,15 @@ class ObserveInteraction(
             additionalData: HashMap<String, Any?>
         ): ScheduledFuture<*> {
             return discordBot.messagesToObserveScheduledThreadPool.schedule({
-                runBlocking(AlunaCoroutinesDispatcher.Default) {
-                    launch(AlunaCoroutinesDispatcher.Default) {
+                runBlocking(AlunaDispatchers.Internal) {
+                    launch(AlunaDispatchers.Interaction) {
                         try {
-                            interaction.onButtonInteractionTimeout(additionalData)
+                            interaction.handleOnButtonInteractionTimeout(additionalData)
                         } catch (e: Exception) {
                             logger.debug("Could not run onButtonInteractionTimeout for interaction '${discordBot.getInteractionName(interaction)}'\n${e.stackTraceToString()}")
                         }
                     }
-                    launch(AlunaCoroutinesDispatcher.Default) {
+                    launch(AlunaDispatchers.Interaction) {
                         discordBot.removeMessageForButtonEvents(messageId)
                     }
                 }
@@ -79,15 +79,15 @@ class ObserveInteraction(
             additionalData: HashMap<String, Any?>
         ): ScheduledFuture<*> {
             return discordBot.messagesToObserveScheduledThreadPool.schedule({
-                runBlocking(AlunaCoroutinesDispatcher.Default) {
-                    launch(AlunaCoroutinesDispatcher.Default) {
+                runBlocking(AlunaDispatchers.Internal) {
+                    launch(AlunaDispatchers.Interaction) {
                         try {
-                            interaction.onStringSelectInteractionTimeout(additionalData)
+                            interaction.handleOnStringSelectInteractionTimeout(additionalData)
                         } catch (e: Exception) {
                             logger.debug("Could not run onStringSelectInteractionTimeout for interaction '${discordBot.getInteractionName(interaction)}'\n${e.stackTraceToString()}")
                         }
                     }
-                    launch(AlunaCoroutinesDispatcher.Default) {
+                    launch(AlunaDispatchers.Interaction) {
                         discordBot.removeMessageForStringSelectEvents(messageId)
                     }
                 }
@@ -103,15 +103,15 @@ class ObserveInteraction(
             additionalData: HashMap<String, Any?>
         ): ScheduledFuture<*> {
             return discordBot.messagesToObserveScheduledThreadPool.schedule({
-                runBlocking(AlunaCoroutinesDispatcher.Default) {
-                    launch(AlunaCoroutinesDispatcher.Default) {
+                runBlocking(AlunaDispatchers.Internal) {
+                    launch(AlunaDispatchers.Interaction) {
                         try {
-                            interaction.onEntitySelectInteractionTimeout(additionalData)
+                            interaction.handleOnEntitySelectInteractionTimeout(additionalData)
                         } catch (e: Exception) {
                             logger.debug("Could not run onEntitySelectInteractionTimeout for interaction '${discordBot.getInteractionName(interaction)}'\n${e.stackTraceToString()}")
                         }
                     }
-                    launch(AlunaCoroutinesDispatcher.Default) {
+                    launch(AlunaDispatchers.Interaction) {
                         discordBot.removeMessageForStringSelectEvents(messageId)
                     }
                 }
@@ -127,15 +127,15 @@ class ObserveInteraction(
             additionalData: HashMap<String, Any?>
         ): ScheduledFuture<*> {
             return discordBot.messagesToObserveScheduledThreadPool.schedule({
-                runBlocking(AlunaCoroutinesDispatcher.Default) {
-                    launch(AlunaCoroutinesDispatcher.Default) {
+                runBlocking(AlunaDispatchers.Internal) {
+                    launch(AlunaDispatchers.Interaction) {
                         try {
-                            interaction.onModalInteractionTimeout(additionalData)
+                            interaction.handleOnModalInteractionTimeout(additionalData)
                         } catch (e: Exception) {
                             logger.debug("Could not run onModalInteractionTimeout for interaction '${discordBot.getInteractionName(interaction)}'\n${e.stackTraceToString()}")
                         }
                     }
-                    launch(AlunaCoroutinesDispatcher.Default) {
+                    launch(AlunaDispatchers.Interaction) {
                         discordBot.removeMessageForModalEvents(authorId)
                     }
                 }

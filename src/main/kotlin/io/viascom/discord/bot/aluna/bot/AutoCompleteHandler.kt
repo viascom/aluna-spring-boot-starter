@@ -34,14 +34,14 @@ import java.time.Duration
  * @property commands Commands which this auto complete handler is mapped to
  * @property option Name of the option or null if this auto complete handler should reply on all options
  */
-abstract class AutoCompleteHandler @JvmOverloads constructor(val commands: ArrayList<Class<out DiscordCommand>>, val option: String? = null) :
+abstract class AutoCompleteHandler @JvmOverloads constructor(val commands: ArrayList<Class<out DiscordCommandHandler>>, val option: String? = null) :
     InteractionScopedObject {
 
     /**
      * @property command Command which this auto complete handler is mapped to
      * @property option Name of the option or null if this auto complete handler should reply on all options
      */
-    constructor(command: Class<out DiscordCommand>, option: String? = null) : this(arrayListOf(command), option)
+    constructor(command: Class<out DiscordCommandHandler>, option: String? = null) : this(arrayListOf(command), option)
 
     @Autowired
     lateinit var discordBot: DiscordBot

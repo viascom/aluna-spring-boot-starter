@@ -21,9 +21,11 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.shardmanager.BotShutdownHook
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnAlunaShutdownHook
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -39,8 +41,10 @@ class ShutdownHookRegistration(private val botShutdownHook: BotShutdownHook, pri
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onApplicationEvent(event: ApplicationStartedEvent) {
-        logger.debug("Register shutdown hook: ${botShutdownHook::class.qualifiedName}")
-        Runtime.getRuntime().addShutdownHook(botShutdownHook)
+        AlunaDispatchers.InternalScope.launch {
+            logger.debug("Register shutdown hook: ${botShutdownHook::class.qualifiedName}")
+            Runtime.getRuntime().addShutdownHook(botShutdownHook)
+        }
     }
 
 }

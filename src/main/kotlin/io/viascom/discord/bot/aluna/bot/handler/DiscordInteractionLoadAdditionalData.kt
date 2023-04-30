@@ -21,8 +21,8 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
+import io.viascom.discord.bot.aluna.bot.DiscordContextMenuHandler
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -36,37 +36,37 @@ interface DiscordInteractionLoadAdditionalData {
      * This method get called before the command is executed.
      * Make sure to not block the execution for to long as the command needs to be acknowledged in 3 seconds.
      *
-     * @param discordCommand Discord command instance
+     * @param discordCommandHandler Discord command handler instance
      * @param event Slash command event
      */
-    fun loadData(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent)
+    fun loadData(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent)
 
     /**
      * This method get called before the additional requirements are checked.
      * Make sure to not block the execution for to long as the command needs to be acknowledged in 3 seconds.
      *
-     * @param discordCommand Discord command instance
+     * @param discordCommandHandler Discord command handler instance
      * @param event Slash command event
      */
-    fun loadDataBeforeAdditionalRequirements(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent)
+    fun loadDataBeforeAdditionalRequirements(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent)
 
     /**
      * This method get called before the command is executed.
      * Make sure to not block the execution for to long as the auto complete interaction needs to be acknowledged in 3 seconds.
      *
-     * @param discordCommand Discord command instance
+     * @param discordCommandHandler Discord command handler instance
      * @param event Auto complete interaction event
      */
-    fun loadData(discordCommand: DiscordCommand, event: CommandAutoCompleteInteractionEvent)
+    fun loadData(discordCommandHandler: DiscordCommandHandler, event: CommandAutoCompleteInteractionEvent)
 
     /**
      * This method get called before the additional requirements are checked.
      * Make sure to not block the execution for to long as the auto complete interaction needs to be acknowledged in 3 seconds.
      *
-     * @param discordCommand Discord command instance
+     * @param discordCommandHandler Discord command handler instance
      * @param event Slash command event
      */
-    fun loadDataBeforeAdditionalRequirements(discordCommand: DiscordCommand, event: CommandAutoCompleteInteractionEvent)
+    fun loadDataBeforeAdditionalRequirements(discordCommandHandler: DiscordCommandHandler, event: CommandAutoCompleteInteractionEvent)
 
     /**
      * This method get called before the auto-complete is executed.
@@ -83,15 +83,15 @@ interface DiscordInteractionLoadAdditionalData {
      * @param contextMenu Discord context menu instance
      * @param event Discord context menu event
      */
-    fun loadData(contextMenu: DiscordContextMenu, event: GenericCommandInteractionEvent)
+    fun loadData(contextMenu: DiscordContextMenuHandler, event: GenericCommandInteractionEvent)
 
     /**
      * This method get called before the additional requirements are checked.
      * Make sure to not block the execution for to long as the interaction needs to be acknowledged in 3 seconds.
      *
-     * @param discordContextMenu Discord context menu instance
+     * @param discordContextMenuHandler Discord context menu instance
      * @param event Slash command event
      */
-    fun loadDataBeforeAdditionalRequirements(discordContextMenu: DiscordContextMenu, event: GenericCommandInteractionEvent)
+    fun loadDataBeforeAdditionalRequirements(discordContextMenuHandler: DiscordContextMenuHandler, event: GenericCommandInteractionEvent)
 
 }

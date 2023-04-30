@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.event
 
-import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenuHandler
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.Channel
@@ -43,5 +43,5 @@ class DiscordUserContextEvent(
     val channel: Channel?,
     val guild: Guild?,
     val name: String,
-    val contextMenu: DiscordUserContextMenu
+    val contextMenu: DiscordUserContextMenuHandler
 ) : ApplicationEvent(source)

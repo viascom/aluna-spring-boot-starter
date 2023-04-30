@@ -30,6 +30,7 @@ import net.dv8tion.jda.api.interactions.InteractionHook
 import org.springframework.stereotype.Component
 import java.awt.Color
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 
 @Component
@@ -53,7 +54,7 @@ class DiscordPingProvider : SystemCommandDataProvider(
         val replyHook = event.deferReply().complete()
 
         val gatewayPing: Long = event.jda.gatewayPing
-        val now = LocalDateTime.now()
+        val now = LocalDateTime.now(ZoneOffset.UTC)
         val apiPing = event.jda.restPing.complete()
 
         replyHook.editOriginalEmbeds(builder.build()).queue {
@@ -61,7 +62,7 @@ class DiscordPingProvider : SystemCommandDataProvider(
                 .setDescription(
                     "❯ **Gateway Ping:** `${gatewayPing}ms`\n" +
                             "❯ **Api Ping:** `${apiPing}ms`\n" +
-                            "❯ **Roundtrip Latency:** `${ChronoUnit.MILLIS.between(now, LocalDateTime.now())}ms`\n"
+                            "❯ **Roundtrip Latency:** `${ChronoUnit.MILLIS.between(now, LocalDateTime.now(ZoneOffset.UTC))}ms`\n"
                 )
                 .setColor(Color.GREEN)
                 .build()

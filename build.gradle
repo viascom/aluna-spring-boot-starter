@@ -1,3 +1,4 @@
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -10,6 +11,7 @@ plugins {
     id "org.springframework.boot" version "3.0.6"
     id "io.spring.dependency-management" version "1.1.0"
     id "de.undercouch.download" version "5.4.0"
+    id "org.jetbrains.dokka" version "1.8.10"
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -18,7 +20,7 @@ targetCompatibility = JavaVersion.VERSION_17
 ext {
     major = 0
     minor = 0
-    patch = 45
+    patch = 46
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
@@ -211,4 +213,28 @@ signing {
 
 tasks.withType(Sign).configureEach {
     onlyIf { isCiServer }
+}
+
+tasks.withType(DokkaTask.class).configureEach {
+    dokkaSourceSets.configureEach {
+        moduleName.set(project.name)
+        moduleVersion.set(project.version.toString())
+        includes.from("README.md")
+        jdkVersion.set(17)
+        sourceLink {
+            localDirectory.set(file("src/main/kotlin"))
+            remoteUrl.set(URL("https://github.com/viascom/aluna-spring-boot-starter/tree/master/src/main/kotlin"))
+            remoteLineSuffix.set("#L")
+        }
+
+        perPackageOption {
+            documentedVisibilities.set([Visibility.PUBLIC])
+        }
+
+        externalDocumentationLink {
+            url.set(new URL("ttps://ci.dv8tion.net/job/JDA5/javadoc/"))
+        }
+
+    }
+
 }

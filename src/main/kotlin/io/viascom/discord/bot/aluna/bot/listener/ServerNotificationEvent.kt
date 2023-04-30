@@ -21,6 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.SendServerNotificationCondition
@@ -28,6 +29,7 @@ import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.TimestampFormat
 import io.viascom.discord.bot.aluna.util.getGuildTextChannel
 import io.viascom.discord.bot.aluna.util.toDiscordTimestamp
+import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
@@ -61,9 +63,9 @@ open class ServerNotificationEvent(
         }
     }
 
-    private fun onGuildJoin(event: GuildJoinEvent) {
+    private suspend fun onGuildJoin(event: GuildJoinEvent) = withContext(AlunaDispatchers.Interaction) {
         if (!alunaProperties.notification.serverJoin.enabled) {
-            return
+            return@withContext
         }
 
         val server = event.guild
@@ -76,7 +78,7 @@ open class ServerNotificationEvent(
 
         if (channel == null) {
             logger.warn("Aluna was not able to send a GuildJoinEvent to the defined channel.")
-            return
+            return@withContext
         }
 
         channel.sendMessageEmbeds(embedMessage.build()).queue { message ->
@@ -94,9 +96,9 @@ open class ServerNotificationEvent(
         }
     }
 
-    private fun onGuildLeave(event: GuildLeaveEvent) {
+    private suspend fun onGuildLeave(event: GuildLeaveEvent) = withContext(AlunaDispatchers.Interaction) {
         if (!alunaProperties.notification.serverLeave.enabled) {
-            return
+            return@withContext
         }
 
         val server = event.guild
@@ -109,7 +111,7 @@ open class ServerNotificationEvent(
 
         if (channel == null) {
             logger.warn("Aluna was not able to send a GuildLeaveEvent to the defined channel.")
-            return
+            return@withContext
         }
 
         channel.sendMessageEmbeds(embedMessage.build()).queue { message ->

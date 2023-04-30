@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,8 +19,17 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.bot.handler
+package io.viascom.discord.bot.aluna.model
 
-enum class CooldownScope {
-    NO_COOLDOWN, USER, CHANNEL, GUILD, USER_GUILD, GLOBAL
-}
+import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+
+data class CommandUsage(
+    val command: String,
+    val instance: String,
+    val clazz: Class<out InteractionScopedObject>,
+    val userId: String,
+    val serverId: String?,
+    val timestamp: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
+)

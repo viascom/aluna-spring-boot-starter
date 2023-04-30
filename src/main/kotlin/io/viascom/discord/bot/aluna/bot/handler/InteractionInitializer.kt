@@ -21,14 +21,19 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
+import io.viascom.discord.bot.aluna.bot.DiscordContextMenuHandler
+import io.viascom.discord.bot.aluna.bot.command.DefaultHelpCommand
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordMainShardConnectedEvent
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.model.DevelopmentStatus
 import io.viascom.discord.bot.aluna.property.AlunaProperties
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.interactions.commands.Command.*
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
@@ -42,8 +47,8 @@ import org.springframework.stereotype.Service
 @Order(100)
 @ConditionalOnJdaEnabled
 internal open class InteractionInitializer(
-    private val commands: List<DiscordCommand>,
-    private val contextMenus: List<DiscordContextMenu>,
+    private val commands: List<DiscordCommandHandler>,
+    private val contextMenus: List<DiscordContextMenuHandler>,
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
     private val eventPublisher: EventPublisher,
@@ -53,16 +58,19 @@ internal open class InteractionInitializer(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onApplicationEvent(event: DiscordMainShardConnectedEvent) {
-        if (discordBot.interactionsInitialized) {
-            return
-        }
-        discordBot.interactionsInitialized = true
+        AlunaDispatchers.InternalScope.launch {
+            if (discordBot.interactionsInitialized) {
+                return@launch
+            }
+            discordBot.interactionsInitialized = true
 
-        initSlashCommands()
+            initSlashCommands()
+        }
     }
 
-    private fun initSlashCommands() {
+    private suspend fun initSlashCommands() = withContext(AlunaDispatchers.Internal) {
         logger.debug("Check interactions to update")
+        val deferredCurrentInteractions = async { shardManager.shards.first().retrieveCommands(true).complete() }
 
         //Get all interactions, filter not needed interactions and call init methods
         val filteredCommands = commands.filter {
@@ -100,11 +108,17 @@ internal open class InteractionInitializer(
         }.toCollection(arrayListOf())
 
 
+        //Check if bot has its own help command and forgot to disable default help command
+        if (filteredCommands.count { it.name == "help" } > 1 && alunaProperties.command.helpCommand.enabled) {
+            logger.warn("Found /help command in your commands, but help command is enabled in your configuration. Please disable help command in your configuration. Default help command will be disabled for this run.")
+            filteredCommands.removeIf { it.name == "help" && it is DefaultHelpCommand }
+        }
+
         val interactionToUpdate = arrayListOf<CommandDataImpl>()
         interactionToUpdate.addAll(filteredCommands)
         interactionToUpdate.addAll(filteredContext)
 
-        val currentInteractions = shardManager.shards.first().retrieveCommands(true).complete()
+        val currentInteractions = deferredCurrentInteractions.await()
 
         shardManager.shards.first().updateCommands()
             .addCommands(interactionToUpdate)
@@ -142,7 +156,7 @@ internal open class InteractionInitializer(
                 val removedCommands = currentInteractions.filter { it.id !in updatedCommands.map { it.id } }
 
                 interactionToUpdate.filter { it.name in newCommands.map { it.name } }.forEach {
-                    printCommand((it as DiscordCommand))
+                    printCommand((it as DiscordCommandHandler))
                 }
                 changedCommands.forEach {
                     logger.debug("Update interaction '${it.name}'")
@@ -177,7 +191,7 @@ internal open class InteractionInitializer(
         }
     }
 
-    private fun printCommand(command: DiscordCommand, isSpecific: Boolean = false) {
+    private fun printCommand(command: DiscordCommandHandler, isSpecific: Boolean = false) {
         var commandText = ""
         commandText += "Add${if (isSpecific) " server specific" else ""} command '/${command.name}'"
         when {

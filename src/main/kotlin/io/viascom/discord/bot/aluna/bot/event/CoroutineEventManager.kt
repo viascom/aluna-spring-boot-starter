@@ -24,6 +24,7 @@
 
 package io.viascom.discord.bot.aluna.bot.event
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import kotlinx.coroutines.*
 import kotlinx.coroutines.scheduling.*
 import net.dv8tion.jda.api.events.GenericEvent
@@ -40,7 +41,7 @@ import kotlin.time.Duration
  * This enables [the coroutine listener extension][listener].
  */
 open class CoroutineEventManager(
-    scope: CoroutineScope = AlunaCoroutinesDispatcher.DefaultScope,
+    scope: CoroutineScope = AlunaDispatchers.InternalScope,
     /** Timeout [Duration] each event listener is allowed to run. Set to [Duration.INFINITE] for no timeout. Default: [Duration.INFINITE] */
     var timeout: Duration = Duration.INFINITE
 ) : IEventManager, CoroutineScope by scope {
@@ -54,7 +55,7 @@ open class CoroutineEventManager(
     }
 
     override fun handle(event: GenericEvent) {
-        launch(AlunaCoroutinesDispatcher.Default) {
+        launch(AlunaDispatchers.Internal) {
             for (listener in listeners) try {
                 val actualTimeout = timeout(listener)
                 if (actualTimeout.isPositive() && actualTimeout.isFinite()) {

@@ -37,6 +37,7 @@ import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 @Interaction
 class EditOrCreateMessageCommand : DiscordCommand("edit-or-create-message", "Edit or Create Message") {
@@ -67,7 +68,7 @@ class EditOrCreateMessageCommand : DiscordCommand("edit-or-create-message", "Edi
     override fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
         event.deferEdit().queue()
         if (event.componentId == "update-message") {
-            val newText = "This is the edited or new text | " + LocalDateTime.now().nano
+            val newText = "This is the edited or new text | " + LocalDateTime.now(ZoneOffset.UTC).nano
             event.channel.sendOrEditMessage(messageIdToEdit, MessageCreateData.fromContent(newText)).queue {
                 messageIdToEdit = it.id
                 it.addReaction(Emoji.fromUnicode("\uD83C\uDF15")).queue()

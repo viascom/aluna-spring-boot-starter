@@ -21,8 +21,10 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
@@ -39,22 +41,24 @@ class ListenerRegistration(private val coroutineListeners: List<CoroutineEventLi
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onApplicationEvent(event: ApplicationStartedEvent) {
-        val combinedListener = arrayListOf<Any>()
-        combinedListener.addAll(listeners)
-        combinedListener.addAll(coroutineListeners)
+        AlunaDispatchers.InternalScope.launch {
+            val combinedListener = arrayListOf<Any>()
+            combinedListener.addAll(listeners)
+            combinedListener.addAll(coroutineListeners)
 
-        val listenersToRegister = combinedListener.filterNot {
-            //Filter out static registered listeners
-            it::class.java.canonicalName.startsWith("io.viascom.discord.bot.aluna.bot.listener") && it::class.java.canonicalName != ServerNotificationEvent::class.java.canonicalName
-        }
-        val internalListeners = combinedListener.filter {
-            it::class.java.canonicalName.startsWith("io.viascom.discord.bot.aluna.bot.listener") && it::class.java.canonicalName != ServerNotificationEvent::class.java.canonicalName
-        }
+            val listenersToRegister = combinedListener.filterNot {
+                //Filter out static registered listeners
+                it::class.java.canonicalName.startsWith("io.viascom.discord.bot.aluna.bot.listener") && it::class.java.canonicalName != ServerNotificationEvent::class.java.canonicalName
+            }
+            val internalListeners = combinedListener.filter {
+                it::class.java.canonicalName.startsWith("io.viascom.discord.bot.aluna.bot.listener") && it::class.java.canonicalName != ServerNotificationEvent::class.java.canonicalName
+            }
 
-        logger.debug("Register internal listeners: [" + internalListeners.joinToString(", ") { it::class.java.canonicalName } + "]")
-        if (listenersToRegister.isNotEmpty()) {
-            logger.debug("Register listeners:\n" + listenersToRegister.joinToString("\n") { "- ${it::class.java.canonicalName}" })
-            shardManager.addEventListener(*listenersToRegister.toTypedArray())
+            logger.debug("Register internal listeners: [" + internalListeners.joinToString(", ") { it::class.java.canonicalName } + "]")
+            if (listenersToRegister.isNotEmpty()) {
+                logger.debug("Register listeners:\n" + listenersToRegister.joinToString("\n") { "- ${it::class.java.canonicalName}" })
+                shardManager.addEventListener(*listenersToRegister.toTypedArray())
+            }
         }
     }
 

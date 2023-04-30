@@ -33,15 +33,15 @@ interface DiscordInteractionHandler {
     var author: User
     var discordBot: DiscordBot
 
-    fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
-    fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>)
+    suspend fun handleOnButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    suspend fun handleOnButtonInteractionTimeout(additionalData: HashMap<String, Any?>)
 
-    fun onStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
-    fun onStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>)
+    suspend fun handleOnStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    suspend fun handleOnStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>)
 
-    fun onEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
-    fun onEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>)
+    suspend fun handleOnEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    suspend fun handleOnEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>)
 
-    fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
-    fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>)
+    suspend fun handleOnModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    suspend fun handleOnModalInteractionTimeout(additionalData: HashMap<String, Any?>)
 }

@@ -21,32 +21,32 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
+import io.viascom.discord.bot.aluna.bot.DiscordContextMenuHandler
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
-class DefaultDiscordInteractionLoadAdditionalData : DiscordInteractionLoadAdditionalData {
-    override fun loadData(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent) {
+open class DefaultDiscordInteractionLoadAdditionalData : DiscordInteractionLoadAdditionalData {
+    override fun loadData(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent) {
     }
 
-    override fun loadDataBeforeAdditionalRequirements(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent) {
+    override fun loadDataBeforeAdditionalRequirements(discordCommand: DiscordCommandHandler, event: SlashCommandInteractionEvent) {
     }
 
-    override fun loadData(discordCommand: DiscordCommand, event: CommandAutoCompleteInteractionEvent) {
+    override fun loadData(discordCommandHandler: DiscordCommandHandler, event: CommandAutoCompleteInteractionEvent) {
     }
 
-    override fun loadDataBeforeAdditionalRequirements(discordCommand: DiscordCommand, event: CommandAutoCompleteInteractionEvent) {
+    override fun loadDataBeforeAdditionalRequirements(discordCommandHandler: DiscordCommandHandler, event: CommandAutoCompleteInteractionEvent) {
     }
 
-    override fun loadDataBeforeAdditionalRequirements(discordContextMenu: DiscordContextMenu, event: GenericCommandInteractionEvent) {
+    override fun loadDataBeforeAdditionalRequirements(discordContextMenuHandler: DiscordContextMenuHandler, event: GenericCommandInteractionEvent) {
     }
 
     override fun loadData(event: CommandAutoCompleteInteractionEvent) {
     }
 
-    override fun loadData(contextMenu: DiscordContextMenu, event: GenericCommandInteractionEvent) {
+    override fun loadData(contextMenu: DiscordContextMenuHandler, event: GenericCommandInteractionEvent) {
     }
 
 }

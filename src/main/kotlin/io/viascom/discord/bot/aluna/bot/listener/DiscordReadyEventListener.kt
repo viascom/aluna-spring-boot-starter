@@ -21,11 +21,13 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordSlashCommandInitializedEvent
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.getGuildTextChannel
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -48,32 +50,34 @@ internal open class DiscordReadyEventListener(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onApplicationEvent(event: DiscordSlashCommandInitializedEvent) {
-        if (alunaProperties.discord.setStatusToOnlineWhenReady) {
-            //Set status to online and remove activity
-            shardManager.setStatus(OnlineStatus.ONLINE)
-            shardManager.setActivity(null)
-        }
-
-        if (alunaProperties.notification.botReady.enabled) {
-            val embedMessage = EmbedBuilder()
-                .setTitle("⚡ Bot Ready")
-                .setColor(Color.GREEN)
-                .setDescription("Bot is up and ready to answer interactions.")
-                .addField("» Client-Id", alunaProperties.discord.applicationId ?: "n/a", false)
-                .addField("» Total Interactions", (discordBot.commands.size + discordBot.contextMenus.size).toString(), true)
-                .addField("» Production Mode", alunaProperties.productionMode.toString(), true)
-
-            val channel = shardManager.getGuildTextChannel(
-                alunaProperties.notification.botReady.server.toString(),
-                alunaProperties.notification.botReady.channel.toString()
-            )
-
-            if (channel == null) {
-                logger.warn("Aluna was not able to send a DiscordReadyEvent to the defined channel.")
-                return
+        AlunaDispatchers.InternalScope.launch {
+            if (alunaProperties.discord.setStatusToOnlineWhenReady) {
+                //Set status to online and remove activity
+                shardManager.setStatus(OnlineStatus.ONLINE)
+                shardManager.setActivity(null)
             }
 
-            channel.sendMessageEmbeds(embedMessage.build()).queue()
+            if (alunaProperties.notification.botReady.enabled) {
+                val embedMessage = EmbedBuilder()
+                    .setTitle("⚡ Bot Ready")
+                    .setColor(Color.GREEN)
+                    .setDescription("Bot is up and ready to answer interactions.")
+                    .addField("» Client-Id", alunaProperties.discord.applicationId ?: "n/a", false)
+                    .addField("» Total Interactions", (discordBot.commands.size + discordBot.contextMenus.size).toString(), true)
+                    .addField("» Production Mode", alunaProperties.productionMode.toString(), true)
+
+                val channel = shardManager.getGuildTextChannel(
+                    alunaProperties.notification.botReady.server.toString(),
+                    alunaProperties.notification.botReady.channel.toString()
+                )
+
+                if (channel == null) {
+                    logger.warn("Aluna was not able to send a DiscordReadyEvent to the defined channel.")
+                    return@launch
+                }
+
+                channel.sendMessageEmbeds(embedMessage.build()).queue()
+            }
         }
     }
 

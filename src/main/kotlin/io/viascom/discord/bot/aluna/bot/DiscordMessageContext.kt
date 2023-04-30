@@ -22,23 +22,23 @@
 package io.viascom.discord.bot.aluna.bot
 
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
-import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
+import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFunction
 
-abstract class DiscordUserContextMenu(name: String, localizations: LocalizationFunction? = null) : DiscordUserContextMenuHandler(name, localizations) {
+abstract class DiscordMessageContext(name: String, localizations: LocalizationFunction? = null) : DiscordMessageContextMenuHandler(name, localizations) {
 
     /**
      * The main body method of a [DiscordContextMenuHandler].
      * <br></br>This is the "response" for a successful
      * [#run(DiscordContextMenu)][DiscordContextMenuHandler.execute].
      *
-     * @param event The [UserContextInteractionEvent] that triggered this Command
+     * @param event The [MessageContextInteractionEvent] that triggered this Command
      */
 
-    protected abstract fun execute(event: UserContextInteractionEvent)
+    protected abstract fun execute(event: MessageContextInteractionEvent)
 
     /**
      * On destroy gets called, when the object gets destroyed after the defined beanTimoutDelay.
@@ -120,7 +120,7 @@ abstract class DiscordUserContextMenu(name: String, localizations: LocalizationF
     open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
     }
 
-    override suspend fun runExecute(event: UserContextInteractionEvent) = execute(event)
+    override suspend fun runExecute(event: MessageContextInteractionEvent) = execute(event)
     override suspend fun runOnDestroy() = onDestroy()
     override suspend fun runOnButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>) = onButtonInteraction(event, additionalData)
     override suspend fun runOnButtonInteractionTimeout(additionalData: HashMap<String, Any?>) = onButtonInteractionTimeout(additionalData)

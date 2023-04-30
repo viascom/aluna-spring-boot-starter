@@ -22,38 +22,29 @@
 package io.viascom.discord.bot.aluna.bot
 
 
-import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.exception.AlunaInteractionRepresentationNotFoundException
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFunction
 import org.slf4j.MDC
 import org.springframework.util.StopWatch
 
-abstract class DiscordMessageContextMenu(name: String, localizations: LocalizationFunction? = null) :
-    DiscordContextMenu(Command.Type.MESSAGE, name, localizations) {
+abstract class DiscordMessageContextMenuHandler(name: String, localizations: LocalizationFunction? = null) :
+    DiscordContextMenuHandler(Command.Type.MESSAGE, name, localizations) {
+
+    internal abstract suspend fun runExecute(event: MessageContextInteractionEvent)
 
     /**
-     * The main body method of a [DiscordContextMenu].
-     * <br></br>This is the "response" for a successful
-     * [#run(DiscordCommand)][DiscordContextMenu.execute].
-     *
-     * @param event The [MessageContextInteractionEvent] that triggered this Command
-     */
-
-    protected abstract fun execute(event: MessageContextInteractionEvent)
-
-    /**
-     * Runs checks for the [DiscordMessageContextMenu] with the given [MessageContextInteractionEvent] that called it.
+     * Runs checks for the [DiscordMessageContextMenuHandler] with the given [MessageContextInteractionEvent] that called it.
      *
      * @param event The MessageContextInteractionEvent that triggered this Command
      */
 
     @JvmSynthetic
-    internal fun run(event: MessageContextInteractionEvent) {
-        val command = this
+    internal suspend fun run(event: MessageContextInteractionEvent) = withContext(AlunaDispatchers.Interaction) {
         if (alunaProperties.debug.useStopwatch) {
             stopWatch = StopWatch()
             stopWatch!!.start()
@@ -64,9 +55,9 @@ abstract class DiscordMessageContextMenu(name: String, localizations: Localizati
             try {
                 onExecutionException(event, exception)
             } catch (exceptionError: Exception) {
-                discordInteractionMetaDataHandler.onGenericExecutionException(command, exception, exceptionError, event)
+                discordInteractionMetaDataHandler.onGenericExecutionException(this@DiscordMessageContextMenuHandler, exception, exceptionError, event)
             }
-            return
+            return@withContext
         }
 
         discordRepresentation = discordBot.discordRepresentations[event.name]!!
@@ -90,49 +81,48 @@ abstract class DiscordMessageContextMenu(name: String, localizations: Localizati
             guildLocale = event.guildLocale
         }
 
-        val missingUserPermissions = discordInteractionConditions.checkForNeededUserPermissions(this, userPermissions, event)
+        val missingUserPermissions = discordInteractionConditions.checkForNeededUserPermissions(this@DiscordMessageContextMenuHandler, userPermissions, event)
         if (missingUserPermissions.hasMissingPermissions) {
             onMissingUserPermission(event, missingUserPermissions)
-            return
+            return@withContext
         }
 
-        val missingBotPermissions = discordInteractionConditions.checkForNeededBotPermissions(this, botPermissions, event)
+        val missingBotPermissions = discordInteractionConditions.checkForNeededBotPermissions(this@DiscordMessageContextMenuHandler, botPermissions, event)
         if (missingBotPermissions.hasMissingPermissions) {
             onMissingBotPermission(event, missingBotPermissions)
-            return
+            return@withContext
         }
 
-        discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this, event)
+        discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this@DiscordMessageContextMenuHandler, event)
 
-        val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalContextRequirements(this, event)
+        val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalContextRequirements(this@DiscordMessageContextMenuHandler, event)
         if (additionalRequirements.failed) {
             onFailedAdditionalRequirements(event, additionalRequirements)
-            return
+            return@withContext
         }
 
         //Load additional data for this interaction
-        discordInteractionLoadAdditionalData.loadData(this, event)
-        runBlocking(AlunaCoroutinesDispatcher.Default) {
-            //Run onCommandExecution in asyncExecutor to ensure it is not blocking the execution of the interaction itself
-            async(AlunaCoroutinesDispatcher.IO) { discordInteractionMetaDataHandler.onContextMenuExecution(command, event) }
-            async(AlunaCoroutinesDispatcher.IO) {
-                if (alunaProperties.discord.publishDiscordContextEvent) {
-                    eventPublisher.publishDiscordMessageContextEvent(author, channel, guild, event.fullCommandName, command)
-                }
-            }
+        discordInteractionLoadAdditionalData.loadData(this@DiscordMessageContextMenuHandler, event)
 
-            try {
-                logger.info("Run context menu '${event.fullCommandName}'" + if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else "")
-                execute(event)
-            } catch (e: Exception) {
-                try {
-                    onExecutionException(event, e)
-                } catch (exceptionError: Exception) {
-                    discordInteractionMetaDataHandler.onGenericExecutionException(command, e, exceptionError, event)
-                }
-            } finally {
-                exitCommand(event)
+        //Run onCommandExecution in asyncExecutor to ensure it is not blocking the execution of the interaction itself
+        launch(AlunaDispatchers.Detached) { discordInteractionMetaDataHandler.onContextMenuExecution(this@DiscordMessageContextMenuHandler, event) }
+        launch(AlunaDispatchers.Detached) {
+            if (alunaProperties.discord.publishDiscordContextEvent) {
+                eventPublisher.publishDiscordMessageContextEvent(author, channel, guild, event.fullCommandName, this@DiscordMessageContextMenuHandler)
             }
+        }
+
+        try {
+            logger.info("Run context menu '${event.fullCommandName}'" + if (alunaProperties.debug.showHashCode) " [${this@DiscordMessageContextMenuHandler.hashCode()}]" else "")
+            runExecute(event)
+        } catch (e: Exception) {
+            try {
+                onExecutionException(event, e)
+            } catch (exceptionError: Exception) {
+                discordInteractionMetaDataHandler.onGenericExecutionException(this@DiscordMessageContextMenuHandler, e, exceptionError, event)
+            }
+        } finally {
+            exitCommand(event)
         }
     }
 }

@@ -37,7 +37,7 @@ class OnInteractionHandler : DiscordInteractionMetaDataHandler {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onCommandExecution(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent) {
+    override fun onCommandExecution(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent) {
         val httpClient = OkHttpClient.Builder()
             .connectTimeout(20, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
@@ -49,20 +49,20 @@ class OnInteractionHandler : DiscordInteractionMetaDataHandler {
         logger.info("After rest :)")
     }
 
-    override fun onContextMenuExecution(contextMenu: DiscordContextMenu, event: GenericCommandInteractionEvent) {
+    override fun onContextMenuExecution(contextMenu: DiscordContextMenuHandler, event: GenericCommandInteractionEvent) {
 
     }
 
-    override fun onExitInteraction(discordCommand: DiscordCommand, stopWatch: StopWatch?, event: SlashCommandInteractionEvent) {
+    override fun onExitInteraction(discordCommandHandler: DiscordCommandHandler, stopWatch: StopWatch?, event: SlashCommandInteractionEvent) {
 
     }
 
-    override fun onExitInteraction(contextMenu: DiscordContextMenu, stopWatch: StopWatch?, event: GenericCommandInteractionEvent) {
+    override fun onExitInteraction(contextMenu: DiscordContextMenuHandler, stopWatch: StopWatch?, event: GenericCommandInteractionEvent) {
 
     }
 
     override fun onGenericExecutionException(
-        discordCommand: DiscordCommand,
+        discordCommandHandler: DiscordCommandHandler,
         throwableOfExecution: Exception,
         exceptionOfSpecificHandler: Exception,
         event: GenericCommandInteractionEvent
@@ -71,7 +71,7 @@ class OnInteractionHandler : DiscordInteractionMetaDataHandler {
     }
 
     override fun onGenericExecutionException(
-        contextMenu: DiscordContextMenu,
+        contextMenu: DiscordContextMenuHandler,
         throwableOfExecution: Exception,
         exceptionOfSpecificHandler: Exception,
         event: GenericCommandInteractionEvent

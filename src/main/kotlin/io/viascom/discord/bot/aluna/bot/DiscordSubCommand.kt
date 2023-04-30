@@ -21,11 +21,13 @@
 
 package io.viascom.discord.bot.aluna.bot
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.handler.CooldownScope
 import io.viascom.discord.bot.aluna.model.DevelopmentStatus
 import io.viascom.discord.bot.aluna.model.UseScope
 import io.viascom.discord.bot.aluna.util.TimestampFormat
 import io.viascom.discord.bot.aluna.util.toDiscordTimestamp
+import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -66,7 +68,7 @@ abstract class DiscordSubCommand(name: String, description: String) : Subcommand
     var useScope = UseScope.GLOBAL
 
     @set:JvmSynthetic
-    lateinit var parentCommand: DiscordCommand
+    lateinit var parentCommand: DiscordCommandHandler
         internal set
 
     /**
@@ -82,7 +84,7 @@ abstract class DiscordSubCommand(name: String, description: String) : Subcommand
     var interactionDevelopmentStatus = DevelopmentStatus.LIVE
 
     @JvmSynthetic
-    internal fun initialize(currentSubFullCommandName: String, parentCommand: DiscordCommand, parentDiscordRepresentation: Command) {
+    internal fun initialize(currentSubFullCommandName: String, parentCommand: DiscordCommandHandler, parentDiscordRepresentation: Command) {
         this.parentCommand = parentCommand
 
         val elements = currentSubFullCommandName.split(" ")
@@ -160,7 +162,7 @@ abstract class DiscordSubCommand(name: String, description: String) : Subcommand
      * @param callEntitySelectTimeout Call onEntitySelectInteractionTimeout of this bean
      * @param callModalTimeout Call onModalInteractionTimeout of this bean
      */
-    fun destroyThisInstance(
+    suspend fun destroyThisInstance(
         removeObservers: Boolean = true,
         removeObserverTimeouts: Boolean = true,
         callOnDestroy: Boolean = false,
@@ -168,7 +170,7 @@ abstract class DiscordSubCommand(name: String, description: String) : Subcommand
         callStringSelectTimeout: Boolean = false,
         callEntitySelectTimeout: Boolean = false,
         callModalTimeout: Boolean = false
-    ) {
+    ) = withContext(AlunaDispatchers.Interaction) {
         parentCommand.destroyThisInstance(
             removeObservers,
             removeObserverTimeouts,

@@ -25,6 +25,16 @@ aluna:
     system-command:
       enabled: true
       enable-kotlin-script-evaluate: true
+    help-command:
+      enabled: true
+      title: Aluna Help
+      description: Aluna is a spring boot starter for discord bots. It provides a lot of features to make your life easier.
+      invite-button:
+        enabled: true
+      website-button:
+        enabled: true
+        link: https://github.com/viascom/aluna-spring-boot-starter
+      embed-color: '#ffdd40'
   translation:
     enabled: true
     supported-discord-locals: german, english_us

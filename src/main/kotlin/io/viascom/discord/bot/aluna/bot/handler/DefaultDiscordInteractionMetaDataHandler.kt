@@ -21,27 +21,27 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
+import io.viascom.discord.bot.aluna.bot.DiscordContextMenuHandler
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import org.springframework.util.StopWatch
 
-class DefaultDiscordInteractionMetaDataHandler : DiscordInteractionMetaDataHandler {
-    override fun onCommandExecution(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent) {
+open class DefaultDiscordInteractionMetaDataHandler : DiscordInteractionMetaDataHandler {
+    override fun onCommandExecution(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent) {
     }
 
-    override fun onContextMenuExecution(contextMenu: DiscordContextMenu, event: GenericCommandInteractionEvent) {
+    override fun onContextMenuExecution(contextMenu: DiscordContextMenuHandler, event: GenericCommandInteractionEvent) {
     }
 
-    override fun onExitInteraction(discordCommand: DiscordCommand, stopWatch: StopWatch?, event: SlashCommandInteractionEvent) {
+    override fun onExitInteraction(discordCommandHandler: DiscordCommandHandler, stopWatch: StopWatch?, event: SlashCommandInteractionEvent) {
     }
 
-    override fun onExitInteraction(contextMenu: DiscordContextMenu, stopWatch: StopWatch?, event: GenericCommandInteractionEvent) {
+    override fun onExitInteraction(contextMenu: DiscordContextMenuHandler, stopWatch: StopWatch?, event: GenericCommandInteractionEvent) {
     }
 
     override fun onGenericExecutionException(
-        discordCommand: DiscordCommand,
+        discordCommandHandler: DiscordCommandHandler,
         throwableOfExecution: Exception,
         exceptionOfSpecificHandler: Exception,
         event: GenericCommandInteractionEvent
@@ -50,7 +50,7 @@ class DefaultDiscordInteractionMetaDataHandler : DiscordInteractionMetaDataHandl
     }
 
     override fun onGenericExecutionException(
-        contextMenu: DiscordContextMenu,
+        contextMenu: DiscordContextMenuHandler,
         throwableOfExecution: Exception,
         exceptionOfSpecificHandler: Exception,
         event: GenericCommandInteractionEvent

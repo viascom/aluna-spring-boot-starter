@@ -27,6 +27,9 @@ class AlunaCommandProperties {
 
     @NestedConfigurationProperty
     var systemCommand: SystemCommandProperties = SystemCommandProperties()
+
+    @NestedConfigurationProperty
+    var helpCommand: HelpCommandProperties = HelpCommandProperties()
 }
 
 class SystemCommandProperties {
@@ -72,4 +75,66 @@ class ReleaseNoteProperties {
     var newFeatureEmote: String = "\uD83E\uDDE9"
     var bugFixEmote: String = "\uD83D\uDC1B"
     var internalChangeEmote: String = "⚙️"
+}
+
+class HelpCommandProperties {
+    /**
+     * Enable /help
+     */
+    var enabled: Boolean = false
+
+    /**
+     * Title used in the command
+     */
+    var title: String = "Help"
+
+    /**
+     * Title used in the command
+     */
+    var description: String = ""
+
+    /**
+     * Color of the embed
+     */
+    var embedColor: String = "#03a66a"
+
+    @NestedConfigurationProperty
+    var inviteButton: InviteButton = InviteButton()
+
+    @NestedConfigurationProperty
+    var websiteButton: HelpButton = HelpButton().apply {
+        label = "Visit our Website"
+        emote = "🌐"
+    }
+
+    @NestedConfigurationProperty
+    var joinSupportServerButton: HelpButton = HelpButton().apply {
+        label = "Join our Discord"
+        emote = "👋"
+    }
+
+    @NestedConfigurationProperty
+    var supportButton: HelpButton = HelpButton().apply {
+        label = "Support Us"
+        emote = "❤️"
+    }
+}
+
+
+class InviteButton {
+    var enabled: Boolean = false
+    var label: String = "Invite Me"
+    var emote: String? = "📩"
+
+    /**
+     * If this is set, the bot will use this link instead of the default one based on your configuration.
+     */
+    var link: String? = null
+}
+
+class HelpButton {
+    var enabled: Boolean = false
+    var label: String = "Help"
+    var emote: String? = null
+    var link: String = ""
 }

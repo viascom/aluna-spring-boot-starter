@@ -21,12 +21,14 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.NanoId
+import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
@@ -52,15 +54,15 @@ open class InteractionComponentEventListener(
         }
     }
 
-    private fun onButtonInteraction(event: ButtonInteractionEvent) {
+    private suspend fun onButtonInteraction(event: ButtonInteractionEvent) = withContext(AlunaDispatchers.Interaction) {
         val id = event.componentId
         if (!id.startsWith("/")) {
-            return
+            return@withContext
         }
 
         val commandId = id.substring(1).split(":")[0]
         if (!discordBot.commandsWithPersistentInteractions.contains(commandId)) {
-            return
+            return@withContext
         }
         val uniqueId = id.substring(1).split(":").getOrNull(1) ?: NanoId.generate()
         DiscordContext.setDiscordState(
@@ -70,19 +72,19 @@ open class InteractionComponentEventListener(
             uniqueId,
             event.messageId
         )
-        val interaction = discordBot.commands[commandId] ?: return
+        val interaction = discordBot.commands[commandId] ?: return@withContext
         context.getBean(interaction).onButtonGlobalInteraction(event)
     }
 
-    private fun onStringSelectInteraction(event: StringSelectInteractionEvent) {
+    private suspend fun onStringSelectInteraction(event: StringSelectInteractionEvent) = withContext(AlunaDispatchers.Interaction) {
         val id = event.componentId
         if (!id.startsWith("/")) {
-            return
+            return@withContext
         }
 
         val commandId = id.substring(1).split(":")[0]
         if (!discordBot.commandsWithPersistentInteractions.contains(commandId)) {
-            return
+            return@withContext
         }
         val uniqueId = id.substring(1).split(":").getOrNull(1) ?: NanoId.generate()
         DiscordContext.setDiscordState(
@@ -92,19 +94,19 @@ open class InteractionComponentEventListener(
             uniqueId,
             event.messageId
         )
-        val interaction = discordBot.commands[commandId] ?: return
+        val interaction = discordBot.commands[commandId] ?: return@withContext
         context.getBean(interaction).onStringSelectGlobalInteraction(event)
     }
 
-    private fun onEntitySelectInteraction(event: EntitySelectInteractionEvent) {
+    private suspend fun onEntitySelectInteraction(event: EntitySelectInteractionEvent) = withContext(AlunaDispatchers.Interaction) {
         val id = event.componentId
         if (!id.startsWith("/")) {
-            return
+            return@withContext
         }
 
         val commandId = id.substring(1).split(":")[0]
         if (!discordBot.commandsWithPersistentInteractions.contains(commandId)) {
-            return
+            return@withContext
         }
         val uniqueId = id.substring(1).split(":").getOrNull(1) ?: NanoId.generate()
         DiscordContext.setDiscordState(
@@ -114,19 +116,19 @@ open class InteractionComponentEventListener(
             uniqueId,
             event.messageId
         )
-        val interaction = discordBot.commands[commandId] ?: return
+        val interaction = discordBot.commands[commandId] ?: return@withContext
         context.getBean(interaction).onEntitySelectGlobalInteraction(event)
     }
 
-    private fun onModalInteraction(event: ModalInteractionEvent) {
+    private suspend fun onModalInteraction(event: ModalInteractionEvent) = withContext(AlunaDispatchers.Interaction) {
         val id = event.modalId
         if (!id.startsWith("/")) {
-            return
+            return@withContext
         }
 
         val commandId = id.substring(1).split(":")[0]
         if (!discordBot.commandsWithPersistentInteractions.contains(commandId)) {
-            return
+            return@withContext
         }
         val uniqueId = id.substring(1).split(":").getOrNull(1) ?: NanoId.generate()
         DiscordContext.setDiscordState(
@@ -135,7 +137,7 @@ open class InteractionComponentEventListener(
             DiscordContext.Type.INTERACTION,
             uniqueId
         )
-        val interaction = discordBot.commands[commandId] ?: return
+        val interaction = discordBot.commands[commandId] ?: return@withContext
         context.getBean(interaction).onModalGlobalInteraction(event)
     }
 }

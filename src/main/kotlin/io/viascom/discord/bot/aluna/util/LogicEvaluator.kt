@@ -28,10 +28,10 @@ package io.viascom.discord.bot.aluna.util
  * expressions using parentheses.
  *
  * Usage example:
- * <pre>{@code
+ * <pre>
  * val inputString = "!(3 < 5) && (false || 6 > 1)";
  * val result = LogicEvaluator.eval(inputString);
- * }</pre>
+ * </pre>
  *
  */
 object LogicEvaluator {

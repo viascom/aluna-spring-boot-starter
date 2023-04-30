@@ -21,15 +21,15 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
 import io.viascom.discord.bot.aluna.util.NanoId
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.events.Event
 import net.dv8tion.jda.api.events.GatewayPingEvent
@@ -61,7 +61,7 @@ class EventWaiter(
     @get:JvmSynthetic
     internal val waitingEvents: ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, ArrayList<WaitingEvent<GenericEvent>>>> = ConcurrentHashMap()
 
-    @get:JvmSynthetic
+    @JvmSynthetic
     internal val scheduledThreadPool =
         AlunaThreadPool.getScheduledThreadPool(
             1,
@@ -88,13 +88,13 @@ class EventWaiter(
                     val elementsToRemove = arrayListOf<Int>()
                     waitingEventElements.forEach { waitingEvent ->
                         val remove = if (waitingEvent.attempt(event)) {
-                            runBlocking(AlunaCoroutinesDispatcher.Default) {
+                            AlunaDispatchers.InternalScope.launch {
                                 try {
                                     if (SlashCommandInteractionEvent::class.isSuperclassOf(event::class)) {
                                         event as SlashCommandInteractionEvent
                                         DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.INTERACTION)
                                     }
-                                    waitingEvent.execute(event)
+                                    launch(AlunaDispatchers.Interaction) { waitingEvent.execute(event) }
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                     logger.error(e.message)
@@ -198,11 +198,11 @@ class EventWaiter(
 
                 //Create new task
                 it.timeoutTask = scheduledThreadPool.schedule({
-                    runBlocking(AlunaCoroutinesDispatcher.Default) {
+                    AlunaDispatchers.InternalScope.launch {
                         if (waitingEvents.containsKey(it.type) && waitingEvents[it.type]!!.containsKey(id) &&
                             waitingEvents[it.type]!![id]!!.remove(it) && it.timeoutAction != null
                         ) {
-                            it.timeoutAction.invoke()
+                            launch(AlunaDispatchers.Interaction) { it.timeoutAction.invoke() }
                         }
                     }
 
@@ -364,11 +364,11 @@ class EventWaiter(
 
         if (timeout != null) {
             we.timeoutTask = scheduledThreadPool.schedule({
-                runBlocking(AlunaCoroutinesDispatcher.Default) {
+                AlunaDispatchers.InternalScope.launch {
                     if (waitingEvents.containsKey(type) && waitingEvents[type]!!.containsKey(id) &&
                         waitingEvents[type]!![id]!!.remove(we) && timeoutAction != null
                     ) {
-                        timeoutAction.invoke()
+                        launch(AlunaDispatchers.Interaction) { timeoutAction.invoke() }
                     }
                 }
 

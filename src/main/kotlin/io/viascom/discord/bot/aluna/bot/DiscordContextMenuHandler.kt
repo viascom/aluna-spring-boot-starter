@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot
 
-import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
 import io.viascom.discord.bot.aluna.event.EventPublisher
@@ -30,9 +30,8 @@ import io.viascom.discord.bot.aluna.model.DevelopmentStatus
 import io.viascom.discord.bot.aluna.model.MissingPermissions
 import io.viascom.discord.bot.aluna.model.UseScope
 import io.viascom.discord.bot.aluna.property.AlunaProperties
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
@@ -58,7 +57,7 @@ import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
 
-abstract class DiscordContextMenu(
+abstract class DiscordContextMenuHandler(
     type: Command.Type,
     name: String,
 
@@ -185,84 +184,33 @@ abstract class DiscordContextMenu(
      */
     var stopWatch: StopWatch? = null
 
-    /**
-     * This method gets triggered, as soon as a button event for this interaction is called.
-     * Make sure that you register your message id: `discordBot.registerMessageForButtonEvents(it, this)` or `.queueAndRegisterInteraction()`
-     *
-     * @param event [ButtonInteractionEvent] this method is based on
-     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
-     */
 
-    override fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
-        return true
-    }
+    @JvmSynthetic
+    internal abstract suspend fun runOnDestroy()
 
-    /**
-     * This method gets triggered, as soon as a button event observer duration timeout is reached.
-     */
+    @JvmSynthetic
+    internal abstract suspend fun runOnButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
 
-    override fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
-    }
+    @JvmSynthetic
+    internal abstract suspend fun runOnButtonInteractionTimeout(additionalData: HashMap<String, Any?>)
 
-    /**
-     * This method gets triggered, as soon as a select event for this interaction is called.
-     * Make sure that you register your message id: `discordBot.registerMessageForSelectEvents(it, this)` or `.queueAndRegisterInteraction()`
-     *
-     * @param event [StringSelectInteractionEvent] this method is based on
-     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
-     */
-    override fun onStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
-        return true
-    }
+    @JvmSynthetic
+    internal abstract suspend fun runOnStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
 
-    /**
-     * This method gets triggered, as soon as a select event observer duration timeout is reached.
-     */
-    override fun onStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
-    }
+    @JvmSynthetic
+    internal abstract suspend fun runOnStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>)
 
-    /**
-     * This method gets triggered, as soon as a select event for this interaction is called.
-     * Make sure that you register your message id: `discordBot.registerMessageForSelectEvents(it, this)` or `.queueAndRegisterInteraction()`
-     *
-     * @param event [EntitySelectInteractionEvent] this method is based on
-     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
-     */
-    override fun onEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
-        return true
-    }
+    @JvmSynthetic
+    internal abstract suspend fun runOnEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
 
-    /**
-     * This method gets triggered, as soon as a select event observer duration timeout is reached.
-     */
-    override fun onEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
-    }
+    @JvmSynthetic
+    internal abstract suspend fun runOnEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>)
 
-    /**
-     * This method gets triggered, as soon as a modal event for this interaction is called.
-     * Make sure that you register your message id: `discordBot.registerMessageForModalEvents(it, this)` or `.queueAndRegisterInteraction()`
-     *
-     * @param event [ModalInteractionEvent] this method is based on
-     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
-     */
+    @JvmSynthetic
+    internal abstract suspend fun runOnModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
-        return true
-    }
-
-    /**
-     * This method gets triggered, as soon as a modal event observer duration timeout is reached.
-     */
-
-    override fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
-    }
-
-    /**
-     * On destroy gets called, when the object gets destroyed after the defined beanTimoutDelay.
-     */
-
-    open fun onDestroy() {
-    }
+    @JvmSynthetic
+    internal abstract suspend fun runOnModalInteractionTimeout(additionalData: HashMap<String, Any?>)
 
     fun prepareInteraction() {
         if (isAdministratorOnlyCommand) {
@@ -329,24 +277,21 @@ abstract class DiscordContextMenu(
     }
 
     @JvmSynthetic
-    internal fun exitCommand(event: GenericCommandInteractionEvent) {
-        val command = this
-        runBlocking(AlunaCoroutinesDispatcher.Default) {
-            launch(AlunaCoroutinesDispatcher.Default) {
-                if (alunaProperties.debug.useStopwatch && stopWatch != null) {
-                    stopWatch!!.stop()
-                    MDC.put("duration", stopWatch!!.totalTimeMillis.toString())
-                    logger.info("Context menu '${event.fullCommandName}' (${command.author.id})${if (alunaProperties.debug.showHashCode) " [${command.hashCode()}]" else ""} took ${stopWatch!!.totalTimeMillis}ms")
-                    when {
-                        (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the context menu ${event.fullCommandName} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
-                        (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the context menu ${event.fullCommandName} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
-                    }
+    internal suspend fun exitCommand(event: GenericCommandInteractionEvent) = withContext(AlunaDispatchers.Detached) {
+        launch {
+            if (alunaProperties.debug.useStopwatch && stopWatch != null) {
+                stopWatch!!.stop()
+                MDC.put("duration", stopWatch!!.totalTimeMillis.toString())
+                logger.info("Context menu '${event.fullCommandName}' (${this@DiscordContextMenuHandler.author.id})${if (alunaProperties.debug.showHashCode) " [${this@DiscordContextMenuHandler.hashCode()}]" else ""} took ${stopWatch!!.totalTimeMillis}ms")
+                when {
+                    (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the context menu ${event.fullCommandName} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
+                    (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the context menu ${event.fullCommandName} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
                 }
             }
+        }
 
-            launch(AlunaCoroutinesDispatcher.IO) {
-                discordInteractionMetaDataHandler.onExitInteraction(command, stopWatch, event)
-            }
+        launch {
+            discordInteractionMetaDataHandler.onExitInteraction(this@DiscordContextMenuHandler, stopWatch, event)
         }
     }
 
@@ -366,7 +311,7 @@ abstract class DiscordContextMenu(
      * @param callEntitySelectTimeout Call onEntitySelectInteractionTimeout of this bean
      * @param callModalTimeout Call onModalInteractionTimeout of this bean
      */
-    fun destroyThisInstance(
+    suspend fun destroyThisInstance(
         removeObservers: Boolean = true,
         removeObserverTimeouts: Boolean = true,
         callOnDestroy: Boolean = false,
@@ -374,7 +319,7 @@ abstract class DiscordContextMenu(
         callStringSelectTimeout: Boolean = false,
         callEntitySelectTimeout: Boolean = false,
         callModalTimeout: Boolean = false
-    ) {
+    ) = withContext(AlunaDispatchers.Interaction) {
         val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
         interactionScope.removeByUniqueId(uniqueId)
 
@@ -397,12 +342,23 @@ abstract class DiscordContextMenu(
             modalObserver?.value?.timeoutTask?.cancel(true)
         }
 
-        runBlocking(AlunaCoroutinesDispatcher.Default) {
-            async { if (callOnDestroy) onDestroy() }
-            async { if (callButtonTimeout) buttonObserver?.let { onButtonInteractionTimeout(it.value.additionalData) } }
-            async { if (callStringSelectTimeout) stringSelectObserver?.let { onStringSelectInteractionTimeout(it.value.additionalData) } }
-            async { if (callEntitySelectTimeout) entitySelectObserver?.let { onEntitySelectInteractionTimeout(it.value.additionalData) } }
-            async { if (callModalTimeout) modalObserver?.let { onModalInteractionTimeout(it.value.additionalData) } }
-        }
+        launch { if (callOnDestroy) runOnDestroy() }
+        launch { if (callButtonTimeout) buttonObserver?.let { runOnButtonInteractionTimeout(it.value.additionalData) } }
+        launch { if (callStringSelectTimeout) stringSelectObserver?.let { runOnStringSelectInteractionTimeout(it.value.additionalData) } }
+        launch { if (callEntitySelectTimeout) entitySelectObserver?.let { runOnEntitySelectInteractionTimeout(it.value.additionalData) } }
+        launch { if (callModalTimeout) modalObserver?.let { runOnModalInteractionTimeout(it.value.additionalData) } }
     }
+
+    override suspend fun handleOnButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean = runOnButtonInteraction(event, additionalData)
+    override suspend fun handleOnButtonInteractionTimeout(additionalData: HashMap<String, Any?>) = runOnButtonInteractionTimeout(additionalData)
+    override suspend fun handleOnStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>) =
+        runOnStringSelectInteraction(event, additionalData)
+
+    override suspend fun handleOnStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) = runOnStringSelectInteractionTimeout(additionalData)
+    override suspend fun handleOnEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>) =
+        runOnEntitySelectInteraction(event, additionalData)
+
+    override suspend fun handleOnEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) = runOnEntitySelectInteractionTimeout(additionalData)
+    override suspend fun handleOnModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>) = runOnModalInteraction(event, additionalData)
+    override suspend fun handleOnModalInteractionTimeout(additionalData: HashMap<String, Any?>) = runOnModalInteractionTimeout(additionalData)
 }

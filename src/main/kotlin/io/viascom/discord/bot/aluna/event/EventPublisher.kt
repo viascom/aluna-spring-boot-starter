@@ -22,9 +22,9 @@
 package io.viascom.discord.bot.aluna.event
 
 import io.viascom.discord.bot.aluna.bot.AutoCompleteHandler
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.DiscordMessageContextMenu
-import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
+import io.viascom.discord.bot.aluna.bot.DiscordMessageContextMenuHandler
+import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenuHandler
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
@@ -50,7 +50,7 @@ class EventPublisher(
     private val alunaProperties: AlunaProperties
 ) {
 
-    @get:JvmSynthetic
+    @JvmSynthetic
     internal val eventThreadPool = AlunaThreadPool.getDynamicThreadPool(
         0,
         alunaProperties.thread.eventThreadPool,
@@ -120,16 +120,16 @@ class EventPublisher(
     }
 
     @JvmSynthetic
-    internal fun publishDiscordCommandEvent(user: User, channel: Channel, guild: Guild?, commandPath: String, command: DiscordCommand) {
+    internal fun publishDiscordCommandEvent(user: User, channel: Channel, guild: Guild?, commandPath: String, commandHandler: DiscordCommandHandler) {
         eventThreadPool.execute {
             logger.debug("Publishing DiscordCommandEvent")
-            val discordCommandEvent = DiscordCommandEvent(this, user, channel, guild, commandPath, command)
+            val discordCommandEvent = DiscordCommandEvent(this, user, channel, guild, commandPath, commandHandler)
             applicationEventPublisher.publishEvent(discordCommandEvent)
         }
     }
 
     @JvmSynthetic
-    internal fun publishDiscordMessageContextEvent(user: User, channel: Channel?, guild: Guild?, name: String, contextMenu: DiscordMessageContextMenu) {
+    internal fun publishDiscordMessageContextEvent(user: User, channel: Channel?, guild: Guild?, name: String, contextMenu: DiscordMessageContextMenuHandler) {
         eventThreadPool.execute {
             logger.debug("Publishing DiscordMessageContextEvent")
             val discordMessageContextEvent = DiscordMessageContextEvent(this, user, channel, guild, name, contextMenu)
@@ -138,7 +138,7 @@ class EventPublisher(
     }
 
     @JvmSynthetic
-    internal fun publishDiscordUserContextEvent(user: User, channel: Channel?, guild: Guild?, name: String, contextMenu: DiscordUserContextMenu) {
+    internal fun publishDiscordUserContextEvent(user: User, channel: Channel?, guild: Guild?, name: String, contextMenu: DiscordUserContextMenuHandler) {
         eventThreadPool.execute {
             logger.debug("Publishing DiscordUserContextEvent")
             val discordUserContextEvent = DiscordUserContextEvent(this, user, channel, guild, name, contextMenu)

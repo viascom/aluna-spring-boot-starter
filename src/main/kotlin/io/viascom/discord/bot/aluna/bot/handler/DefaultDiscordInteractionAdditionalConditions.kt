@@ -21,35 +21,35 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
+import io.viascom.discord.bot.aluna.bot.DiscordContextMenuHandler
 import io.viascom.discord.bot.aluna.model.AdditionalRequirements
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
 
-class DefaultDiscordInteractionAdditionalConditions : DiscordInteractionAdditionalConditions {
+open class DefaultDiscordInteractionAdditionalConditions : DiscordInteractionAdditionalConditions {
     override fun checkForAdditionalCommandRequirements(
-        discordCommand: DiscordCommand,
+        discordCommandHandler: DiscordCommandHandler,
         event: SlashCommandInteractionEvent
     ): AdditionalRequirements {
         return AdditionalRequirements()
     }
 
-    override fun checkForAdditionalCommandRequirements(discordCommand: DiscordCommand, event: CommandAutoCompleteInteractionEvent): AdditionalRequirements {
+    override fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: CommandAutoCompleteInteractionEvent): AdditionalRequirements {
         return AdditionalRequirements()
     }
 
     override fun checkForAdditionalContextRequirements(
-        contextMenu: DiscordContextMenu,
+        contextMenu: DiscordContextMenuHandler,
         event: UserContextInteractionEvent
     ): AdditionalRequirements {
         return AdditionalRequirements()
     }
 
     override fun checkForAdditionalContextRequirements(
-        contextMenu: DiscordContextMenu,
+        contextMenu: DiscordContextMenuHandler,
         event: MessageContextInteractionEvent
     ): AdditionalRequirements {
         return AdditionalRequirements()

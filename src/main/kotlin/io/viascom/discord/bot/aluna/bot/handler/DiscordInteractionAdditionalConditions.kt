@@ -21,8 +21,8 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
+import io.viascom.discord.bot.aluna.bot.DiscordContextMenuHandler
 import io.viascom.discord.bot.aluna.model.AdditionalRequirements
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
@@ -35,21 +35,21 @@ interface DiscordInteractionAdditionalConditions {
      * Check for additional requirements.
      * Make sure to not block the execution for to long as the interaction needs to be acknowledged in 3 seconds.
      *
-     * @param discordCommand Discord command instance
+     * @param discordCommandHandler Discord command handler instance
      * @param event Slash command event
      * @return AdditionalRequirements
      */
-    fun checkForAdditionalCommandRequirements(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent): AdditionalRequirements
+    fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent): AdditionalRequirements
 
     /**
      * Check for additional requirements.
      * Make sure to not block the execution for to long as the interaction needs to be acknowledged in 3 seconds.
      *
-     * @param discordCommand Discord command instance
+     * @param discordCommandHandler Discord command handler instance
      * @param event Auto complete event
      * @return AdditionalRequirements
      */
-    fun checkForAdditionalCommandRequirements(discordCommand: DiscordCommand, event: CommandAutoCompleteInteractionEvent): AdditionalRequirements
+    fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: CommandAutoCompleteInteractionEvent): AdditionalRequirements
 
     /**
      * Check for additional requirements.
@@ -59,7 +59,7 @@ interface DiscordInteractionAdditionalConditions {
      * @param event User context menu event
      * @return AdditionalRequirements
      */
-    fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenu, event: UserContextInteractionEvent): AdditionalRequirements
+    fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenuHandler, event: UserContextInteractionEvent): AdditionalRequirements
 
 
     /**
@@ -70,5 +70,5 @@ interface DiscordInteractionAdditionalConditions {
      * @param event Message context menu event
      * @return AdditionalRequirements
      */
-    fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenu, event: MessageContextInteractionEvent): AdditionalRequirements
+    fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenuHandler, event: MessageContextInteractionEvent): AdditionalRequirements
 }

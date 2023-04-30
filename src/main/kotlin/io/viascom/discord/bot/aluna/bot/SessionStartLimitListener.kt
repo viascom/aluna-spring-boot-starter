@@ -21,13 +21,16 @@
 
 package io.viascom.discord.bot.aluna.bot
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordAllShardsReadyEvent
+import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 @Service
 @ConditionalOnJdaEnabled
@@ -38,11 +41,12 @@ class SessionStartLimitListener(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onApplicationEvent(event: DiscordAllShardsReadyEvent) {
-        //Show session info, if remaining is below 300
-        if (discordBot.sessionStartLimits?.remaining != null && discordBot.sessionStartLimits!!.remaining < 300) {
-            val resetDate = LocalDateTime.now().plusSeconds(discordBot.sessionStartLimits!!.resetAfter / 1000L)
-            logger.warn(
-                """
+        AlunaDispatchers.InternalScope.launch {
+            //Show session info, if remaining is below 300
+            if (discordBot.sessionStartLimits?.remaining != null && discordBot.sessionStartLimits!!.remaining < 300) {
+                val resetDate = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(discordBot.sessionStartLimits!!.resetAfter / 1000L)
+                logger.warn(
+                    """
                     
                 ###############################################
                              Session Start Limit
@@ -56,7 +60,8 @@ class SessionStartLimitListener(
                 -> Max Concurrency: ${discordBot.sessionStartLimits!!.maxConcurrency}
                 ###############################################
                 """.trimIndent()
-            )
+                )
+            }
         }
     }
 

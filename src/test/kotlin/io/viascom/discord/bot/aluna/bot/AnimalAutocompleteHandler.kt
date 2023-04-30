@@ -21,21 +21,68 @@
 
 package io.viascom.discord.bot.aluna.bot
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.interaction.SetPreferredAnimalCommand
-import io.viascom.discord.bot.aluna.util.replyStringChoices
+import io.viascom.discord.bot.aluna.util.getOptionAsString
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.util.concurrent.TimeUnit
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @AutoComplete
 class AnimalAutocompleteHandler : AutoCompleteHandler(SetPreferredAnimalCommand::class.java, "animal") {
 
+    val tempFlow = MutableStateFlow<CommandAutoCompleteInteractionEvent?>(null)
+
+    var isLoading = false
+    var data: List<String>? = null
+
     override fun onRequest(event: CommandAutoCompleteInteractionEvent) {
-        val options = hashMapOf<String, String>()
+        logger.info(this.uniqueId)
 
-        options["fox"] = "Fox"
-        options["bunny"] = "Bunny"
-        options["deer"] = "Deer"
+        if (data == null && !isLoading) {
+            isLoading = true
+            logger.info("first request")
+            AlunaDispatchers.InteractionScope.launch {
+                val httpClient = OkHttpClient.Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .writeTimeout(60, TimeUnit.SECONDS)
+                    .readTimeout(120, TimeUnit.SECONDS)
+                    .build()
 
-        event.replyStringChoices(options).queue()
+
+                httpClient.newCall(Request.Builder().get().url("http://httpbin.org/delay/4").build()).execute()
+                logger.info("data loaded")
+                data = arrayListOf("fox", "bunny", "deer")
+            }
+            return
+        }
+
+        tempFlow.update { event }
+    }
+
+    suspend fun handleInput() {
+        tempFlow.debounce {
+            if (data != null) return@debounce 0.toDuration(DurationUnit.SECONDS)
+            (2000.toDuration(DurationUnit.MILLISECONDS)) //Wait longer to show the user we are loading data
+        }.collect { event ->
+            if (event == null || data == null) return@collect
+
+            logger.info("check input: ${event.getOptionAsString("animal") ?: ""}")
+
+            val filtered = data!!.filter { it.contains(event.getOptionAsString("animal") ?: "") }
+            event.replyChoiceStrings(filtered).queue()
+        }
+    }
+
+    init {
+        AlunaDispatchers.InteractionScope.launch { handleInput() }
     }
 
 }

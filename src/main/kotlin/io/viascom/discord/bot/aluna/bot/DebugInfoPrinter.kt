@@ -21,12 +21,14 @@
 
 package io.viascom.discord.bot.aluna.bot
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.configuration.AlunaHealthIndicator
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordSlashCommandInitializedEvent
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.property.ModeratorIdProvider
 import io.viascom.discord.bot.aluna.property.OwnerIdProvider
+import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
@@ -49,28 +51,29 @@ class DebugInfoPrinter(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onApplicationEvent(event: DiscordSlashCommandInitializedEvent) {
-        if (!alunaProperties.productionMode) {
-            var permission = 0L
-            alunaProperties.discord.defaultPermissions.forEach { permission = permission or it.rawValue }
-            val token = if (!alunaProperties.debug.hideTokenInDebugConfigurationLog) {
-                "-> token:           ${alunaProperties.discord.token}\n"
-            } else ""
-            val invite = if (alunaProperties.discord.applicationId != null) {
-                "https://discord.com/oauth2/authorize?client_id=${alunaProperties.discord.applicationId}&scope=bot%20applications.commands&permissions=$permission"
-            } else {
-                "<Please add an applicationId to see this invite link!>"
-            }
-            val healthIndicator = try {
-                context.getBean(AlunaHealthIndicator::class.java)
-            } catch (e: Exception) {
-                null
-            }
-            val actuator = if (healthIndicator != null) {
-                val serverProperties = context.getBean(ServerProperties::class.java)
-                "-> healthIndicator: http://localhost:${serverProperties.port}/actuator/health/aluna\n"
-            } else ""
-            logger.info(
-                """
+        AlunaDispatchers.InternalScope.launch {
+            if (!alunaProperties.productionMode) {
+                var permission = 0L
+                alunaProperties.discord.defaultPermissions.forEach { permission = permission or it.rawValue }
+                val token = if (!alunaProperties.debug.hideTokenInDebugConfigurationLog) {
+                    "-> token:           ${alunaProperties.discord.token}\n"
+                } else ""
+                val invite = if (alunaProperties.discord.applicationId != null) {
+                    "https://discord.com/oauth2/authorize?client_id=${alunaProperties.discord.applicationId}&scope=bot%20applications.commands&permissions=$permission"
+                } else {
+                    "<Please add an applicationId to see this invite link!>"
+                }
+                val healthIndicator = try {
+                    context.getBean(AlunaHealthIndicator::class.java)
+                } catch (e: Exception) {
+                    null
+                }
+                val actuator = if (healthIndicator != null) {
+                    val serverProperties = context.getBean(ServerProperties::class.java)
+                    "-> healthIndicator: http://localhost:${serverProperties.port}/actuator/health/aluna\n"
+                } else ""
+                logger.info(
+                    """
                 
                 ###############################################
                                 Configuration
@@ -81,11 +84,12 @@ class DebugInfoPrinter(
                 -> supportServer:   ${alunaProperties.discord.supportServer ?: "<not defined>"}
                 -> invite:          $invite
                 """.trimIndent() + "\n" +
-                        token +
-                        actuator +
-                        "###############################################"
+                            token +
+                            actuator +
+                            "###############################################"
 
-            )
+                )
+            }
         }
     }
 

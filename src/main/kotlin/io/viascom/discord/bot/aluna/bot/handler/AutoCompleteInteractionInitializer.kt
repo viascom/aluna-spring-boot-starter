@@ -21,11 +21,13 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.AutoCompleteHandler
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordSlashCommandInitializedEvent
 import io.viascom.discord.bot.aluna.event.EventPublisher
+import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationListener
@@ -42,7 +44,9 @@ internal open class AutoCompleteInteractionInitializer(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onApplicationEvent(event: DiscordSlashCommandInitializedEvent) {
-        initAutoCompleteHandlers()
+        AlunaDispatchers.InternalScope.launch {
+            initAutoCompleteHandlers()
+        }
     }
 
     private fun initAutoCompleteHandlers() {

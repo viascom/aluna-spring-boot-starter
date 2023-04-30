@@ -21,13 +21,15 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordContextMenuHandler
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordFirstShardConnectedEvent
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.property.AlunaProperties
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.interactions.commands.Command.*
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
@@ -41,7 +43,7 @@ import org.springframework.stereotype.Service
 @ConditionalOnJdaEnabled
 internal open class InteractionLoader(
     private val commands: List<DiscordCommand>,
-    private val contextMenus: List<DiscordContextMenu>,
+    private val contextMenus: List<DiscordContextMenuHandler>,
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
     private val eventPublisher: EventPublisher,
@@ -51,41 +53,42 @@ internal open class InteractionLoader(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     override fun onApplicationEvent(event: DiscordFirstShardConnectedEvent) {
-        //No need to load interactions if it is the main shard
-        if (alunaProperties.discord.sharding.fromShard == 0) {
-            return
-        }
-
-        logger.debug("Load interactions")
-
-        shardManager.shards.first().retrieveCommands(true).queue { currentCommands ->
-            discordBot.discordRepresentations.clear()
-            discordBot.discordRepresentations.putAll(currentCommands.associateBy { it.name })
-
-            currentCommands.filter { it.type == Type.SLASH }.filter { it.name in commands.map { it.name } }.forEach { filteredCommand ->
-                try {
-                    discordBot.commands.computeIfAbsent(filteredCommand.id) { commands.first { it.name == filteredCommand.name }.javaClass }
-                    if (commands.first { it.name == filteredCommand.name }.observeAutoComplete && filteredCommand.id !in discordBot.commandsWithAutocomplete) {
-                        discordBot.commandsWithAutocomplete.add(filteredCommand.id)
-                    }
-                    if (commands.first { it.name == filteredCommand.name }.handlePersistentInteractions && filteredCommand.id !in discordBot.commandsWithPersistentInteractions) {
-                        discordBot.commandsWithPersistentInteractions.add(filteredCommand.id)
-                    }
-                } catch (e: Exception) {
-                    logger.error("Could not add command '${filteredCommand.name}' to available commands")
-                }
+        AlunaDispatchers.InternalScope.launch {
+            //No need to load interactions if it is the main shard
+            if (alunaProperties.discord.sharding.fromShard == 0) {
+                return@launch
             }
 
-            currentCommands.filter { it.type != Type.SLASH }.filter { it.name in contextMenus.map { it.name } }.forEach { filteredCommand ->
-                try {
-                    discordBot.contextMenus.computeIfAbsent(filteredCommand.id) { contextMenus.first { it.name == filteredCommand.name }.javaClass }
-                } catch (e: Exception) {
-                    logger.error("Could not add context menu '${filteredCommand.name}' to available commands")
+            logger.debug("Load interactions")
+
+            shardManager.shards.first().retrieveCommands(true).queue { currentCommands ->
+                discordBot.discordRepresentations.clear()
+                discordBot.discordRepresentations.putAll(currentCommands.associateBy { it.name })
+
+                currentCommands.filter { it.type == Type.SLASH }.filter { it.name in commands.map { it.name } }.forEach { filteredCommand ->
+                    try {
+                        discordBot.commands.computeIfAbsent(filteredCommand.id) { commands.first { it.name == filteredCommand.name }.javaClass }
+                        if (commands.first { it.name == filteredCommand.name }.observeAutoComplete && filteredCommand.id !in discordBot.commandsWithAutocomplete) {
+                            discordBot.commandsWithAutocomplete.add(filteredCommand.id)
+                        }
+                        if (commands.first { it.name == filteredCommand.name }.handlePersistentInteractions && filteredCommand.id !in discordBot.commandsWithPersistentInteractions) {
+                            discordBot.commandsWithPersistentInteractions.add(filteredCommand.id)
+                        }
+                    } catch (e: Exception) {
+                        logger.error("Could not add command '${filteredCommand.name}' to available commands")
+                    }
                 }
+
+                currentCommands.filter { it.type != Type.SLASH }.filter { it.name in contextMenus.map { it.name } }.forEach { filteredCommand ->
+                    try {
+                        discordBot.contextMenus.computeIfAbsent(filteredCommand.id) { contextMenus.first { it.name == filteredCommand.name }.javaClass }
+                    } catch (e: Exception) {
+                        logger.error("Could not add context menu '${filteredCommand.name}' to available commands")
+                    }
+                }
+
+                eventPublisher.publishDiscordSlashCommandInitializedEvent(arrayListOf(), arrayListOf(), arrayListOf())
             }
-
-            eventPublisher.publishDiscordSlashCommandInitializedEvent(arrayListOf(), arrayListOf(), arrayListOf())
         }
-
     }
 }

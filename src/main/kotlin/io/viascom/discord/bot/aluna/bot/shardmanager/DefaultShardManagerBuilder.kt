@@ -22,6 +22,7 @@
 package io.viascom.discord.bot.aluna.bot.shardmanager
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.bot.listener.*
@@ -31,6 +32,7 @@ import io.viascom.discord.bot.aluna.property.AlunaDiscordProperties
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
 import jakarta.annotation.Nonnull
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.events.GenericEvent
@@ -47,14 +49,13 @@ import okhttp3.Request
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.toJavaDuration
 
 
-class DefaultShardManagerBuilder(
+open class DefaultShardManagerBuilder(
     private val interactionEventListener: InteractionEventListener,
     private val genericInteractionListener: GenericInteractionListener,
     private val interactionComponentEventListener: InteractionComponentEventListener,
@@ -249,16 +250,13 @@ class DefaultShardManagerBuilder(
 
         val shardManager = shardManagerBuilder.build()
 
-        val threadPool = AlunaThreadPool.getDynamicSingleThreadPool(10.seconds.toJavaDuration(), "Aluna-StartUp-Pool-%d")
-
-        threadPool.submit {
+        AlunaDispatchers.InternalScope.launch {
             logger.debug("Awaiting for $latchCount shards to connect")
             try {
                 shardStartListener.latch.await()
                 val elapsed = System.currentTimeMillis() - start
                 logger.debug("All shards are connected! Took ${TimeUnit.MILLISECONDS.toSeconds(elapsed)} seconds")
                 shardManager.removeEventListener(shardStartListener)
-                threadPool.shutdown()
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }
@@ -287,7 +285,7 @@ class DefaultShardManagerBuilder(
             null
         }
 
-        gatewayResponse?.sessionStartLimit?.let { it.resetTimestamp = LocalDateTime.now().plusSeconds(it.resetAfter / 1000L) }
+        gatewayResponse?.sessionStartLimit?.let { it.resetTimestamp = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(it.resetAfter / 1000L) }
 
         return gatewayResponse
     }

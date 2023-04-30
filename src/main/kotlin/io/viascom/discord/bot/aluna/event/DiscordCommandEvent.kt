@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.event
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.Channel
@@ -35,7 +35,7 @@ import org.springframework.context.ApplicationEvent
  * @param channel channel of the command
  * @param guild server of the command if available
  * @param commandPath path of the command
- * @param command command itself
+ * @param commandHandler command itself
  */
-class DiscordCommandEvent(source: Any, val user: User, val channel: Channel, val guild: Guild?, val commandPath: String, val command: DiscordCommand) :
+class DiscordCommandEvent(source: Any, val user: User, val channel: Channel, val guild: Guild?, val commandPath: String, val commandHandler: DiscordCommandHandler) :
     ApplicationEvent(source)

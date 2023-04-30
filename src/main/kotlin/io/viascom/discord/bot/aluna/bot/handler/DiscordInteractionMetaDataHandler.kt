@@ -21,8 +21,8 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
+import io.viascom.discord.bot.aluna.bot.DiscordContextMenuHandler
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import org.springframework.util.StopWatch
@@ -35,10 +35,10 @@ interface DiscordInteractionMetaDataHandler {
     /**
      * Gets called asynchronously before the command is executed.
      *
-     * @param discordCommand Discord command instance
+     * @param discordCommandHandler Discord command instance
      * @param event
      */
-    fun onCommandExecution(discordCommand: DiscordCommand, event: SlashCommandInteractionEvent)
+    fun onCommandExecution(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent)
 
     /**
      * Gets called asynchronously before the context menu is executed.
@@ -46,17 +46,17 @@ interface DiscordInteractionMetaDataHandler {
      * @param contextMenu Discord context menu instance
      * @param event
      */
-    fun onContextMenuExecution(contextMenu: DiscordContextMenu, event: GenericCommandInteractionEvent)
+    fun onContextMenuExecution(contextMenu: DiscordContextMenuHandler, event: GenericCommandInteractionEvent)
 
     /**
      * Gets called asynchronously after the command is executed.
      * This gets also called if the command execution throws an exception.
      *
-     * @param discordCommand Discord command instance
+     * @param discordCommandHandler Discord command instance
      * @param stopWatch StopWatch instance if enabled
      * @param event Slash command event
      */
-    fun onExitInteraction(discordCommand: DiscordCommand, stopWatch: StopWatch?, event: SlashCommandInteractionEvent)
+    fun onExitInteraction(discordCommandHandler: DiscordCommandHandler, stopWatch: StopWatch?, event: SlashCommandInteractionEvent)
 
     /**
      * Gets called asynchronously after the context menu is executed.
@@ -66,18 +66,18 @@ interface DiscordInteractionMetaDataHandler {
      * @param stopWatch StopWatch instance if enabled
      * @param event Slash command event
      */
-    fun onExitInteraction(contextMenu: DiscordContextMenu, stopWatch: StopWatch?, event: GenericCommandInteractionEvent)
+    fun onExitInteraction(contextMenu: DiscordContextMenuHandler, stopWatch: StopWatch?, event: GenericCommandInteractionEvent)
 
     /**
      * Gets called if the command defined onExecutionException throws an exception.
      *
-     * @param discordCommand Discord command instance
+     * @param discordCommandHandler Discord command instance
      * @param throwableOfExecution initial exception from the execution
      * @param exceptionOfSpecificHandler exception thrown by onExecutionException
      * @param event Slash command event
      */
     fun onGenericExecutionException(
-        discordCommand: DiscordCommand,
+        discordCommandHandler: DiscordCommandHandler,
         throwableOfExecution: Exception,
         exceptionOfSpecificHandler: Exception,
         event: GenericCommandInteractionEvent
@@ -92,7 +92,7 @@ interface DiscordInteractionMetaDataHandler {
      * @param event Slash command event
      */
     fun onGenericExecutionException(
-        contextMenu: DiscordContextMenu,
+        contextMenu: DiscordContextMenuHandler,
         throwableOfExecution: Exception,
         exceptionOfSpecificHandler: Exception,
         event: GenericCommandInteractionEvent

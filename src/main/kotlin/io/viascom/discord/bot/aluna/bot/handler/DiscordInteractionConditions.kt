@@ -21,8 +21,8 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.DiscordContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
+import io.viascom.discord.bot.aluna.bot.DiscordContextMenuHandler
 import io.viascom.discord.bot.aluna.model.MissingPermissions
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
@@ -33,13 +33,13 @@ interface DiscordInteractionConditions {
      * Check if the user has all the needed permissions.
      * Make sure to not block the execution for to long as the command needs to be acknowledged in 3 seconds.
      *
-     * @param discordCommand Discord command instance
+     * @param discordCommandHandler Discord command instance
      * @param userPermissions Needed Permissions
      * @param event Generic interaction event
      * @return MissingPermissions
      */
     fun checkForNeededUserPermissions(
-        discordCommand: DiscordCommand,
+        discordCommandHandler: DiscordCommandHandler,
         userPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
     ): MissingPermissions
@@ -48,13 +48,13 @@ interface DiscordInteractionConditions {
      * Check if the bot has all the needed permissions.
      * Make sure to not block the execution for to long as the command needs to be acknowledged in 3 seconds.
      *
-     * @param discordCommand Discord command instance
+     * @param discordCommandHandler Discord command instance
      * @param botPermissions Needed Permissions
      * @param event Generic interaction event
      * @return MissingPermissions
      */
     fun checkForNeededBotPermissions(
-        discordCommand: DiscordCommand,
+        discordCommandHandler: DiscordCommandHandler,
         botPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
     ): MissingPermissions
@@ -69,7 +69,7 @@ interface DiscordInteractionConditions {
      * @return MissingPermissions
      */
     fun checkForNeededUserPermissions(
-        contextMenu: DiscordContextMenu,
+        contextMenu: DiscordContextMenuHandler,
         userPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
     ): MissingPermissions
@@ -84,7 +84,7 @@ interface DiscordInteractionConditions {
      * @return MissingPermissions
      */
     fun checkForNeededBotPermissions(
-        contextMenu: DiscordContextMenu,
+        contextMenu: DiscordContextMenuHandler,
         botPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
     ): MissingPermissions

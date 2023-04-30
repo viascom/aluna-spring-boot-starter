@@ -226,10 +226,12 @@ fun EmbedBuilder.addFields(fields: Collection<MessageEmbed.Field>): EmbedBuilder
 }
 
 fun EmbedBuilder.setColor(red: Int, green: Int, blue: Int): EmbedBuilder = this.setColor(Color(red, green, blue))
-fun EmbedBuilder.setColor(hexColor: String): EmbedBuilder = this.setColor(Color.getColor(hexColor))
+fun EmbedBuilder.setColor(hexColor: String): EmbedBuilder = this.setColor(Color.decode(hexColor))
 
 fun User.getMessage(messageId: String): Message? = try {
     this.openPrivateChannel().complete().retrieveMessageById(messageId).complete()
 } catch (e: Exception) {
     null
 }
+
+fun String.toDiscordEmbed(title: String? = null): EmbedBuilder = EmbedBuilder().setTitle(title).setDescription(this).setColor("#2c2d31")

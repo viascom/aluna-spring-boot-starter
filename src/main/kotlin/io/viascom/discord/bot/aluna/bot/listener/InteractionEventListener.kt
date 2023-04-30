@@ -22,8 +22,8 @@
 package io.viascom.discord.bot.aluna.bot.listener
 
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.DiscordMessageContextMenu
-import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenu
+import io.viascom.discord.bot.aluna.bot.DiscordMessageContextMenuHandler
+import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenuHandler
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
@@ -50,7 +50,7 @@ open class InteractionEventListener(
         }
     }
 
-    private fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
+    private suspend fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
         DiscordContext.setDiscordState(
             event.user.id,
             event.guild?.id,
@@ -62,7 +62,7 @@ open class InteractionEventListener(
         }
     }
 
-    private fun onUserContextInteraction(event: UserContextInteractionEvent) {
+    private suspend fun onUserContextInteraction(event: UserContextInteractionEvent) {
         DiscordContext.setDiscordState(
             event.user.id,
             event.guild?.id,
@@ -70,11 +70,11 @@ open class InteractionEventListener(
             NanoId.generate()
         )
         discordBot.contextMenus[event.commandId]?.let { interaction ->
-            (context.getBean(interaction) as DiscordUserContextMenu).run(event)
+            (context.getBean(interaction) as DiscordUserContextMenuHandler).run(event)
         }
     }
 
-    private fun onMessageContextInteraction(event: MessageContextInteractionEvent) {
+    private suspend fun onMessageContextInteraction(event: MessageContextInteractionEvent) {
         DiscordContext.setDiscordState(
             event.user.id,
             event.guild?.id,
@@ -82,7 +82,7 @@ open class InteractionEventListener(
             NanoId.generate()
         )
         discordBot.contextMenus[event.commandId]?.let { interaction ->
-            (context.getBean(interaction) as DiscordMessageContextMenu).run(event)
+            (context.getBean(interaction) as DiscordMessageContextMenuHandler).run(event)
         }
     }
 }

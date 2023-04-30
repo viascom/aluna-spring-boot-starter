@@ -21,10 +21,10 @@
 
 package io.viascom.discord.bot.aluna.configuration.scope
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.DiscordInteractionHandler
 import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
-import io.viascom.discord.bot.aluna.bot.event.AlunaCoroutinesDispatcher
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
 import io.viascom.discord.bot.aluna.model.ObserveInteraction
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
@@ -39,6 +39,7 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.core.NamedInheritableThreadLocal
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
@@ -48,10 +49,10 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    @get:JvmSynthetic
+    @JvmSynthetic
     internal val scopedObjects = Collections.synchronizedMap(HashMap<BeanName, HashMap<DiscordStateId, HashMap<UniqueId, ScopedObjectData>>>())
 
-    @get:JvmSynthetic
+    @JvmSynthetic
     internal var scopedObjectsTimeoutScheduler: ScheduledThreadPoolExecutor
 
     private val scopedObjectsTimeoutScheduledTask = Collections.synchronizedMap(HashMap<UniqueId, ScheduledFuture<*>>())
@@ -257,7 +258,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
     ): ScheduledFuture<*> {
         return scopedObjectsTimeoutScheduler.schedule({
             val discordBot: DiscordBot = context.getBean(DiscordBot::class.java) as DiscordBot
-            runBlocking(AlunaCoroutinesDispatcher.Default) {
+            runBlocking(AlunaDispatchers.Internal) {
                 if (executeOnDestroy) {
                     try {
                         newObj::class.java.getDeclaredMethod("onDestroy").invoke(newObj)
@@ -531,7 +532,7 @@ internal class ScopedObjectData(
     var type: DiscordContext.Type,
     val obj: Any,
     var messageId: String? = null,
-    var creationDate: LocalDateTime = LocalDateTime.now()
+    var creationDate: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
 ) {
     override fun toString(): String {
         return "[type='$type', creationDate='$creationDate', obj='$obj']"

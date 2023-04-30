@@ -31,7 +31,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
 
-class DefaultDiscordInteractionLocalization(
+open class DefaultDiscordInteractionLocalization(
     private val alunaProperties: AlunaProperties
 ) : DiscordInteractionLocalization {
 

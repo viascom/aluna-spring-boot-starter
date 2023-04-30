@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,8 +19,11 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.bot.handler
+package io.viascom.discord.bot.aluna.configuration.condition
 
-enum class CooldownScope {
-    NO_COOLDOWN, USER, CHANNEL, GUILD, USER_GUILD, GLOBAL
-}
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import java.lang.annotation.Inherited
+
+@ConditionalOnProperty(name = ["command.help-command.enabled"], prefix = "aluna", matchIfMissing = false)
+@Inherited
+annotation class ConditionalOnDefaultHelpCommandEnabled()

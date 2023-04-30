@@ -21,31 +21,23 @@
 
 package io.viascom.discord.bot.aluna.bot.interaction
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import io.viascom.discord.bot.aluna.bot.DiscordMessageContextMenu
-import io.viascom.discord.bot.aluna.bot.Interaction
-import io.viascom.discord.bot.aluna.model.Webhook
-import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
-import net.dv8tion.jda.api.utils.FileUpload
-import net.dv8tion.jda.api.utils.messages.MessageEditData
-
-@Interaction
-class GetMessageAsWebhookMessageMenu(
-    private val objectMapper: ObjectMapper
-) : DiscordMessageContextMenu("Extract as Webhook") {
-
-    override fun execute(event: MessageContextInteractionEvent) {
-        //Create a webhook model from the target message
-        val webhook = Webhook.fromMessage(MessageEditData.fromMessage(event.target))
-
-        /*
-        Convert the model to json, so we can send it as a file to Discord.
-        We do this, because Discord messages are limited by characters and the webhook json can get quite big.
-        */
-        val jsonByteArray = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(webhook)
-
-        //Send the "file" together with some text back to the user
-        event.reply("Webhook json of [Message-Link](${event.target.jumpUrl}):").setFiles(FileUpload.fromData(jsonByteArray, "message.json")).queue()
-    }
-
-}
+//@Interaction
+//class GetMessageAsWebhookMessageMenu(
+//    private val objectMapper: ObjectMapper
+//) : DiscordMessageContextMenu("Extract as Webhook") {
+//
+//    override fun execute(event: MessageContextInteractionEvent) {
+//        //Create a webhook model from the target message
+//        val webhook = Webhook.fromMessage(MessageEditData.fromMessage(event.target))
+//
+//        /*
+//        Convert the model to json, so we can send it as a file to Discord.
+//        We do this, because Discord messages are limited by characters and the webhook json can get quite big.
+//        */
+//        val jsonByteArray = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(webhook)
+//
+//        //Send the "file" together with some text back to the user
+//        event.reply("Webhook json of [Message-Link](${event.target.jumpUrl}):").setFiles(FileUpload.fromData(jsonByteArray, "message.json")).queue()
+//    }
+//
+//}
