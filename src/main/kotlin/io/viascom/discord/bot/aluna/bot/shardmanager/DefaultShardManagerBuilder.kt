@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
+import io.viascom.discord.bot.aluna.bot.event.CoroutineEventManager
 import io.viascom.discord.bot.aluna.bot.listener.*
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.model.GatewayResponse
@@ -77,7 +78,7 @@ open class DefaultShardManagerBuilder(
             .addEventListeners(genericInteractionListener)
             .addEventListeners(interactionEventListener)
             .addEventListeners(interactionComponentEventListener)
-            .setEventManagerProvider { discordBot.coroutineEventManager }
+            .setEventManagerProvider { CoroutineEventManager(discordBot.eventThreadPool) }
             .setCallbackPool(
                 AlunaThreadPool.getDynamicThreadPool(
                     0,

@@ -21,13 +21,9 @@
 
 package io.viascom.discord.bot.aluna.event
 
-import io.viascom.discord.bot.aluna.bot.AutoCompleteHandler
-import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
-import io.viascom.discord.bot.aluna.bot.DiscordMessageContextMenuHandler
-import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenuHandler
+import io.viascom.discord.bot.aluna.bot.*
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
-import io.viascom.discord.bot.aluna.util.AlunaThreadPool
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.Channel
@@ -47,23 +43,15 @@ import kotlin.reflect.KClass
 @ConditionalOnJdaEnabled
 class EventPublisher(
     private val applicationEventPublisher: ApplicationEventPublisher,
-    private val alunaProperties: AlunaProperties
+    private val alunaProperties: AlunaProperties,
+    private val discordBot: DiscordBot
 ) {
-
-    @JvmSynthetic
-    internal val eventThreadPool = AlunaThreadPool.getDynamicThreadPool(
-        0,
-        alunaProperties.thread.eventThreadPool,
-        java.time.Duration.ofMinutes(1),
-        true,
-        "Aluna-Event-Pool-%d"
-    )
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @JvmSynthetic
     internal fun publishDiscordNodeReadyEvent(jdaEvent: ReadyEvent, shardManager: ShardManager) {
-        eventThreadPool.execute {
+        discordBot.eventThreadPool.execute {
             logger.debug("Publishing DiscordNodeReadyEvent")
             val discordNodeReadyEvent = DiscordNodeReadyEvent(this, jdaEvent, shardManager)
             applicationEventPublisher.publishEvent(discordNodeReadyEvent)
@@ -72,7 +60,7 @@ class EventPublisher(
 
     @JvmSynthetic
     internal fun publishDiscordAllShardsReadyEvent(jdaEvent: ReadyEvent, shardManager: ShardManager) {
-        eventThreadPool.execute {
+        discordBot.eventThreadPool.execute {
             logger.debug("Publishing DiscordAllShardsReadyEvent")
             val discordAlShardsReadyEvent = DiscordAllShardsReadyEvent(this, jdaEvent, shardManager)
             applicationEventPublisher.publishEvent(discordAlShardsReadyEvent)
@@ -81,7 +69,7 @@ class EventPublisher(
 
     @JvmSynthetic
     internal fun publishDiscordMainShardConnectedEvent(jdaEvent: ReadyEvent, shardManager: ShardManager) {
-        eventThreadPool.execute {
+        discordBot.eventThreadPool.execute {
             logger.debug("Publishing DiscordMainShardConnectedEvent")
             val discordReadyEvent = DiscordMainShardConnectedEvent(this, jdaEvent, shardManager)
             applicationEventPublisher.publishEvent(discordReadyEvent)
@@ -90,7 +78,7 @@ class EventPublisher(
 
     @JvmSynthetic
     internal fun publishDiscordFirstShardConnectedEvent(jdaEvent: ReadyEvent, shardManager: ShardManager) {
-        eventThreadPool.execute {
+        discordBot.eventThreadPool.execute {
             logger.debug("Publishing DiscordFirstShardConnectedEvent")
             val discordReadyEvent = DiscordFirstShardConnectedEvent(this, jdaEvent, shardManager)
             applicationEventPublisher.publishEvent(discordReadyEvent)
@@ -103,7 +91,7 @@ class EventPublisher(
         updatedCommands: List<KClass<out CommandDataImpl>>,
         removedCommands: List<String>
     ) {
-        eventThreadPool.execute {
+        discordBot.eventThreadPool.execute {
             logger.debug("Publishing DiscordSlashCommandInitializedEvent")
             val discordSlashCommandInitializedEvent = DiscordSlashCommandInitializedEvent(this, newCommands, updatedCommands, removedCommands)
             applicationEventPublisher.publishEvent(discordSlashCommandInitializedEvent)
@@ -112,7 +100,7 @@ class EventPublisher(
 
     @JvmSynthetic
     internal fun publishDiscordAutoCompleteHandlerInitializedEvent(handlers: List<KClass<out AutoCompleteHandler>>) {
-        eventThreadPool.execute {
+        discordBot.eventThreadPool.execute {
             logger.debug("Publishing DiscordAutoCompleteHandlerInitializedEvent")
             val discordAutoCompleteHandlerInitializedEvent = DiscordAutoCompleteHandlerInitializedEvent(this, handlers)
             applicationEventPublisher.publishEvent(discordAutoCompleteHandlerInitializedEvent)
@@ -121,7 +109,7 @@ class EventPublisher(
 
     @JvmSynthetic
     internal fun publishDiscordCommandEvent(user: User, channel: Channel, guild: Guild?, commandPath: String, commandHandler: DiscordCommandHandler) {
-        eventThreadPool.execute {
+        discordBot.eventThreadPool.execute {
             logger.debug("Publishing DiscordCommandEvent")
             val discordCommandEvent = DiscordCommandEvent(this, user, channel, guild, commandPath, commandHandler)
             applicationEventPublisher.publishEvent(discordCommandEvent)
@@ -130,7 +118,7 @@ class EventPublisher(
 
     @JvmSynthetic
     internal fun publishDiscordMessageContextEvent(user: User, channel: Channel?, guild: Guild?, name: String, contextMenu: DiscordMessageContextMenuHandler) {
-        eventThreadPool.execute {
+        discordBot.eventThreadPool.execute {
             logger.debug("Publishing DiscordMessageContextEvent")
             val discordMessageContextEvent = DiscordMessageContextEvent(this, user, channel, guild, name, contextMenu)
             applicationEventPublisher.publishEvent(discordMessageContextEvent)
@@ -139,7 +127,7 @@ class EventPublisher(
 
     @JvmSynthetic
     internal fun publishDiscordUserContextEvent(user: User, channel: Channel?, guild: Guild?, name: String, contextMenu: DiscordUserContextMenuHandler) {
-        eventThreadPool.execute {
+        discordBot.eventThreadPool.execute {
             logger.debug("Publishing DiscordUserContextEvent")
             val discordUserContextEvent = DiscordUserContextEvent(this, user, channel, guild, name, contextMenu)
             applicationEventPublisher.publishEvent(discordUserContextEvent)
@@ -148,7 +136,7 @@ class EventPublisher(
 
     @JvmSynthetic
     internal fun publishDiscordEvent(event: GenericEvent) {
-        eventThreadPool.execute {
+        discordBot.eventThreadPool.execute {
             if (alunaProperties.discord.publishEvents) {
 
                 try {

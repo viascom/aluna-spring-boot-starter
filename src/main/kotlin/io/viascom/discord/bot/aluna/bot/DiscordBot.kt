@@ -67,6 +67,15 @@ open class DiscordBot(
 
     var shardManager: ShardManager? = null
 
+    @JvmSynthetic
+    internal val eventThreadPool = AlunaThreadPool.getDynamicThreadPool(
+        0,
+        alunaProperties.thread.eventThreadPool,
+        java.time.Duration.ofMinutes(1),
+        true,
+        "Aluna-Event-Pool-%d"
+    )
+
     @set:JvmSynthetic
     var interactionsInitialized: Boolean = false
         internal set
@@ -112,9 +121,6 @@ open class DiscordBot(
     @set:JvmSynthetic
     var totalShards: Int = 1
         internal set
-
-    @JvmSynthetic
-    internal var coroutineEventManager: CoroutineEventManager = CoroutineEventManager(timeout = kotlin.time.Duration.INFINITE)
 
     @get:JvmSynthetic
     @set:JvmSynthetic

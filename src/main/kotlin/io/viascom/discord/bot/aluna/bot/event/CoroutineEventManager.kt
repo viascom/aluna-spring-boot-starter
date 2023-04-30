@@ -33,6 +33,7 @@ import net.dv8tion.jda.api.hooks.IEventManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.ThreadPoolExecutor
 import kotlin.time.Duration
 
 /**
@@ -41,6 +42,7 @@ import kotlin.time.Duration
  * This enables [the coroutine listener extension][listener].
  */
 open class CoroutineEventManager(
+    val eventThreadPool: ThreadPoolExecutor,
     scope: CoroutineScope = AlunaDispatchers.InternalScope,
     /** Timeout [Duration] each event listener is allowed to run. Set to [Duration.INFINITE] for no timeout. Default: [Duration.INFINITE] */
     var timeout: Duration = Duration.INFINITE
@@ -77,7 +79,7 @@ open class CoroutineEventManager(
 
     protected open suspend fun runListener(listener: Any, event: GenericEvent) = when (listener) {
         is CoroutineEventListener -> listener.onEvent(event)
-        is EventListener -> listener.onEvent(event)
+        is EventListener -> eventThreadPool.execute { listener.onEvent(event) }
         else -> Unit
     }
 

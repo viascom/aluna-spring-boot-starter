@@ -107,7 +107,7 @@ class AlunaHealthIndicator(
         threads["messagesToObserveTimeoutThreads"] = getThreadPoolDetail(discordBot.messagesToObserveScheduledThreadPool)
         threads["eventWaiterExecutorTimeoutThreads"] = getThreadPoolDetail(eventWaiter.scheduledThreadPool)
         threads["scopedObjectsTimeoutScheduler"] = getThreadPoolDetail(interactionScope.scopedObjectsTimeoutScheduler)
-        threads["eventThreadPool"] = getThreadPoolDetail(eventPublisher.eventThreadPool)
+        threads["eventThreadPool"] = getThreadPoolDetail(discordBot.eventThreadPool)
 
         status.withDetail("threads", threads)
         status.withDetail("currentActiveInteractions", interactionScope.getInstanceCount())
