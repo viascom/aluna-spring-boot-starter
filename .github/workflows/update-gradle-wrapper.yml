@@ -25,4 +25,4 @@ jobs:
         uses: gradle-update/update-gradle-wrapper-action@v1
         with:
           labels: dependencies, gradle
-          reviewers: botscripter
+          reviewers: nik-sta

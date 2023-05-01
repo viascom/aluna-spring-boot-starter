@@ -31,3 +31,4 @@ build/
 *.iml
 .DS_Store
 .jpb
+.fastRequest/
