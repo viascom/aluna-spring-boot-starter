@@ -28,8 +28,9 @@ import java.lang.annotation.Inherited
  *
  * NOTE: Using it is not suggested for production environment.
  */
+@RequiresOptIn
 @MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
+@Retention(AnnotationRetention.BINARY)
 @Target(
     AnnotationTarget.ANNOTATION_CLASS,
     AnnotationTarget.CLASS,
@@ -40,12 +41,8 @@ import java.lang.annotation.Inherited
     AnnotationTarget.VALUE_PARAMETER,
     AnnotationTarget.CONSTRUCTOR,
     AnnotationTarget.LOCAL_VARIABLE,
-    AnnotationTarget.FILE,
     AnnotationTarget.ANNOTATION_CLASS,
-    AnnotationTarget.PROPERTY,
-    AnnotationTarget.TYPE,
-    AnnotationTarget.TYPEALIAS,
-    AnnotationTarget.TYPE_PARAMETER
+    AnnotationTarget.PROPERTY
 )
 @Inherited
 annotation class Experimental(val description: String)

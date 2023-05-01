@@ -25,6 +25,14 @@ import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.springframework.context.ApplicationEvent
 import kotlin.reflect.KClass
 
+/**
+ * Discord slash command initialized event. This gets triggered, as soon as the slash commands are initialized.
+ *
+ * @property newCommands
+ * @property updatedCommands
+ * @property removedCommands
+ *
+ */
 class DiscordSlashCommandInitializedEvent(
     source: Any,
     val newCommands: List<KClass<out CommandDataImpl>>,

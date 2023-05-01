@@ -25,4 +25,11 @@ import net.dv8tion.jda.api.events.session.ReadyEvent
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.springframework.context.ApplicationEvent
 
+/**
+ * Discord node ready event. This gets triggered, as soon as the node is ready. If subset is used, this is triggered as soon as all shards of this node are connected
+ *
+ * @property jdaEvent
+ * @property shardManager
+ *
+ */
 class DiscordNodeReadyEvent(source: Any, val jdaEvent: ReadyEvent, val shardManager: ShardManager) : ApplicationEvent(source)

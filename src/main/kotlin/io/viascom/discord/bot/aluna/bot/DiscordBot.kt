@@ -130,10 +130,22 @@ open class DiscordBot(
     internal val commandHistory = MutableSharedFlow<CommandUsage>(replay = 15, extraBufferCapacity = 15, BufferOverflow.DROP_OLDEST)
     val commandHistoryFlow = commandHistory.asSharedFlow()
 
+    /**
+     * Get discord command by name
+     *
+     * @param name name of the command
+     * @return class of the command
+     */
     fun getDiscordCommandByName(name: String): Command? {
         return discordRepresentations.getOrElse(name) { null }
     }
 
+    /**
+     * Get discord command by class
+     *
+     * @param clazz class of the command
+     * @return command
+     */
     fun getDiscordCommandByClass(clazz: Class<DiscordCommandHandler>): Command? {
         return commands.entries.firstOrNull { it.value == clazz }?.key?.let { discordRepresentations[it] }
     }
@@ -177,16 +189,37 @@ open class DiscordBot(
         return cooldowns[key]
     }
 
+    /**
+     * Check if the current instance is the master node
+     *
+     * @return true if the current instance is the master node
+     */
     fun isMasterNode(): Boolean {
         return if (alunaProperties.discord.sharding.type == AlunaDiscordProperties.Sharding.Type.SUBSET) {
             alunaProperties.discord.sharding.fromShard == 0
         } else true
     }
 
+    /**
+     * Get the current node number
+     *
+     * @return current node number
+     */
     fun getNodeNumber(): Int {
         return alunaProperties.nodeNumber
     }
 
+    /**
+     * Register a message for button events. If such an event happens, Aluna will trigger the onButtonInteraction method of the interaction handler.
+     *
+     * @param messageId message id
+     * @param interaction interaction handler
+     * @param multiUse if the interaction can be used multiple times
+     * @param duration timout of the interaction
+     * @param additionalData additional data
+     * @param authorIds only specified users can use it
+     * @param interactionUserOnly only the user who created the interaction can use it
+     */
     @JvmOverloads
     fun registerMessageForButtonEvents(
         messageId: String,
@@ -222,6 +255,17 @@ open class DiscordBot(
         }
     }
 
+    /**
+     * Register a message for button events. The message id is retrieved from the provided hook. If such an event happens, Aluna will trigger the onButtonInteraction method of the interaction handler.
+     *
+     * @param hook interaction hook
+     * @param interaction interaction handler
+     * @param multiUse if the interaction can be used multiple times
+     * @param duration timout of the interaction
+     * @param additionalData additional data
+     * @param authorIds only specified users can use it
+     * @param interactionUserOnly only the user who created the interaction can use it
+     */
     @JvmOverloads
     fun registerMessageForButtonEvents(
         hook: InteractionHook,
@@ -237,6 +281,17 @@ open class DiscordBot(
 
     }
 
+    /**
+     * Register a message for string select events. If such an event happens, Aluna will trigger the onStringSelectInteraction method of the interaction handler.
+     *
+     * @param hook interaction hook
+     * @param interaction interaction handler
+     * @param multiUse if the interaction can be used multiple times
+     * @param duration timout of the interaction
+     * @param additionalData additional data
+     * @param authorIds only specified users can use it
+     * @param interactionUserOnly only the user who created the interaction can use it
+     */
     @JvmOverloads
     fun registerMessageForStringSelectEvents(
         messageId: String,
@@ -272,6 +327,17 @@ open class DiscordBot(
         }
     }
 
+    /**
+     * Register a message for string select events. The message id is retrieved from the provided hook. If such an event happens, Aluna will trigger the onStringSelectInteraction method of the interaction handler.
+     *
+     * @param hook interaction hook
+     * @param interaction interaction handler
+     * @param multiUse if the interaction can be used multiple times
+     * @param duration timout of the interaction
+     * @param additionalData additional data
+     * @param authorIds only specified users can use it
+     * @param interactionUserOnly only the user who created the interaction can use it
+     */
     @JvmOverloads
     fun registerMessageForStringSelectEvents(
         hook: InteractionHook,
@@ -286,6 +352,17 @@ open class DiscordBot(
             .queue { registerMessageForStringSelectEvents(it.id, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly) }
     }
 
+    /**
+     * Register a message for entity select events. If such an event happens, Aluna will trigger the onEntitySelectInteraction method of the interaction handler.
+     *
+     * @param hook interaction hook
+     * @param interaction interaction handler
+     * @param multiUse if the interaction can be used multiple times
+     * @param duration timout of the interaction
+     * @param additionalData additional data
+     * @param authorIds only specified users can use it
+     * @param interactionUserOnly only the user who created the interaction can use it
+     */
     @JvmOverloads
     fun registerMessageForEntitySelectEvents(
         messageId: String,
@@ -321,6 +398,17 @@ open class DiscordBot(
         }
     }
 
+    /**
+     * Register a message for entity select events. The message id is retrieved from the provided hook. If such an event happens, Aluna will trigger the onEntitySelectInteraction method of the interaction handler.
+     *
+     * @param hook interaction hook
+     * @param interaction interaction handler
+     * @param multiUse if the interaction can be used multiple times
+     * @param duration timout of the interaction
+     * @param additionalData additional data
+     * @param authorIds only specified users can use it
+     * @param interactionUserOnly only the user who created the interaction can use it
+     */
     @JvmOverloads
     fun registerMessageForEntitySelectEvents(
         hook: InteractionHook,
@@ -335,6 +423,15 @@ open class DiscordBot(
             .queue { registerMessageForEntitySelectEvents(it.id, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly) }
     }
 
+    /**
+     * Register a listener for modal events. If such an event happens, Aluna will trigger the onModalInteraction method of the interaction handler.
+     *
+     * @param authorId author id
+     * @param interaction interaction handler
+     * @param multiUse if the interaction can be used multiple times
+     * @param duration timout of the interaction
+     * @param additionalData additional data
+     */
     @JvmOverloads
     fun registerMessageForModalEvents(
         authorId: String,
@@ -362,11 +459,50 @@ open class DiscordBot(
         }
     }
 
+    /**
+     * Remove listener for button events by message id.
+     *
+     * @param messageId message id
+     */
     fun removeMessageForButtonEvents(messageId: String) = messagesToObserveButton.remove(messageId)
+
+    /**
+     * Remove listener for string select events by message id.
+     *
+     * @param messageId message id
+     */
     fun removeMessageForStringSelectEvents(messageId: String) = messagesToObserveStringSelect.remove(messageId)
+
+    /**
+     * Remove listener for entity select events by message id.
+     *
+     * @param messageId message id
+     */
     fun removeMessageForEntitySelectEvents(messageId: String) = messagesToObserveStringSelect.remove(messageId)
+
+    /**
+     * Remove listener for modal events by user id.
+     *
+     * @param messageId message id
+     */
     fun removeMessageForModalEvents(userId: String) = messagesToObserveModal.remove(userId)
 
+    /**
+     * Queue an interaction and register listeners for it.
+     *
+     * @param T type of the rest action
+     * @param action action to queue
+     * @param hook interaction hook
+     * @param interaction interaction handler
+     * @param type event types to register
+     * @param multiUse if the interaction can be used multiple times
+     * @param duration timout of the interaction
+     * @param additionalData additional data
+     * @param authorIds only specified users can use it
+     * @param interactionUserOnly only the user who created the interaction can use it
+     * @param failure callback for failure
+     * @param success callback for success
+     */
     @JvmOverloads
     fun <T : Any> queueAndRegisterInteraction(
         action: RestAction<T>,
@@ -411,6 +547,18 @@ open class DiscordBot(
         })
     }
 
+    /**
+     * Queue an interaction and register listeners for it.
+     *
+     * @param action action to queue
+     * @param interaction interaction handler
+     * @param type event types to register
+     * @param multiUse if the interaction can be used multiple times
+     * @param duration timout of the interaction
+     * @param additionalData additional data
+     * @param failure callback for failure
+     * @param success callback for success
+     */
     @JvmOverloads
     fun queueAndRegisterInteraction(
         action: RestAction<Void>,
@@ -441,6 +589,20 @@ open class DiscordBot(
         })
     }
 
+    /**
+     * Queue an interaction and register listeners for it.
+     *
+     * @param action action to queue
+     * @param interaction interaction handler
+     * @param type event types to register
+     * @param multiUse if the interaction can be used multiple times
+     * @param duration timout of the interaction
+     * @param additionalData additional data
+     * @param authorIds only specified users can use it
+     * @param interactionUserOnly only the user who created the interaction can use it
+     * @param failure callback for failure
+     * @param success callback for success
+     */
     @JvmOverloads
     fun queueAndRegisterInteraction(
         action: ReplyCallbackAction,
@@ -490,6 +652,15 @@ open class DiscordBot(
         })
     }
 
+    /**
+     * Queue an action and set the message id for the interaction.
+     *
+     * @param action action to queue
+     * @param hook interaction hook
+     * @param interaction interaction handler
+     * @param failure callback for failure
+     * @param success callback for success
+     */
     @JvmOverloads
     fun <T : Any> queueAndSetMessageId(
         action: RestAction<T>, hook: InteractionHook, interaction: DiscordInteractionHandler, failure: Consumer<in Throwable>? = null, success: Consumer<in T>? = null
@@ -514,6 +685,14 @@ open class DiscordBot(
         })
     }
 
+    /**
+     * Queue an action and set the message id for the interaction.
+     *
+     * @param action action to queue
+     * @param interaction interaction handler
+     * @param failure callback for failure
+     * @param success callback for success
+     */
     @JvmOverloads
     fun queueAndSetMessageId(
         action: ReplyCallbackAction,
@@ -557,6 +736,22 @@ internal typealias CooldownKey = String
 internal typealias MessageId = String
 internal typealias LastUsage = LocalDateTime
 
+/**
+ * Queue an interaction and register listeners for it.
+ *
+ * @param T type of the rest action
+ * @param action action to queue
+ * @param hook interaction hook
+ * @param interaction interaction handler
+ * @param type event types to register
+ * @param multiUse if the interaction can be used multiple times
+ * @param duration timout of the interaction
+ * @param additionalData additional data
+ * @param authorIds only specified users can use it
+ * @param interactionUserOnly only the user who created the interaction can use it
+ * @param failure callback for failure
+ * @param success callback for success
+ */
 fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
     hook: InteractionHook,
     interaction: DiscordInteractionHandler,
@@ -582,6 +777,18 @@ fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
     success
 )
 
+/**
+ * Queue an interaction and register listeners for it.
+ *
+ * @param action action to queue
+ * @param interaction interaction handler
+ * @param type event types to register
+ * @param multiUse if the interaction can be used multiple times
+ * @param duration timout of the interaction
+ * @param additionalData additional data
+ * @param failure callback for failure
+ * @param success callback for success
+ */
 fun RestAction<Void>.queueAndRegisterInteraction(
     interaction: DiscordInteractionHandler,
     type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.MODAL),
@@ -592,6 +799,15 @@ fun RestAction<Void>.queueAndRegisterInteraction(
     success: Consumer<in Void>? = null
 ) = interaction.discordBot.queueAndRegisterInteraction(this, interaction, type, multiUse, duration, additionalData, failure, success)
 
+/**
+ * Queue an action and set the message id for the interaction.
+ *
+ * @param action action to queue
+ * @param hook interaction hook
+ * @param interaction interaction handler
+ * @param failure callback for failure
+ * @param success callback for success
+ */
 fun <T : Any> RestAction<T>.queueAndSetMessageId(
     hook: InteractionHook,
     interaction: DiscordInteractionHandler,
@@ -599,6 +815,20 @@ fun <T : Any> RestAction<T>.queueAndSetMessageId(
     success: Consumer<in T>? = null
 ) = interaction.discordBot.queueAndSetMessageId(this, hook, interaction, failure, success)
 
+/**
+ * Queue an interaction and register listeners for it.
+ *
+ * @param action action to queue
+ * @param interaction interaction handler
+ * @param type event types to register
+ * @param multiUse if the interaction can be used multiple times
+ * @param duration timout of the interaction
+ * @param additionalData additional data
+ * @param authorIds only specified users can use it
+ * @param interactionUserOnly only the user who created the interaction can use it
+ * @param failure callback for failure
+ * @param success callback for success
+ */
 fun ReplyCallbackAction.queueAndRegisterInteraction(
     interaction: DiscordInteractionHandler,
     type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
@@ -622,6 +852,14 @@ fun ReplyCallbackAction.queueAndRegisterInteraction(
     success
 )
 
+/**
+ * Queue an action and set the message id for the interaction.
+ *
+ * @param action action to queue
+ * @param interaction interaction handler
+ * @param failure callback for failure
+ * @param success callback for success
+ */
 fun ReplyCallbackAction.queueAndSetMessageId(
     interaction: DiscordInteractionHandler,
     failure: Consumer<in Throwable>? = null,

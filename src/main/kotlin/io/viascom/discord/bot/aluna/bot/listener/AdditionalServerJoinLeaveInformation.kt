@@ -24,9 +24,25 @@ package io.viascom.discord.bot.aluna.bot.listener
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.MessageEmbed.Field
 
+/**
+ * This interface can be used to add additional information to the join and leave message
+ */
 interface AdditionalServerJoinLeaveInformation {
 
+    /**
+     * Returns a list of fields that will be added to the join message
+     *
+     * @param server the server that the bot joined
+     * @return a list of fields
+     */
     fun getAdditionalServerJoinInformation(server: Guild): List<Field>
+
+    /**
+     * Returns a list of fields that will be added to the leave message
+     *
+     * @param server the server that the bot left
+     * @return a list of fields
+     */
     fun getAdditionalServerLeaveInformation(server: Guild): List<Field>
 
 }

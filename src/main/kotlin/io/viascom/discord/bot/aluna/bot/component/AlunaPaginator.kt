@@ -47,6 +47,11 @@ import java.util.function.Consumer
 import java.util.function.Function
 import kotlin.math.ceil
 
+/**
+ * A Paginator is a component to paginate through a list of items.
+ * It uses the [EventWaiter] to wait for user interactions.
+ *
+ */
 class AlunaPaginator(
     val eventWaiter: EventWaiter,
     val eventWaiterId: String = NanoId.generate(),

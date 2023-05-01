@@ -25,4 +25,10 @@ import io.viascom.discord.bot.aluna.bot.AutoCompleteHandler
 import org.springframework.context.ApplicationEvent
 import kotlin.reflect.KClass
 
+/**
+ * Discord auto complete handler initialized event. This gets triggered, as soon as the auto complete handlers are initialized.
+ *
+ * @property handlers
+ *
+ */
 class DiscordAutoCompleteHandlerInitializedEvent(source: Any, val handlers: List<KClass<out AutoCompleteHandler>>) : ApplicationEvent(source)

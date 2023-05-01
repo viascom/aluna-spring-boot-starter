@@ -24,6 +24,9 @@ package io.viascom.discord.bot.aluna.bot
 import io.viascom.discord.bot.aluna.configuration.scope.InteractionScoped
 import org.springframework.stereotype.Component
 
+/**
+ * This annotation can be used to mark a bean as a component that is handling auto complete request.
+ */
 @Component
 @InteractionScoped
 annotation class AutoComplete
