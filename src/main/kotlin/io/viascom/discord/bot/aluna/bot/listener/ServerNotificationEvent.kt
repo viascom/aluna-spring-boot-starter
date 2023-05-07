@@ -102,7 +102,7 @@ open class ServerNotificationEvent(
         }
 
         val server = event.guild
-        val embedMessage = createServerMessage(true, server)
+        val embedMessage = createServerMessage(false, server)
 
         val channel = shardManager.getGuildTextChannel(
             alunaProperties.notification.serverLeave.server.toString(),
@@ -155,8 +155,14 @@ open class ServerNotificationEvent(
             .setDescription("")
             .setThumbnail(server.iconUrl)
             .addField("» Server", "Name: ${server.name}\nId: ${server.id}", false)
-            .addField("» Owner", "Name: ${server.retrieveOwner().complete().effectiveName}\nId: ${server.ownerId}", false)
-            .addField("» Locale", "Name: ${server.locale.languageName}", false)
+
+        if (!serverJoin) {
+            embedMessage.addField("» Owner", "Name: ${server.owner?.effectiveName}\nId: ${server.ownerId}", false)
+        } else {
+            embedMessage.addField("» Owner", "Name: ${server.retrieveOwner().complete().effectiveName}\nId: ${server.ownerId}", false)
+        }
+
+        embedMessage.addField("» Locale", "Name: ${server.locale.languageName}", false)
             .addField("» Members", "Total: ${server.memberCount}", false)
 
         if (!serverJoin) {
