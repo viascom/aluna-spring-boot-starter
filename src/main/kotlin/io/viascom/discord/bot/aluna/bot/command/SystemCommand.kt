@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.command
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.CoroutineDiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandDataProvider
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandEmojiProvider
@@ -45,7 +45,7 @@ class SystemCommand(
     private val dataProviders: List<SystemCommandDataProvider>,
     private val moderatorIdProvider: ModeratorIdProvider,
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider
-) : DiscordCommand(
+) : CoroutineDiscordCommand(
     "system-command",
     "Runs a system command.",
     observeAutoComplete = true
@@ -65,7 +65,7 @@ class SystemCommand(
         addOptions(commandOption, argsOption)
     }
 
-    override fun execute(event: SlashCommandInteractionEvent) {
+    override suspend fun execute(event: SlashCommandInteractionEvent) {
         if (event.user.idLong !in ownerIdProvider.getOwnerIds() && event.user.idLong !in moderatorIdProvider.getModeratorIds()) {
             event.deferReply(true).setContent("${systemCommandEmojiProvider.crossEmoji().formatted} This command is to powerful for you.").queue()
             return
@@ -102,39 +102,39 @@ class SystemCommand(
         }
     }
 
-    override fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override suspend fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return selectedProvider?.onButtonInteraction(event) ?: true
     }
 
-    override fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    override suspend fun onButtonInteractionTimeout() {
         selectedProvider?.onButtonInteractionTimeout()
     }
 
-    override fun onStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: java.util.HashMap<String, Any?>): Boolean {
+    override suspend fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
         return selectedProvider?.onStringSelectMenuInteraction(event) ?: true
     }
 
-    override fun onStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    override suspend fun onStringSelectInteractionTimeout() {
         selectedProvider?.onStringSelectInteractionTimeout()
     }
 
-    override fun onEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: java.util.HashMap<String, Any?>): Boolean {
+    override suspend fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
         return selectedProvider?.onEntitySelectInteraction(event) ?: true
     }
 
-    override fun onEntitySelectInteractionTimeout(additionalData: java.util.HashMap<String, Any?>) {
+    override suspend fun onEntitySelectInteractionTimeout() {
         selectedProvider?.onEntitySelectInteractionTimeout()
     }
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
-        return selectedProvider?.onModalInteraction(event, additionalData) ?: true
+    override suspend fun onModalInteraction(event: ModalInteractionEvent): Boolean {
+        return selectedProvider?.onModalInteraction(event) ?: true
     }
 
-    override fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
-        selectedProvider?.onModalInteractionTimeout(additionalData)
+    override suspend fun onModalInteractionTimeout() {
+        selectedProvider?.onModalInteractionTimeout()
     }
 
-    override fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
+    override suspend fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
         super.onAutoCompleteEvent(option, event)
 
         if (option == "command") {

@@ -201,7 +201,7 @@ class GenerateStickerEnumProvider(
         return true
     }
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         when (event.modalId) {
             "add_server" -> {
                 event.deferEdit().queue()

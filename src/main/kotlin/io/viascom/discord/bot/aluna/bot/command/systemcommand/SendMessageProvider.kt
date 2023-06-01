@@ -61,13 +61,13 @@ class SendMessageProvider(
         val message: TextInput = textInput("message", "Message", TextInputStyle.PARAGRAPH)
 
         val modal: Modal = Modal.create("send_message", "Send Message")
-            .addActionRows(ActionRow.of(serverId), ActionRow.of(channelId), ActionRow.of(messageReferenceId), ActionRow.of(message))
+            .addComponents(ActionRow.of(serverId), ActionRow.of(channelId), ActionRow.of(messageReferenceId), ActionRow.of(message))
             .build()
 
         event.replyModal(modal).queueAndRegisterInteraction(command)
     }
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         var serverId = event.getValueAsString("serverId", "0")!!
         var channelId = event.getValueAsString("channelId", "0")!!
         var messageReferenceId = event.getValueAsString("messageReferenceId", "")!!

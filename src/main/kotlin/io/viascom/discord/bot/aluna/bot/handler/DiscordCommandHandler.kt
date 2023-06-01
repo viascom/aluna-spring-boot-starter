@@ -19,9 +19,10 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.bot
+package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
+import io.viascom.discord.bot.aluna.bot.*
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
 import io.viascom.discord.bot.aluna.event.EventPublisher
@@ -184,7 +185,7 @@ abstract class DiscordCommandHandler(
     lateinit var discordRepresentation: Command
         internal set
 
-    private val subCommandElements: java.util.HashMap<String, DiscordSubCommandElement> = hashMapOf()
+    private val subCommandElements: HashMap<String, DiscordSubCommandElement> = hashMapOf()
 
     /**
      * Current sub command path gets set when the command gets used.
@@ -271,45 +272,45 @@ abstract class DiscordCommandHandler(
     internal abstract suspend fun runOnDestroy()
 
     @JvmSynthetic
-    internal abstract suspend fun runOnButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    internal abstract suspend fun runOnButtonInteraction(event: ButtonInteractionEvent): Boolean
 
     @JvmSynthetic
-    internal abstract suspend fun runOnButtonInteractionTimeout(additionalData: HashMap<String, Any?>)
+    internal abstract suspend fun runOnButtonInteractionTimeout()
 
     @JvmSynthetic
-    internal abstract suspend fun runOnStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    internal abstract suspend fun runOnStringSelectInteraction(event: StringSelectInteractionEvent): Boolean
 
     @JvmSynthetic
-    internal abstract suspend fun runOnStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>)
+    internal abstract suspend fun runOnStringSelectInteractionTimeout()
 
     @JvmSynthetic
-    internal abstract suspend fun runOnEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    internal abstract suspend fun runOnEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean
 
     @JvmSynthetic
-    internal abstract suspend fun runOnEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>)
+    internal abstract suspend fun runOnEntitySelectInteractionTimeout()
 
     @JvmSynthetic
-    internal abstract suspend fun runOnModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    internal abstract suspend fun runOnModalInteraction(event: ModalInteractionEvent): Boolean
 
     @JvmSynthetic
-    internal abstract suspend fun runOnModalInteractionTimeout(additionalData: HashMap<String, Any?>)
+    internal abstract suspend fun runOnModalInteractionTimeout()
 
     @JvmSynthetic
     internal abstract suspend fun runOnAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent)
 
 
-    override suspend fun handleOnButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override suspend fun handleOnButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return if (handleSubCommands) {
-            handleSubCommand(event, { it.onButtonInteraction(event) }, { onSubCommandInteractionFallback(event) })
+            handleSubCommand(event, { it.runOnButtonInteraction(event) }, { onSubCommandInteractionFallback(event) })
         } else {
-            runOnButtonInteraction(event, additionalData)
+            runOnButtonInteraction(event)
         }
     }
 
-    override suspend fun handleOnButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    override suspend fun handleOnButtonInteractionTimeout() {
         if (handleSubCommands) {
             handleSubCommand(null, {
-                it.onButtonInteractionTimeout(additionalData)
+                it.runOnButtonInteractionTimeout()
                 true
             }, {
                 onSubCommandInteractionTimeoutFallback()
@@ -317,22 +318,22 @@ abstract class DiscordCommandHandler(
             })
         }
 
-        runOnButtonInteractionTimeout(additionalData)
+        runOnButtonInteractionTimeout()
     }
 
-    override suspend fun handleOnStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override suspend fun handleOnStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
         return if (handleSubCommands) {
-            handleSubCommand(event, { it.onStringSelectInteraction(event) }, { onSubCommandInteractionFallback(event) })
+            handleSubCommand(event, { it.runOnStringSelectInteraction(event) }, { onSubCommandInteractionFallback(event) })
         } else {
-            runOnStringSelectInteraction(event, additionalData)
+            runOnStringSelectInteraction(event)
         }
     }
 
 
-    override suspend fun handleOnStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    override suspend fun handleOnStringSelectInteractionTimeout() {
         if (handleSubCommands) {
             handleSubCommand(null, {
-                it.onStringSelectInteractionTimeout(additionalData)
+                it.runOnStringSelectInteractionTimeout()
                 true
             }, {
                 onSubCommandInteractionTimeoutFallback()
@@ -340,22 +341,22 @@ abstract class DiscordCommandHandler(
             })
         }
 
-        runOnStringSelectInteractionTimeout(additionalData)
+        runOnStringSelectInteractionTimeout()
     }
 
 
-    override suspend fun handleOnEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override suspend fun handleOnEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
         return if (handleSubCommands) {
-            handleSubCommand(event, { it.onEntitySelectInteraction(event) }, { onSubCommandInteractionFallback(event) })
+            handleSubCommand(event, { it.runOnEntitySelectInteraction(event) }, { onSubCommandInteractionFallback(event) })
         } else {
-            runOnEntitySelectInteraction(event, additionalData)
+            runOnEntitySelectInteraction(event)
         }
     }
 
-    override suspend fun handleOnEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    override suspend fun handleOnEntitySelectInteractionTimeout() {
         if (handleSubCommands) {
             handleSubCommand(null, {
-                it.onEntitySelectInteractionTimeout(additionalData)
+                it.runOnEntitySelectInteractionTimeout()
                 true
             }, {
                 onSubCommandInteractionTimeoutFallback()
@@ -363,25 +364,25 @@ abstract class DiscordCommandHandler(
             })
         }
 
-        runOnEntitySelectInteractionTimeout(additionalData)
+        runOnEntitySelectInteractionTimeout()
     }
 
 
-    override suspend fun handleOnModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override suspend fun handleOnModalInteraction(event: ModalInteractionEvent): Boolean {
         return if (handleSubCommands) {
             handleSubCommand(
                 event,
-                { it.onModalInteraction(event, additionalData) },
+                { it.runOnModalInteraction(event) },
                 { onSubCommandInteractionFallback(event) })
         } else {
-            runOnModalInteraction(event, additionalData)
+            runOnModalInteraction(event)
         }
     }
 
-    override suspend fun handleOnModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    override suspend fun handleOnModalInteractionTimeout() {
         if (handleSubCommands) {
             handleSubCommand(null, {
-                it.onModalInteractionTimeout(additionalData)
+                it.runOnModalInteractionTimeout()
                 true
             }, {
                 onSubCommandInteractionTimeoutFallback()
@@ -389,7 +390,7 @@ abstract class DiscordCommandHandler(
             })
         }
 
-        runOnModalInteractionTimeout(additionalData)
+        runOnModalInteractionTimeout()
     }
 
     @JvmSynthetic
@@ -413,7 +414,7 @@ abstract class DiscordCommandHandler(
 
         if (handleSubCommands && redirectAutoCompleteEventsToSubCommands) {
             handleSubCommand(event, {
-                it.onAutoCompleteEvent(option, event)
+                it.runOnAutoCompleteEvent(option, event)
                 true
             }, { onSubCommandInteractionFallback(event) })
         } else {
@@ -532,17 +533,17 @@ abstract class DiscordCommandHandler(
     open fun initCommandOptions() {}
     open fun initSubCommands() {}
 
-    fun prepareInteraction() {
+    suspend fun prepareInteraction() = withContext(AlunaDispatchers.Internal) {
         if (isAdministratorOnlyCommand) {
-            this.defaultPermissions = DefaultMemberPermissions.DISABLED
+            this@DiscordCommandHandler.defaultPermissions = DefaultMemberPermissions.DISABLED
         }
-        this.isGuildOnly = (useScope == UseScope.GUILD_ONLY)
+        this@DiscordCommandHandler.isGuildOnly = (useScope == UseScope.GUILD_ONLY)
 
         if (!alunaProperties.productionMode) {
-            if ((isAdministratorOnlyCommand || this.defaultPermissions == DefaultMemberPermissions.DISABLED) && !this.isGuildOnly) {
+            if ((isAdministratorOnlyCommand || this@DiscordCommandHandler.defaultPermissions == DefaultMemberPermissions.DISABLED) && !this@DiscordCommandHandler.isGuildOnly) {
                 logger.warn("The interaction '$name' has a default permission for administrator only but is not restricted to guild only. All users will be able to use this interaction in DMs with your bot!")
             }
-            if (this.defaultPermissions != DefaultMemberPermissions.ENABLED && this.defaultPermissions != DefaultMemberPermissions.DISABLED && !this.isGuildOnly) {
+            if (this@DiscordCommandHandler.defaultPermissions != DefaultMemberPermissions.ENABLED && this@DiscordCommandHandler.defaultPermissions != DefaultMemberPermissions.DISABLED && !this@DiscordCommandHandler.isGuildOnly) {
                 logger.warn("The interaction '$name' has a default permission restriction for a specific user permission but is not restricted to guild only. All users will be able to use this interaction in DMs with your bot!")
             }
         }
@@ -550,15 +551,15 @@ abstract class DiscordCommandHandler(
         loadDynamicSubCommandElements()
     }
 
-    private fun loadDynamicSubCommandElements() {
+    private suspend fun loadDynamicSubCommandElements() = withContext(AlunaDispatchers.Internal) {
         if (subCommandElements.isEmpty()) {
             initSubCommands()
         }
 
         if (subCommandElements.isEmpty()) {
-            InternalUtil.getSubCommandElements(this).forEach { field ->
+            InternalUtil.getSubCommandElements(this@DiscordCommandHandler).forEach { field ->
                 field.isAccessible = true
-                registerSubCommands(field.getter.call(this) as DiscordSubCommandElement)
+                registerSubCommands(field.getter.call(this@DiscordCommandHandler) as DiscordSubCommandElement)
             }
         }
     }
@@ -715,12 +716,12 @@ abstract class DiscordCommandHandler(
             }
         }
 
-    open fun registerSubCommands(vararg elements: DiscordSubCommandElement) {
+    open suspend fun registerSubCommands(vararg elements: DiscordSubCommandElement) = withContext(AlunaDispatchers.Internal) {
         elements
             .filter { element ->
                 when {
                     alunaProperties.includeInDevelopmentInteractions -> true
-                    alunaProperties.productionMode && (element::class.isSubclassOf(DiscordSubCommand::class)) && (element as DiscordSubCommand).interactionDevelopmentStatus == DevelopmentStatus.IN_DEVELOPMENT -> false
+                    alunaProperties.productionMode && (element::class.isSubclassOf(DiscordSubCommandHandler::class)) && (element as DiscordSubCommandHandler).interactionDevelopmentStatus == DevelopmentStatus.IN_DEVELOPMENT -> false
                     alunaProperties.productionMode && (element::class.isSubclassOf(DiscordSubCommandGroup::class)) && (element as DiscordSubCommandGroup).interactionDevelopmentStatus == DevelopmentStatus.IN_DEVELOPMENT -> false
                     else -> true
                 }
@@ -728,25 +729,22 @@ abstract class DiscordCommandHandler(
             .forEach { element ->
                 subCommandElements.putIfAbsent(element.getName(), element)
 
-                if (element::class.isSubclassOf(DiscordSubCommand::class)) {
-                    element as DiscordSubCommand
-                    element.parentCommand = this
-                    element.initCommandOptions()
-                    this.addSubcommands(element)
+                if (element::class.isSubclassOf(DiscordSubCommandHandler::class)) {
+                    element as DiscordSubCommandHandler
+                    element.parentCommand = this@DiscordCommandHandler
+                    element.runInitCommandOptions()
+                    this@DiscordCommandHandler.addSubcommands(element)
                 }
 
-                if (element::class.isSubclassOf(DiscordSubCommandGroup::class)) {
-                    element as DiscordSubCommandGroup
+                if (element::class.isSubclassOf(DiscordSubCommandGroupHandler::class)) {
+                    element as DiscordSubCommandGroupHandler
                     element.initSubCommands()
-                    this.addSubcommandGroups(element)
+                    this@DiscordCommandHandler.addSubcommandGroups(element)
                 }
             }
     }
 
-    open fun handleSubCommandExecution(
-        event: SlashCommandInteractionEvent,
-        fallback: (SlashCommandInteractionEvent) -> (Unit)
-    ) {
+    open suspend fun handleSubCommandExecution(event: SlashCommandInteractionEvent, fallback: (SlashCommandInteractionEvent) -> (Unit)) {
         loadDynamicSubCommandElements()
 
         val path = event.fullCommandName.split(" ")
@@ -762,15 +760,15 @@ abstract class DiscordCommandHandler(
         val firstElement = subCommandElements[firstLevel]!!
 
         //Check if it is a SubCommand
-        if (firstElement::class.isSubclassOf(DiscordSubCommand::class)) {
-            (firstElement as DiscordSubCommand).initialize(event.fullCommandName, this, discordRepresentation)
+        if (firstElement::class.isSubclassOf(DiscordSubCommandHandler::class)) {
+            (firstElement as DiscordSubCommandHandler).initialize(event.fullCommandName, this, discordRepresentation)
             firstElement.run(event)
             return
         }
 
         //Check if it is a SubCommand in a SubCommandGroup
         val secondLevel = path[2]
-        if (!(firstElement as DiscordSubCommandGroup).subCommands.containsKey(secondLevel)) {
+        if (!(firstElement as DiscordSubCommandGroupHandler).subCommands.containsKey(secondLevel)) {
             logger.debug("Command path '${event.fullCommandName}' not found in the registered elements")
             fallback.invoke(event)
             return
@@ -780,11 +778,11 @@ abstract class DiscordCommandHandler(
         firstElement.subCommands[secondLevel]!!.run(event)
     }
 
-    open fun handleSubCommand(
+    open suspend fun handleSubCommand(
         event: GenericInteractionCreateEvent?,
-        function: (DiscordSubCommand) -> (Boolean),
+        function: suspend (DiscordSubCommandHandler) -> (Boolean),
         fallback: (GenericInteractionCreateEvent?) -> (Boolean)
-    ): Boolean {
+    ): Boolean = withContext(AlunaDispatchers.Interaction) {
         loadDynamicSubCommandElements()
 
         val path = currentSubFullCommandName.split(" ")
@@ -793,26 +791,26 @@ abstract class DiscordCommandHandler(
         val firstLevel = path[1]
         if (!subCommandElements.containsKey(firstLevel)) {
             logger.debug("Command path '${currentSubFullCommandName}' not found in the registered elements")
-            return fallback.invoke(event)
+            return@withContext fallback.invoke(event)
         }
 
         val firstElement = subCommandElements[firstLevel]!!
 
         //Check if it is a SubCommand
-        if (firstElement::class.isSubclassOf(DiscordSubCommand::class)) {
-            (firstElement as DiscordSubCommand).initialize(currentSubFullCommandName, this, discordRepresentation)
-            return function.invoke(firstElement)
+        if (firstElement::class.isSubclassOf(DiscordSubCommandHandler::class)) {
+            (firstElement as DiscordSubCommandHandler).initialize(currentSubFullCommandName, this@DiscordCommandHandler, discordRepresentation)
+            return@withContext function.invoke(firstElement)
         }
 
         //Check if it is a SubCommand in a SubCommandGroup
         val secondLevel = path[2]
         if (!(firstElement as DiscordSubCommandGroup).subCommands.containsKey(secondLevel)) {
             logger.debug("Command path '${currentSubFullCommandName}' not found in the registered elements")
-            return fallback.invoke(event)
+            return@withContext fallback.invoke(event)
         }
 
-        (firstElement as DiscordSubCommand).initialize(currentSubFullCommandName, this, discordRepresentation)
-        return function.invoke(firstElement.subCommands[secondLevel]!!)
+        (firstElement as DiscordSubCommandHandler).initialize(currentSubFullCommandName, this@DiscordCommandHandler, discordRepresentation)
+        return@withContext function.invoke(firstElement.subCommands[secondLevel]!!)
     }
 
     fun updateMessageIdForScope(messageId: String) {
@@ -863,30 +861,30 @@ abstract class DiscordCommandHandler(
         }
 
         launch { if (callOnDestroy) runOnDestroy() }
-        launch { if (callButtonTimeout) buttonObserver?.let { runOnButtonInteractionTimeout(it.value.additionalData) } }
-        launch { if (callStringSelectTimeout) stringSelectObserver?.let { runOnStringSelectInteractionTimeout(it.value.additionalData) } }
-        launch { if (callEntitySelectTimeout) entitySelectObserver?.let { runOnEntitySelectInteractionTimeout(it.value.additionalData) } }
-        launch { if (callModalTimeout) modalObserver?.let { runOnModalInteractionTimeout(it.value.additionalData) } }
+        launch { if (callButtonTimeout) buttonObserver?.let { runOnButtonInteractionTimeout() } }
+        launch { if (callStringSelectTimeout) stringSelectObserver?.let { runOnStringSelectInteractionTimeout() } }
+        launch { if (callEntitySelectTimeout) entitySelectObserver?.let { runOnEntitySelectInteractionTimeout() } }
+        launch { if (callModalTimeout) modalObserver?.let { runOnModalInteractionTimeout() } }
     }
 
     @JvmSynthetic
     internal suspend fun onButtonGlobalInteraction(event: ButtonInteractionEvent) {
-        this.handleOnButtonInteraction(event, hashMapOf())
+        this.handleOnButtonInteraction(event)
     }
 
     @JvmSynthetic
     internal suspend fun onStringSelectGlobalInteraction(event: StringSelectInteractionEvent) {
-        this.handleOnStringSelectInteraction(event, hashMapOf())
+        this.handleOnStringSelectInteraction(event)
     }
 
     @JvmSynthetic
     internal suspend fun onEntitySelectGlobalInteraction(event: EntitySelectInteractionEvent) {
-        this.handleOnEntitySelectInteraction(event, hashMapOf())
+        this.handleOnEntitySelectInteraction(event)
     }
 
     @JvmSynthetic
     internal suspend fun onModalGlobalInteraction(event: ModalInteractionEvent) {
-        this.handleOnModalInteraction(event, hashMapOf())
+        this.handleOnModalInteraction(event)
     }
 
     fun generateGlobalInteractionId(componentId: String): String {

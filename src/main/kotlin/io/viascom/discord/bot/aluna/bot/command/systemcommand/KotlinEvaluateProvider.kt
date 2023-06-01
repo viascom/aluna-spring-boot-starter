@@ -65,7 +65,7 @@ class KotlinEvaluateProvider(
     }
 
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         val script = event.getValueAsString("script", "0")!!.toString()
         event.reply(
             "Script:\n```kotlin\n" +

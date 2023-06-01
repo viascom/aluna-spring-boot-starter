@@ -23,8 +23,6 @@ package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
-import io.viascom.discord.bot.aluna.bot.DiscordContextMenuHandler
 import io.viascom.discord.bot.aluna.bot.command.DefaultHelpCommand
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordMainShardConnectedEvent

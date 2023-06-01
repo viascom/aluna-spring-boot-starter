@@ -21,7 +21,14 @@
 
 package io.viascom.discord.bot.aluna.property
 
+import java.time.Duration
+
 class AlunaBotStatsProperties {
+
+    /**
+     * Send stats over BotBlock Api: https://botblock.org/
+     */
+    var botBlock: BotBlock = BotBlock()
 
     /**
      * bots.ondiscord.xyz
@@ -51,5 +58,16 @@ class AlunaBotStatsProperties {
     class Configuration {
         var enabled: Boolean = false
         var token: String? = null
+    }
+
+    class BotBlock {
+        var enabled: Boolean = false
+        var updateDelay: Duration = Duration.ofMinutes(30)
+
+        /**
+         * site with their tokens to send data to.
+         * Full list of sites: https://botblock.org/lists
+         */
+        var tokens: HashMap<String, String> = hashMapOf()
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,8 +19,9 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.bot
+package io.viascom.discord.bot.aluna.bot.handler
 
+import io.viascom.discord.bot.aluna.bot.DiscordBot
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
@@ -33,15 +34,15 @@ interface DiscordInteractionHandler {
     var author: User
     var discordBot: DiscordBot
 
-    suspend fun handleOnButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
-    suspend fun handleOnButtonInteractionTimeout(additionalData: HashMap<String, Any?>)
+    suspend fun handleOnButtonInteraction(event: ButtonInteractionEvent): Boolean
+    suspend fun handleOnButtonInteractionTimeout()
 
-    suspend fun handleOnStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
-    suspend fun handleOnStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>)
+    suspend fun handleOnStringSelectInteraction(event: StringSelectInteractionEvent): Boolean
+    suspend fun handleOnStringSelectInteractionTimeout()
 
-    suspend fun handleOnEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
-    suspend fun handleOnEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>)
+    suspend fun handleOnEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean
+    suspend fun handleOnEntitySelectInteractionTimeout()
 
-    suspend fun handleOnModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
-    suspend fun handleOnModalInteractionTimeout(additionalData: HashMap<String, Any?>)
+    suspend fun handleOnModalInteraction(event: ModalInteractionEvent): Boolean
+    suspend fun handleOnModalInteractionTimeout()
 }

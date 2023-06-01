@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/viascom/aluna-spring-boot-starter/releases"><img src="https://img.shields.io/maven-metadata/v.svg?label=maven-central&metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fio%2Fviascom%2Fdiscord%2Fbot%2Faluna-spring-boot-starter%2Fmaven-metadata.xml"
          alt="Maven central"></a>
-  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--beta.8-blue.svg"
+  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--beta.9-blue.svg"
               alt="JDA-Version "></a>
   <a href="http://www.apache.org/licenses/"><img src="https://img.shields.io/badge/license-Apache_2.0-blue.svg"
          alt="license Apache 2.0"></a>
@@ -21,9 +21,9 @@
 
 | Library     |                                       Version                                       |
 |-------------|:-----------------------------------------------------------------------------------:|
-| JDA         | <img src="https://img.shields.io/badge/5.0.0-beta.8-yellow.svg" alt="5.0.0-beta.8"> |
-| Spring Boot |     <img src="https://img.shields.io/badge/3.0.0-brightgreen.svg" alt="3.0.0">      |
-| Kotlin      |     <img src="https://img.shields.io/badge/1.8.0-brightgreen.svg" alt="1.8.0">      |
+| JDA         | <img src="https://img.shields.io/badge/5.0.0-beta.9-yellow.svg" alt="5.0.0-beta.9"> |
+| Spring Boot |     <img src="https://img.shields.io/badge/3.1.0-brightgreen.svg" alt="3.1.0">      |
+| Kotlin      |    <img src="https://img.shields.io/badge/1.8.21-brightgreen.svg" alt="1.8.21">     |
 | emoji-java  |     <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1">      |
 
 ## Download
@@ -31,7 +31,7 @@
 Gradle:
 ```gradle
 dependencies {
-  implementation 'io.viascom.discord.bot:aluna-spring-boot-starter:0.0.46_5.0.0-beta.8'
+  implementation 'io.viascom.discord.bot:aluna-spring-boot-starter:0.0.47_5.0.0-beta.9'
 }
 ```
 
@@ -40,7 +40,7 @@ Maven:
 <dependency>
   <groupId>io.viascom.discord.bot</groupId>
     <artifactId>aluna-spring-boot-starter</artifactId>
-    <version>0.0.46_5.0.0-beta.8</version>
+    <version>0.0.47_5.0.0-beta.9</version>
 </dependency>
 ```
 
@@ -67,7 +67,7 @@ event.reply("Pong\nYour locale is:${this.userLocale}").setComponents(ActionRow.o
     .queueAndRegisterInteraction(hook, this)
 
 
-override fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+override fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
     logger.debug(this.hashCode().toString())
     if (event.componentId == "hi") {
         event.editMessage("Oh hi :)").removeActionRows().queue()

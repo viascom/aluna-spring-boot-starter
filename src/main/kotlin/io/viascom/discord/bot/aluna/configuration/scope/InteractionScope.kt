@@ -23,8 +23,8 @@ package io.viascom.discord.bot.aluna.configuration.scope
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.DiscordInteractionHandler
 import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
+import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionHandler
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
 import io.viascom.discord.bot.aluna.model.ObserveInteraction
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
@@ -339,7 +339,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
         buttonMessage?.let { observer ->
             logger.debug("[$name] - ${DiscordContext.discordState} -> reset button interaction timeout for message ${observer.key}")
             observer.value.timeoutTask?.cancel(true)
-            observer.value.timeoutTask = ObserveInteraction.scheduleButtonTimeout(newObj, observer.value.duration, observer.key, discordBot, logger, observer.value.additionalData)
+            observer.value.timeoutTask = ObserveInteraction.scheduleButtonTimeout(newObj, observer.value.duration, observer.key, discordBot, logger)
         }
 
         val stringSelectMessage = discordBot.messagesToObserveStringSelect.entries.firstOrNull { it.value.uniqueId == uniqueId }
@@ -347,7 +347,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
             logger.debug("[$name] - ${DiscordContext.discordState} -> reset string select interaction timeout for message ${observer.key}")
             observer.value.timeoutTask?.cancel(true)
             observer.value.timeoutTask =
-                ObserveInteraction.scheduleStringSelectTimeout(newObj, observer.value.duration, observer.key, discordBot, logger, observer.value.additionalData)
+                ObserveInteraction.scheduleStringSelectTimeout(newObj, observer.value.duration, observer.key, discordBot, logger)
         }
 
         val entitySelectMessage = discordBot.messagesToObserveEntitySelect.entries.firstOrNull { it.value.uniqueId == uniqueId }
@@ -355,7 +355,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
             logger.debug("[$name] - ${DiscordContext.discordState} -> reset entity select interaction timeout for message ${observer.key}")
             observer.value.timeoutTask?.cancel(true)
             observer.value.timeoutTask =
-                ObserveInteraction.scheduleEntitySelectTimeout(newObj, observer.value.duration, observer.key, discordBot, logger, observer.value.additionalData)
+                ObserveInteraction.scheduleEntitySelectTimeout(newObj, observer.value.duration, observer.key, discordBot, logger)
         }
 
         val modalMessage = discordBot.messagesToObserveModal.entries.firstOrNull { it.value.uniqueId == uniqueId }
@@ -367,7 +367,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
             logger.debug("[$name] - ${DiscordContext.discordState} -> reset modal interaction timeout for message ${observer.key}")
             observer.value.timeoutTask?.cancel(true)
             observer.value.timeoutTask =
-                ObserveInteraction.scheduleModalTimeout(newObj, observer.value.duration, observer.value.authorIds!!.first(), discordBot, logger, observer.value.additionalData)
+                ObserveInteraction.scheduleModalTimeout(newObj, observer.value.duration, observer.value.authorIds!!.first(), discordBot, logger)
         }
     }
 

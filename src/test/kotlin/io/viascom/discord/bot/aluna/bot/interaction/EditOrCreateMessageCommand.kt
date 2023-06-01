@@ -65,7 +65,7 @@ class EditOrCreateMessageCommand : DiscordCommand("edit-or-create-message", "Edi
         }
     }
 
-    override fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         event.deferEdit().queue()
         if (event.componentId == "update-message") {
             val newText = "This is the edited or new text | " + LocalDateTime.now(ZoneOffset.UTC).nano
@@ -79,7 +79,7 @@ class EditOrCreateMessageCommand : DiscordCommand("edit-or-create-message", "Edi
         return true
     }
 
-    override fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    override fun onButtonInteractionTimeout() {
         val embed = EmbedBuilder()
             .setDescription("The timeout for the button hook was reached. Please the command again.")
             .build()

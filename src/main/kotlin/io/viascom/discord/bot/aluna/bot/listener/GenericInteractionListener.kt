@@ -85,7 +85,7 @@ open class GenericInteractionListener(
                 return@withContext
             }
 
-            val result = context.getBean(entry.interaction.java).handleOnButtonInteraction(event, entry.additionalData)
+            val result = context.getBean(entry.interaction.java).handleOnButtonInteraction(event)
             if (!entry.stayActive && result) {
                 discordBot.removeMessageForButtonEvents(event.message.id)
             }
@@ -101,7 +101,7 @@ open class GenericInteractionListener(
                 return@withContext
             }
 
-            val result = context.getBean(entry.interaction.java).handleOnStringSelectInteraction(event, entry.additionalData)
+            val result = context.getBean(entry.interaction.java).handleOnStringSelectInteraction(event)
             if (!entry.stayActive && result) {
                 discordBot.removeMessageForStringSelectEvents(event.message.id)
             }
@@ -116,7 +116,7 @@ open class GenericInteractionListener(
                 return@withContext
             }
 
-            val result = context.getBean(entry.interaction.java).handleOnEntitySelectInteraction(event, entry.additionalData)
+            val result = context.getBean(entry.interaction.java).handleOnEntitySelectInteraction(event)
             if (!entry.stayActive && result) {
                 discordBot.removeMessageForEntitySelectEvents(event.message.id)
             }
@@ -131,7 +131,7 @@ open class GenericInteractionListener(
                 return@withContext
             }
 
-            val result = context.getBean(entry.interaction.java).handleOnModalInteraction(event, entry.additionalData)
+            val result = context.getBean(entry.interaction.java).handleOnModalInteraction(event)
             if (!entry.stayActive && result) {
                 discordBot.removeMessageForModalEvents(event.user.id)
             }

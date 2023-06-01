@@ -22,7 +22,6 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
-import io.viascom.discord.bot.aluna.bot.AutoCompleteHandler
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordSlashCommandInitializedEvent

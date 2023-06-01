@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.command
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.CoroutineDiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnDefaultHelpCommandEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
@@ -37,13 +37,13 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button
 @Interaction
 @ConditionalOnJdaEnabled
 @ConditionalOnDefaultHelpCommandEnabled
-class DefaultHelpCommand : DiscordCommand("help", "Shows information about the bot") {
+class DefaultHelpCommand : CoroutineDiscordCommand("help", "Shows information about the bot") {
 
     init {
         this.beanCallOnDestroy = false
     }
 
-    override fun execute(event: SlashCommandInteractionEvent) {
+    override suspend fun execute(event: SlashCommandInteractionEvent) {
         val embed = EmbedBuilder()
             .setAuthor(alunaProperties.command.helpCommand.title, null, event.jda.selfUser.effectiveAvatarUrl)
             .setColor(alunaProperties.command.helpCommand.embedColor)

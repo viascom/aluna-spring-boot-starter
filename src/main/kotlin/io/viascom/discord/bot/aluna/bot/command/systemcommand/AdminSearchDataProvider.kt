@@ -205,7 +205,7 @@ class AdminSearchDataProvider(
         lastHook.editOriginalEmbeds(lastEmbed.build()).removeComponents().queue()
     }
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         lastHook = event.deferReply().complete()
         handleSearch(event.interaction.getValue("id")?.asString ?: "")
         return true

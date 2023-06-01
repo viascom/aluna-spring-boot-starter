@@ -76,7 +76,7 @@ class BotStatusProvider(
                 .setDescription(
                     """Start-time : ${
                         LocalDateTime.now(ZoneOffset.UTC).minusSeconds(uptime).toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME)
-                    } *(${secondsToTime(uptime)?.replace("*", "")} ago)*
+                    } *(${secondsToTime(uptime).replace("*", "")} ago)*
                        Memory     : $used MB / $total MB
                     """.trimIndent()
                 )

@@ -21,6 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot
 
+import io.viascom.discord.bot.aluna.bot.handler.DiscordMessageContextMenuHandler
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
@@ -55,14 +56,14 @@ abstract class DiscordMessageContext(name: String, localizations: LocalizationFu
      * @param event [ButtonInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: java.util.HashMap<String, Any?>): Boolean {
+    open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a button event observer duration timeout is reached.
      */
-    open fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    open fun onButtonInteractionTimeout() {
     }
 
     //======= Select Interaction =======
@@ -74,14 +75,14 @@ abstract class DiscordMessageContext(name: String, localizations: LocalizationFu
      * @param event [StringSelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open fun onStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    open fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-    open fun onStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    open fun onStringSelectInteractionTimeout() {
     }
 
     /**
@@ -91,14 +92,14 @@ abstract class DiscordMessageContext(name: String, localizations: LocalizationFu
      * @param event [EntitySelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open fun onEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    open fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-    open fun onEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    open fun onEntitySelectInteractionTimeout() {
     }
 
     //======= Modal Interaction =======
@@ -110,25 +111,25 @@ abstract class DiscordMessageContext(name: String, localizations: LocalizationFu
      * @param event [ModalInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    open fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a modal event observer duration timeout is reached.
      */
-    open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    open fun onModalInteractionTimeout() {
     }
 
     override suspend fun runExecute(event: MessageContextInteractionEvent) = execute(event)
     override suspend fun runOnDestroy() = onDestroy()
-    override suspend fun runOnButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>) = onButtonInteraction(event, additionalData)
-    override suspend fun runOnButtonInteractionTimeout(additionalData: HashMap<String, Any?>) = onButtonInteractionTimeout(additionalData)
-    override suspend fun runOnStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>) = onStringSelectInteraction(event, additionalData)
-    override suspend fun runOnStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) = onStringSelectInteractionTimeout(additionalData)
-    override suspend fun runOnEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>) = onEntitySelectInteraction(event, additionalData)
-    override suspend fun runOnEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) = onEntitySelectInteractionTimeout(additionalData)
-    override suspend fun runOnModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>) = onModalInteraction(event, additionalData)
-    override suspend fun runOnModalInteractionTimeout(additionalData: HashMap<String, Any?>) = onModalInteractionTimeout(additionalData)
+    override suspend fun runOnButtonInteraction(event: ButtonInteractionEvent) = onButtonInteraction(event)
+    override suspend fun runOnButtonInteractionTimeout() = onButtonInteractionTimeout()
+    override suspend fun runOnStringSelectInteraction(event: StringSelectInteractionEvent) = onStringSelectInteraction(event)
+    override suspend fun runOnStringSelectInteractionTimeout() = onStringSelectInteractionTimeout()
+    override suspend fun runOnEntitySelectInteraction(event: EntitySelectInteractionEvent) = onEntitySelectInteraction(event)
+    override suspend fun runOnEntitySelectInteractionTimeout() = onEntitySelectInteractionTimeout()
+    override suspend fun runOnModalInteraction(event: ModalInteractionEvent) = onModalInteraction(event)
+    override suspend fun runOnModalInteractionTimeout() = onModalInteractionTimeout()
 
 }

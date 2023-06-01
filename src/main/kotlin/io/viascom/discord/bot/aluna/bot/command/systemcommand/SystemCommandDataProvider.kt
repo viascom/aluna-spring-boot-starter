@@ -74,10 +74,10 @@ abstract class SystemCommandDataProvider(
     open fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: SystemCommand) {}
 
 
-    open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    open fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         return true
     }
 
-    open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {}
+    open fun onModalInteractionTimeout() {}
 
 }

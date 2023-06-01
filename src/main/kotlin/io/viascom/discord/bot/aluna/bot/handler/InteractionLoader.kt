@@ -24,7 +24,6 @@ package io.viascom.discord.bot.aluna.bot.handler
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
-import io.viascom.discord.bot.aluna.bot.DiscordContextMenuHandler
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordFirstShardConnectedEvent
 import io.viascom.discord.bot.aluna.event.EventPublisher

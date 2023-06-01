@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,9 +19,10 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.bot
+package io.viascom.discord.bot.aluna.configuration.listener
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
+import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.AlunaHealthIndicator
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordSlashCommandInitializedEvent

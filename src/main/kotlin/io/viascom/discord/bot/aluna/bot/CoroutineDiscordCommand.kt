@@ -21,6 +21,8 @@
 
 package io.viascom.discord.bot.aluna.bot
 
+import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandHandler
+import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionHandler
 import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionLocalization
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
@@ -50,7 +52,7 @@ abstract class CoroutineDiscordCommand @JvmOverloads constructor(
     /**
      * If enabled, Aluna will automatically forward the command execution as well as interaction events to the matching sub command.
      *
-     * For this to work, you need to annotate your autowired [DiscordSubCommand] or [DiscordSubCommandGroup] implementation with [@SubCommandElement][SubCommandElement]
+     * For this to work, you need to annotate your autowired [DiscordSubCommand] or [DiscordSubCommandGroupHandler] implementation with [@SubCommandElement][SubCommandElement]
      * or register them manually with [registerSubCommands] during [initSubCommands].
      *
      * The Top-Level command can not be used (limitation of Discord), but Aluna will nevertheless always call [execute] on the top-level command before executing the sub command method if you need to do some general stuff.
@@ -88,14 +90,14 @@ abstract class CoroutineDiscordCommand @JvmOverloads constructor(
      * @param event [ButtonInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open suspend fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: java.util.HashMap<String, Any?>): Boolean {
+    open suspend fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a button event observer duration timeout is reached.
      */
-    open suspend fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    open suspend fun onButtonInteractionTimeout() {
     }
 
     //======= Select Interaction =======
@@ -107,14 +109,14 @@ abstract class CoroutineDiscordCommand @JvmOverloads constructor(
      * @param event [StringSelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open suspend fun onStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    open suspend fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-    open suspend fun onStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    open suspend fun onStringSelectInteractionTimeout() {
     }
 
     /**
@@ -124,14 +126,14 @@ abstract class CoroutineDiscordCommand @JvmOverloads constructor(
      * @param event [EntitySelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open suspend fun onEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    open suspend fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-    open suspend fun onEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    open suspend fun onEntitySelectInteractionTimeout() {
     }
 
     //======= Modal Interaction =======
@@ -143,14 +145,14 @@ abstract class CoroutineDiscordCommand @JvmOverloads constructor(
      * @param event [ModalInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open suspend fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    open suspend fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a modal event observer duration timeout is reached.
      */
-    open suspend fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    open suspend fun onModalInteractionTimeout() {
     }
 
     //======= Auto Complete =======
@@ -160,14 +162,14 @@ abstract class CoroutineDiscordCommand @JvmOverloads constructor(
 
     override suspend fun runExecute(event: SlashCommandInteractionEvent) = execute(event)
     override suspend fun runOnDestroy() = onDestroy()
-    override suspend fun runOnButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>) = onButtonInteraction(event, additionalData)
-    override suspend fun runOnButtonInteractionTimeout(additionalData: HashMap<String, Any?>) = onButtonInteractionTimeout(additionalData)
-    override suspend fun runOnStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>) = onStringSelectInteraction(event, additionalData)
-    override suspend fun runOnStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) = onStringSelectInteractionTimeout(additionalData)
-    override suspend fun runOnEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>) = onEntitySelectInteraction(event, additionalData)
-    override suspend fun runOnEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) = onEntitySelectInteractionTimeout(additionalData)
-    override suspend fun runOnModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>) = onModalInteraction(event, additionalData)
-    override suspend fun runOnModalInteractionTimeout(additionalData: HashMap<String, Any?>) = onModalInteractionTimeout(additionalData)
+    override suspend fun runOnButtonInteraction(event: ButtonInteractionEvent) = onButtonInteraction(event)
+    override suspend fun runOnButtonInteractionTimeout() = onButtonInteractionTimeout()
+    override suspend fun runOnStringSelectInteraction(event: StringSelectInteractionEvent) = onStringSelectInteraction(event)
+    override suspend fun runOnStringSelectInteractionTimeout() = onStringSelectInteractionTimeout()
+    override suspend fun runOnEntitySelectInteraction(event: EntitySelectInteractionEvent) = onEntitySelectInteraction(event)
+    override suspend fun runOnEntitySelectInteractionTimeout() = onEntitySelectInteractionTimeout()
+    override suspend fun runOnModalInteraction(event: ModalInteractionEvent) = onModalInteraction(event)
+    override suspend fun runOnModalInteractionTimeout() = onModalInteractionTimeout()
     override suspend fun runOnAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) = onAutoCompleteEvent(option, event)
 
 }

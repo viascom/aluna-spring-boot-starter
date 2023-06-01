@@ -22,6 +22,8 @@
 package io.viascom.discord.bot.aluna.bot
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
+import io.viascom.discord.bot.aluna.bot.handler.AutoComplete
+import io.viascom.discord.bot.aluna.bot.handler.AutoCompleteHandler
 import io.viascom.discord.bot.aluna.bot.interaction.SetPreferredAnimalCommand
 import io.viascom.discord.bot.aluna.util.getOptionAsString
 import kotlinx.coroutines.flow.MutableStateFlow

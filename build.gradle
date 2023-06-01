@@ -30,6 +30,7 @@ ext {
     jacksonVersion = "2.15.1"
     emojiJavaVersion = "5.1.1"
     gsonVersion = "2.10.1"
+    javabotblockapiVersion = "6.7.4_347"
 }
 
 group "io.viascom.discord.bot"
@@ -60,6 +61,7 @@ java {
 
 repositories {
     mavenCentral()
+    maven { url = 'https://repo.codemc.io/repository/maven-public' }
 }
 
 dependencies {
@@ -98,6 +100,11 @@ dependencies {
         //Because of https://advisory.checkmarx.net/advisory/vulnerability/Cx08fcacc9-cb99/
     }
     api "org.json:json:20230227"
+
+    //====== BotBlock ======
+    compileOnly "org.botblock:javabotblockapi-core:$javabotblockapiVersion"
+    compileOnly "org.botblock:javabotblockapi-request:$javabotblockapiVersion"
+    compileOnly "org.botblock:javabotblockapi-jda:$javabotblockapiVersion"
 
     //====== Testing ======
     testImplementation "org.springframework.boot:spring-boot-starter-web"

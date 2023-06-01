@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.event
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
+import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandHandler
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.Channel

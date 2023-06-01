@@ -23,7 +23,7 @@ package io.viascom.discord.bot.aluna.bot
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventManager
-import io.viascom.discord.bot.aluna.bot.handler.CooldownScope
+import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
 import io.viascom.discord.bot.aluna.model.CommandUsage
@@ -216,7 +216,6 @@ open class DiscordBot(
      * @param interaction interaction handler
      * @param multiUse if the interaction can be used multiple times
      * @param duration timout of the interaction
-     * @param additionalData additional data
      * @param authorIds only specified users can use it
      * @param interactionUserOnly only the user who created the interaction can use it
      */
@@ -226,16 +225,12 @@ open class DiscordBot(
         interaction: DiscordInteractionHandler,
         multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
-        additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
         val discordBot = this
         AlunaDispatchers.InternalScope.launch {
             logger.debug("Register message $messageId for button events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
-            if (!additionalData.containsKey("message.id")) {
-                additionalData["message.id"] = messageId
-            }
 
             messagesToObserveButton[messageId] =
                 ObserveInteraction(
@@ -244,10 +239,9 @@ open class DiscordBot(
                     LocalDateTime.now(ZoneOffset.UTC),
                     duration,
                     multiUse,
-                    additionalData,
                     authorIds,
                     interactionUserOnly,
-                    ObserveInteraction.scheduleButtonTimeout(interaction, duration, messageId, discordBot, logger, additionalData)
+                    ObserveInteraction.scheduleButtonTimeout(interaction, duration, messageId, discordBot, logger)
                 )
 
             val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
@@ -262,7 +256,6 @@ open class DiscordBot(
      * @param interaction interaction handler
      * @param multiUse if the interaction can be used multiple times
      * @param duration timout of the interaction
-     * @param additionalData additional data
      * @param authorIds only specified users can use it
      * @param interactionUserOnly only the user who created the interaction can use it
      */
@@ -272,12 +265,11 @@ open class DiscordBot(
         interaction: DiscordInteractionHandler,
         multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
-        additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal()
-            .queue { registerMessageForButtonEvents(it.id, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly) }
+            .queue { registerMessageForButtonEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
 
     }
 
@@ -288,7 +280,6 @@ open class DiscordBot(
      * @param interaction interaction handler
      * @param multiUse if the interaction can be used multiple times
      * @param duration timout of the interaction
-     * @param additionalData additional data
      * @param authorIds only specified users can use it
      * @param interactionUserOnly only the user who created the interaction can use it
      */
@@ -298,16 +289,12 @@ open class DiscordBot(
         interaction: DiscordInteractionHandler,
         multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
-        additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
         val discordBot = this
         AlunaDispatchers.InternalScope.launch {
             logger.debug("Register message $messageId for string select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
-            if (!additionalData.containsKey("message.id")) {
-                additionalData["message.id"] = messageId
-            }
 
             messagesToObserveStringSelect[messageId] =
                 ObserveInteraction(
@@ -316,10 +303,9 @@ open class DiscordBot(
                     LocalDateTime.now(ZoneOffset.UTC),
                     duration,
                     multiUse,
-                    additionalData,
                     authorIds,
                     interactionUserOnly,
-                    ObserveInteraction.scheduleStringSelectTimeout(interaction, duration, messageId, discordBot, logger, additionalData)
+                    ObserveInteraction.scheduleStringSelectTimeout(interaction, duration, messageId, discordBot, logger)
                 )
 
             val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
@@ -344,12 +330,11 @@ open class DiscordBot(
         interaction: DiscordInteractionHandler,
         multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
-        additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal()
-            .queue { registerMessageForStringSelectEvents(it.id, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly) }
+            .queue { registerMessageForStringSelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
     }
 
     /**
@@ -369,16 +354,12 @@ open class DiscordBot(
         interaction: DiscordInteractionHandler,
         multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
-        additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
         val discordBot = this
         AlunaDispatchers.InternalScope.launch {
             logger.debug("Register message $messageId for entity select events to interaction '${getInteractionName(interaction)}'" + if (interactionUserOnly) " (only specified users can use it)" else "")
-            if (!additionalData.containsKey("message.id")) {
-                additionalData["message.id"] = messageId
-            }
 
             messagesToObserveEntitySelect[messageId] =
                 ObserveInteraction(
@@ -387,10 +368,9 @@ open class DiscordBot(
                     LocalDateTime.now(ZoneOffset.UTC),
                     duration,
                     multiUse,
-                    additionalData,
                     authorIds,
                     interactionUserOnly,
-                    ObserveInteraction.scheduleEntitySelectTimeout(interaction, duration, messageId, discordBot, logger, additionalData)
+                    ObserveInteraction.scheduleEntitySelectTimeout(interaction, duration, messageId, discordBot, logger)
                 )
 
             val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
@@ -415,12 +395,11 @@ open class DiscordBot(
         interaction: DiscordInteractionHandler,
         multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
-        additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
         hook.retrieveOriginal()
-            .queue { registerMessageForEntitySelectEvents(it.id, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly) }
+            .queue { registerMessageForEntitySelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
     }
 
     /**
@@ -437,8 +416,7 @@ open class DiscordBot(
         authorId: String,
         interaction: DiscordInteractionHandler,
         multiUse: Boolean = false,
-        duration: Duration = Duration.ofMinutes(14),
-        additionalData: HashMap<String, Any?> = hashMapOf()
+        duration: Duration = Duration.ofMinutes(14)
     ) {
         val discordBot = this
         AlunaDispatchers.InternalScope.launch {
@@ -451,10 +429,9 @@ open class DiscordBot(
                     LocalDateTime.now(ZoneOffset.UTC),
                     duration,
                     multiUse,
-                    additionalData,
                     arrayListOf(authorId),
                     true,
-                    ObserveInteraction.scheduleModalTimeout(interaction, duration, authorId, discordBot, logger, additionalData)
+                    ObserveInteraction.scheduleModalTimeout(interaction, duration, authorId, discordBot, logger)
                 )
         }
     }
@@ -511,7 +488,6 @@ open class DiscordBot(
         type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
         multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
-        additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = arrayListOf(interaction.author.id),
         interactionUserOnly: Boolean = true,
         failure: Consumer<in Throwable>? = null,
@@ -522,22 +498,22 @@ open class DiscordBot(
             AlunaDispatchers.InternalScope.launch {
                 launch {
                     if (type.contains(EventRegisterType.BUTTON)) {
-                        discordBot.registerMessageForButtonEvents(hook, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly)
+                        discordBot.registerMessageForButtonEvents(hook, interaction, multiUse, duration, authorIds, interactionUserOnly)
                     }
                 }
                 launch {
                     if (type.contains(EventRegisterType.STRING_SELECT)) {
-                        discordBot.registerMessageForStringSelectEvents(hook, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly)
+                        discordBot.registerMessageForStringSelectEvents(hook, interaction, multiUse, duration, authorIds, interactionUserOnly)
                     }
                 }
                 launch {
                     if (type.contains(EventRegisterType.ENTITY_SELECT)) {
-                        discordBot.registerMessageForEntitySelectEvents(hook, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly)
+                        discordBot.registerMessageForEntitySelectEvents(hook, interaction, multiUse, duration, authorIds, interactionUserOnly)
                     }
                 }
                 launch {
                     if (type.contains(EventRegisterType.MODAL)) {
-                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, multiUse, duration, additionalData)
+                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, multiUse, duration)
                     }
                 }
                 success?.accept(it)
@@ -566,7 +542,6 @@ open class DiscordBot(
         type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.MODAL),
         multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
-        additionalData: HashMap<String, Any?> = hashMapOf(),
         failure: Consumer<in Throwable>? = null,
         success: Consumer<in Void>? = null
     ) {
@@ -575,7 +550,7 @@ open class DiscordBot(
             AlunaDispatchers.InternalScope.launch {
                 launch {
                     if (type.contains(EventRegisterType.MODAL)) {
-                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, multiUse, duration, additionalData)
+                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, multiUse, duration)
                     }
                 }
                 launch(AlunaDispatchers.Detached) {
@@ -610,7 +585,6 @@ open class DiscordBot(
         type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
         multiUse: Boolean = false,
         duration: Duration = Duration.ofMinutes(14),
-        additionalData: HashMap<String, Any?> = hashMapOf(),
         authorIds: ArrayList<String>? = arrayListOf(interaction.author.id),
         interactionUserOnly: Boolean = true,
         failure: Consumer<in Throwable>? = null,
@@ -622,22 +596,22 @@ open class DiscordBot(
 
                 launch {
                     if (type.contains(EventRegisterType.BUTTON)) {
-                        discordBot.registerMessageForButtonEvents(it, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly)
+                        discordBot.registerMessageForButtonEvents(it, interaction, multiUse, duration, authorIds, interactionUserOnly)
                     }
                 }
                 launch {
                     if (type.contains(EventRegisterType.STRING_SELECT)) {
-                        discordBot.registerMessageForStringSelectEvents(it, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly)
+                        discordBot.registerMessageForStringSelectEvents(it, interaction, multiUse, duration, authorIds, interactionUserOnly)
                     }
                 }
                 launch {
                     if (type.contains(EventRegisterType.ENTITY_SELECT)) {
-                        discordBot.registerMessageForEntitySelectEvents(it, interaction, multiUse, duration, additionalData, authorIds, interactionUserOnly)
+                        discordBot.registerMessageForEntitySelectEvents(it, interaction, multiUse, duration, authorIds, interactionUserOnly)
                     }
                 }
                 launch {
                     if (type.contains(EventRegisterType.MODAL)) {
-                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, multiUse, duration, additionalData)
+                        discordBot.registerMessageForModalEvents(interaction.author.id, interaction, multiUse, duration)
                     }
                 }
                 launch(AlunaDispatchers.Detached) {
@@ -758,7 +732,6 @@ fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
     type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
     multiUse: Boolean = false,
     duration: Duration = Duration.ofMinutes(14),
-    additionalData: HashMap<String, Any?> = hashMapOf(),
     authorIds: ArrayList<String>? = arrayListOf(interaction.author.id),
     interactionUserOnly: Boolean = true,
     failure: Consumer<in Throwable>? = null,
@@ -770,7 +743,6 @@ fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
     type,
     multiUse,
     duration,
-    additionalData,
     authorIds,
     interactionUserOnly,
     failure,
@@ -794,10 +766,9 @@ fun RestAction<Void>.queueAndRegisterInteraction(
     type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.MODAL),
     multiUse: Boolean = false,
     duration: Duration = Duration.ofMinutes(14),
-    additionalData: HashMap<String, Any?> = hashMapOf(),
     failure: Consumer<in Throwable>? = null,
     success: Consumer<in Void>? = null
-) = interaction.discordBot.queueAndRegisterInteraction(this, interaction, type, multiUse, duration, additionalData, failure, success)
+) = interaction.discordBot.queueAndRegisterInteraction(this, interaction, type, multiUse, duration, failure, success)
 
 /**
  * Queue an action and set the message id for the interaction.
@@ -834,7 +805,6 @@ fun ReplyCallbackAction.queueAndRegisterInteraction(
     type: ArrayList<EventRegisterType> = arrayListOf(EventRegisterType.BUTTON),
     multiUse: Boolean = false,
     duration: Duration = Duration.ofMinutes(14),
-    additionalData: HashMap<String, Any?> = hashMapOf(),
     authorIds: ArrayList<String>? = arrayListOf(interaction.author.id),
     interactionUserOnly: Boolean = true,
     failure: Consumer<in Throwable>? = null,
@@ -845,7 +815,6 @@ fun ReplyCallbackAction.queueAndRegisterInteraction(
     type,
     multiUse,
     duration,
-    additionalData,
     authorIds,
     interactionUserOnly,
     failure,

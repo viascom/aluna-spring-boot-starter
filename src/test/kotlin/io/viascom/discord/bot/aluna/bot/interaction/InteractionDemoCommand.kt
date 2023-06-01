@@ -86,7 +86,7 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
             }
     }
 
-    override fun onButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         when (event.componentId) {
             "set_text" -> {
                 val modal = Modal.create("set_text", "Set Image")
@@ -111,13 +111,13 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
         return true
     }
 
-    override fun onStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: java.util.HashMap<String, Any?>): Boolean {
+    override fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
         latestEmbed.setColor(event.getSelection().toInt())
         event.editMessageEmbeds(latestEmbed.build()).queue { latestHook = it }
         return true
     }
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         when (event.modalId) {
             "set_text" -> {
                 val text = event.getValueAsString("text", "")

@@ -21,7 +21,11 @@
 
 package io.viascom.discord.bot.aluna.event
 
-import io.viascom.discord.bot.aluna.bot.*
+import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.bot.handler.AutoCompleteHandler
+import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandHandler
+import io.viascom.discord.bot.aluna.bot.handler.DiscordMessageContextMenuHandler
+import io.viascom.discord.bot.aluna.bot.handler.DiscordUserContextMenuHandler
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.entities.Guild

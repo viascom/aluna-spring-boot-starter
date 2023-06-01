@@ -614,8 +614,8 @@ fun levenshteinDistance(str1: String, str2: String): Double {
     return 1.0 - (distance.toDouble() / maxOf(str1.length, str2.length))
 }
 
-fun secondsToTime(timeseconds: Long): String? {
-    var timeseconds = timeseconds
+fun secondsToTime(inputSeconds: Long, noTimeText: String = "**No time**"): String {
+    var timeseconds = inputSeconds
     val builder = StringBuilder()
     val years = (timeseconds / (60 * 60 * 24 * 365)).toInt()
     if (years > 0) {
@@ -647,7 +647,7 @@ fun secondsToTime(timeseconds: Long): String? {
     }
     var str = builder.toString()
     if (str.endsWith(", ")) str = str.substring(0, str.length - 2)
-    if (str == "") str = "**No time**"
+    if (str == "") str = noTimeText
     return str
 }
 

@@ -21,8 +21,6 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommandHandler
-import io.viascom.discord.bot.aluna.bot.DiscordContextMenuHandler
 import io.viascom.discord.bot.aluna.model.MissingPermissions
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent

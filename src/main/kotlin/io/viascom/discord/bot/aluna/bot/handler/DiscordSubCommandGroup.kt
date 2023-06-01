@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,16 +19,6 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.event
+package io.viascom.discord.bot.aluna.bot.handler
 
-import io.viascom.discord.bot.aluna.bot.handler.AutoCompleteHandler
-import org.springframework.context.ApplicationEvent
-import kotlin.reflect.KClass
-
-/**
- * Discord auto complete handler initialized event. This gets triggered, as soon as the auto complete handlers are initialized.
- *
- * @property handlers
- *
- */
-class DiscordAutoCompleteHandlerInitializedEvent(source: Any, val handlers: List<KClass<out AutoCompleteHandler>>) : ApplicationEvent(source)
+abstract class DiscordSubCommandGroup(name: String, description: String) : DiscordSubCommandGroupHandler(name, description)

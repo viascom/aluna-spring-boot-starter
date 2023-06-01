@@ -264,7 +264,7 @@ class ReleaseNotesProvider(
         return true
     }
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         when (event.modalId) {
             "set-json" -> {
                 event.deferEdit().queue()

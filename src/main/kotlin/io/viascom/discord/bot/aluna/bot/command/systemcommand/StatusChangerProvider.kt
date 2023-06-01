@@ -177,7 +177,7 @@ class StatusChangerProvider(
         return true
     }
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         lastHook = event.deferEdit().complete()
         activityText = event.getValueAsString("text", "")!!
         activityUrl = event.getValueAsString("url", "")!!

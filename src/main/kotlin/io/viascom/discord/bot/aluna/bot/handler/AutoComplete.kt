@@ -19,16 +19,14 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.event
+package io.viascom.discord.bot.aluna.bot.handler
 
-import io.viascom.discord.bot.aluna.bot.handler.AutoCompleteHandler
-import org.springframework.context.ApplicationEvent
-import kotlin.reflect.KClass
+import io.viascom.discord.bot.aluna.configuration.scope.InteractionScoped
+import org.springframework.stereotype.Component
 
 /**
- * Discord auto complete handler initialized event. This gets triggered, as soon as the auto complete handlers are initialized.
- *
- * @property handlers
- *
+ * This annotation can be used to mark a bean as a component that is handling auto complete request.
  */
-class DiscordAutoCompleteHandlerInitializedEvent(source: Any, val handlers: List<KClass<out AutoCompleteHandler>>) : ApplicationEvent(source)
+@Component
+@InteractionScoped
+annotation class AutoComplete

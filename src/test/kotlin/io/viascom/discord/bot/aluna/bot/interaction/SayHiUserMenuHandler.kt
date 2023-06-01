@@ -57,7 +57,7 @@ class SayHiUserMenuHandler : DiscordUserContextMenu(
         event.replyModal(modal).queueAndRegisterInteraction(this)
     }
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         //Acknowledge the event
         event.deferEdit().queue()
 

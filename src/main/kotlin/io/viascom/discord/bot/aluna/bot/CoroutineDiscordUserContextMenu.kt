@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,64 +21,30 @@
 
 package io.viascom.discord.bot.aluna.bot
 
-import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandHandler
-import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionHandler
-import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionLocalization
+import io.viascom.discord.bot.aluna.bot.handler.DiscordUserContextMenuHandler
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
-import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFunction
 
-abstract class DiscordCommand @JvmOverloads constructor(
-    name: String,
-    description: String,
+abstract class CoroutineDiscordUserContextMenu(name: String, localizations: LocalizationFunction? = null) : DiscordUserContextMenuHandler(name, localizations) {
 
     /**
-     * Define a [LocalizationFunction] for this command. If set no null, Aluna will take the implementation of [DiscordInteractionLocalization].
-     */
-    override var localizations: LocalizationFunction? = null,
-
-    /**
-     * If enabled, Aluna will register an event listener for auto complete requests and link it to this command.
+     * The main body method of a [DiscordContextMenuHandler].
+     * <br></br>This is the "response" for a successful
+     * [#run(DiscordContextMenu)][DiscordContextMenuHandler.execute].
      *
-     * If such an event gets triggered, the method [onAutoCompleteEvent] will be invoked.
+     * @param event The [UserContextInteractionEvent] that triggered this Command
      */
-    override val observeAutoComplete: Boolean = false,
 
-    /**
-     * If enabled, Aluna will automatically forward the command execution as well as interaction events to the matching sub command.
-     *
-     * For this to work, you need to annotate your autowired [DiscordSubCommand] or [DiscordSubCommandGroupHandler] implementation with [@SubCommandElement][SubCommandElement]
-     * or register them manually with [registerSubCommands] during [initSubCommands].
-     *
-     * The Top-Level command can not be used (limitation of Discord), but Aluna will nevertheless always call [execute] on the top-level command before executing the sub command method if you need to do some general stuff.
-     */
-    override val handleSubCommands: Boolean = false,
-
-    /**
-     * If enabled, Aluna will direct matching interactions to this command.
-     * If a matching instance of this command (based on uniqueId or message) is found, the corresponding method is called. If not, a new instance gets created.
-     */
-    override val handlePersistentInteractions: Boolean = false
-) : DiscordCommandHandler(name, description, localizations, observeAutoComplete, handleSubCommands, handlePersistentInteractions), SlashCommandData,
-    InteractionScopedObject, DiscordInteractionHandler {
-
-    /**
-     * Method to implement for command execution
-     *
-     * @param event The [SlashCommandInteractionEvent] that triggered this Command
-     */
-    protected abstract fun execute(event: SlashCommandInteractionEvent)
-
+    protected abstract suspend fun execute(event: UserContextInteractionEvent)
 
     /**
      * On destroy gets called, when the object gets destroyed after the defined beanTimoutDelay.
      */
-    open fun onDestroy() {
+    open suspend fun onDestroy() {
     }
 
     //======= Button Interaction =======
@@ -90,14 +56,14 @@ abstract class DiscordCommand @JvmOverloads constructor(
      * @param event [ButtonInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
+    open suspend fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a button event observer duration timeout is reached.
      */
-    open fun onButtonInteractionTimeout() {
+    open suspend fun onButtonInteractionTimeout() {
     }
 
     //======= Select Interaction =======
@@ -109,14 +75,14 @@ abstract class DiscordCommand @JvmOverloads constructor(
      * @param event [StringSelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
+    open suspend fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-    open fun onStringSelectInteractionTimeout() {
+    open suspend fun onStringSelectInteractionTimeout() {
     }
 
     /**
@@ -126,14 +92,14 @@ abstract class DiscordCommand @JvmOverloads constructor(
      * @param event [EntitySelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
+    open suspend fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-    open fun onEntitySelectInteractionTimeout() {
+    open suspend fun onEntitySelectInteractionTimeout() {
     }
 
     //======= Modal Interaction =======
@@ -145,23 +111,17 @@ abstract class DiscordCommand @JvmOverloads constructor(
      * @param event [ModalInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open fun onModalInteraction(event: ModalInteractionEvent): Boolean {
+    open suspend fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a modal event observer duration timeout is reached.
      */
-    open fun onModalInteractionTimeout() {
+    open suspend fun onModalInteractionTimeout() {
     }
 
-    //======= Auto Complete =======
-
-    open fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
-    }
-
-
-    override suspend fun runExecute(event: SlashCommandInteractionEvent) = execute(event)
+    override suspend fun runExecute(event: UserContextInteractionEvent) = execute(event)
     override suspend fun runOnDestroy() = onDestroy()
     override suspend fun runOnButtonInteraction(event: ButtonInteractionEvent) = onButtonInteraction(event)
     override suspend fun runOnButtonInteractionTimeout() = onButtonInteractionTimeout()
@@ -171,5 +131,5 @@ abstract class DiscordCommand @JvmOverloads constructor(
     override suspend fun runOnEntitySelectInteractionTimeout() = onEntitySelectInteractionTimeout()
     override suspend fun runOnModalInteraction(event: ModalInteractionEvent) = onModalInteraction(event)
     override suspend fun runOnModalInteractionTimeout() = onModalInteractionTimeout()
-    override suspend fun runOnAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) = onAutoCompleteEvent(option, event)
+
 }

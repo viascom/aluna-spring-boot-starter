@@ -93,13 +93,13 @@ class PurgeMessagesProvider(
         val amount: TextInput = textInput("amount", "Amount of messages", TextInputStyle.SHORT)
 
         val modal: Modal = Modal.create("purge", "Purge")
-            .addActionRows(ActionRow.of(amount))
+            .addComponents(ActionRow.of(amount))
             .build()
 
         event.replyModal(modal).queueAndRegisterInteraction(command)
     }
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         event.deferReply(true).queue {
             it.editOriginal(
                 "${systemCommandEmojiProvider.tickEmoji().formatted} Removing ${

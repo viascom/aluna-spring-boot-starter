@@ -21,9 +21,9 @@
 
 package io.viascom.discord.bot.aluna.bot.interaction.animal
 
-import io.viascom.discord.bot.aluna.bot.DiscordSubCommandGroup
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.SubCommandElement
+import io.viascom.discord.bot.aluna.bot.handler.DiscordSubCommandGroup
 import org.springframework.beans.factory.annotation.Autowired
 
 @Interaction

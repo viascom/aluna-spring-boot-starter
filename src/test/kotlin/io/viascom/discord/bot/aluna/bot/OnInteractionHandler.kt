@@ -21,6 +21,8 @@
 
 package io.viascom.discord.bot.aluna.bot
 
+import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandHandler
+import io.viascom.discord.bot.aluna.bot.handler.DiscordContextMenuHandler
 import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionMetaDataHandler
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent

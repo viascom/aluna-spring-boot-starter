@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,10 +19,11 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.bot
+package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
-import io.viascom.discord.bot.aluna.bot.handler.*
+import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
 import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.model.AdditionalRequirements
@@ -189,28 +190,28 @@ abstract class DiscordContextMenuHandler(
     internal abstract suspend fun runOnDestroy()
 
     @JvmSynthetic
-    internal abstract suspend fun runOnButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    internal abstract suspend fun runOnButtonInteraction(event: ButtonInteractionEvent): Boolean
 
     @JvmSynthetic
-    internal abstract suspend fun runOnButtonInteractionTimeout(additionalData: HashMap<String, Any?>)
+    internal abstract suspend fun runOnButtonInteractionTimeout()
 
     @JvmSynthetic
-    internal abstract suspend fun runOnStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    internal abstract suspend fun runOnStringSelectInteraction(event: StringSelectInteractionEvent): Boolean
 
     @JvmSynthetic
-    internal abstract suspend fun runOnStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>)
+    internal abstract suspend fun runOnStringSelectInteractionTimeout()
 
     @JvmSynthetic
-    internal abstract suspend fun runOnEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    internal abstract suspend fun runOnEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean
 
     @JvmSynthetic
-    internal abstract suspend fun runOnEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>)
+    internal abstract suspend fun runOnEntitySelectInteractionTimeout()
 
     @JvmSynthetic
-    internal abstract suspend fun runOnModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean
+    internal abstract suspend fun runOnModalInteraction(event: ModalInteractionEvent): Boolean
 
     @JvmSynthetic
-    internal abstract suspend fun runOnModalInteractionTimeout(additionalData: HashMap<String, Any?>)
+    internal abstract suspend fun runOnModalInteractionTimeout()
 
     fun prepareInteraction() {
         if (isAdministratorOnlyCommand) {
@@ -343,22 +344,18 @@ abstract class DiscordContextMenuHandler(
         }
 
         launch { if (callOnDestroy) runOnDestroy() }
-        launch { if (callButtonTimeout) buttonObserver?.let { runOnButtonInteractionTimeout(it.value.additionalData) } }
-        launch { if (callStringSelectTimeout) stringSelectObserver?.let { runOnStringSelectInteractionTimeout(it.value.additionalData) } }
-        launch { if (callEntitySelectTimeout) entitySelectObserver?.let { runOnEntitySelectInteractionTimeout(it.value.additionalData) } }
-        launch { if (callModalTimeout) modalObserver?.let { runOnModalInteractionTimeout(it.value.additionalData) } }
+        launch { if (callButtonTimeout) buttonObserver?.let { runOnButtonInteractionTimeout() } }
+        launch { if (callStringSelectTimeout) stringSelectObserver?.let { runOnStringSelectInteractionTimeout() } }
+        launch { if (callEntitySelectTimeout) entitySelectObserver?.let { runOnEntitySelectInteractionTimeout() } }
+        launch { if (callModalTimeout) modalObserver?.let { runOnModalInteractionTimeout() } }
     }
 
-    override suspend fun handleOnButtonInteraction(event: ButtonInteractionEvent, additionalData: HashMap<String, Any?>): Boolean = runOnButtonInteraction(event, additionalData)
-    override suspend fun handleOnButtonInteractionTimeout(additionalData: HashMap<String, Any?>) = runOnButtonInteractionTimeout(additionalData)
-    override suspend fun handleOnStringSelectInteraction(event: StringSelectInteractionEvent, additionalData: HashMap<String, Any?>) =
-        runOnStringSelectInteraction(event, additionalData)
-
-    override suspend fun handleOnStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) = runOnStringSelectInteractionTimeout(additionalData)
-    override suspend fun handleOnEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>) =
-        runOnEntitySelectInteraction(event, additionalData)
-
-    override suspend fun handleOnEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) = runOnEntitySelectInteractionTimeout(additionalData)
-    override suspend fun handleOnModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>) = runOnModalInteraction(event, additionalData)
-    override suspend fun handleOnModalInteractionTimeout(additionalData: HashMap<String, Any?>) = runOnModalInteractionTimeout(additionalData)
+    override suspend fun handleOnButtonInteraction(event: ButtonInteractionEvent): Boolean = runOnButtonInteraction(event)
+    override suspend fun handleOnButtonInteractionTimeout() = runOnButtonInteractionTimeout()
+    override suspend fun handleOnStringSelectInteraction(event: StringSelectInteractionEvent) = runOnStringSelectInteraction(event)
+    override suspend fun handleOnStringSelectInteractionTimeout() = runOnStringSelectInteractionTimeout()
+    override suspend fun handleOnEntitySelectInteraction(event: EntitySelectInteractionEvent) = runOnEntitySelectInteraction(event)
+    override suspend fun handleOnEntitySelectInteractionTimeout() = runOnEntitySelectInteractionTimeout()
+    override suspend fun handleOnModalInteraction(event: ModalInteractionEvent) = runOnModalInteraction(event)
+    override suspend fun handleOnModalInteractionTimeout() = runOnModalInteractionTimeout()
 }

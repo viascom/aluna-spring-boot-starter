@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.bot
+package io.viascom.discord.bot.aluna.bot.handler
 
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers

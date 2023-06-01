@@ -21,164 +21,120 @@
 
 package io.viascom.discord.bot.aluna.bot
 
-import io.viascom.discord.bot.aluna.AlunaDispatchers
-import io.viascom.discord.bot.aluna.bot.handler.CooldownScope
-import io.viascom.discord.bot.aluna.model.DevelopmentStatus
-import io.viascom.discord.bot.aluna.model.UseScope
-import io.viascom.discord.bot.aluna.util.TimestampFormat
-import io.viascom.discord.bot.aluna.util.toDiscordTimestamp
-import kotlinx.coroutines.withContext
+import io.viascom.discord.bot.aluna.bot.handler.DiscordSubCommandHandler
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
-import net.dv8tion.jda.api.interactions.commands.Command
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
-import org.springframework.beans.factory.annotation.Autowired
-import java.time.Duration
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 
-abstract class DiscordSubCommand(name: String, description: String) : SubcommandData(name, description), InteractionScopedObject, DiscordSubCommandElement {
-
-    @Autowired
-    lateinit var discordBot: DiscordBot
+abstract class DiscordSubCommand(name: String, description: String) : DiscordSubCommandHandler(name, description), DiscordSubCommandElement {
 
     /**
-     * This gets set by the CommandContext automatically and should not be changed
+     * Method to implement for command execution
+     *
+     * @param event The [SlashCommandInteractionEvent] that triggered this Command
      */
-    override lateinit var uniqueId: String
-
-    override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
-    override var beanUseAutoCompleteBean: Boolean = true
-    override var beanRemoveObserverOnDestroy: Boolean = true
-    override var beanResetObserverTimeoutOnBeanExtend: Boolean = true
-    override var beanCallOnDestroy: Boolean = true
-    override var freshInstance: Boolean = true
-
-    /**
-     * The [CooldownScope][CooldownScope] of the command.
-     */
-    var cooldownScope = CooldownScope.NO_COOLDOWN
-
-    var cooldown: Duration = Duration.ZERO
-
-    var useScope = UseScope.GLOBAL
-
-    @set:JvmSynthetic
-    lateinit var parentCommand: DiscordCommandHandler
-        internal set
-
-    /**
-     * Discord representation of this interaction
-     */
-    @set:JvmSynthetic
-    lateinit var discordRepresentation: Command.Subcommand
-        internal set
-
-    /**
-     * Interaction development status
-     */
-    var interactionDevelopmentStatus = DevelopmentStatus.LIVE
-
-    @JvmSynthetic
-    internal fun initialize(currentSubFullCommandName: String, parentCommand: DiscordCommandHandler, parentDiscordRepresentation: Command) {
-        this.parentCommand = parentCommand
-
-        val elements = currentSubFullCommandName.split(" ")
-        discordRepresentation = when (elements.size) {
-            2 -> parentDiscordRepresentation.subcommands.firstOrNull { it.name == elements[1] }
-            3 -> parentDiscordRepresentation.subcommandGroups.firstOrNull { it.name == elements[1] }?.subcommands?.firstOrNull { it.name == elements[2] }
-            else -> null
-        } ?: throw IllegalArgumentException("Could not find Discord Representation of this command based on: $currentSubFullCommandName")
-    }
-
-    abstract fun execute(event: SlashCommandInteractionEvent)
-
-    @JvmSynthetic
-    internal fun run(event: SlashCommandInteractionEvent) {
-        //Check use scope of this command
-        if (!event.isFromGuild && useScope == UseScope.GUILD_ONLY) {
-            onWrongUseScope(event)
-            return
-        }
-
-        //Check for cooldown
-        val cooldownKey = discordBot.getCooldownKey(cooldownScope, discordRepresentation.id, parentCommand.author.id, parentCommand.channel.id, parentCommand.guild?.id)
-        if (cooldownScope != CooldownScope.NO_COOLDOWN) {
-            if (discordBot.isCooldownActive(cooldownKey, cooldown)) {
-                onCooldownStillActive(event, discordBot.cooldowns[cooldownKey]!!)
-                return
-            }
-        }
-        discordBot.cooldowns[cooldownKey] = LocalDateTime.now(ZoneOffset.UTC)
-
-        execute(event)
-    }
+    protected abstract fun execute(event: SlashCommandInteractionEvent)
 
     open fun initCommandOptions() {}
 
-    open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean = true
-    open fun onButtonInteractionTimeout(additionalData: HashMap<String, Any?>) {}
-
-    open fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean = true
-    open fun onStringSelectInteractionTimeout(additionalData: HashMap<String, Any?>) {}
-
-    open fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean = true
-    open fun onEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) {}
-
-    open fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {}
-
-    open fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean = true
-    open fun onModalInteractionTimeout(additionalData: HashMap<String, Any?>) {}
-
-    open fun onCooldownStillActive(
-        event: SlashCommandInteractionEvent,
-        lastUse: LocalDateTime
-    ) {
-        event.deferReply(true)
-            .setContent("⛔ This interaction is still on cooldown and will be usable ${lastUse.plusNanos(cooldown.toNanos()).toDiscordTimestamp(TimestampFormat.RELATIVE_TIME)}.")
-            .queue()
+    /**
+     * On destroy gets called, when the object gets destroyed after the defined beanTimoutDelay.
+     */
+    open fun onDestroy() {
     }
 
-    open fun onWrongUseScope(event: SlashCommandInteractionEvent) {
-        event.deferReply(true).setContent("⛔ This command can only be used on a server directly.").queue()
-    }
+    //======= Button Interaction =======
 
-    fun updateMessageIdForScope(messageId: String) {
-        parentCommand.updateMessageIdForScope(messageId)
+    /**
+     * This method gets triggered, as soon as a button event for this command is called.
+     * Make sure that you register your message id: `discordBot.registerMessageForButtonEvents(it, this)` or `.queueAndRegisterInteraction()`
+     *
+     * @param event [ButtonInteractionEvent] this method is based on
+     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
+     */
+    open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
+        return false
     }
 
     /**
-     * Destroy this bean instance. This will remove the bean from the interaction scope as well as remove the bean timout.
-     *
-     * @param removeObservers Remove all observers
-     * @param removeObserverTimeouts Remove all observer timeouts
-     * @param callOnDestroy Call onDestroy of this bean
-     * @param callButtonTimeout Call onButtonInteractionTimeout of this bean
-     * @param callStringSelectTimeout Call onStringSelectInteractionTimeout of this bean
-     * @param callEntitySelectTimeout Call onEntitySelectInteractionTimeout of this bean
-     * @param callModalTimeout Call onModalInteractionTimeout of this bean
+     * This method gets triggered, as soon as a button event observer duration timeout is reached.
      */
-    suspend fun destroyThisInstance(
-        removeObservers: Boolean = true,
-        removeObserverTimeouts: Boolean = true,
-        callOnDestroy: Boolean = false,
-        callButtonTimeout: Boolean = false,
-        callStringSelectTimeout: Boolean = false,
-        callEntitySelectTimeout: Boolean = false,
-        callModalTimeout: Boolean = false
-    ) = withContext(AlunaDispatchers.Interaction) {
-        parentCommand.destroyThisInstance(
-            removeObservers,
-            removeObserverTimeouts,
-            callOnDestroy,
-            callButtonTimeout,
-            callStringSelectTimeout,
-            callEntitySelectTimeout,
-            callModalTimeout
-        )
+    open fun onButtonInteractionTimeout() {
     }
+
+    //======= Select Interaction =======
+
+    /**
+     * This method gets triggered, as soon as a select event for this command is called.
+     * Make sure that you register your message id: `discordBot.registerMessageForSelectEvents(it, this)` or `.queueAndRegisterInteraction()`
+     *
+     * @param event [StringSelectInteractionEvent] this method is based on
+     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
+     */
+    open fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
+        return false
+    }
+
+    /**
+     * This method gets triggered, as soon as a select event observer duration timeout is reached.
+     */
+    open fun onStringSelectInteractionTimeout() {
+    }
+
+    /**
+     * This method gets triggered, as soon as a select event for this command is called.
+     * Make sure that you register your message id: `discordBot.registerMessageForSelectEvents(it, this)` or `.queueAndRegisterInteraction()`
+     *
+     * @param event [EntitySelectInteractionEvent] this method is based on
+     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
+     */
+    open fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
+        return false
+    }
+
+    /**
+     * This method gets triggered, as soon as a select event observer duration timeout is reached.
+     */
+    open fun onEntitySelectInteractionTimeout() {
+    }
+
+    //======= Modal Interaction =======
+
+    /**
+     * This method gets triggered, as soon as a modal event for this command is called.
+     * Make sure that you register your message id: `discordBot.registerMessageForModalEvents(it, this)` or `.queueAndRegisterInteraction()`
+     *
+     * @param event [ModalInteractionEvent] this method is based on
+     * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
+     */
+    open fun onModalInteraction(event: ModalInteractionEvent): Boolean {
+        return false
+    }
+
+    /**
+     * This method gets triggered, as soon as a modal event observer duration timeout is reached.
+     */
+    open fun onModalInteractionTimeout() {
+    }
+
+    //======= Auto Complete =======
+
+    open fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
+    }
+
+    override suspend fun runExecute(event: SlashCommandInteractionEvent) = execute(event)
+    override suspend fun runOnDestroy() = onDestroy()
+    override suspend fun runOnButtonInteraction(event: ButtonInteractionEvent) = onButtonInteraction(event)
+    override suspend fun runOnButtonInteractionTimeout() = onButtonInteractionTimeout()
+    override suspend fun runOnStringSelectInteraction(event: StringSelectInteractionEvent) = onStringSelectInteraction(event)
+    override suspend fun runOnStringSelectInteractionTimeout() = onStringSelectInteractionTimeout()
+    override suspend fun runOnEntitySelectInteraction(event: EntitySelectInteractionEvent) = onEntitySelectInteraction(event)
+    override suspend fun runOnEntitySelectInteractionTimeout() = onEntitySelectInteractionTimeout()
+    override suspend fun runOnModalInteraction(event: ModalInteractionEvent) = onModalInteraction(event)
+    override suspend fun runOnModalInteractionTimeout() = onModalInteractionTimeout()
+    override suspend fun runOnAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) = onAutoCompleteEvent(option, event)
+    override suspend fun runInitCommandOptions() = initCommandOptions()
 }

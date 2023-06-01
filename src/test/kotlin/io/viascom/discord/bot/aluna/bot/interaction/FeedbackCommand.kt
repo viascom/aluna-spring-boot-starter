@@ -46,7 +46,7 @@ class FeedbackCommand : DiscordCommand("feedback", "Add some feedback") {
         event.replyModal(modal).queueAndRegisterInteraction(this)
     }
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         //Create a new embed builder with the content of the modal
         val embed = EmbedBuilder()
             .setTitle("Feedback from ${event.user.asTag}")

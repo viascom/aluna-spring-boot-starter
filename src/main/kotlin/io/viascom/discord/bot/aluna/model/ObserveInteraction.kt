@@ -23,7 +23,7 @@ package io.viascom.discord.bot.aluna.model
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.DiscordInteractionHandler
+import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionHandler
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
@@ -39,7 +39,6 @@ class ObserveInteraction(
     val startTime: LocalDateTime,
     val duration: Duration,
     val stayActive: Boolean = false,
-    val additionalData: HashMap<String, Any?> = hashMapOf(),
     val authorIds: ArrayList<String>? = null,
     val interactionUserOnly: Boolean = false,
     var timeoutTask: ScheduledFuture<*>? = null
@@ -51,14 +50,13 @@ class ObserveInteraction(
             duration: Duration,
             messageId: String,
             discordBot: DiscordBot,
-            logger: Logger,
-            additionalData: HashMap<String, Any?>
+            logger: Logger
         ): ScheduledFuture<*> {
             return discordBot.messagesToObserveScheduledThreadPool.schedule({
                 runBlocking(AlunaDispatchers.Internal) {
                     launch(AlunaDispatchers.Interaction) {
                         try {
-                            interaction.handleOnButtonInteractionTimeout(additionalData)
+                            interaction.handleOnButtonInteractionTimeout()
                         } catch (e: Exception) {
                             logger.debug("Could not run onButtonInteractionTimeout for interaction '${discordBot.getInteractionName(interaction)}'\n${e.stackTraceToString()}")
                         }
@@ -75,14 +73,13 @@ class ObserveInteraction(
             duration: Duration,
             messageId: String,
             discordBot: DiscordBot,
-            logger: Logger,
-            additionalData: HashMap<String, Any?>
+            logger: Logger
         ): ScheduledFuture<*> {
             return discordBot.messagesToObserveScheduledThreadPool.schedule({
                 runBlocking(AlunaDispatchers.Internal) {
                     launch(AlunaDispatchers.Interaction) {
                         try {
-                            interaction.handleOnStringSelectInteractionTimeout(additionalData)
+                            interaction.handleOnStringSelectInteractionTimeout()
                         } catch (e: Exception) {
                             logger.debug("Could not run onStringSelectInteractionTimeout for interaction '${discordBot.getInteractionName(interaction)}'\n${e.stackTraceToString()}")
                         }
@@ -99,14 +96,13 @@ class ObserveInteraction(
             duration: Duration,
             messageId: String,
             discordBot: DiscordBot,
-            logger: Logger,
-            additionalData: HashMap<String, Any?>
+            logger: Logger
         ): ScheduledFuture<*> {
             return discordBot.messagesToObserveScheduledThreadPool.schedule({
                 runBlocking(AlunaDispatchers.Internal) {
                     launch(AlunaDispatchers.Interaction) {
                         try {
-                            interaction.handleOnEntitySelectInteractionTimeout(additionalData)
+                            interaction.handleOnEntitySelectInteractionTimeout()
                         } catch (e: Exception) {
                             logger.debug("Could not run onEntitySelectInteractionTimeout for interaction '${discordBot.getInteractionName(interaction)}'\n${e.stackTraceToString()}")
                         }
@@ -123,14 +119,13 @@ class ObserveInteraction(
             duration: Duration,
             authorId: String,
             discordBot: DiscordBot,
-            logger: Logger,
-            additionalData: HashMap<String, Any?>
+            logger: Logger
         ): ScheduledFuture<*> {
             return discordBot.messagesToObserveScheduledThreadPool.schedule({
                 runBlocking(AlunaDispatchers.Internal) {
                     launch(AlunaDispatchers.Interaction) {
                         try {
-                            interaction.handleOnModalInteractionTimeout(additionalData)
+                            interaction.handleOnModalInteractionTimeout()
                         } catch (e: Exception) {
                             logger.debug("Could not run onModalInteractionTimeout for interaction '${discordBot.getInteractionName(interaction)}'\n${e.stackTraceToString()}")
                         }

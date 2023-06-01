@@ -91,7 +91,7 @@ class SendMessageToUserCommand : DiscordCommand("send-message-to-user", "Send a 
         event.replyModal(modal.build()).queueAndRegisterInteraction(this, arrayListOf(EventRegisterType.MODAL))
     }
 
-    override fun onEntitySelectInteraction(event: EntitySelectInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
         when (event.componentId) {
             "user_select" -> {
                 event.deferEdit().queue()
@@ -114,11 +114,11 @@ class SendMessageToUserCommand : DiscordCommand("send-message-to-user", "Send a 
         return true
     }
 
-    override fun onEntitySelectInteractionTimeout(additionalData: HashMap<String, Any?>) {
+    override fun onEntitySelectInteractionTimeout() {
         latestHook.editOriginalEmbeds(latestEmbed.build()).removeComponents().queue()
     }
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         event.deferEdit().queue()
         selectedChannel.sendMessage(selectedUser.asMention + " " + event.values.first().asString).queue()
 

@@ -19,9 +19,10 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.bot
+package io.viascom.discord.bot.aluna.configuration.listener
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
+import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordAllShardsReadyEvent
 import kotlinx.coroutines.launch

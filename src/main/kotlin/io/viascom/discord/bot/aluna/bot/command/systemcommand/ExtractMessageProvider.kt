@@ -72,7 +72,7 @@ class ExtractMessageProvider(
         }
     }
 
-    override fun onModalInteraction(event: ModalInteractionEvent, additionalData: HashMap<String, Any?>): Boolean {
+    override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         val elements = event.getValueAsString("message_url")!!.split("/")
         extractMessage(elements, event.user) {
             if (it == null) {

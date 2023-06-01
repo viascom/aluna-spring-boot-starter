@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,14 +19,11 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.bot
+package io.viascom.discord.bot.aluna.configuration.condition
 
-import io.viascom.discord.bot.aluna.configuration.scope.InteractionScoped
-import org.springframework.stereotype.Component
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import java.lang.annotation.Inherited
 
-/**
- * This annotation can be used to mark a bean as a component that is handling auto complete request.
- */
-@Component
-@InteractionScoped
-annotation class AutoComplete
+@ConditionalOnProperty(name = ["bot-stats.bot-block.enabled"], prefix = "aluna", matchIfMissing = false)
+@Inherited
+annotation class ConditionalOnBotBlockEnabled()

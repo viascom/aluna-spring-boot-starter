@@ -21,13 +21,15 @@
 
 package io.viascom.discord.bot.aluna.bot.listener
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.DiscordMessageContextMenuHandler
-import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenuHandler
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
+import io.viascom.discord.bot.aluna.bot.handler.DiscordMessageContextMenuHandler
+import io.viascom.discord.bot.aluna.bot.handler.DiscordUserContextMenuHandler
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
 import io.viascom.discord.bot.aluna.util.NanoId
+import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -50,7 +52,7 @@ open class InteractionEventListener(
         }
     }
 
-    private suspend fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) {
+    private suspend fun onSlashCommandInteraction(event: SlashCommandInteractionEvent) = withContext(AlunaDispatchers.Interaction) {
         DiscordContext.setDiscordState(
             event.user.id,
             event.guild?.id,
@@ -62,7 +64,7 @@ open class InteractionEventListener(
         }
     }
 
-    private suspend fun onUserContextInteraction(event: UserContextInteractionEvent) {
+    private suspend fun onUserContextInteraction(event: UserContextInteractionEvent) = withContext(AlunaDispatchers.Interaction) {
         DiscordContext.setDiscordState(
             event.user.id,
             event.guild?.id,
@@ -74,7 +76,7 @@ open class InteractionEventListener(
         }
     }
 
-    private suspend fun onMessageContextInteraction(event: MessageContextInteractionEvent) {
+    private suspend fun onMessageContextInteraction(event: MessageContextInteractionEvent) = withContext(AlunaDispatchers.Interaction) {
         DiscordContext.setDiscordState(
             event.user.id,
             event.guild?.id,

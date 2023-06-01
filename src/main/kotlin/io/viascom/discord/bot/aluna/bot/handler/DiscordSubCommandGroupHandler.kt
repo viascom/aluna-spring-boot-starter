@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Viascom Ltd liab. Co
+ * Copyright 2023 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,17 +19,17 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.bot
+package io.viascom.discord.bot.aluna.bot.handler
 
+import io.viascom.discord.bot.aluna.bot.DiscordSubCommandElement
+import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
 import io.viascom.discord.bot.aluna.model.DevelopmentStatus
 import io.viascom.discord.bot.aluna.util.InternalUtil
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData
 import java.time.Duration
 import kotlin.reflect.jvm.isAccessible
 
-abstract class DiscordSubCommandGroup(name: String, description: String) : SubcommandGroupData(name, description),
-    InteractionScopedObject,
-    DiscordSubCommandElement {
+abstract class DiscordSubCommandGroupHandler(name: String, description: String) : SubcommandGroupData(name, description), InteractionScopedObject, DiscordSubCommandElement {
 
     /**
      * This gets set by the CommandContext automatically and should not be changed
@@ -43,7 +43,7 @@ abstract class DiscordSubCommandGroup(name: String, description: String) : Subco
     override var beanCallOnDestroy: Boolean = true
     override var freshInstance: Boolean = true
 
-    val subCommands: HashMap<String, DiscordSubCommand> = hashMapOf()
+    val subCommands: HashMap<String, DiscordSubCommandHandler> = hashMapOf()
 
     /**
      * Interaction development status
@@ -55,17 +55,17 @@ abstract class DiscordSubCommandGroup(name: String, description: String) : Subco
         if (subCommands.isEmpty()) {
             InternalUtil.getSubCommandElements(this).forEach { field ->
                 field.isAccessible = true
-                registerSubCommands(field.getter.call(this) as DiscordSubCommand)
+                registerSubCommands(field.getter.call(this) as DiscordSubCommandHandler)
             }
         }
     }
 
-    fun registerSubCommand(subCommand: DiscordSubCommand) {
+    fun registerSubCommand(subCommand: DiscordSubCommandHandler) {
         subCommands[subCommand.name] = subCommand
         this.addSubcommands(subCommand)
     }
 
-    fun registerSubCommands(vararg subCommands: DiscordSubCommand) {
+    fun registerSubCommands(vararg subCommands: DiscordSubCommandHandler) {
         subCommands.forEach {
             registerSubCommand(it)
         }
