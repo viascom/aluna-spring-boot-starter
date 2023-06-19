@@ -99,7 +99,7 @@ dependencies {
         exclude group: "org.json", module: "json"
         //Because of https://advisory.checkmarx.net/advisory/vulnerability/Cx08fcacc9-cb99/
     }
-    api "org.json:json:20230227"
+    api "org.json:json:20230618"
 
     //====== BotBlock ======
     compileOnly "org.botblock:javabotblockapi-core:$javabotblockapiVersion"
