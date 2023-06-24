@@ -24,10 +24,12 @@ package io.viascom.discord.bot.aluna.model
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.annotations.SerializedName
 import io.viascom.discord.bot.aluna.util.toEditData
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.MessageEmbed
+import net.dv8tion.jda.api.utils.data.DataObject
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
 import net.dv8tion.jda.api.utils.messages.MessageData
@@ -52,7 +54,30 @@ data class Webhook(
         var timestamp: OffsetDateTime?,
         var title: String?,
         var url: String?
-    )
+    ) {
+
+        fun fromEmbedBuilder(embedBuilder: EmbedBuilder) = fromMessageEmbed(embedBuilder.build())
+
+        fun fromMessageEmbed(messageEmbed: MessageEmbed) {
+            messageEmbed.toData().toJson().let { json ->
+                ObjectMapper().readValue(json, Embed::class.java).let { embed ->
+                    this.author = embed.author
+                    this.color = embed.color
+                    this.description = embed.description
+                    this.fields = embed.fields
+                    this.footer = embed.footer
+                    this.image = embed.image
+                    this.thumbnail = embed.thumbnail
+                    this.timestamp = embed.timestamp
+                    this.title = embed.title
+                    this.url = embed.url
+                }
+            }
+        }
+
+        fun toEmbedBuilder() = EmbedBuilder.fromData(DataObject.fromJson(ObjectMapper().writeValueAsBytes(this)))
+        fun toMessageEmbed() = this.toEmbedBuilder().build()
+    }
 
     @JsonInclude(Include.NON_NULL)
     data class Field(

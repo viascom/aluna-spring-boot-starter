@@ -429,7 +429,7 @@ abstract class DiscordCommandHandler(
         guild = event.guild
         guild?.let { MDC.put("discord.server", "${it.id} (${it.name})") }
         author = event.user
-        MDC.put("discord.author", "${author.id} (${author.asTag})")
+        MDC.put("discord.author", "${author.id} (${author.name})")
 
         userLocale = event.userLocale
         MDC.put("discord.author_locale", userLocale.locale)

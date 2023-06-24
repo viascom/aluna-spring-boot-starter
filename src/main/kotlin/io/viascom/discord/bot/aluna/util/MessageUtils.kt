@@ -40,6 +40,7 @@ import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
 import net.dv8tion.jda.api.utils.messages.MessageEditData
 import java.awt.Color
+import java.nio.charset.Charset
 
 object MessageUtils {
 
@@ -225,8 +226,52 @@ fun EmbedBuilder.addFields(fields: Collection<MessageEmbed.Field>): EmbedBuilder
     return this
 }
 
+/**
+ * Sets the color of the embed using RGB values.
+ *
+ * @param red The red component of the color, a value between 0 and 255.
+ * @param green The green component of the color, a value between 0 and 255.
+ * @param blue The blue component of the color, a value between 0 and 255.
+ * @return The updated EmbedBuilder object.
+ */
 fun EmbedBuilder.setColor(red: Int, green: Int, blue: Int): EmbedBuilder = this.setColor(Color(red, green, blue))
+
+/**
+ * Sets the color of the embed using a hexadecimal color string.
+ *
+ * @param hexColor The hexadecimal color string, e.g., "#FF0000" for red.
+ * @return The updated EmbedBuilder object.
+ */
 fun EmbedBuilder.setColor(hexColor: String): EmbedBuilder = this.setColor(Color.decode(hexColor))
+
+/**
+ * Converts the constructed EmbedBuilder object into a JSON byte array.
+ *
+ * @return A byte array containing the JSON representation of the embed.
+ */
+fun EmbedBuilder.toJson(): ByteArray = this.build().toData().toJson()
+
+/**
+ * Converts the constructed EmbedBuilder object into a JSON string.
+ *
+ * @return A string containing the JSON representation of the embed.
+ */
+fun EmbedBuilder.toJsonString(): String = this.toJson().toString(Charset.defaultCharset())
+
+/**
+ * Converts the MessageEmbed object into a JSON byte array.
+ *
+ * @return A byte array containing the JSON representation of the MessageEmbed.
+ */
+fun MessageEmbed.toJson(): ByteArray = this.toData().toJson()
+
+/**
+ * Converts the MessageEmbed object into a JSON string.
+ *
+ * @return A string containing the JSON representation of the MessageEmbed.
+ */
+fun MessageEmbed.toJsonString(): String = this.toJson().toString(Charset.defaultCharset())
+
 
 fun User.getMessage(messageId: String): Message? = try {
     this.openPrivateChannel().complete().retrieveMessageById(messageId).complete()

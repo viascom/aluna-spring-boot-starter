@@ -70,7 +70,7 @@ abstract class DiscordMessageContextMenuHandler(name: String, localizations: Loc
         channel = event.channel
         channel?.let { MDC.put("discord.channel", it.id) }
         author = event.user
-        MDC.put("discord.author", "${author.id} (${author.asTag})")
+        MDC.put("discord.author", "${author.id} (${author.name})")
 
 
         userLocale = event.userLocale

@@ -89,6 +89,14 @@ fun Member.hasCompletedOnboarding(): Boolean = this.flags.contains(Member.Member
 fun Member.hasStartedOnboarding(): Boolean = this.flags.contains(Member.MemberFlag.STARTED_ONBOARDING)
 
 /**
+ * Retrieves the Name displayed in the official Discord Client.
+ * The returned name is escaped and will not contain any markdown links.
+ *
+ * @return The guild nickname of this Member or the {@link User#getEffectiveName() effective user name} if no guild nickname is present. The returned name is escaped and will not contain any markdown links.
+ */
+fun Member.effectiveNameEscaped(): String = escapeMarkdownLinks(this.effectiveName)
+
+/**
  * Puts this Member in time out in this {@link net.dv8tion.jda.api.entities.Guild Guild} for a specific amount of time.
  *
  * @param  duration

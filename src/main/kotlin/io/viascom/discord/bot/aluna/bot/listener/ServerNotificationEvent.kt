@@ -172,7 +172,7 @@ open class ServerNotificationEvent(
         val otherBots = "» Other Bots"
 
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
-            val botListText = botList?.joinToString(", ") { it.user.asTag }
+            val botListText = botList?.joinToString(", ") { it.user.name }
             when {
                 membersSuccess == true && botListText != null && botListText.length <= MessageEmbed.VALUE_MAX_LENGTH -> embedMessage.addField(otherBots, botListText, false)
                 membersSuccess == true && botListText != null && botListText.length > MessageEmbed.VALUE_MAX_LENGTH -> embedMessage.addField(

@@ -83,7 +83,7 @@ class ShutdownProvider(
             if (event.componentId == "yes") {
                 lastEmbed.setDescription("${systemCommandEmojiProvider.tickEmoji().formatted} Bot shutting down now!")
                 lastHook.editOriginalEmbeds(lastEmbed.build()).removeComponents().queue()
-                logger.warn("Shutdown initiated by /system-command. User: ${event.user.asTag} (${event.user.id})")
+                logger.warn("Shutdown initiated by /system-command. User: ${event.user.name} (${event.user.id})")
                 exitProcess(0)
             } else {
                 lastEmbed.setDescription("${systemCommandEmojiProvider.crossEmoji().formatted} Canceled")

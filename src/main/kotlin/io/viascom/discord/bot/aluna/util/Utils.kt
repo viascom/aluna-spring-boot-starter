@@ -658,3 +658,16 @@ fun pluralise(x: Int, singular: String?, plural: String?): String? {
 fun pluralise(x: Long, singular: String?, plural: String?): String? {
     return if (x == 1L) singular else plural
 }
+
+fun escapeMarkdownLinks(input: String): String {
+    var result = input
+
+    // Escape inline links: [link text](URL)
+    result = result.replace(Regex("""\[(.*?)\]\((.*?)\)""")) { "\\${it.value}" }
+
+    // Escape reference-style links: [link text][id] and [id]: URL
+    result = result.replace(Regex("""\[(.*?)\]\[(.*?)\]""")) { "\\${it.value}" }
+    result = result.replace(Regex("""\[(.*?)\]: (.*?)""")) { "\\${it.value}" }
+
+    return result
+}

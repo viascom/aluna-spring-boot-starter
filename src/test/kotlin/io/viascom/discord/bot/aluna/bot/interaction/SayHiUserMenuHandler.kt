@@ -50,7 +50,7 @@ class SayHiUserMenuHandler : DiscordUserContextMenu(
 
         //Create a new modal with one text input
         val modal: Modal = Modal.create("say_hi", "Say hi")
-            .addTextField("message", "Message", TextInputStyle.PARAGRAPH, placeholder = "You can use @user to mention ${target.asTag}")
+            .addTextField("message", "Message", TextInputStyle.PARAGRAPH, placeholder = "You can use @user to mention ${target.name}")
             .build()
 
         //Show the modal to the user and register the interaction to Aluna

@@ -67,7 +67,7 @@ class AdminSearchOverviewPage(
     override fun onUserRequest(discordUser: User, embedBuilder: EmbedBuilder) {
         val mutualServers = shardManager.getMutualGuilds(discordUser)
 
-        embedBuilder.addField("Discord-ID", discordUser.id, true).addField("Discord-Tag", discordUser.asTag, true)
+        embedBuilder.addField("Discord-ID", discordUser.id, true).addField("Discord-Tag", discordUser.name + " *(${discordUser.asTag})*", true)
             .addField("Discord-Mention", discordUser.asMention, true)
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
             val localeMap = discordUser.mutualGuilds.groupBy { it.locale }
@@ -127,7 +127,7 @@ class AdminSearchOverviewPage(
         embedBuilder.addField("Features", discordServer.features.joinToString(" | "), false)
 
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
-            val otherBots = discordServer.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.asTag }
+            val otherBots = discordServer.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.name }
             if (otherBots.length > MessageEmbed.VALUE_MAX_LENGTH) {
                 embedBuilder.addField("Other Bots", "Server has ${otherBots.length} bots", false)
             } else {
@@ -173,7 +173,7 @@ class AdminSearchOverviewPage(
             "Is from a Bot", (if (discordRole.tags.isBot) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted, true
         )
         discordRole.tags.botId?.let {
-            embedBuilder.addField("Assigned Bot", "${shardManager.getUserById(it)?.asTag ?: "n/a"} (`${it}`)", true)
+            embedBuilder.addField("Assigned Bot", "${shardManager.getUserById(it)?.name ?: "n/a"} (`${it}`)", true)
             embedBuilder.addBlankField(true)
         }
         embedBuilder.addField(

@@ -217,7 +217,7 @@ class AdminSearchDataProvider(
         try {
             arrayListOf(shardManager.getUserByTag(id))
         } catch (e: Exception) {
-            shardManager.userCache.filter { it.asTag.lowercase().contains(id.lowercase()) }
+            shardManager.userCache.filter { it.name.lowercase().contains(id.lowercase()) }
         }
     }
 
@@ -289,7 +289,7 @@ class AdminSearchDataProvider(
 
     private fun generateDiscordUser(discordUser: User, page: String = "OVERVIEW") {
         lastEmbed.clearFields()
-        lastEmbed.setDescription("Found Discord User **${discordUser.asTag}**\nwith ID: ``${discordUser.id}``")
+        lastEmbed.setDescription("Found Discord User **${discordUser.name}** *(${discordUser.asTag})*\nwith ID: ``${discordUser.id}``")
         lastEmbed.setThumbnail(discordUser.avatarUrl)
         lastEmbed.setFooter(null)
         lastEmbed.setImage(null)
@@ -368,7 +368,7 @@ class AdminSearchDataProvider(
         val users = checkForUser(arg)
         if (users.isNotEmpty()) {
             users.forEach {
-                responses[Command.Choice(it.asTag + " (User)", it.id)] = levenshteinDistance(it.asTag, arg)
+                responses[Command.Choice(it.asTag + " (User)", it.id)] = levenshteinDistance(it.name, arg)
             }
         }
 
@@ -416,8 +416,8 @@ class AdminSearchDataProvider(
         val possibleServers = shardManager.guilds.filter { it.name.lowercase().contains(arg.lowercase()) }.take(10).map {
             Command.Choice(it.name, it.id)
         }
-        val possibleUsers = shardManager.userCache.filter { it.asTag.lowercase().contains(arg.lowercase()) }.take(15).map {
-            Command.Choice(it.asTag, it.id)
+        val possibleUsers = shardManager.userCache.filter { it.name.lowercase().contains(arg.lowercase()) }.take(15).map {
+            Command.Choice(it.name, it.id)
         }
 
         if (possibleServers.isNotEmpty() || possibleUsers.isNotEmpty()) {
