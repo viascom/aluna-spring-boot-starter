@@ -30,6 +30,7 @@ import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction
 import net.dv8tion.jda.api.sharding.ShardManager
+import net.dv8tion.jda.api.utils.MarkdownSanitizer
 import java.time.Duration
 
 /**
@@ -90,11 +91,11 @@ fun Member.hasStartedOnboarding(): Boolean = this.flags.contains(Member.MemberFl
 
 /**
  * Retrieves the Name displayed in the official Discord Client.
- * The returned name is escaped and will not contain any markdown links.
+ * The returned name is escaped and will not contain any markdown.
  *
- * @return The guild nickname of this Member or the {@link User#getEffectiveName() effective user name} if no guild nickname is present. The returned name is escaped and will not contain any markdown links.
+ * @return The guild nickname of this Member or the {@link User#getEffectiveName() effective user name} if no guild nickname is present. The returned name is escaped and will not contain any markdown.
  */
-fun Member.effectiveNameEscaped(): String = escapeMarkdownLinks(this.effectiveName)
+fun Member.effectiveNameEscaped(): String = MarkdownSanitizer.sanitize(escapeMarkdownLinks(this.effectiveName), MarkdownSanitizer.SanitizationStrategy.ESCAPE)
 
 /**
  * Puts this Member in time out in this {@link net.dv8tion.jda.api.entities.Guild Guild} for a specific amount of time.
