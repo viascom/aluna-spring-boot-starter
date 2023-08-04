@@ -35,6 +35,10 @@ aluna:
         enabled: true
         link: https://github.com/viascom/aluna-spring-boot-starter
       embed-color: '#ffdd40'
+      fields:
+        - name: 'Powered by Aluna'
+          value: 'Aluna is a spring boot starter for discord bots'
+          inline: true
   translation:
     enabled: true
     supported-discord-locals: german, english_us

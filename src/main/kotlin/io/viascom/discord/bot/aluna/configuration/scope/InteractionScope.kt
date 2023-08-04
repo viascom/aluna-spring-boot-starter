@@ -176,8 +176,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
         }
 
         //If type is Command we create a new instance or use the one from the auto complete if present
-        val autoCompleteForThisCommand =
-            scopedObjects[name]!![DiscordContext.discordState!!.id]!!.entries.firstOrNull { it.value.type == DiscordContext.Type.AUTO_COMPLETE }
+        val autoCompleteForThisCommand = scopedObjects[name]!![DiscordContext.discordState!!.id]!!.entries.firstOrNull { it.value.type == DiscordContext.Type.AUTO_COMPLETE }
         if (autoCompleteForThisCommand != null && loadBeanUseAutoCompleteBean(autoCompleteForThisCommand.value.obj, false)) {
             DiscordContext.discordState!!.uniqueId = autoCompleteForThisCommand.key
             logger.debug("[$name] - ${DiscordContext.discordState} -> found auto-complete (use for command)")
@@ -261,9 +260,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
             runBlocking(AlunaDispatchers.Internal) {
                 if (executeOnDestroy) {
                     try {
-                        newObj::class.java.getDeclaredMethod("onDestroy").invoke(newObj)
-                    } catch (e: NoSuchMethodException) {
-                        logger.debug("[$name] - ${DiscordContext.discordState} -> onDestroy does not exist for $newObj")
+                        (newObj as InteractionScopedObject).runOnDestroy()
                     } catch (e: Exception) {
                         logger.debug("[$name] - ${DiscordContext.discordState} -> could not invoke onDestroy for ${newObj}\n${e.stackTraceToString()}")
                     }

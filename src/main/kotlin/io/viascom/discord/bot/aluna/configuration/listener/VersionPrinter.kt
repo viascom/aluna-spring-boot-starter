@@ -22,9 +22,7 @@
 package io.viascom.discord.bot.aluna.configuration.listener
 
 import io.viascom.discord.bot.aluna.AlunaAutoConfiguration
-import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
-import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationPreparedEvent
@@ -37,8 +35,11 @@ class VersionPrinter : ApplicationListener<ApplicationPreparedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(AlunaAutoConfiguration::class.java)
 
+    private var firstExecution: Boolean = true
+
     override fun onApplicationEvent(event: ApplicationPreparedEvent) {
-        AlunaDispatchers.InternalScope.launch {
+        if (firstExecution) {
+            firstExecution = false
             val versions = this::class.java.classLoader.getResource("version.txt")?.readText()?.split("\n")
             val internalVersion = this::class.java.getPackage().implementationVersion
             val alunaVersion = versions?.getOrElse(0) { _ -> internalVersion } ?: internalVersion

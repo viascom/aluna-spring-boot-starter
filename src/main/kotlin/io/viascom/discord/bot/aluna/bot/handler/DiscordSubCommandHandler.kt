@@ -129,9 +129,6 @@ abstract class DiscordSubCommandHandler(
     internal abstract suspend fun runInitCommandOptions()
 
     @JvmSynthetic
-    internal abstract suspend fun runOnDestroy()
-
-    @JvmSynthetic
     internal abstract suspend fun runOnButtonInteraction(event: ButtonInteractionEvent): Boolean
 
     @JvmSynthetic

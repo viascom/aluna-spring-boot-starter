@@ -61,6 +61,11 @@ class SystemCommandProperties {
      */
     var enableKotlinScriptEvaluate: Boolean = false
 
+    /**
+     * Execute load additional data on system-command interaction
+     */
+    var executeLoadAdditionalData: Boolean = false
+
     @NestedConfigurationProperty
     var releaseNotes: ReleaseNoteProperties = ReleaseNoteProperties()
 }
@@ -99,6 +104,9 @@ class HelpCommandProperties {
     var embedColor: String = "#03a66a"
 
     @NestedConfigurationProperty
+    var fields: ArrayList<HelpField> = arrayListOf()
+
+    @NestedConfigurationProperty
     var inviteButton: InviteButton = InviteButton()
 
     @NestedConfigurationProperty
@@ -118,6 +126,11 @@ class HelpCommandProperties {
         label = "Support Us"
         emote = "❤️"
     }
+
+    /**
+     * Execute load additional data on help interaction
+     */
+    var executeLoadAdditionalData: Boolean = false
 }
 
 
@@ -137,4 +150,10 @@ class HelpButton {
     var label: String = "Help"
     var emote: String? = null
     var link: String = ""
+}
+
+class HelpField {
+    var name: String = ""
+    var value: String = ""
+    var inline: Boolean = false
 }

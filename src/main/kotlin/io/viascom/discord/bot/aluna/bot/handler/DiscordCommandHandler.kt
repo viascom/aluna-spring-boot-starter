@@ -269,9 +269,6 @@ abstract class DiscordCommandHandler(
     internal abstract suspend fun runExecute(event: SlashCommandInteractionEvent)
 
     @JvmSynthetic
-    internal abstract suspend fun runOnDestroy()
-
-    @JvmSynthetic
     internal abstract suspend fun runOnButtonInteraction(event: ButtonInteractionEvent): Boolean
 
     @JvmSynthetic
@@ -309,13 +306,11 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnButtonInteractionTimeout() {
         if (handleSubCommands) {
-            handleSubCommand(null, {
-                it.runOnButtonInteractionTimeout()
-                true
-            }, {
-                onSubCommandInteractionTimeoutFallback()
-                true
-            })
+            handleSubCommand(
+                null,
+                { it.runOnButtonInteractionTimeout(); true },
+                { onSubCommandInteractionTimeoutFallback(); true }
+            )
         }
 
         runOnButtonInteractionTimeout()
@@ -332,13 +327,11 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnStringSelectInteractionTimeout() {
         if (handleSubCommands) {
-            handleSubCommand(null, {
-                it.runOnStringSelectInteractionTimeout()
-                true
-            }, {
-                onSubCommandInteractionTimeoutFallback()
-                true
-            })
+            handleSubCommand(
+                null,
+                { it.runOnStringSelectInteractionTimeout(); true },
+                { onSubCommandInteractionTimeoutFallback(); true }
+            )
         }
 
         runOnStringSelectInteractionTimeout()
@@ -355,13 +348,11 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnEntitySelectInteractionTimeout() {
         if (handleSubCommands) {
-            handleSubCommand(null, {
-                it.runOnEntitySelectInteractionTimeout()
-                true
-            }, {
-                onSubCommandInteractionTimeoutFallback()
-                true
-            })
+            handleSubCommand(
+                null,
+                { it.runOnEntitySelectInteractionTimeout(); true },
+                { onSubCommandInteractionTimeoutFallback(); true }
+            )
         }
 
         runOnEntitySelectInteractionTimeout()
@@ -381,13 +372,11 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnModalInteractionTimeout() {
         if (handleSubCommands) {
-            handleSubCommand(null, {
-                it.runOnModalInteractionTimeout()
-                true
-            }, {
-                onSubCommandInteractionTimeoutFallback()
-                true
-            })
+            handleSubCommand(
+                null,
+                { it.runOnModalInteractionTimeout(); true },
+                { onSubCommandInteractionTimeoutFallback(); true }
+            )
         }
 
         runOnModalInteractionTimeout()
@@ -400,23 +389,23 @@ abstract class DiscordCommandHandler(
         currentSubFullCommandName = event.fullCommandName
         MDC.put("interaction", event.fullCommandName)
 
-        discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this, event)
+        if (shouldLoadAdditionalData(name, alunaProperties)) {
+            discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this, event)
+        }
 
         //Check additional requirements for this command
-        val additionalRequirements =
-            discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
+        val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
         if (additionalRequirements.failed) {
             onFailedAdditionalRequirements(event, additionalRequirements)
             return
         }
 
-        discordInteractionLoadAdditionalData.loadData(this, event)
+        if (shouldLoadAdditionalData(name, alunaProperties)) {
+            discordInteractionLoadAdditionalData.loadData(this, event)
+        }
 
         if (handleSubCommands && redirectAutoCompleteEventsToSubCommands) {
-            handleSubCommand(event, {
-                it.runOnAutoCompleteEvent(option, event)
-                true
-            }, { onSubCommandInteractionFallback(event) })
+            handleSubCommand(event, { it.runOnAutoCompleteEvent(option, event); true }, { onSubCommandInteractionFallback(event) })
         } else {
             runOnAutoCompleteEvent(option, event)
         }
@@ -485,9 +474,7 @@ abstract class DiscordCommandHandler(
     open fun onMissingBotPermission(event: SlashCommandInteractionEvent, missingPermissions: MissingPermissions) {
         when {
             missingPermissions.notInVoice -> {
-                event.deferReply(true)
-                    .setContent("⛔ You need to be in a voice channel yourself to execute this command").queue()
-
+                event.deferReply(true).setContent("⛔ You need to be in a voice channel yourself to execute this command").queue()
             }
 
             (missingPermissions.hasMissingPermissions) -> {
@@ -500,30 +487,17 @@ abstract class DiscordCommandHandler(
         }
     }
 
-    open fun onFailedAdditionalRequirements(
-        event: SlashCommandInteractionEvent,
-        additionalRequirements: AdditionalRequirements
-    ) {
+    open fun onFailedAdditionalRequirements(event: SlashCommandInteractionEvent, additionalRequirements: AdditionalRequirements) {
         event.deferReply(true).setContent("⛔ Additional requirements for this command failed.").queue()
     }
 
-    open fun onCooldownStillActive(
-        event: SlashCommandInteractionEvent,
-        lastUse: LocalDateTime
-    ) {
+    open fun onCooldownStillActive(event: SlashCommandInteractionEvent, lastUse: LocalDateTime) {
         event.deferReply(true)
-            .setContent(
-                "⛔ This interaction is still on cooldown and will be usable ${
-                    lastUse.plusNanos(cooldown.toNanos()).toDiscordTimestamp(TimestampFormat.RELATIVE_TIME)
-                }."
-            )
+            .setContent("⛔ This interaction is still on cooldown and will be usable ${lastUse.plusNanos(cooldown.toNanos()).toDiscordTimestamp(TimestampFormat.RELATIVE_TIME)}.")
             .queue()
     }
 
-    open fun onFailedAdditionalRequirements(
-        event: CommandAutoCompleteInteractionEvent,
-        additionalRequirements: AdditionalRequirements
-    ) {
+    open fun onFailedAdditionalRequirements(event: CommandAutoCompleteInteractionEvent, additionalRequirements: AdditionalRequirements) {
     }
 
     open fun onExecutionException(event: SlashCommandInteractionEvent, exception: Exception) {
@@ -593,12 +567,7 @@ abstract class DiscordCommandHandler(
             try {
                 onExecutionException(event, exception)
             } catch (exceptionError: Exception) {
-                discordInteractionMetaDataHandler.onGenericExecutionException(
-                    this@DiscordCommandHandler,
-                    exception,
-                    exceptionError,
-                    event
-                )
+                discordInteractionMetaDataHandler.onGenericExecutionException(this@DiscordCommandHandler, exception, exceptionError, event)
             }
             return@withContext
         }
@@ -619,34 +588,32 @@ abstract class DiscordCommandHandler(
         }
 
         //Check needed user permissions for this command
-        val missingUserPermissions =
-            discordInteractionConditions.checkForNeededUserPermissions(this@DiscordCommandHandler, userPermissions, event)
+        val missingUserPermissions = discordInteractionConditions.checkForNeededUserPermissions(this@DiscordCommandHandler, userPermissions, event)
         if (missingUserPermissions.hasMissingPermissions) {
             onMissingUserPermission(event, missingUserPermissions)
             return@withContext
         }
 
         //Check needed bot permissions for this command
-        val missingBotPermissions =
-            discordInteractionConditions.checkForNeededBotPermissions(this@DiscordCommandHandler, botPermissions, event)
+        val missingBotPermissions = discordInteractionConditions.checkForNeededBotPermissions(this@DiscordCommandHandler, botPermissions, event)
         if (missingBotPermissions.hasMissingPermissions) {
             onMissingBotPermission(event, missingBotPermissions)
             return@withContext
         }
 
-        discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this@DiscordCommandHandler, event)
+        if (shouldLoadAdditionalData(name, alunaProperties)) {
+            discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this@DiscordCommandHandler, event)
+        }
 
         //Check additional requirements for this command
-        val additionalRequirements =
-            discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this@DiscordCommandHandler, event)
+        val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this@DiscordCommandHandler, event)
         if (additionalRequirements.failed) {
             onFailedAdditionalRequirements(event, additionalRequirements)
             return@withContext
         }
 
         //Check for cooldown
-        val cooldownKey =
-            discordBot.getCooldownKey(cooldownScope, discordRepresentation.id, author.id, channel.id, guild?.id)
+        val cooldownKey = discordBot.getCooldownKey(cooldownScope, discordRepresentation.id, author.id, channel.id, guild?.id)
         if (cooldownScope != CooldownScope.NO_COOLDOWN) {
             if (discordBot.isCooldownActive(cooldownKey, cooldown)) {
                 onCooldownStillActive(event, discordBot.cooldowns[cooldownKey]!!)
@@ -657,7 +624,9 @@ abstract class DiscordCommandHandler(
 
 
         //Load additional data for this command
-        discordInteractionLoadAdditionalData.loadData(this@DiscordCommandHandler, event)
+        if (shouldLoadAdditionalData(name, alunaProperties)) {
+            discordInteractionLoadAdditionalData.loadData(this@DiscordCommandHandler, event)
+        }
 
         //Run onCommandExecution in async to ensure it is not blocking the execution of the command itself
         launch(AlunaDispatchers.Detached) {
@@ -668,13 +637,7 @@ abstract class DiscordCommandHandler(
         }
         launch(AlunaDispatchers.Detached) {
             if (alunaProperties.discord.publishDiscordCommandEvent) {
-                eventPublisher.publishDiscordCommandEvent(
-                    author,
-                    channel,
-                    guild,
-                    event.fullCommandName,
-                    this@DiscordCommandHandler
-                )
+                eventPublisher.publishDiscordCommandEvent(author, channel, guild, event.fullCommandName, this@DiscordCommandHandler)
             }
         }
 
@@ -809,7 +772,7 @@ abstract class DiscordCommandHandler(
             return@withContext fallback.invoke(event)
         }
 
-        (firstElement as DiscordSubCommandHandler).initialize(currentSubFullCommandName, this@DiscordCommandHandler, discordRepresentation)
+        (firstElement as DiscordSubCommandGroupHandler).subCommands[secondLevel]!!.initialize(currentSubFullCommandName, this@DiscordCommandHandler, discordRepresentation)
         return@withContext function.invoke(firstElement.subCommands[secondLevel]!!)
     }
 
@@ -830,13 +793,13 @@ abstract class DiscordCommandHandler(
      * @param callModalTimeout Call onModalInteractionTimeout of this bean
      */
     suspend fun destroyThisInstance(
-        removeObservers: Boolean = true,
-        removeObserverTimeouts: Boolean = true,
-        callOnDestroy: Boolean = false,
-        callButtonTimeout: Boolean = false,
-        callStringSelectTimeout: Boolean = false,
-        callEntitySelectTimeout: Boolean = false,
-        callModalTimeout: Boolean = false
+        removeObservers: Boolean,
+        removeObserverTimeouts: Boolean,
+        callOnDestroy: Boolean,
+        callButtonTimeout: Boolean,
+        callStringSelectTimeout: Boolean,
+        callEntitySelectTimeout: Boolean,
+        callModalTimeout: Boolean
     ) = withContext(AlunaDispatchers.Interaction) {
         val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
         interactionScope.removeByUniqueId(uniqueId)
@@ -885,6 +848,21 @@ abstract class DiscordCommandHandler(
     @JvmSynthetic
     internal suspend fun onModalGlobalInteraction(event: ModalInteractionEvent) {
         this.handleOnModalInteraction(event)
+    }
+
+    @JvmSynthetic
+    internal fun shouldLoadAdditionalData(name: String, properties: AlunaProperties): Boolean {
+        val isSystemCommand = name == "system-command"
+        val isHelpCommand = name == "help"
+
+        return when {
+            name !in listOf("system-command", "help") -> true
+            isSystemCommand && !properties.command.systemCommand.enabled -> true
+            isSystemCommand && properties.command.systemCommand.executeLoadAdditionalData -> true
+            isHelpCommand && !properties.command.helpCommand.enabled -> true
+            isHelpCommand && properties.command.helpCommand.executeLoadAdditionalData -> true
+            else -> false
+        }
     }
 
     fun generateGlobalInteractionId(componentId: String): String {

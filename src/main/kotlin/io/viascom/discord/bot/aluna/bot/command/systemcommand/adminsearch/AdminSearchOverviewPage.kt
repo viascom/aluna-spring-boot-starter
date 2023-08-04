@@ -217,12 +217,12 @@ class AdminSearchOverviewPage(
             }, true
         )
         embedBuilder.addField("Time Created", discordChannel.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
-        if (discordChannel.type in ChannelType.values().filter { it.isGuild }) {
+        if (discordChannel.type in ChannelType.entries.filter { it.isGuild }) {
             val channel = discordChannel as GuildChannel
             embedBuilder.addField("Server", "${channel.guild.name} (`${channel.guild.id}`)", false)
 
             //If message
-            if (discordChannel.type in ChannelType.values().filter { it.isMessage && !it.isThread }) {
+            if (discordChannel.type in ChannelType.entries.filter { it.isMessage && !it.isThread }) {
                 val textChannel = channel as TextChannel
 
                 textChannel.parentCategory?.let {
@@ -254,7 +254,7 @@ class AdminSearchOverviewPage(
             }
 
             //If Voice
-            if (discordChannel.type in ChannelType.values().filter { it.isAudio }) {
+            if (discordChannel.type in ChannelType.entries.filter { it.isAudio }) {
                 val voiceChannel = channel as VoiceChannel
                 voiceChannel.parentCategory?.let {
                     embedBuilder.addField("Parent Category", "${it.name} (`${it.id}`)", false)
@@ -272,7 +272,7 @@ class AdminSearchOverviewPage(
             }
 
             //If Thread
-            if (discordChannel.type in ChannelType.values().filter { it.isThread }) {
+            if (discordChannel.type in ChannelType.entries.filter { it.isThread }) {
                 val threadChannel = channel as ThreadChannel
 
                 embedBuilder.addField("Parent Channel", "${threadChannel.parentChannel.name} (`${threadChannel.parentChannel.id}`)", false)

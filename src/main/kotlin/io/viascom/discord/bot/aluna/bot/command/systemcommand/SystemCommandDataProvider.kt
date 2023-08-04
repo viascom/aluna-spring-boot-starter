@@ -56,6 +56,10 @@ abstract class SystemCommandDataProvider(
     override var freshInstance: Boolean = true
 
     abstract fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand)
+
+    override suspend fun runOnDestroy() {
+    }
+
     open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return true
     }

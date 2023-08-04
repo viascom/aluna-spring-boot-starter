@@ -21,10 +21,12 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
+import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordSubCommandElement
 import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
 import io.viascom.discord.bot.aluna.model.DevelopmentStatus
 import io.viascom.discord.bot.aluna.util.InternalUtil
+import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData
 import java.time.Duration
 import kotlin.reflect.jvm.isAccessible
@@ -51,24 +53,27 @@ abstract class DiscordSubCommandGroupHandler(name: String, description: String) 
     var interactionDevelopmentStatus = DevelopmentStatus.LIVE
 
     @JvmSynthetic
-    internal fun initSubCommands() {
+    internal suspend fun initSubCommands() = withContext(AlunaDispatchers.Internal) {
         if (subCommands.isEmpty()) {
-            InternalUtil.getSubCommandElements(this).forEach { field ->
+            InternalUtil.getSubCommandElements(this@DiscordSubCommandGroupHandler).forEach { field ->
                 field.isAccessible = true
-                registerSubCommands(field.getter.call(this) as DiscordSubCommandHandler)
+                registerSubCommands(field.getter.call(this@DiscordSubCommandGroupHandler) as DiscordSubCommandHandler)
             }
         }
     }
 
-    fun registerSubCommand(subCommand: DiscordSubCommandHandler) {
+    suspend fun registerSubCommand(subCommand: DiscordSubCommandHandler) {
         subCommands[subCommand.name] = subCommand
+        subCommand.runInitCommandOptions()
         this.addSubcommands(subCommand)
     }
 
-    fun registerSubCommands(vararg subCommands: DiscordSubCommandHandler) {
+    suspend fun registerSubCommands(vararg subCommands: DiscordSubCommandHandler) {
         subCommands.forEach {
             registerSubCommand(it)
         }
     }
 
+    override suspend fun runOnDestroy() {
+    }
 }

@@ -75,4 +75,7 @@ abstract class AutoCompleteHandler @JvmOverloads constructor(val commands: Array
         discordInteractionLoadAdditionalData.loadData(event)
         onRequest(event)
     }
+
+    override suspend fun runOnDestroy() {
+    }
 }

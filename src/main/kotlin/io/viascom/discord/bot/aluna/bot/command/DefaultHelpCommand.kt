@@ -50,6 +50,10 @@ class DefaultHelpCommand : CoroutineDiscordCommand("help", "Shows information ab
             .setThumbnail(event.jda.selfUser.effectiveAvatarUrl)
             .setDescription(alunaProperties.command.helpCommand.description)
 
+        alunaProperties.command.helpCommand.fields.forEach {
+            embed.addField(it.name, it.value, it.inline)
+        }
+
         val buttons = arrayListOf<Button>()
 
         if (alunaProperties.command.helpCommand.inviteButton.enabled) {

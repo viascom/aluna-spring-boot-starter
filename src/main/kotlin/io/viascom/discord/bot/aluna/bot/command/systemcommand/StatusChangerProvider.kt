@@ -189,7 +189,7 @@ class StatusChangerProvider(
         val rows = arrayListOf<ActionRow>()
 
         val statusSelect = StringSelectMenu.create("status")
-        OnlineStatus.values().filter { it != OnlineStatus.UNKNOWN }.forEach {
+        OnlineStatus.entries.filter { it != OnlineStatus.UNKNOWN }.forEach {
             statusSelect.addOption(it.name, it.key, isDefault = (it == status))
         }
         rows.add(ActionRow.of(statusSelect.build()))

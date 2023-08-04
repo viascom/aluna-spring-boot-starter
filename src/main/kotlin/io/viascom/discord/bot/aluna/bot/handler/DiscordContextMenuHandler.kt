@@ -187,9 +187,6 @@ abstract class DiscordContextMenuHandler(
 
 
     @JvmSynthetic
-    internal abstract suspend fun runOnDestroy()
-
-    @JvmSynthetic
     internal abstract suspend fun runOnButtonInteraction(event: ButtonInteractionEvent): Boolean
 
     @JvmSynthetic

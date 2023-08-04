@@ -154,7 +154,7 @@ class ReleaseNotesProvider(
 
     private fun replaceText(input: String): String {
         return input.replace("\\{now:(SHORT_TIME|LONG_TIME|SHORT_DATE|LONG_DATE|SHORT_DATE_TIME|LONG_DATE_TIME|RELATIVE_TIME)}".toRegex()) { match ->
-            TimestampFormat.values().firstOrNull { it.name == match.groupValues[1] }?.let { LocalDateTime.now(ZoneOffset.UTC).toDiscordTimestamp(it) } ?: match.groupValues[0]
+            TimestampFormat.entries.firstOrNull { it.name == match.groupValues[1] }?.let { LocalDateTime.now(ZoneOffset.UTC).toDiscordTimestamp(it) } ?: match.groupValues[0]
         }
     }
 

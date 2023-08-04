@@ -60,4 +60,6 @@ interface InteractionScopedObject {
      */
     var freshInstance: Boolean
 
+
+    suspend fun runOnDestroy()
 }

@@ -171,7 +171,7 @@ open class DefaultShardManagerBuilder(
             logger.debug("Disabled CacheFlags: [${alunaProperties.discord.cacheFlagsDisabled.joinToString(", ") { it.name }}]")
 
             val cacheFlags = if (alunaProperties.discord.cacheFlagsDisabled.contains(AlunaDiscordProperties.CacheFlag.ALL)) {
-                CacheFlag.values().toList()
+                CacheFlag.entries.toList()
             } else {
                 alunaProperties.discord.cacheFlagsDisabled.mapNotNull {
                     when (it) {
@@ -196,7 +196,7 @@ open class DefaultShardManagerBuilder(
         if (alunaProperties.discord.cacheFlagsEnabled.isNotEmpty()) {
             logger.debug("Enable CacheFlags: [${alunaProperties.discord.cacheFlagsEnabled.joinToString(", ") { it.name }}]")
             val cacheFlags = if (alunaProperties.discord.cacheFlagsEnabled.contains(AlunaDiscordProperties.CacheFlag.ALL)) {
-                CacheFlag.values().toList()
+                CacheFlag.entries.toList()
             } else {
                 alunaProperties.discord.cacheFlagsEnabled.mapNotNull {
                     when (it) {
