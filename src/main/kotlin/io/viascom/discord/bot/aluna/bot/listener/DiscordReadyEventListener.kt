@@ -24,7 +24,7 @@ package io.viascom.discord.bot.aluna.bot.listener
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
-import io.viascom.discord.bot.aluna.event.DiscordSlashCommandInitializedEvent
+import io.viascom.discord.bot.aluna.event.DiscordAllShardsReadyEvent
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.getGuildTextChannel
 import kotlinx.coroutines.launch
@@ -45,11 +45,11 @@ internal open class DiscordReadyEventListener(
     private val discordBot: DiscordBot,
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties
-) : ApplicationListener<DiscordSlashCommandInitializedEvent> {
+) : ApplicationListener<DiscordAllShardsReadyEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onApplicationEvent(event: DiscordSlashCommandInitializedEvent) {
+    override fun onApplicationEvent(event: DiscordAllShardsReadyEvent) {
         AlunaDispatchers.InternalScope.launch {
             if (alunaProperties.discord.setStatusToOnlineWhenReady) {
                 //Set status to online and remove activity
@@ -72,7 +72,7 @@ internal open class DiscordReadyEventListener(
                 )
 
                 if (channel == null) {
-                    logger.warn("Aluna was not able to send a DiscordReadyEvent to the defined channel.")
+                    logger.warn("Aluna was not able to send a DiscordAllShardsReadyEvent to the defined channel.")
                     return@launch
                 }
 

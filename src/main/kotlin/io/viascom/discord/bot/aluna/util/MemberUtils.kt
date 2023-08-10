@@ -40,8 +40,7 @@ import java.time.Duration
  *
  * @return probable Locale
  */
-fun User.probableLocale(): DiscordLocale? =
-    mutualGuilds.groupBy { it.locale }.maxByOrNull { it.value.size }?.value?.firstOrNull()?.locale
+fun User.probableLocale(): DiscordLocale? = mutualGuilds.groupBy { it.locale }.maxByOrNull { it.value.size }?.value?.firstOrNull()?.locale
 
 /**
  * Get the probable locale of a user based on the most common locale of the mutual servers.
@@ -113,11 +112,9 @@ fun Member.timeoutFor(duration: Duration, reason: String? = null): AuditableRest
 
 fun User.tryToSendDM(message: String, then: Runnable) {
     try {
-        this.openPrivateChannel()
-            .queue({ pc -> pc.sendMessage(message).queue({ then.run() }) { then.run() } }) { then.run() }
+        this.openPrivateChannel().queue({ pc -> pc.sendMessage(message).queue({ then.run() }) { then.run() } }) { then.run() }
     } catch (ignore: Exception) {
     }
 }
 
-fun ShardManager.getMemberById(guildId: String, userId: String): Member? =
-    this.getGuildById(guildId)?.getMemberById(userId)
+fun ShardManager.getMemberById(guildId: String, userId: String): Member? = this.getGuildById(guildId)?.getMemberById(userId)

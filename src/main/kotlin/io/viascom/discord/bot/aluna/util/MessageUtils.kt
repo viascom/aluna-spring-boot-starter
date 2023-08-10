@@ -37,6 +37,7 @@ import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageEditAction
 import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
+import net.dv8tion.jda.api.utils.FileUpload
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
 import net.dv8tion.jda.api.utils.messages.MessageEditData
 import java.awt.Color
@@ -280,3 +281,19 @@ fun User.getMessage(messageId: String): Message? = try {
 }
 
 fun String.toDiscordEmbed(title: String? = null): EmbedBuilder = EmbedBuilder().setTitle(title).setDescription(this).setColor("#2c2d31")
+
+/**
+ * Create a new {@link FileUpload} for a string.
+ * <br>This is used to upload data to discord for various purposes.
+ *
+ * @param  data
+ *         The string to upload
+ * @param  name
+ *         The representative name to use for the file
+ *
+ * @throws IllegalArgumentException
+ *         If null is provided or the name is empty
+ *
+ * @return {@link FileUpload}
+ */
+fun FileUpload.fromString(data: String, name: String): FileUpload = FileUpload.fromData(data.toByteArray(), name)

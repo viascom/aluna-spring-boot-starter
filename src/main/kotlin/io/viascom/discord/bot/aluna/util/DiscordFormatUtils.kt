@@ -45,8 +45,7 @@ enum class TimestampFormat(val format: String) {
  * @param format Format of the timestamp
  * @return Discord timestamp
  */
-fun LocalDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String =
-    "<t:${this.toUnixTimestamp()}:${format.format}>"
+fun LocalDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String = "<t:${this.toUnixTimestamp()}:${format.format}>"
 
 /**
  * Convert to discord timestamp.
@@ -54,8 +53,7 @@ fun LocalDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.S
  * @param format Format of the timestamp
  * @return Discord timestamp
  */
-fun OffsetDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String =
-    "<t:${this.toEpochSecond()}:${format.format}>"
+fun OffsetDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String = "<t:${this.toEpochSecond()}:${format.format}>"
 
 /**
  * Convert to discord timestamp.
@@ -63,8 +61,7 @@ fun OffsetDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.
  * @param format Format of the timestamp
  * @return Discord timestamp
  */
-fun ZonedDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String =
-    "<t:${this.toEpochSecond()}:${format.format}>"
+fun ZonedDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String = "<t:${this.toEpochSecond()}:${format.format}>"
 
 /**
  * Convert to unix timestamp. This method will use the LocalDateTime at UTC.

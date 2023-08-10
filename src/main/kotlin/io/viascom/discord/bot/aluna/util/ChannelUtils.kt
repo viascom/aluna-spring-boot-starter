@@ -103,18 +103,14 @@ fun ShardManager.getGuildMessage(guildId: String, channelId: String, messageId: 
     this.getGuildTextChannel(guildId, channelId)?.retrieveMessageById(messageId)?.complete()
 
 fun ShardManager.getPrivateChannelByUser(userId: String): MessageChannel? = this.retrieveUserById(userId).complete()?.openPrivateChannel()?.complete()
-fun ShardManager.getPrivateMessageByUser(userId: String, messageId: String): Message? {
-    return try {
-        getPrivateChannelByUser(userId)?.retrieveMessageById(messageId)?.complete()
-    } catch (e: Exception) {
-        null
-    }
+fun ShardManager.getPrivateMessageByUser(userId: String, messageId: String): Message? = try {
+    getPrivateChannelByUser(userId)?.retrieveMessageById(messageId)?.complete()
+} catch (e: Exception) {
+    null
 }
 
-fun ShardManager.getPrivateMessage(channelId: String, messageId: String): Message? {
-    return try {
-        getPrivateChannelById(channelId)?.retrieveMessageById(messageId)?.complete()
-    } catch (e: Exception) {
-        null
-    }
+fun ShardManager.getPrivateMessage(channelId: String, messageId: String): Message? = try {
+    getPrivateChannelById(channelId)?.retrieveMessageById(messageId)?.complete()
+} catch (e: Exception) {
+    null
 }

@@ -180,7 +180,7 @@ object AlunaThreadPool {
         keepAliveTime: Duration,
         workQueue: BlockingQueue<Runnable>,
         threadFactory: ThreadFactory,
-        val fixedContext: Map<String?, String?>? = null,
+        private val fixedContext: Map<String?, String?>? = null,
     ) : ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime.seconds, TimeUnit.SECONDS, workQueue, threadFactory) {
 
         private val useFixedContext = (fixedContext != null)
@@ -208,22 +208,20 @@ object AlunaThreadPool {
             super.execute(wrap(command, getContextForTask()))
         }
 
-        fun wrap(runnable: Runnable, context: Map<String?, String?>?): Runnable {
-            return Runnable {
-                val previous: Map<String?, String?>? = MDC.getCopyOfContextMap()
-                if (context == null) {
+        private fun wrap(runnable: Runnable, context: Map<String?, String?>?): Runnable = Runnable {
+            val previous: Map<String?, String?>? = MDC.getCopyOfContextMap()
+            if (context == null) {
+                MDC.clear()
+            } else {
+                MDC.setContextMap(context)
+            }
+            try {
+                runnable.run()
+            } finally {
+                if (previous == null) {
                     MDC.clear()
                 } else {
-                    MDC.setContextMap(context)
-                }
-                try {
-                    runnable.run()
-                } finally {
-                    if (previous == null) {
-                        MDC.clear()
-                    } else {
-                        MDC.setContextMap(previous)
-                    }
+                    MDC.setContextMap(previous)
                 }
             }
         }
@@ -235,7 +233,7 @@ object AlunaThreadPool {
         ttl: Duration? = null,
         threadFactory: ThreadFactory,
         removeTaskOnCancelPolicy: Boolean = false,
-        val fixedContext: Map<String?, String?>? = null,
+        private val fixedContext: Map<String?, String?>? = null,
     ) : ScheduledThreadPoolExecutor(corePoolSize, threadFactory) {
 
         private val useFixedContext = (fixedContext != null)
@@ -272,22 +270,20 @@ object AlunaThreadPool {
             super.execute(wrap(command, getContextForTask()))
         }
 
-        fun wrap(runnable: Runnable, context: Map<String?, String?>?): Runnable {
-            return Runnable {
-                val previous: Map<String?, String?>? = MDC.getCopyOfContextMap()
-                if (context == null) {
+        private fun wrap(runnable: Runnable, context: Map<String?, String?>?): Runnable = Runnable {
+            val previous: Map<String?, String?>? = MDC.getCopyOfContextMap()
+            if (context == null) {
+                MDC.clear()
+            } else {
+                MDC.setContextMap(context)
+            }
+            try {
+                runnable.run()
+            } finally {
+                if (previous == null) {
                     MDC.clear()
                 } else {
-                    MDC.setContextMap(context)
-                }
-                try {
-                    runnable.run()
-                } finally {
-                    if (previous == null) {
-                        MDC.clear()
-                    } else {
-                        MDC.setContextMap(previous)
-                    }
+                    MDC.setContextMap(previous)
                 }
             }
         }

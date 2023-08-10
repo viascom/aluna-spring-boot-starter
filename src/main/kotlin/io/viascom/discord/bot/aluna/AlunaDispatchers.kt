@@ -74,13 +74,4 @@ object AlunaDispatchers {
         return CoroutineScope(dispatcher + parent + exceptionHandler + context + CoroutineName(name) + MDCContext())
     }
 
-//    private fun getDispatcher(nThreads: Int = 10, name: String = "AlunaDispatcher"): CoroutineDispatcher {
-//        val dynamicThreadPool = AlunaThreadPool.getDynamicThreadPool(nThreads, Duration.ofSeconds(10), name)
-//        val threadNo = AtomicInteger()
-//        dynamicThreadPool.setThreadFactory { runnable ->
-//            Thread(runnable, if (nThreads == 1) name else name + "-" + threadNo.incrementAndGet()).also { it.isDaemon = true }
-//        }
-//        return dynamicThreadPool.asCoroutineDispatcher()
-//    }
-
 }

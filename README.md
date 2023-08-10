@@ -10,12 +10,14 @@
          alt="Maven central"></a>
   <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--beta.12-blue.svg"
               alt="JDA-Version "></a>
+  <img src="https://img.shields.io/badge/Kotlin-1.9-%238052ff?logo=kotlin"
+         alt="Kotlin Version">
   <a href="http://www.apache.org/licenses/"><img src="https://img.shields.io/badge/license-Apache_2.0-blue.svg"
          alt="license Apache 2.0"></a>
 </p>
 <br>
 
-## Versions
+## Version
 
 *These are the versions of all exposed dependencies.*
 
@@ -38,7 +40,7 @@ dependencies {
 Maven:
 ```xml
 <dependency>
-  <groupId>io.viascom.discord.bot</groupId>
+    <groupId>io.viascom.discord.bot</groupId>
     <artifactId>aluna-spring-boot-starter</artifactId>
     <version>0.0.48_5.0.0-beta.12</version>
 </dependency>
@@ -50,10 +52,7 @@ Maven:
 
 ```kotlin
 @Interaction
-class PingCommand : DiscordCommand(
-    "ping",
-    "Send a ping"
-) {
+class PingCommand : DiscordCommand("ping", "Send a ping") {
     override fun execute(event: SlashCommandInteractionEvent) {
         event.reply("Pong\nYour locale is:${this.userLocale}").queue()
     }
@@ -95,14 +94,17 @@ logging:
 
 ## Versioning
 
-This project is developed by [Viascom](https://github.com/viascom) using the [Semantic Versioning specification](https://semver.org). For the versions available, see the [releases on this repository](https://github.com/viascom/aluna-spring-boot-starter/releases).
+This project is developed by [Viascom](https://github.com/viascom) using
+the [Semantic Versioning specification](https://semver.org). For the versions available, see
+the [releases on this repository](https://github.com/viascom/aluna-spring-boot-starter/releases).
 
 ## Authors
 
 * **Patrick Bösch** - *Initial work* - [itsmefox](https://github.com/itsmefox)
 * **Nikola Stanković** - *Initial work* - [nik-sta](https://github.com/nik-sta)
 
-See also the list of [contributors](https://github.com/viascom/aluna-spring-boot-starter/contributors) who participated in this project. 💕
+See also the list of [contributors](https://github.com/viascom/aluna-spring-boot-starter/contributors) who participated
+in this project. 💕
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) file.

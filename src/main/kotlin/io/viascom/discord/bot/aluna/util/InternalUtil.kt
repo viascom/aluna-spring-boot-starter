@@ -51,9 +51,7 @@ internal object InternalUtil {
 
         //Search properties
         clazz::class.memberProperties.filter {
-            it.findAnnotation<SubCommandElement>() != null && (it.returnType.classifier as KClass<*>).isSubclassOf(
-                DiscordSubCommandElement::class
-            )
+            it.findAnnotation<SubCommandElement>() != null && (it.returnType.classifier as KClass<*>).isSubclassOf(DiscordSubCommandElement::class)
         }.forEach {
             fields.add(it)
         }
