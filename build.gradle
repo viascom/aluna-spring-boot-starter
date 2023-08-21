@@ -15,9 +15,9 @@ plugins {
 }
 
 ext {
-    major = 0
+    major = 1
     minor = 0
-    patch = 48
+    patch = 0
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
@@ -31,7 +31,7 @@ ext {
 }
 
 group "io.viascom.discord.bot"
-version = "${major}.${minor}.${patch}_${jdaVersion}${isCiServer ? "" : "-SNAPSHOT"}"
+version = "${major}.${minor}.${patch}${isCiServer ? "" : "-SNAPSHOT"}"
 project.logger.lifecycle("Version of this build: ${version}")
 
 tasks.bootJar { enabled = false }
