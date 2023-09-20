@@ -65,6 +65,9 @@ open class AlunaAutoConfiguration {
         interactionEventListener: InteractionEventListener,
         genericAutoCompleteListener: GenericInteractionListener,
         interactionComponentEventListener: InteractionComponentEventListener,
+        shardStartListener: ShardStartListener,
+        shardReadyEventListener: ShardReadyEventListener,
+        shardShutdownEventListener: ShardShutdownEventListener,
         eventWaiter: EventWaiter,
         genericEventPublisher: GenericEventPublisher,
         eventPublisher: EventPublisher,
@@ -75,10 +78,13 @@ open class AlunaAutoConfiguration {
     ): ShardManager {
         logger.debug("Enable DefaultShardManagerBuilder")
 
-        discordBot.shardManager = discordBot.shardManager ?: DefaultShardManagerBuilder(
+        val shardManagerBuilder = DefaultShardManagerBuilder(
             interactionEventListener,
             genericAutoCompleteListener,
             interactionComponentEventListener,
+            shardStartListener,
+            shardReadyEventListener,
+            shardShutdownEventListener,
             eventWaiter,
             genericEventPublisher,
             eventPublisher,
@@ -86,7 +92,16 @@ open class AlunaAutoConfiguration {
             customizers,
             objectMapper,
             discordBot
-        ).build()
+        )
+
+        discordBot.shardManager = shardManagerBuilder.build()
+        discordBot.latchCount = shardManagerBuilder.getLatchCount()
+
+        if (alunaProperties.discord.autoLoginOnStartup) {
+            discordBot.login()
+        } else {
+            logger.debug("AutoLoginOnStartup is disabled. Not awaiting for shards to connect.")
+        }
 
         return discordBot.shardManager!!
     }
@@ -94,9 +109,17 @@ open class AlunaAutoConfiguration {
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnBean(ShardManagerBuilder::class)
-    open fun customShardManagerBuilder(shardManagerBuilder: ShardManagerBuilder): ShardManager {
+    open fun customShardManagerBuilder(shardManagerBuilder: ShardManagerBuilder, alunaProperties: AlunaProperties): ShardManager {
         logger.debug("Enable custom ShardManagerBuilder: ${shardManagerBuilder.javaClass.name}")
         discordBot.shardManager = shardManagerBuilder.build()
+        discordBot.latchCount = shardManagerBuilder.getLatchCount()
+
+        if (alunaProperties.discord.autoLoginOnStartup) {
+            discordBot.login()
+        } else {
+            logger.debug("AutoLoginOnStartup is disabled. Not awaiting for shards to connect.")
+        }
+
         return discordBot.shardManager!!
     }
 
@@ -120,9 +143,9 @@ open class AlunaAutoConfiguration {
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
     @ConditionalOnAlunaShutdownHook
-    open fun defaultBotShutdownHook(shardManager: ShardManager, alunaProperties: AlunaProperties): BotShutdownHook {
+    open fun defaultBotShutdownHook(shardManager: ShardManager, alunaProperties: AlunaProperties, discordBot: DiscordBot): BotShutdownHook {
         logger.debug("Enable DefaultBotShutdownHook")
-        return DefaultBotShutdownHook(shardManager, alunaProperties)
+        return DefaultBotShutdownHook(shardManager, alunaProperties, discordBot)
     }
 
     @Bean

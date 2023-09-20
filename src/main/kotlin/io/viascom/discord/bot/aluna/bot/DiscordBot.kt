@@ -24,6 +24,7 @@ package io.viascom.discord.bot.aluna.bot
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventManager
 import io.viascom.discord.bot.aluna.bot.handler.*
+import io.viascom.discord.bot.aluna.bot.listener.ShardStartListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
 import io.viascom.discord.bot.aluna.model.CommandUsage
@@ -52,6 +53,8 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
@@ -60,21 +63,15 @@ import kotlin.reflect.jvm.isAccessible
 @ConditionalOnJdaEnabled
 open class DiscordBot(
     private val alunaProperties: AlunaProperties,
-    private val configurableListableBeanFactory: ConfigurableListableBeanFactory
+    private val configurableListableBeanFactory: ConfigurableListableBeanFactory,
+    private val shardStartListener: ShardStartListener
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     var shardManager: ShardManager? = null
-
-    @JvmSynthetic
-    internal val eventThreadPool = AlunaThreadPool.getDynamicThreadPool(
-        0,
-        alunaProperties.thread.eventThreadPool,
-        java.time.Duration.ofMinutes(1),
-        true,
-        "Aluna-Event-Pool-%d"
-    )
+    var isLoggedIn: Boolean = false
+    var latchCount: Int = 0
 
     @set:JvmSynthetic
     var interactionsInitialized: Boolean = false
@@ -129,6 +126,33 @@ open class DiscordBot(
     @JvmSynthetic
     internal val commandHistory = MutableSharedFlow<CommandUsage>(replay = 15, extraBufferCapacity = 15, BufferOverflow.DROP_OLDEST)
     val commandHistoryFlow = commandHistory.asSharedFlow()
+
+
+    fun login() {
+        if (isLoggedIn) {
+            logger.warn("ShardManager already logged in. Skipping login.")
+            return
+        }
+
+        logger.info("Spawning {} shards...", latchCount)
+        shardStartListener.latch = CountDownLatch(latchCount)
+        val start = System.currentTimeMillis()
+
+        this.shardManager!!.login()
+        isLoggedIn = true
+
+        AlunaDispatchers.InternalScope.launch {
+            logger.debug("Awaiting for $latchCount shards to connect")
+            try {
+                shardStartListener.latch.await()
+                val elapsed = System.currentTimeMillis() - start
+                logger.debug("All shards are connected! Took ${TimeUnit.MILLISECONDS.toSeconds(elapsed)} seconds")
+                shardManager!!.removeEventListener(shardStartListener)
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     /**
      * Get discord command by name

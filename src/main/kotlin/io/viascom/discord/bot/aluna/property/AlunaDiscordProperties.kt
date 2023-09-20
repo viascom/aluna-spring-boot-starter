@@ -32,6 +32,11 @@ class AlunaDiscordProperties {
     var enableJda: Boolean = true
 
     /**
+     * Automatically start the login process on startup. If this is false, then you will need to manually call ShardManager.login() to start it.
+     */
+    var autoLoginOnStartup: Boolean = true
+
+    /**
      * Discord Bot Token
      * Can be generated here: https://discord.com/developers/applications
      */

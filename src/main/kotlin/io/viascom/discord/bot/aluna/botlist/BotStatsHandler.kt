@@ -22,6 +22,7 @@
 package io.viascom.discord.bot.aluna.botlist
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
+import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import kotlinx.coroutines.launch
@@ -37,6 +38,7 @@ open class BotStatsHandler(
     private val senders: List<BotStatsSender>,
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties,
+    private val discordBot: DiscordBot
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -68,6 +70,8 @@ open class BotStatsHandler(
     @Scheduled(cron = "0 */10 * * * *", zone = "UTC") //Send updates every 10 minutes
     open fun sendStats() {
         AlunaDispatchers.DetachedScope.launch {
+            if (!discordBot.isLoggedIn) return@launch
+
             senders.filter { it.isEnabled() && it.isValid() }.forEach { sender ->
                 launch {
                     try {

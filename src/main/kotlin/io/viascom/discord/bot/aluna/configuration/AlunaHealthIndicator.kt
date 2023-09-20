@@ -78,18 +78,17 @@ class AlunaHealthIndicator(
     override fun health(): Health {
         val status = Health.unknown()
 
-        if (shardManager.shards.any { it.status != JDA.Status.CONNECTED }) {
-            status.down()
-        } else {
-            status.up()
-        }
-
-        if (shardManager.shards.all { it.status != JDA.Status.CONNECTED }) {
-            status.outOfService()
+        when {
+            (!discordBot.isLoggedIn) -> status.unknown()
+            (shardManager.shards.any { it.status != JDA.Status.CONNECTED }) -> status.down()
+            (shardManager.shards.all { it.status != JDA.Status.CONNECTED }) -> status.outOfService()
+            else -> status.up()
         }
 
         val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
 
+        status.withDetail("loggedIn", discordBot.isLoggedIn)
+        status.withDetail("autoLoginOnStartup", alunaProperties.discord.autoLoginOnStartup)
         status.withDetail("nodeNumber", alunaProperties.nodeNumber)
         status.withDetail("clientId", alunaProperties.discord.applicationId ?: "n/a")
         status.withDetail("supportServer", alunaProperties.discord.supportServer ?: "n/a")
@@ -107,7 +106,7 @@ class AlunaHealthIndicator(
         threads["messagesToObserveTimeoutThreads"] = getThreadPoolDetail(discordBot.messagesToObserveScheduledThreadPool)
         threads["eventWaiterExecutorTimeoutThreads"] = getThreadPoolDetail(eventWaiter.scheduledThreadPool)
         threads["scopedObjectsTimeoutScheduler"] = getThreadPoolDetail(interactionScope.scopedObjectsTimeoutScheduler)
-        threads["eventThreadPool"] = getThreadPoolDetail(discordBot.eventThreadPool)
+        threads["eventThreadPool"] = getThreadPoolDetail(eventPublisher.eventThreadPool)
 
         status.withDetail("threads", threads)
         status.withDetail("currentActiveInteractions", interactionScope.getInstanceCount())
@@ -124,8 +123,13 @@ class AlunaHealthIndicator(
                 eventWaiter.waitingEvents.entries.filter { it.key == ModalInteractionEvent::class.java }.count { it.value.isNotEmpty() }
 
         status.withDetail("interactionObserver", interactionObserver)
-        status.withDetail("serversTotal", shardManager.guilds.size)
-        status.withDetail("averageGatewayPing", shardManager.averageGatewayPing)
+        if (discordBot.isLoggedIn) {
+            status.withDetail("serversTotal", shardManager.guilds.size)
+            status.withDetail("averageGatewayPing", shardManager.averageGatewayPing)
+        } else {
+            status.withDetail("serversTotal", 0)
+            status.withDetail("averageGatewayPing", 0)
+        }
         status.withDetail("sharding", getSharding(shardManager, alunaProperties))
         status.withDetail("sessionStartLimit", discordBot.sessionStartLimits)
 
@@ -165,14 +169,16 @@ class AlunaHealthIndicator(
     private fun getSharding(shardManager: ShardManager, alunaProperties: AlunaProperties): Sharding {
         val shards = arrayListOf<ShardDetail>()
 
-        shardManager.shards.forEachIndexed { index, jda ->
-            shards.add(ShardDetail(index, jda.status, jda.guilds.size))
+        if (discordBot.isLoggedIn) {
+            shardManager.shards.forEachIndexed { index, jda ->
+                shards.add(ShardDetail(index, jda.status, jda.guilds.size))
+            }
         }
 
         return Sharding(
-            shardManager.shardsTotal,
-            shardManager.shardsQueued,
-            shardManager.shardsRunning,
+            if (discordBot.isLoggedIn) shardManager.shardsTotal else 0,
+            if (discordBot.isLoggedIn) shardManager.shardsQueued else 0,
+            if (discordBot.isLoggedIn) shardManager.shardsRunning else 0,
             alunaProperties.discord.sharding.type,
             if (alunaProperties.discord.sharding.type == AlunaDiscordProperties.Sharding.Type.SINGLE) {
                 0
@@ -180,7 +186,7 @@ class AlunaHealthIndicator(
                 alunaProperties.discord.sharding.fromShard
             },
             if (alunaProperties.discord.sharding.type == AlunaDiscordProperties.Sharding.Type.SINGLE) {
-                shardManager.shardsTotal - 1
+                if (discordBot.isLoggedIn) shardManager.shardsTotal - 1 else 0
             } else {
                 alunaProperties.discord.sharding.fromShard + alunaProperties.discord.sharding.shardAmount
             },

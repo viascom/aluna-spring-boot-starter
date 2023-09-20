@@ -27,4 +27,6 @@ interface ShardManagerBuilder {
 
     fun build(): ShardManager
 
+    fun getLatchCount(): Int
+
 }

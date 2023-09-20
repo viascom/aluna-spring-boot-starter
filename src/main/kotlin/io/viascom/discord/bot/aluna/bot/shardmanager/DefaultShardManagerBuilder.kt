@@ -22,9 +22,7 @@
 package io.viascom.discord.bot.aluna.bot.shardmanager
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventManager
 import io.viascom.discord.bot.aluna.bot.listener.*
 import io.viascom.discord.bot.aluna.event.EventPublisher
@@ -32,12 +30,8 @@ import io.viascom.discord.bot.aluna.model.GatewayResponse
 import io.viascom.discord.bot.aluna.property.AlunaDiscordProperties
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
-import jakarta.annotation.Nonnull
-import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.Activity
-import net.dv8tion.jda.api.events.GenericEvent
-import net.dv8tion.jda.api.events.session.ReadyEvent
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -51,8 +45,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
 
 
@@ -60,6 +52,9 @@ open class DefaultShardManagerBuilder(
     private val interactionEventListener: InteractionEventListener,
     private val genericInteractionListener: GenericInteractionListener,
     private val interactionComponentEventListener: InteractionComponentEventListener,
+    private val shardStartListener: ShardStartListener,
+    private val shardReadyEventListener: ShardReadyEventListener,
+    private val shardShutdownEventListener: ShardShutdownEventListener,
     private val eventWaiter: EventWaiter,
     private val genericEventPublisher: GenericEventPublisher,
     private val eventPublisher: EventPublisher,
@@ -71,6 +66,8 @@ open class DefaultShardManagerBuilder(
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
+    private var latchCount: Int = 0
+
     override fun build(): ShardManager {
         val shardManagerBuilder = DefaultShardManagerBuilder.createDefault(alunaProperties.discord.token)
             .addEventListeners(eventWaiter)
@@ -78,7 +75,10 @@ open class DefaultShardManagerBuilder(
             .addEventListeners(genericInteractionListener)
             .addEventListeners(interactionEventListener)
             .addEventListeners(interactionComponentEventListener)
-            .setEventManagerProvider { CoroutineEventManager(discordBot.eventThreadPool) }
+            .addEventListeners(shardStartListener)
+            .addEventListeners(shardReadyEventListener)
+            .addEventListeners(shardShutdownEventListener)
+            .setEventManagerProvider { CoroutineEventManager(eventPublisher.eventThreadPool) }
             .setCallbackPool(
                 AlunaThreadPool.getDynamicThreadPool(
                     0,
@@ -108,7 +108,7 @@ open class DefaultShardManagerBuilder(
         val recommendedShards = getRecommendedShards(alunaProperties.discord.token!!)
         discordBot.sessionStartLimits = recommendedShards?.sessionStartLimit
 
-        val latchCount: Int
+
         if (alunaProperties.discord.sharding.type == AlunaDiscordProperties.Sharding.Type.SINGLE) {
             shardManagerBuilder.setShardsTotal(alunaProperties.discord.sharding.totalShards)
 
@@ -242,29 +242,10 @@ open class DefaultShardManagerBuilder(
             it.customize(shardManagerBuilder)
         }
 
-        logger.info("Spawning {} shards...", latchCount)
-        val start = System.currentTimeMillis()
-        val shardStartListener = ShardStartListener(CountDownLatch(latchCount), eventPublisher)
-        val shardReadyListener = ShardReadyEventListener(eventPublisher, discordBot)
-        shardManagerBuilder.addEventListeners(shardStartListener)
-        shardManagerBuilder.addEventListeners(shardReadyListener)
-
-        val shardManager = shardManagerBuilder.build()
-
-        AlunaDispatchers.InternalScope.launch {
-            logger.debug("Awaiting for $latchCount shards to connect")
-            try {
-                shardStartListener.latch.await()
-                val elapsed = System.currentTimeMillis() - start
-                logger.debug("All shards are connected! Took ${TimeUnit.MILLISECONDS.toSeconds(elapsed)} seconds")
-                shardManager.removeEventListener(shardStartListener)
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            }
-        }
-
-        return shardManager
+        return shardManagerBuilder.build(false)
     }
+
+    override fun getLatchCount(): Int = latchCount
 
     private fun getRecommendedShards(token: String): GatewayResponse? {
         val gatewayResponse = try {
@@ -290,34 +271,4 @@ open class DefaultShardManagerBuilder(
 
         return gatewayResponse
     }
-
-    private class ShardStartListener(val latch: CountDownLatch, val eventPublisher: EventPublisher) : CoroutineEventListener {
-
-        val initialLatchCount = latch.count
-        var mainShardLoaded = false
-
-        override suspend fun onEvent(@Nonnull event: GenericEvent) {
-            if (event is ReadyEvent) {
-                event.getJDA().shardManager ?: throw AssertionError()
-                latch.countDown()
-
-                //If main shard (0) is connected, trigger interaction update
-                if (!mainShardLoaded && event.jda.shardInfo.shardId == 0) {
-                    mainShardLoaded = true
-                    eventPublisher.publishDiscordMainShardConnectedEvent(event, event.jda.shardManager!!)
-                }
-
-                //If first shard is connected.
-                if (latch.count + 1 == initialLatchCount) {
-                    eventPublisher.publishDiscordFirstShardConnectedEvent(event, event.jda.shardManager!!)
-                }
-
-                //Publish DiscordNodeReadyEvent as soon as all shards of this node are connected
-                if (latch.count == 0L) {
-                    eventPublisher.publishDiscordNodeReadyEvent(event, event.jda.shardManager!!)
-                }
-            }
-        }
-    }
-
 }
