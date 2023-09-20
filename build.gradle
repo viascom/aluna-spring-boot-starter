@@ -16,7 +16,7 @@ plugins {
 
 ext {
     major = 1
-    minor = 0
+    minor = 1
     patch = 0
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
