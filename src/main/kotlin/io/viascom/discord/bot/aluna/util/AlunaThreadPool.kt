@@ -21,6 +21,8 @@
 
 package io.viascom.discord.bot.aluna.util
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -172,6 +174,43 @@ object AlunaThreadPool {
             ThreadFactoryBuilder().setNameFormat(name).setUncaughtExceptionHandler(uncaughtExceptionHandler).build(),
             removeTaskOnCancelPolicy
         )
+    }
+
+    /**
+     * Executes the given [block] of code with a specified [timeout] on a given [executor].
+     *
+     * @param T The type of the result returned by [block].
+     * @param executor The [ThreadPoolExecutor] where the [block] is executed.
+     * @param timeout The maximum time to wait for the [block] to complete.
+     * @param block The code block to be executed.
+     *
+     * @return The result of type [T] returned by [block].
+     *
+     * @throws TimeoutException If the [block] execution exceeds the given [timeout].
+     * @throws ExecutionException If an exception occurred during the [block] execution.
+     * @throws InterruptedException If the thread was interrupted during execution.
+     */
+    suspend fun <T> runWithTimeout(executor: ThreadPoolExecutor, timeout: Duration, block: () -> T): T {
+        val future = CompletableFuture.supplyAsync({
+            try {
+                block()
+            } catch (e: Exception) {
+                throw e.cause ?: e
+            }
+        }, executor)
+
+        return try {
+            withContext(Dispatchers.IO) {
+                future.get(timeout.toMillis(), TimeUnit.MILLISECONDS)
+            }
+        } catch (e: TimeoutException) {
+            future.cancel(true)
+            throw TimeoutException("Execution timed out after ${timeout.toString()}")
+        } catch (e: ExecutionException) {
+            throw e.cause ?: e
+        } catch (e: InterruptedException) {
+            throw e
+        }
     }
 
     class AlunaThreadPoolExecutor(
