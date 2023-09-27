@@ -66,6 +66,11 @@ class SystemCommandProperties {
      */
     var executeLoadAdditionalData: Boolean = false
 
+    /**
+     * Check additional conditions on system-command interaction
+     */
+    var checkAdditionalConditions: Boolean = false
+
     @NestedConfigurationProperty
     var releaseNotes: ReleaseNoteProperties = ReleaseNoteProperties()
 }
@@ -131,6 +136,11 @@ class HelpCommandProperties {
      * Execute load additional data on help interaction
      */
     var executeLoadAdditionalData: Boolean = false
+
+    /**
+     * Check additional conditions on help interaction
+     */
+    var checkAdditionalConditions: Boolean = false
 }
 
 

@@ -47,7 +47,7 @@ abstract class SystemCommandDataProvider(
     var autoAcknowledgeEvent: Boolean = true
 ) : InteractionScopedObject {
 
-    override lateinit var uniqueId: String
+    override var uniqueId: String = ""
     override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
     override var beanUseAutoCompleteBean: Boolean = true
     override var beanRemoveObserverOnDestroy: Boolean = false

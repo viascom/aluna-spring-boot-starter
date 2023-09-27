@@ -246,9 +246,7 @@ abstract class DiscordCommandHandler(
      *
      * *This is set by Aluna based on the information provided by Discord*
      */
-    @set:JvmSynthetic
     var userLocale: DiscordLocale = DiscordLocale.ENGLISH_US
-        internal set
 
     /**
      * Guild [Locale]
@@ -394,10 +392,12 @@ abstract class DiscordCommandHandler(
         }
 
         //Check additional requirements for this command
-        val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
-        if (additionalRequirements.failed) {
-            onFailedAdditionalRequirements(event, additionalRequirements)
-            return
+        if (shouldCheckAdditionalConditions(name, alunaProperties)) {
+            val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
+            if (additionalRequirements.failed) {
+                onFailedAdditionalRequirements(event, additionalRequirements)
+                return
+            }
         }
 
         if (shouldLoadAdditionalData(name, alunaProperties)) {
@@ -554,7 +554,6 @@ abstract class DiscordCommandHandler(
      *
      * @param event The CommandEvent that triggered this Command
      */
-
     @JvmSynthetic
     internal suspend fun run(event: SlashCommandInteractionEvent) = withContext(AlunaDispatchers.Interaction) {
         if (alunaProperties.debug.useStopwatch) {
@@ -606,10 +605,12 @@ abstract class DiscordCommandHandler(
         }
 
         //Check additional requirements for this command
-        val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this@DiscordCommandHandler, event)
-        if (additionalRequirements.failed) {
-            onFailedAdditionalRequirements(event, additionalRequirements)
-            return@withContext
+        if (shouldCheckAdditionalConditions(name, alunaProperties)) {
+            val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this@DiscordCommandHandler, event)
+            if (additionalRequirements.failed) {
+                onFailedAdditionalRequirements(event, additionalRequirements)
+                return@withContext
+            }
         }
 
         //Check for cooldown
@@ -861,6 +862,21 @@ abstract class DiscordCommandHandler(
             isSystemCommand && properties.command.systemCommand.executeLoadAdditionalData -> true
             isHelpCommand && !properties.command.helpCommand.enabled -> true
             isHelpCommand && properties.command.helpCommand.executeLoadAdditionalData -> true
+            else -> false
+        }
+    }
+
+    @JvmSynthetic
+    internal fun shouldCheckAdditionalConditions(name: String, properties: AlunaProperties): Boolean {
+        val isSystemCommand = name == "system-command"
+        val isHelpCommand = name == "help"
+
+        return when {
+            name !in listOf("system-command", "help") -> true
+            isSystemCommand && !properties.command.systemCommand.enabled -> true
+            isSystemCommand && properties.command.systemCommand.checkAdditionalConditions -> true
+            isHelpCommand && !properties.command.helpCommand.enabled -> true
+            isHelpCommand && properties.command.helpCommand.checkAdditionalConditions -> true
             else -> false
         }
     }

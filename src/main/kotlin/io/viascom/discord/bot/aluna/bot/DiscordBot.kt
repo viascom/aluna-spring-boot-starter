@@ -71,11 +71,6 @@ open class DiscordBot(
 
     var shardManager: ShardManager? = null
     var isLoggedIn: Boolean = false
-    var latchCount: Int = 0
-
-    @set:JvmSynthetic
-    var interactionsInitialized: Boolean = false
-        internal set
 
     val commands = hashMapOf<InteractionId, Class<DiscordCommandHandler>>()
     val contextMenus = hashMapOf<InteractionId, Class<DiscordContextMenuHandler>>()
@@ -83,26 +78,29 @@ open class DiscordBot(
     val commandsWithPersistentInteractions = arrayListOf<InteractionId>()
     val autoCompleteHandlers = hashMapOf<Pair<InteractionId, OptionName?>, Class<out AutoCompleteHandler>>()
 
+    @JvmSynthetic
+    internal var latchCount: Int = 0
+
+    @set:JvmSynthetic
+    var interactionsInitialized: Boolean = false
+        internal set
+
     @get:JvmSynthetic
     internal val discordRepresentations = hashMapOf<InteractionName, Command>()
 
     @get:JvmSynthetic
     internal val cooldowns = hashMapOf<CooldownKey, LastUsage>()
 
-    @get:JvmSynthetic
-    @set:JvmSynthetic
+    @JvmSynthetic
     internal var messagesToObserveButton: MutableMap<MessageId, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<MessageId, ObserveInteraction>())
 
-    @get:JvmSynthetic
-    @set:JvmSynthetic
+    @JvmSynthetic
     internal var messagesToObserveStringSelect: MutableMap<MessageId, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<MessageId, ObserveInteraction>())
 
-    @get:JvmSynthetic
-    @set:JvmSynthetic
+    @JvmSynthetic
     internal var messagesToObserveEntitySelect: MutableMap<MessageId, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<MessageId, ObserveInteraction>())
 
-    @get:JvmSynthetic
-    @set:JvmSynthetic
+    @JvmSynthetic
     internal var messagesToObserveModal: MutableMap<MessageId, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<MessageId, ObserveInteraction>())
 
     @JvmSynthetic
@@ -119,8 +117,7 @@ open class DiscordBot(
     var totalShards: Int = 1
         internal set
 
-    @get:JvmSynthetic
-    @set:JvmSynthetic
+    @JvmSynthetic
     internal var sessionStartLimits: GatewayResponse.SessionStartLimit? = null
 
     @JvmSynthetic
