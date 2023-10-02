@@ -89,7 +89,7 @@ open class DefaultShardManagerBuilder(
                 )
             )
             .setStatus(OnlineStatus.DO_NOT_DISTURB)
-            .setActivity(Activity.playing("loading..."))
+            .setActivity(Activity.customStatus("loading..."))
             .setBulkDeleteSplittingEnabled(alunaProperties.discord.bulkDeleteSplitting)
             .setMemberCachePolicy(
                 when (alunaProperties.discord.memberCachePolicy) {

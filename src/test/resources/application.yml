@@ -44,7 +44,8 @@ aluna:
     supported-discord-locals: german, english_us
     base-path: i18n/interactions
   debug:
-    use-stopwatch: true
+    use-time-marks: true
+    show-detail-time-marks: true
     show-hash-code: true
     show-translation-keys: none
   bot-stats:

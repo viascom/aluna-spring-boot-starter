@@ -45,7 +45,7 @@ class DefaultBotShutdownHook(
 
         shardManager.shards.forEach { jda ->
             // Indicate on our presence that we are restarting
-            jda.presence.setPresence(OnlineStatus.IDLE, Activity.playing(createActivityText("\uD83D\uDE34 Bot is restarting...", jda.shardInfo.shardId)))
+            jda.presence.setPresence(OnlineStatus.IDLE, Activity.customStatus(createActivityText("\uD83D\uDE34 Bot is restarting...", jda.shardInfo.shardId)))
         }
     }
 

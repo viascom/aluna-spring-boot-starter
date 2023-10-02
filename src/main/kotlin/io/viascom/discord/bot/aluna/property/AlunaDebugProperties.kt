@@ -26,7 +26,12 @@ class AlunaDebugProperties {
     /**
      * Show time elapsed for commands
      */
-    var useStopwatch: Boolean = true
+    var useTimeMarks: Boolean = true
+
+    /**
+     * Show detailed time elapsed for commands
+     */
+    var showDetailTimeMarks: Boolean = true
 
     /**
      * Show hash code for commands

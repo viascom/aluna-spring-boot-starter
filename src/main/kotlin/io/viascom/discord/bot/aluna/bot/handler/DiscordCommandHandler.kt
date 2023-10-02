@@ -28,6 +28,7 @@ import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.exception.AlunaInteractionRepresentationNotFoundException
 import io.viascom.discord.bot.aluna.model.*
+import io.viascom.discord.bot.aluna.model.TimeMarkStep.*
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.property.OwnerIdProvider
 import io.viascom.discord.bot.aluna.util.InternalUtil
@@ -59,13 +60,13 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
-import org.springframework.util.StopWatch
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.isAccessible
+import kotlin.time.TimeSource.Monotonic.markNow
 
 
 abstract class DiscordCommandHandler(
@@ -258,9 +259,11 @@ abstract class DiscordCommandHandler(
         internal set
 
     /**
-     * Stop watch used if enabled by properties
+     * TimeMarks used if enabled by properties
      */
-    var stopWatch: StopWatch? = null
+    @set:JvmSynthetic
+    var timeMarks: ArrayList<TimeMarkRecord>? = null
+        internal set
 
 
     @JvmSynthetic
@@ -296,7 +299,7 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return if (handleSubCommands) {
-            handleSubCommand(event, { it.runOnButtonInteraction(event) }, { onSubCommandInteractionFallback(event) })
+            handleSubCommandInteraction(event, { it.runOnButtonInteraction(event) }, { onSubCommandInteractionFallback(event) })
         } else {
             runOnButtonInteraction(event)
         }
@@ -304,7 +307,7 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnButtonInteractionTimeout() {
         if (handleSubCommands) {
-            handleSubCommand(
+            handleSubCommandInteraction(
                 null,
                 { it.runOnButtonInteractionTimeout(); true },
                 { onSubCommandInteractionTimeoutFallback(); true }
@@ -316,7 +319,7 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
         return if (handleSubCommands) {
-            handleSubCommand(event, { it.runOnStringSelectInteraction(event) }, { onSubCommandInteractionFallback(event) })
+            handleSubCommandInteraction(event, { it.runOnStringSelectInteraction(event) }, { onSubCommandInteractionFallback(event) })
         } else {
             runOnStringSelectInteraction(event)
         }
@@ -325,7 +328,7 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnStringSelectInteractionTimeout() {
         if (handleSubCommands) {
-            handleSubCommand(
+            handleSubCommandInteraction(
                 null,
                 { it.runOnStringSelectInteractionTimeout(); true },
                 { onSubCommandInteractionTimeoutFallback(); true }
@@ -338,7 +341,7 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
         return if (handleSubCommands) {
-            handleSubCommand(event, { it.runOnEntitySelectInteraction(event) }, { onSubCommandInteractionFallback(event) })
+            handleSubCommandInteraction(event, { it.runOnEntitySelectInteraction(event) }, { onSubCommandInteractionFallback(event) })
         } else {
             runOnEntitySelectInteraction(event)
         }
@@ -346,7 +349,7 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnEntitySelectInteractionTimeout() {
         if (handleSubCommands) {
-            handleSubCommand(
+            handleSubCommandInteraction(
                 null,
                 { it.runOnEntitySelectInteractionTimeout(); true },
                 { onSubCommandInteractionTimeoutFallback(); true }
@@ -359,7 +362,7 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnModalInteraction(event: ModalInteractionEvent): Boolean {
         return if (handleSubCommands) {
-            handleSubCommand(
+            handleSubCommandInteraction(
                 event,
                 { it.runOnModalInteraction(event) },
                 { onSubCommandInteractionFallback(event) })
@@ -370,7 +373,7 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnModalInteractionTimeout() {
         if (handleSubCommands) {
-            handleSubCommand(
+            handleSubCommandInteraction(
                 null,
                 { it.runOnModalInteractionTimeout(); true },
                 { onSubCommandInteractionTimeoutFallback(); true }
@@ -405,7 +408,7 @@ abstract class DiscordCommandHandler(
         }
 
         if (handleSubCommands && redirectAutoCompleteEventsToSubCommands) {
-            handleSubCommand(event, { it.runOnAutoCompleteEvent(option, event); true }, { onSubCommandInteractionFallback(event) })
+            handleSubCommandInteraction(event, { it.runOnAutoCompleteEvent(option, event); true }, { onSubCommandInteractionFallback(event) })
         } else {
             runOnAutoCompleteEvent(option, event)
         }
@@ -556,10 +559,10 @@ abstract class DiscordCommandHandler(
      */
     @JvmSynthetic
     internal suspend fun run(event: SlashCommandInteractionEvent) = withContext(AlunaDispatchers.Interaction) {
-        if (alunaProperties.debug.useStopwatch) {
-            stopWatch = StopWatch()
-            stopWatch!!.start()
+        if (alunaProperties.debug.useTimeMarks) {
+            timeMarks = arrayListOf()
         }
+        timeMarks?.add(START at markNow())
 
         if (!discordBot.discordRepresentations.containsKey(event.name)) {
             val exception = AlunaInteractionRepresentationNotFoundException(event.name)
@@ -580,11 +583,15 @@ abstract class DiscordCommandHandler(
         channel = event.channel
         MDC.put("discord.channel", channel.id)
 
+        timeMarks?.add(INITIALIZED at markNow())
+
         //Check if this is an owner command
         if (isOwnerCommand && author.idLong !in ownerIdProvider.getOwnerIds()) {
             onOwnerCommandNotAllowedByUser(event)
             return@withContext
         }
+
+        timeMarks?.add(OWNER_CHECKED at markNow())
 
         //Check needed user permissions for this command
         val missingUserPermissions = discordInteractionConditions.checkForNeededUserPermissions(this@DiscordCommandHandler, userPermissions, event)
@@ -593,6 +600,8 @@ abstract class DiscordCommandHandler(
             return@withContext
         }
 
+        timeMarks?.add(NEEDED_USER_PERMISSIONS at markNow())
+
         //Check needed bot permissions for this command
         val missingBotPermissions = discordInteractionConditions.checkForNeededBotPermissions(this@DiscordCommandHandler, botPermissions, event)
         if (missingBotPermissions.hasMissingPermissions) {
@@ -600,33 +609,40 @@ abstract class DiscordCommandHandler(
             return@withContext
         }
 
+        timeMarks?.add(NEEDED_BOT_PERMISSIONS at markNow())
+
         if (shouldLoadAdditionalData(name, alunaProperties)) {
             discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this@DiscordCommandHandler, event)
+            timeMarks?.add(LOAD_DATA_BEFORE_ADDITIONAL_REQUIREMENTS at markNow())
         }
 
         //Check additional requirements for this command
         if (shouldCheckAdditionalConditions(name, alunaProperties)) {
             val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this@DiscordCommandHandler, event)
+            timeMarks?.add(CHECK_FOR_ADDITIONAL_COMMAND_REQUIREMENTS at markNow())
             if (additionalRequirements.failed) {
                 onFailedAdditionalRequirements(event, additionalRequirements)
                 return@withContext
             }
+        } else {
+            timeMarks?.add(CHECK_FOR_ADDITIONAL_COMMAND_REQUIREMENTS at markNow())
         }
 
         //Check for cooldown
-        val cooldownKey = discordBot.getCooldownKey(cooldownScope, discordRepresentation.id, author.id, channel.id, guild?.id)
         if (cooldownScope != CooldownScope.NO_COOLDOWN) {
+            val cooldownKey = discordBot.getCooldownKey(cooldownScope, discordRepresentation.id, author.id, channel.id, guild?.id)
             if (discordBot.isCooldownActive(cooldownKey, cooldown)) {
                 onCooldownStillActive(event, discordBot.cooldowns[cooldownKey]!!)
                 return@withContext
             }
+            discordBot.cooldowns[cooldownKey] = LocalDateTime.now(ZoneOffset.UTC)
         }
-        discordBot.cooldowns[cooldownKey] = LocalDateTime.now(ZoneOffset.UTC)
-
+        timeMarks?.add(CHECK_COOLDOWN at markNow())
 
         //Load additional data for this command
         if (shouldLoadAdditionalData(name, alunaProperties)) {
             discordInteractionLoadAdditionalData.loadData(this@DiscordCommandHandler, event)
+            timeMarks?.add(LOAD_ADDITIONAL_DATA at markNow())
         }
 
         //Run onCommandExecution in async to ensure it is not blocking the execution of the command itself
@@ -642,16 +658,21 @@ abstract class DiscordCommandHandler(
             }
         }
 
+        timeMarks?.add(ASYNC_TASKS_STARTED at markNow())
+
         try {
             logger.info("Run command /${event.fullCommandName}" + if (alunaProperties.debug.showHashCode) " [${this@DiscordCommandHandler.hashCode()}]" else "")
             runExecute(event)
+            timeMarks?.add(RUN_EXECUTE at markNow())
             if (handleSubCommands) {
                 logger.debug("Handle sub command /${event.fullCommandName}")
                 handleSubCommandExecution(event) { onSubCommandFallback(event) }
+                timeMarks?.add(HANDLE_SUB_COMMAND_EXECUTION at markNow())
             }
         } catch (e: Exception) {
             try {
                 onExecutionException(event, e)
+                timeMarks?.add(ON_EXECUTION_EXCEPTION at markNow())
             } catch (exceptionError: Exception) {
                 discordInteractionMetaDataHandler.onGenericExecutionException(this@DiscordCommandHandler, e, exceptionError, event)
             }
@@ -664,52 +685,99 @@ abstract class DiscordCommandHandler(
     internal suspend fun exitCommand(event: SlashCommandInteractionEvent) =
         withContext(AlunaDispatchers.Detached) {
             launch {
-                if (alunaProperties.debug.useStopwatch && stopWatch != null) {
-                    stopWatch!!.stop()
-                    MDC.put("duration", stopWatch!!.totalTimeMillis.toString())
-                    logger.info("Command /${event.fullCommandName} (${this@DiscordCommandHandler.author.id})${if (alunaProperties.debug.showHashCode) " [${this@DiscordCommandHandler.hashCode()}]" else ""} took ${stopWatch!!.totalTimeMillis}ms")
+                timeMarks?.add(EXIT_COMMAND at markNow())
+
+                if (alunaProperties.debug.useTimeMarks && timeMarks != null) {
+
+                    val duration = timeMarks!!.getDuration()
+                    val executeDuration = timeMarks!!.getDurationRunExecute()
+                    val neededUserPermissionsDuration = timeMarks!!.getDurationNeededUserPermissions()
+                    val neededBotPermissionsDuration = timeMarks!!.getDurationNeededBotPermissions()
+                    val loadDataBeforeAdditionalRequirementsDuration = timeMarks!!.getDurationLoadDataBeforeAdditionalRequirements()
+                    val checkForAdditionalCommandRequirementsDuration = timeMarks!!.getDurationCheckForAdditionalCommandRequirements()
+                    val loadAdditionalDataDuration = timeMarks!!.getDurationLoadAdditionalData()
+                    MDC.put("duration", duration.inWholeMilliseconds.toString())
+
+                    if (alunaProperties.debug.showDetailTimeMarks) {
+                        neededUserPermissionsDuration?.let { MDC.put("duration-details.neededUserPermissionsDuration", it.inWholeMilliseconds.toString()) }
+                        neededBotPermissionsDuration?.let { MDC.put("duration-details.neededBotPermissionsDuration", it.inWholeMilliseconds.toString()) }
+                        loadDataBeforeAdditionalRequirementsDuration?.let {
+                            MDC.put(
+                                "duration-details.loadDataBeforeAdditionalRequirementsDuration",
+                                it.inWholeMilliseconds.toString()
+                            )
+                        }
+                        checkForAdditionalCommandRequirementsDuration?.let {
+                            MDC.put(
+                                "duration-details.checkForAdditionalCommandRequirementsDuration",
+                                it.inWholeMilliseconds.toString()
+                            )
+                        }
+                        loadAdditionalDataDuration?.let { MDC.put("duration-details.loadAdditionalDataDuration", it.inWholeMilliseconds.toString()) }
+                        executeDuration?.let { MDC.put("duration-details.executeDuration", it.inWholeMilliseconds.toString()) }
+                    }
+
+                    logger.info("Command /${event.fullCommandName} (${this@DiscordCommandHandler.author.id})${if (alunaProperties.debug.showHashCode) " [${this@DiscordCommandHandler.hashCode()}]" else ""} took $duration (execute method: $executeDuration)")
+
+                    val beforeDuration = kotlin.time.Duration.ZERO
+                    neededUserPermissionsDuration?.let { beforeDuration.plus(it) }
+                    neededUserPermissionsDuration?.let { beforeDuration.plus(it) }
+                    neededBotPermissionsDuration?.let { beforeDuration.plus(it) }
+                    loadDataBeforeAdditionalRequirementsDuration?.let { beforeDuration.plus(it) }
+                    checkForAdditionalCommandRequirementsDuration?.let { beforeDuration.plus(it) }
+                    loadAdditionalDataDuration?.let { beforeDuration.plus(it) }
+
                     when {
-                        (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the command /${event.fullCommandName} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
-                        (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the command /${event.fullCommandName} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
+                        beforeDuration.inWholeMilliseconds > 1500 -> {
+                            logger.warn("The execution of the command /${event.fullCommandName} until calling your execute method took over 1.5 seconds. Make sure you don't do time consuming tasks in you implementation of DiscordInteractionLoadAdditionalData, DefaultDiscordInteractionAdditionalConditions or DiscordInteractionConditions.")
+                        }
+                    }
+
+                    when {
+                        (duration.inWholeMilliseconds > 3000) -> logger.warn("The execution of the command /${event.fullCommandName} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
+                        (duration.inWholeMilliseconds > 1500) -> logger.warn("The execution of the command /${event.fullCommandName} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
+                    }
+
+                    if (alunaProperties.debug.showDetailTimeMarks) {
+                        logger.info(timeMarks!!.printTimeMarks("/${event.fullCommandName}"))
                     }
                 }
 
             }
             launch {
-                discordInteractionMetaDataHandler.onExitInteraction(this@DiscordCommandHandler, stopWatch, event)
+                discordInteractionMetaDataHandler.onExitInteraction(this@DiscordCommandHandler, timeMarks, event)
             }
         }
 
     open suspend fun registerSubCommands(vararg elements: DiscordSubCommandElement) = withContext(AlunaDispatchers.Internal) {
-        elements
-            .filter { element ->
-                when {
-                    alunaProperties.includeInDevelopmentInteractions -> true
-                    alunaProperties.productionMode && (element::class.isSubclassOf(DiscordSubCommandHandler::class)) && (element as DiscordSubCommandHandler).interactionDevelopmentStatus == DevelopmentStatus.IN_DEVELOPMENT -> false
-                    alunaProperties.productionMode && (element::class.isSubclassOf(DiscordSubCommandGroup::class)) && (element as DiscordSubCommandGroup).interactionDevelopmentStatus == DevelopmentStatus.IN_DEVELOPMENT -> false
-                    else -> true
-                }
+        elements.filter { element ->
+            when {
+                alunaProperties.includeInDevelopmentInteractions -> true
+                alunaProperties.productionMode && (element::class.isSubclassOf(DiscordSubCommandHandler::class)) && (element as DiscordSubCommandHandler).interactionDevelopmentStatus == DevelopmentStatus.IN_DEVELOPMENT -> false
+                alunaProperties.productionMode && (element::class.isSubclassOf(DiscordSubCommandGroup::class)) && (element as DiscordSubCommandGroup).interactionDevelopmentStatus == DevelopmentStatus.IN_DEVELOPMENT -> false
+                else -> true
             }
-            .forEach { element ->
-                subCommandElements.putIfAbsent(element.getName(), element)
+        }.forEach { element ->
+            subCommandElements.putIfAbsent(element.getName(), element)
 
-                if (element::class.isSubclassOf(DiscordSubCommandHandler::class)) {
-                    element as DiscordSubCommandHandler
-                    element.parentCommand = this@DiscordCommandHandler
-                    element.runInitCommandOptions()
-                    this@DiscordCommandHandler.addSubcommands(element)
-                }
-
-                if (element::class.isSubclassOf(DiscordSubCommandGroupHandler::class)) {
-                    element as DiscordSubCommandGroupHandler
-                    element.initSubCommands()
-                    this@DiscordCommandHandler.addSubcommandGroups(element)
-                }
+            if (element::class.isSubclassOf(DiscordSubCommandHandler::class)) {
+                element as DiscordSubCommandHandler
+                element.parentCommand = this@DiscordCommandHandler
+                element.runInitCommandOptions()
+                this@DiscordCommandHandler.addSubcommands(element)
             }
+
+            if (element::class.isSubclassOf(DiscordSubCommandGroupHandler::class)) {
+                element as DiscordSubCommandGroupHandler
+                element.initSubCommands()
+                this@DiscordCommandHandler.addSubcommandGroups(element)
+            }
+        }
     }
 
     open suspend fun handleSubCommandExecution(event: SlashCommandInteractionEvent, fallback: (SlashCommandInteractionEvent) -> (Unit)) {
         loadDynamicSubCommandElements()
+        timeMarks?.add(LOAD_DYNAMIC_SUB_COMMAND_ELEMENTS at markNow())
 
         val path = event.fullCommandName.split(" ")
         discordRepresentation = discordBot.discordRepresentations[path[0]]!!
@@ -722,11 +790,14 @@ abstract class DiscordCommandHandler(
         }
 
         val firstElement = subCommandElements[firstLevel]!!
+        timeMarks?.add(CHECK_SUB_COMMAND_PATH at markNow())
 
         //Check if it is a SubCommand
         if (firstElement::class.isSubclassOf(DiscordSubCommandHandler::class)) {
             (firstElement as DiscordSubCommandHandler).initialize(event.fullCommandName, this, discordRepresentation)
+            timeMarks?.add(SUB_COMMAND_INITIALIZED at markNow())
             firstElement.run(event)
+            timeMarks?.add(SUB_COMMAND_RUN_EXECUTE at markNow())
             return
         }
 
@@ -737,12 +808,15 @@ abstract class DiscordCommandHandler(
             fallback.invoke(event)
             return
         }
+        timeMarks?.add(CHECK_SECOND_SUB_COMMAND_PATH at markNow())
 
         firstElement.subCommands[secondLevel]!!.initialize(event.fullCommandName, this, discordRepresentation)
+        timeMarks?.add(SECOND_SUB_COMMAND_INITIALIZED at markNow())
         firstElement.subCommands[secondLevel]!!.run(event)
+        timeMarks?.add(SECOND_SUB_COMMAND_RUN_EXECUTE at markNow())
     }
 
-    open suspend fun handleSubCommand(
+    open suspend fun handleSubCommandInteraction(
         event: GenericInteractionCreateEvent?,
         function: suspend (DiscordSubCommandHandler) -> (Boolean),
         fallback: (GenericInteractionCreateEvent?) -> (Boolean)
@@ -763,7 +837,8 @@ abstract class DiscordCommandHandler(
         //Check if it is a SubCommand
         if (firstElement::class.isSubclassOf(DiscordSubCommandHandler::class)) {
             (firstElement as DiscordSubCommandHandler).initialize(currentSubFullCommandName, this@DiscordCommandHandler, discordRepresentation)
-            return@withContext function.invoke(firstElement)
+            val result = function.invoke(firstElement)
+            return@withContext result
         }
 
         //Check if it is a SubCommand in a SubCommandGroup
@@ -774,7 +849,8 @@ abstract class DiscordCommandHandler(
         }
 
         (firstElement as DiscordSubCommandGroupHandler).subCommands[secondLevel]!!.initialize(currentSubFullCommandName, this@DiscordCommandHandler, discordRepresentation)
-        return@withContext function.invoke(firstElement.subCommands[secondLevel]!!)
+        val result = function.invoke(firstElement.subCommands[secondLevel]!!)
+        return@withContext result
     }
 
     fun updateMessageIdForScope(messageId: String) {

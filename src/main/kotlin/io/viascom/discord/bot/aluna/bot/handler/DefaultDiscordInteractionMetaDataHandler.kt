@@ -21,9 +21,9 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
+import io.viascom.discord.bot.aluna.model.TimeMarkRecord
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import org.springframework.util.StopWatch
 
 open class DefaultDiscordInteractionMetaDataHandler : DiscordInteractionMetaDataHandler {
     override fun onCommandExecution(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent) {
@@ -32,10 +32,10 @@ open class DefaultDiscordInteractionMetaDataHandler : DiscordInteractionMetaData
     override fun onContextMenuExecution(contextMenu: DiscordContextMenuHandler, event: GenericCommandInteractionEvent) {
     }
 
-    override fun onExitInteraction(discordCommandHandler: DiscordCommandHandler, stopWatch: StopWatch?, event: SlashCommandInteractionEvent) {
+    override fun onExitInteraction(discordCommandHandler: DiscordCommandHandler, timeMarks: List<TimeMarkRecord>?, event: SlashCommandInteractionEvent) {
     }
 
-    override fun onExitInteraction(contextMenu: DiscordContextMenuHandler, stopWatch: StopWatch?, event: GenericCommandInteractionEvent) {
+    override fun onExitInteraction(contextMenu: DiscordContextMenuHandler, timeMarks: List<TimeMarkRecord>?, event: GenericCommandInteractionEvent) {
     }
 
     override fun onGenericExecutionException(

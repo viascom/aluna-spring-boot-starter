@@ -21,9 +21,9 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
+import io.viascom.discord.bot.aluna.model.TimeMarkRecord
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import org.springframework.util.StopWatch
 
 /**
  * Interface to implement if you want to execute actions on certain points during interaction execution.
@@ -54,7 +54,7 @@ interface DiscordInteractionMetaDataHandler {
      * @param stopWatch StopWatch instance if enabled
      * @param event Slash command event
      */
-    fun onExitInteraction(discordCommandHandler: DiscordCommandHandler, stopWatch: StopWatch?, event: SlashCommandInteractionEvent)
+    fun onExitInteraction(discordCommandHandler: DiscordCommandHandler, timeMarks: List<TimeMarkRecord>?, event: SlashCommandInteractionEvent)
 
     /**
      * Gets called asynchronously after the context menu is executed.
@@ -64,7 +64,7 @@ interface DiscordInteractionMetaDataHandler {
      * @param stopWatch StopWatch instance if enabled
      * @param event Slash command event
      */
-    fun onExitInteraction(contextMenu: DiscordContextMenuHandler, stopWatch: StopWatch?, event: GenericCommandInteractionEvent)
+    fun onExitInteraction(contextMenu: DiscordContextMenuHandler, timeMarks: List<TimeMarkRecord>?, event: GenericCommandInteractionEvent)
 
     /**
      * Gets called if the command defined onExecutionException throws an exception.

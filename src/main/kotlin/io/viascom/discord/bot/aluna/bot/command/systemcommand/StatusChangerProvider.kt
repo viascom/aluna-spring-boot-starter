@@ -145,6 +145,7 @@ class StatusChangerProvider(
                 if (activityText.isNotEmpty() || activityId == "null") {
 
                     val activity = when (activityId) {
+                        "custom" -> Activity.customStatus(activityText)
                         "playing" -> Activity.playing(activityText)
                         "competing" -> Activity.competing(activityText)
                         "listening" -> Activity.listening(activityText)
@@ -196,6 +197,7 @@ class StatusChangerProvider(
 
         val activitySelect = StringSelectMenu.create("activity")
         activitySelect.addOption("Nothing", "null", isDefault = ("null" == activityId))
+        activitySelect.addOption("Custom", "custom", isDefault = ("custom" == activityId))
         activitySelect.addOption("Playing", "playing", isDefault = ("playing" == activityId))
         activitySelect.addOption("Competing", "competing", isDefault = ("competing" == activityId))
         activitySelect.addOption("Listening", "listening", isDefault = ("listening" == activityId))

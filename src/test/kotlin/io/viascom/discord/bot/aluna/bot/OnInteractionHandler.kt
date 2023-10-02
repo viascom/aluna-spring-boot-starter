@@ -24,6 +24,7 @@ package io.viascom.discord.bot.aluna.bot
 import io.viascom.discord.bot.aluna.bot.handler.DiscordCommandHandler
 import io.viascom.discord.bot.aluna.bot.handler.DiscordContextMenuHandler
 import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionMetaDataHandler
+import io.viascom.discord.bot.aluna.model.TimeMarkRecord
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import okhttp3.OkHttpClient
@@ -31,7 +32,6 @@ import okhttp3.Request
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.util.StopWatch
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -47,19 +47,19 @@ class OnInteractionHandler : DiscordInteractionMetaDataHandler {
             .build()
 
 
-        httpClient.newCall(Request.Builder().get().url("http://httpbin.org/delay/10").build()).execute()
+        val response = httpClient.newCall(Request.Builder().get().url("http://httpbin.org/delay/10").build()).execute()
         logger.info("After rest :)")
+        response.close()
     }
 
     override fun onContextMenuExecution(contextMenu: DiscordContextMenuHandler, event: GenericCommandInteractionEvent) {
 
     }
 
-    override fun onExitInteraction(discordCommandHandler: DiscordCommandHandler, stopWatch: StopWatch?, event: SlashCommandInteractionEvent) {
-
+    override fun onExitInteraction(discordCommandHandler: DiscordCommandHandler, timeMarks: List<TimeMarkRecord>?, event: SlashCommandInteractionEvent) {
     }
 
-    override fun onExitInteraction(contextMenu: DiscordContextMenuHandler, stopWatch: StopWatch?, event: GenericCommandInteractionEvent) {
+    override fun onExitInteraction(contextMenu: DiscordContextMenuHandler, timeMarks: List<TimeMarkRecord>?, event: GenericCommandInteractionEvent) {
 
     }
 

@@ -26,10 +26,8 @@ import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
 import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
 import io.viascom.discord.bot.aluna.event.EventPublisher
-import io.viascom.discord.bot.aluna.model.AdditionalRequirements
-import io.viascom.discord.bot.aluna.model.DevelopmentStatus
-import io.viascom.discord.bot.aluna.model.MissingPermissions
-import io.viascom.discord.bot.aluna.model.UseScope
+import io.viascom.discord.bot.aluna.model.*
+import io.viascom.discord.bot.aluna.model.TimeMarkStep.EXIT_COMMAND
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -54,9 +52,9 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
-import org.springframework.util.StopWatch
 import java.time.Duration
 import java.util.*
+import kotlin.time.TimeSource.Monotonic.markNow
 
 abstract class DiscordContextMenuHandler(
     type: Command.Type,
@@ -181,9 +179,11 @@ abstract class DiscordContextMenuHandler(
     var guildLocale: DiscordLocale = DiscordLocale.ENGLISH_US
 
     /**
-     * Stop watch used if enabled by properties
+     * TimeMarks used if enabled by properties
      */
-    var stopWatch: StopWatch? = null
+    @set:JvmSynthetic
+    var timeMarks: ArrayList<TimeMarkRecord>? = null
+        internal set
 
 
     @JvmSynthetic
@@ -277,19 +277,67 @@ abstract class DiscordContextMenuHandler(
     @JvmSynthetic
     internal suspend fun exitCommand(event: GenericCommandInteractionEvent) = withContext(AlunaDispatchers.Detached) {
         launch {
-            if (alunaProperties.debug.useStopwatch && stopWatch != null) {
-                stopWatch!!.stop()
-                MDC.put("duration", stopWatch!!.totalTimeMillis.toString())
-                logger.info("Context menu '${event.fullCommandName}' (${this@DiscordContextMenuHandler.author.id})${if (alunaProperties.debug.showHashCode) " [${this@DiscordContextMenuHandler.hashCode()}]" else ""} took ${stopWatch!!.totalTimeMillis}ms")
+            timeMarks?.add(EXIT_COMMAND at markNow())
+
+            if (alunaProperties.debug.useTimeMarks && timeMarks != null) {
+
+                val duration = timeMarks!!.getDuration()
+                val executeDuration = timeMarks!!.getDurationRunExecute()
+                val neededUserPermissionsDuration = timeMarks!!.getDurationNeededUserPermissions()
+                val neededBotPermissionsDuration = timeMarks!!.getDurationNeededBotPermissions()
+                val loadDataBeforeAdditionalRequirementsDuration = timeMarks!!.getDurationLoadDataBeforeAdditionalRequirements()
+                val checkForAdditionalCommandRequirementsDuration = timeMarks!!.getDurationCheckForAdditionalCommandRequirements()
+                val loadAdditionalDataDuration = timeMarks!!.getDurationLoadAdditionalData()
+                MDC.put("duration", duration.inWholeMilliseconds.toString())
+
+                if (alunaProperties.debug.showDetailTimeMarks) {
+                    neededUserPermissionsDuration?.let { MDC.put("duration-details.neededUserPermissionsDuration", it.inWholeMilliseconds.toString()) }
+                    neededBotPermissionsDuration?.let { MDC.put("duration-details.neededBotPermissionsDuration", it.inWholeMilliseconds.toString()) }
+                    loadDataBeforeAdditionalRequirementsDuration?.let {
+                        MDC.put(
+                            "duration-details.loadDataBeforeAdditionalRequirementsDuration",
+                            it.inWholeMilliseconds.toString()
+                        )
+                    }
+                    checkForAdditionalCommandRequirementsDuration?.let {
+                        MDC.put(
+                            "duration-details.checkForAdditionalCommandRequirementsDuration",
+                            it.inWholeMilliseconds.toString()
+                        )
+                    }
+                    loadAdditionalDataDuration?.let { MDC.put("duration-details.loadAdditionalDataDuration", it.inWholeMilliseconds.toString()) }
+                    executeDuration?.let { MDC.put("duration-details.executeDuration", it.inWholeMilliseconds.toString()) }
+                }
+
+                logger.info("Context menu '${event.fullCommandName}' (${this@DiscordContextMenuHandler.author.id})${if (alunaProperties.debug.showHashCode) " [${this@DiscordContextMenuHandler.hashCode()}]" else ""} took $duration (execute method: $executeDuration)")
+
+                val beforeDuration = kotlin.time.Duration.ZERO
+                neededUserPermissionsDuration?.let { beforeDuration.plus(it) }
+                neededUserPermissionsDuration?.let { beforeDuration.plus(it) }
+                neededBotPermissionsDuration?.let { beforeDuration.plus(it) }
+                loadDataBeforeAdditionalRequirementsDuration?.let { beforeDuration.plus(it) }
+                checkForAdditionalCommandRequirementsDuration?.let { beforeDuration.plus(it) }
+                loadAdditionalDataDuration?.let { beforeDuration.plus(it) }
+
                 when {
-                    (stopWatch!!.totalTimeMillis > 3000) -> logger.warn("The execution of the context menu ${event.fullCommandName} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
-                    (stopWatch!!.totalTimeMillis > 1500) -> logger.warn("The execution of the context menu ${event.fullCommandName} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
+                    beforeDuration.inWholeMilliseconds > 1500 -> {
+                        logger.warn("The execution of the context menu ${event.fullCommandName} until calling your execute method took over 1.5 seconds. Make sure you don't do time consuming tasks in you implementation of DiscordInteractionLoadAdditionalData, DefaultDiscordInteractionAdditionalConditions or DiscordInteractionConditions.")
+                    }
+                }
+
+                when {
+                    (duration.inWholeMilliseconds > 3000) -> logger.warn("The execution of the context menu ${event.fullCommandName} until it got completed took longer than 3 second. Make sure you acknowledge the event as fast as possible. If it got acknowledge at the end of the method, the interaction token was no longer valid.")
+                    (duration.inWholeMilliseconds > 1500) -> logger.warn("The execution of the context menu ${event.fullCommandName} until it got completed took longer than 1.5 second. Make sure that you acknowledge the event as fast as possible. Because the initial interaction token is only 3 seconds valid.")
+                }
+
+                if (alunaProperties.debug.showDetailTimeMarks) {
+                    logger.info(timeMarks!!.printTimeMarks(event.fullCommandName))
                 }
             }
         }
 
         launch {
-            discordInteractionMetaDataHandler.onExitInteraction(this@DiscordContextMenuHandler, stopWatch, event)
+            discordInteractionMetaDataHandler.onExitInteraction(this@DiscordContextMenuHandler, timeMarks, event)
         }
     }
 
