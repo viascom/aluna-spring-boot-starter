@@ -289,7 +289,7 @@ class AdminSearchDataProvider(
 
     private fun generateDiscordUser(discordUser: User, page: String = "OVERVIEW") {
         lastEmbed.clearFields()
-        lastEmbed.setDescription("Found Discord User **${discordUser.name}** *(${discordUser.asTag})*\nwith ID: ``${discordUser.id}``")
+        lastEmbed.setDescription("Found Discord User **${discordUser.name}**\nwith ID: ``${discordUser.id}``")
         lastEmbed.setThumbnail(discordUser.avatarUrl)
         lastEmbed.setFooter(null)
         lastEmbed.setImage(null)
@@ -368,7 +368,7 @@ class AdminSearchDataProvider(
         val users = checkForUser(arg)
         if (users.isNotEmpty()) {
             users.forEach {
-                responses[Command.Choice(it.asTag + " (User)", it.id)] = levenshteinDistance(it.name, arg)
+                responses[Command.Choice(it.name + " (User)", it.id)] = levenshteinDistance(it.name, arg)
             }
         }
 

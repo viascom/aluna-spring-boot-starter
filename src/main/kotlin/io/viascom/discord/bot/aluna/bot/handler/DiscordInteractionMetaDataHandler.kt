@@ -51,7 +51,7 @@ interface DiscordInteractionMetaDataHandler {
      * This gets also called if the command execution throws an exception.
      *
      * @param discordCommandHandler Discord command instance
-     * @param stopWatch StopWatch instance if enabled
+     * @param timeMarks TimeMarks if enabled
      * @param event Slash command event
      */
     fun onExitInteraction(discordCommandHandler: DiscordCommandHandler, timeMarks: List<TimeMarkRecord>?, event: SlashCommandInteractionEvent)
@@ -61,7 +61,7 @@ interface DiscordInteractionMetaDataHandler {
      * This gets also called if the context menu execution throws an exception.
      *
      * @param contextMenu Discord command instance
-     * @param stopWatch StopWatch instance if enabled
+     * @param timeMarks TimeMarks if enabled
      * @param event Slash command event
      */
     fun onExitInteraction(contextMenu: DiscordContextMenuHandler, timeMarks: List<TimeMarkRecord>?, event: GenericCommandInteractionEvent)

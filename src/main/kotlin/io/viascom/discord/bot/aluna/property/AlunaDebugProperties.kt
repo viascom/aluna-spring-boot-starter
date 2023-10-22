@@ -21,7 +21,17 @@
 
 package io.viascom.discord.bot.aluna.property
 
+import org.springframework.boot.context.properties.DeprecatedConfigurationProperty
+
 class AlunaDebugProperties {
+
+    /**
+     * Stopwatch
+     */
+    @Deprecated("This property is deprecated and got removed. Use useTimeMarks instead.", ReplaceWith("useTimeMarks"), DeprecationLevel.ERROR)
+    @set:DeprecatedConfigurationProperty(reason = "This property is deprecated and got removed. Use useTimeMarks instead.", replacement = "aluna.debug.use-time-marks")
+    @get:DeprecatedConfigurationProperty(reason = "This property is deprecated and got removed. Use useTimeMarks instead.", replacement = "aluna.debug.use-time-marks")
+    var useStopwatch: Boolean? = null
 
     /**
      * Show time elapsed for commands

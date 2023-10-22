@@ -35,7 +35,6 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
-import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.OptionMapping
 import net.dv8tion.jda.api.interactions.commands.OptionType
@@ -565,13 +564,6 @@ fun linkButton(url: String, label: String? = null, emoji: Emoji? = null, disable
  * @return An Emoji instance based on the formatted string.
  */
 fun String.toEmoji() = Emoji.fromFormatted(this)
-
-/**
- * Converts a DiscordLocale into a Java Locale instance.
- *
- * @return A Locale instance based on the DiscordLocale.
- */
-fun DiscordLocale.toLocale() = Locale.forLanguageTag(this.locale)
 
 /**
  * Computes the normalized Levenshtein distance between two strings.

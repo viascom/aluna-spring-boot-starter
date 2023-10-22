@@ -35,11 +35,11 @@ class ShardShutdownEventListener(private val discordBot: DiscordBot) : Coroutine
 
     override suspend fun onEvent(event: GenericEvent) {
         when (event) {
-            is ShutdownEvent -> onShutdown(event)
+            is ShutdownEvent -> onShutdown()
         }
     }
 
-    private suspend fun onShutdown(event: ShutdownEvent) = withContext(AlunaDispatchers.Internal) {
+    private suspend fun onShutdown(): Unit = withContext(AlunaDispatchers.Internal) {
         discordBot.isLoggedIn = false
     }
 

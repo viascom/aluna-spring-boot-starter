@@ -67,7 +67,7 @@ class AdminSearchOverviewPage(
     override fun onUserRequest(discordUser: User, embedBuilder: EmbedBuilder) {
         val mutualServers = shardManager.getMutualGuilds(discordUser)
 
-        embedBuilder.addField("Discord-ID", discordUser.id, true).addField("Discord-Tag", discordUser.name + " *(${discordUser.asTag})*", true)
+        embedBuilder.addField("Discord-ID", discordUser.id, true).addField("Discord-Tag", discordUser.name, true)
             .addField("Discord-Mention", discordUser.asMention, true)
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
             val localeMap = discordUser.mutualGuilds.groupBy { it.locale }

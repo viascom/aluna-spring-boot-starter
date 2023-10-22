@@ -21,7 +21,7 @@ ext {
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
-    jdaVersion = "5.0.0-beta.15"
+    jdaVersion = "5.0.0-beta.16"
     retrofitVersion = "2.9.0"
     jacksonSpringBootVersion = "3.1.5"
     jacksonVersion = "2.15.3"
@@ -200,7 +200,7 @@ publishing {
                         organizationUrl = "https://viascom.io/"
                     }
                     developer {
-                        id = "botscripter"
+                        id = "nik-sta"
                         name = "Nikola Stankovic"
                         email = "nikola.stankovic@viascom.email"
                         organizationUrl = "https://viascom.io/"
