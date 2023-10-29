@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/viascom/aluna-spring-boot-starter/releases"><img src="https://img.shields.io/maven-metadata/v.svg?label=maven-central&metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fio%2Fviascom%2Fdiscord%2Fbot%2Faluna-spring-boot-starter%2Fmaven-metadata.xml"
          alt="Maven central"></a>
-  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--beta.16-blue.svg"
+  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--beta.17-blue.svg"
               alt="JDA-Version "></a>
   <img src="https://img.shields.io/badge/Kotlin-1.9.10-%238052ff?logo=kotlin"
          alt="Kotlin Version">
@@ -23,7 +23,7 @@
 
 | aluna-spring-boot-starter |                                          JDA                                          |                                Spring Boot                                 |                                    Kotlin                                    |                                 emoji-java                                 |
 |:--------------------------|:-------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|
-| `1.1.0`                   | <img src="https://img.shields.io/badge/5.0.0-beta.16-yellow.svg" alt="5.0.0-beta.16"> | <img src="https://img.shields.io/badge/3.1.5-brightgreen.svg" alt="3.1.5"> | <img src="https://img.shields.io/badge/1.9.10-brightgreen.svg" alt="1.9.10"> | <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1"> |
+| `1.1.0`                   | <img src="https://img.shields.io/badge/5.0.0-beta.17-yellow.svg" alt="5.0.0-beta.17"> | <img src="https://img.shields.io/badge/3.1.5-brightgreen.svg" alt="3.1.5"> | <img src="https://img.shields.io/badge/1.9.10-brightgreen.svg" alt="1.9.10"> | <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1"> |
 | `1.0.0`                   | <img src="https://img.shields.io/badge/5.0.0-beta.13-yellow.svg" alt="5.0.0-beta.13"> | <img src="https://img.shields.io/badge/3.1.2-brightgreen.svg" alt="3.1.2"> |  <img src="https://img.shields.io/badge/1.9.0-brightgreen.svg" alt="1.9.0">  | <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1"> |
 | `0.0.48_5.0.0-beta.12`    | <img src="https://img.shields.io/badge/5.0.0-beta.12-yellow.svg" alt="5.0.0-beta.12"> | <img src="https://img.shields.io/badge/3.1.0-brightgreen.svg" alt="3.1.0"> | <img src="https://img.shields.io/badge/1.8.22-brightgreen.svg" alt="1.8.22"> | <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1"> |
 | `0.0.48_5.0.0-beta.11`    | <img src="https://img.shields.io/badge/5.0.0-beta.11-yellow.svg" alt="5.0.0-beta.11"> | <img src="https://img.shields.io/badge/3.1.0-brightgreen.svg" alt="3.1.0"> | <img src="https://img.shields.io/badge/1.8.22-brightgreen.svg" alt="1.8.21"> | <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1"> |
