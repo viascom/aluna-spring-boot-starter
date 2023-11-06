@@ -98,6 +98,9 @@ dependencies {
     }
     api "org.json:json:20231013"
 
+    //====== NanoId ======
+    api "io.viascom.nanoid:nanoid:1.0.0"
+
     //====== BotBlock ======
     compileOnly "org.botblock:javabotblockapi-core:$javabotblockapiVersion"
     compileOnly "org.botblock:javabotblockapi-request:$javabotblockapiVersion"
@@ -113,7 +116,7 @@ dependencies {
 }
 
 tasks.withType(KotlinCompile).configureEach {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_17
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_19
     kotlinOptions.freeCompilerArgs = ["-Xjvm-default=all"]
 }
 

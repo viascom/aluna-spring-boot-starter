@@ -22,9 +22,9 @@
 package io.viascom.discord.bot.aluna.bot.component
 
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
-import io.viascom.discord.bot.aluna.util.NanoId
 import io.viascom.discord.bot.aluna.util.getSelection
 import io.viascom.discord.bot.aluna.util.removeComponents
+import io.viascom.nanoid.NanoId
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed.Field

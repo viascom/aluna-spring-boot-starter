@@ -28,7 +28,7 @@ import io.viascom.discord.bot.aluna.bot.handler.DiscordInteractionHandler
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
 import io.viascom.discord.bot.aluna.model.ObserveInteraction
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
-import io.viascom.discord.bot.aluna.util.NanoId
+import io.viascom.nanoid.NanoId
 import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger

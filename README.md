@@ -10,7 +10,7 @@
          alt="Maven central"></a>
   <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--beta.17-blue.svg"
               alt="JDA-Version "></a>
-  <img src="https://img.shields.io/badge/Kotlin-1.9.10-%238052ff?logo=kotlin"
+  <img src="https://img.shields.io/badge/Kotlin-1.9.20-%238052ff?logo=kotlin"
          alt="Kotlin Version">
   <a href="http://www.apache.org/licenses/"><img src="https://img.shields.io/badge/license-Apache_2.0-blue.svg"
          alt="license Apache 2.0"></a>
@@ -21,12 +21,12 @@
 
 *These are the versions of all exposed dependencies related to the aluna-spring-boot-starter version.*
 
-| aluna-spring-boot-starter |                                          JDA                                          |                                Spring Boot                                 |                                    Kotlin                                    |                                 emoji-java                                 |
-|:--------------------------|:-------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|
-| `1.1.0`                   | <img src="https://img.shields.io/badge/5.0.0-beta.17-yellow.svg" alt="5.0.0-beta.17"> | <img src="https://img.shields.io/badge/3.1.5-brightgreen.svg" alt="3.1.5"> | <img src="https://img.shields.io/badge/1.9.10-brightgreen.svg" alt="1.9.10"> | <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1"> |
-| `1.0.0`                   | <img src="https://img.shields.io/badge/5.0.0-beta.13-yellow.svg" alt="5.0.0-beta.13"> | <img src="https://img.shields.io/badge/3.1.2-brightgreen.svg" alt="3.1.2"> |  <img src="https://img.shields.io/badge/1.9.0-brightgreen.svg" alt="1.9.0">  | <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1"> |
-| `0.0.48_5.0.0-beta.12`    | <img src="https://img.shields.io/badge/5.0.0-beta.12-yellow.svg" alt="5.0.0-beta.12"> | <img src="https://img.shields.io/badge/3.1.0-brightgreen.svg" alt="3.1.0"> | <img src="https://img.shields.io/badge/1.8.22-brightgreen.svg" alt="1.8.22"> | <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1"> |
-| `0.0.48_5.0.0-beta.11`    | <img src="https://img.shields.io/badge/5.0.0-beta.11-yellow.svg" alt="5.0.0-beta.11"> | <img src="https://img.shields.io/badge/3.1.0-brightgreen.svg" alt="3.1.0"> | <img src="https://img.shields.io/badge/1.8.22-brightgreen.svg" alt="1.8.21"> | <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1"> |
+| aluna-spring-boot-starter |                                          JDA                                          |                                Spring Boot                                 |                                    Kotlin                                    |                                 emoji-java                                 |                               nanoid-kotlin                                |
+|:--------------------------|:-------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|
+| `1.1.0`                   | <img src="https://img.shields.io/badge/5.0.0-beta.17-yellow.svg" alt="5.0.0-beta.17"> | <img src="https://img.shields.io/badge/3.1.5-brightgreen.svg" alt="3.1.5"> | <img src="https://img.shields.io/badge/1.9.20-brightgreen.svg" alt="1.9.20"> | <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1"> | <img src="https://img.shields.io/badge/1.0.0-brightgreen.svg" alt="1.0.0"> |
+| `1.0.0`                   | <img src="https://img.shields.io/badge/5.0.0-beta.13-yellow.svg" alt="5.0.0-beta.13"> | <img src="https://img.shields.io/badge/3.1.2-brightgreen.svg" alt="3.1.2"> |  <img src="https://img.shields.io/badge/1.9.0-brightgreen.svg" alt="1.9.0">  | <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1"> |                                     -                                      |
+| `0.0.48_5.0.0-beta.12`    | <img src="https://img.shields.io/badge/5.0.0-beta.12-yellow.svg" alt="5.0.0-beta.12"> | <img src="https://img.shields.io/badge/3.1.0-brightgreen.svg" alt="3.1.0"> | <img src="https://img.shields.io/badge/1.8.22-brightgreen.svg" alt="1.8.22"> | <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1"> |                                     -                                      |
+| `0.0.48_5.0.0-beta.11`    | <img src="https://img.shields.io/badge/5.0.0-beta.11-yellow.svg" alt="5.0.0-beta.11"> | <img src="https://img.shields.io/badge/3.1.0-brightgreen.svg" alt="3.1.0"> | <img src="https://img.shields.io/badge/1.8.22-brightgreen.svg" alt="1.8.21"> | <img src="https://img.shields.io/badge/5.1.1-brightgreen.svg" alt="5.1.1"> |                                     -                                      |
 
 ## Download
 
