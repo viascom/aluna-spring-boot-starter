@@ -199,10 +199,33 @@ fun MessageEditCallbackAction.removeComponents() = this.setComponents(arrayListO
  * Remove all components
  */
 fun ReplyCallbackAction.removeComponents() = this.setComponents(arrayListOf())
+
+/**
+ * Sets the stickers for this message create action.
+ *
+ * @param stickers The Discord stickers to be set.
+ */
 fun MessageCreateAction.setStickers(vararg stickers: DiscordSticker) = this.setStickers(stickers.map { it.toSticker() })
+
+/**
+ * Sets the stickers for the message create action.
+ *
+ * @param stickers The collection of DiscordStickers to set.
+ */
 fun MessageCreateAction.setStickers(stickers: Collection<DiscordSticker>) = this.setStickers(stickers.map { it.toSticker() })
 
+/**
+ * Converts a MessageEditData object to a MessageCreateData object.
+ *
+ * @return The converted MessageCreateData object.
+ */
 fun MessageEditData.toCreateData() = MessageCreateData.fromEditData(this)
+
+/**
+ * Converts a MessageCreateData object to a MessageEditData object.
+ *
+ * @return The converted MessageEditData object.
+ */
 fun MessageCreateData.toEditData() = MessageEditData.fromCreateData(this)
 
 /**
@@ -274,12 +297,24 @@ fun MessageEmbed.toJson(): ByteArray = this.toData().toJson()
 fun MessageEmbed.toJsonString(): String = this.toJson().toString(Charset.defaultCharset())
 
 
+/**
+ * Retrieves a message with the given message ID in the user's private channel.
+ *
+ * @param messageId The ID of the message to retrieve.
+ * @return The retrieved message, or null if an exception occurred.
+ */
 fun User.getMessage(messageId: String): Message? = try {
     this.openPrivateChannel().complete().retrieveMessageById(messageId).complete()
 } catch (e: Exception) {
     null
 }
 
+/**
+ * Converts a string into a Discord embed using the specified title.
+ *
+ * @param title The title of the embed. Defaults to null if not provided.
+ * @return An EmbedBuilder object representing the Discord embed with the specified title and content.
+ */
 fun String.toDiscordEmbed(title: String? = null): EmbedBuilder = EmbedBuilder().setTitle(title).setDescription(this).setColor("#2c2d31")
 
 /**

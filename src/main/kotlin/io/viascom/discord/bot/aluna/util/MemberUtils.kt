@@ -110,6 +110,13 @@ fun Member.timeoutFor(duration: Duration, reason: String? = null): AuditableRest
     return if (reason != null) action.reason(reason) else action
 }
 
+/**
+ * Tries to send a direct message (DM) to the user.
+ * Exceptions are ignored.
+ *
+ * @param message the message to send
+ * @param then the runnable to be executed after the DM is sent
+ */
 fun User.tryToSendDM(message: String, then: Runnable) {
     try {
         this.openPrivateChannel().queue({ pc -> pc.sendMessage(message).queue({ then.run() }) { then.run() } }) { then.run() }
@@ -117,4 +124,11 @@ fun User.tryToSendDM(message: String, then: Runnable) {
     }
 }
 
+/**
+ * Retrieves a Member by their ID from the given guild.
+ *
+ * @param guildId The ID of the guild to search in.
+ * @param userId The ID of the member to retrieve.
+ * @return The Member if found, or null if the guild or member was not found.
+ */
 fun ShardManager.getMemberById(guildId: String, userId: String): Member? = this.getGuildById(guildId)?.getMemberById(userId)

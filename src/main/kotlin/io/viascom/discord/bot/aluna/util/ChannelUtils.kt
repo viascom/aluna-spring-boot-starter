@@ -91,24 +91,62 @@ fun Guild.getChannelsWithBotAndMember(member: Member, type: ArrayList<ChannelTyp
 
 
 /**
- * Get guild text channel
+ * Retrieves a guild text channel
  *
- * @param guildId guild id
- * @param channelId channel id
- * @return Guild Text Channel
+ * @param guildId The ID of the guild to retrieve the voice channel from.
+ * @param channelId The ID of the text channel to be retrieved.
+ * @return The text channel with the specified ID if found, null otherwise.
  */
 fun ShardManager.getGuildTextChannel(guildId: String, channelId: String): MessageChannel? = this.getGuildById(guildId)?.getTextChannelById(channelId)
+
+/**
+ * Retrieves a guild voice channel
+ *
+ * @param guildId The ID of the guild to retrieve the voice channel from.
+ * @param channelId The ID of the voice channel to be retrieved.
+ * @return The voice channel with the specified ID if found, null otherwise.
+ */
 fun ShardManager.getGuildVoiceChannel(guildId: String, channelId: String): VoiceChannel? = this.getGuildById(guildId)?.getVoiceChannelById(channelId)
+
+/**
+ * Retrieves a message from a guild's text channel.
+ *
+ * @param guildId The ID of the guild.
+ * @param channelId The ID of the channel.
+ * @param messageId The ID of the message to retrieve.
+ * @return The retrieved message, or null if it was not found.
+ */
 fun ShardManager.getGuildMessage(guildId: String, channelId: String, messageId: String): Message? =
     this.getGuildTextChannel(guildId, channelId)?.retrieveMessageById(messageId)?.complete()
 
+/**
+ * Retrieves the private message channel for the given user ID.
+ *
+ * @param userId The ID of the user.
+ * @return The MessageChannel object representing the private channel, or null if not found.
+ */
 fun ShardManager.getPrivateChannelByUser(userId: String): MessageChannel? = this.retrieveUserById(userId).complete()?.openPrivateChannel()?.complete()
+
+/**
+ * Retrieves a private message by user ID and message ID.
+ *
+ * @param userId the ID of the user
+ * @param messageId the ID of the message
+ * @return the private message with the given ID, or null if not found or an exception occurs
+ */
 fun ShardManager.getPrivateMessageByUser(userId: String, messageId: String): Message? = try {
     getPrivateChannelByUser(userId)?.retrieveMessageById(messageId)?.complete()
 } catch (e: Exception) {
     null
 }
 
+/**
+ * Retrieves a private message from the specified channel and message ID.
+ *
+ * @param channelId the ID of the private channel
+ * @param messageId the ID of the message to retrieve
+ * @return the retrieved Message object, or null if the message cannot be retrieved
+ */
 fun ShardManager.getPrivateMessage(channelId: String, messageId: String): Message? = try {
     getPrivateChannelById(channelId)?.retrieveMessageById(messageId)?.complete()
 } catch (e: Exception) {

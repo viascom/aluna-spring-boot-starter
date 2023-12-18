@@ -57,6 +57,12 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.function.Function
 
+/**
+ * Rounds the double value to the specified number of decimal places.
+ *
+ * @param decimals The number of decimal places to round to.
+ * @return The rounded double value.
+ */
 fun Double.round(decimals: Int): Double {
     var multiplier = 1.0
     repeat(decimals) { multiplier *= 10 }

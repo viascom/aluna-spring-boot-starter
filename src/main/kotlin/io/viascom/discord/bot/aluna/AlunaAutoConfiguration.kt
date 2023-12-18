@@ -58,6 +58,24 @@ open class AlunaAutoConfiguration {
     //Has to be AlunaAutoConfiguration::class.java as otherwise it is shown as SpringProxy!
     private val logger: Logger = LoggerFactory.getLogger(AlunaAutoConfiguration::class.java)
 
+    /**
+     * Creates a default ShardManager instance using the provided dependencies.
+     *
+     * @param interactionEventListener the InteractionEventListener dependency
+     * @param genericAutoCompleteListener the GenericInteractionListener dependency
+     * @param interactionComponentEventListener the InteractionComponentEventListener dependency
+     * @param shardStartListener the ShardStartListener dependency
+     * @param shardReadyEventListener the ShardReadyEventListener dependency
+     * @param shardShutdownEventListener the ShardShutdownEventListener dependency
+     * @param eventWaiter the EventWaiter dependency
+     * @param genericEventPublisher the GenericEventPublisher dependency
+     * @param eventPublisher the EventPublisher dependency
+     * @param alunaProperties the AlunaProperties dependency
+     * @param customizers the list of ShardManagerBuilderCustomizer dependencies
+     * @param objectMapper the ObjectMapper dependency
+     * @param discordBot the DiscordBot dependency
+     * @return the created ShardManager instance
+     */
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean(ShardManagerBuilder::class)
@@ -106,6 +124,14 @@ open class AlunaAutoConfiguration {
         return discordBot.shardManager!!
     }
 
+    /**
+     * Builds a custom ShardManager instance using the provided dependencies.
+     * This is used if a custom ShardManagerBuilder is provided.
+     *
+     * @param shardManagerBuilder the ShardManagerBuilder instance
+     * @param alunaProperties the AlunaProperties instance
+     * @return the created ShardManager instance
+     */
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnBean(ShardManagerBuilder::class)
@@ -123,6 +149,11 @@ open class AlunaAutoConfiguration {
         return discordBot.shardManager!!
     }
 
+    /**
+     * Returns the default DiscordInteractionConditions.
+     *
+     * @return the created instance of DefaultDiscordInteractionConditions.
+     */
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
@@ -131,6 +162,11 @@ open class AlunaAutoConfiguration {
         return DefaultDiscordInteractionConditions()
     }
 
+    /**
+     * Returns the default implementation of the DiscordInteractionAdditionalConditions interface.
+     *
+     * @return the default DiscordInteractionAdditionalConditions implementation
+     */
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
@@ -139,6 +175,14 @@ open class AlunaAutoConfiguration {
         return DefaultDiscordInteractionAdditionalConditions()
     }
 
+    /**
+     * Returns the default implementation of the BotShutdownHook.
+     *
+     * @param shardManager the ShardManager dependency
+     * @param alunaProperties the AlunaProperties dependency
+     * @param discordBot the DiscordBot dependency
+     * @return the created BotShutdownHook instance
+     */
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
@@ -148,6 +192,11 @@ open class AlunaAutoConfiguration {
         return DefaultBotShutdownHook(shardManager, alunaProperties, discordBot)
     }
 
+    /**
+     *  Returns the default implementation of the DiscordInteractionLoadAdditionalData instance.
+     *
+     * @return the created instance of DiscordInteractionLoadAdditionalData
+     */
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
@@ -156,6 +205,11 @@ open class AlunaAutoConfiguration {
         return DefaultDiscordInteractionLoadAdditionalData()
     }
 
+    /**
+     *  Returns the default implementation of the DiscordInteractionMetaDataHandler instance.
+     *
+     * @return the created instance of DiscordInteractionMetaDataHandler
+     */
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
@@ -164,6 +218,11 @@ open class AlunaAutoConfiguration {
         return DefaultDiscordInteractionMetaDataHandler()
     }
 
+    /**
+     *  Returns the default implementation of the OwnerIdProvider instance.
+     *
+     * @return the created instance of OwnerIdProvider
+     */
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
@@ -172,6 +231,11 @@ open class AlunaAutoConfiguration {
         return DefaultOwnerIdProvider(alunaProperties)
     }
 
+    /**
+     *  Returns the default implementation of the ModeratorIdProvider instance.
+     *
+     * @return the created instance of ModeratorIdProvider
+     */
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
@@ -180,6 +244,11 @@ open class AlunaAutoConfiguration {
         return DefaultModeratorIdProvider(alunaProperties)
     }
 
+    /**
+     *  Returns the default implementation of the SystemCommandEmojiProvider instance.
+     *
+     * @return the created instance of SystemCommandEmojiProvider
+     */
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnSystemCommandEnabled
@@ -189,6 +258,11 @@ open class AlunaAutoConfiguration {
         return DefaultSystemCommandEmojiProvider()
     }
 
+    /**
+     *  Returns the default implementation of the DiscordInteractionLocalization instance.
+     *
+     * @return the created instance of DiscordInteractionLocalization
+     */
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnTranslationEnabled

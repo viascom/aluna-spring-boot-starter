@@ -183,13 +183,11 @@ open class DiscordBot(
     }
 
     /**
-     * Check if the cooldown is active.
+     * Checks if a cooldown is active for the given key.
      *
-     * This method will remove the expired cooldown for the given key.
-     *
-     * @param key
-     * @param cooldown
-     * @return
+     * @param key The key associated with the cooldown.
+     * @param cooldown The duration of the cooldown.
+     * @return `true` if the cooldown is active, `false` otherwise.
      */
     fun isCooldownActive(key: CooldownKey, cooldown: Duration): Boolean {
         //If not known, there is no cooldown
@@ -206,6 +204,12 @@ open class DiscordBot(
         return false
     }
 
+    /**
+     * Retrieves the cooldown time for the given key.
+     *
+     * @param key The key used to identify the cooldown.
+     * @return The cooldown time as a LocalDateTime object, or null if the key is not found.
+     */
     fun getCooldown(key: CooldownKey): LocalDateTime? {
         return cooldowns[key]
     }
