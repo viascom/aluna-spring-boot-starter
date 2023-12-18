@@ -297,7 +297,7 @@ open class DiscordBot(
     /**
      * Register a message for string select events. If such an event happens, Aluna will trigger the onStringSelectInteraction method of the interaction handler.
      *
-     * @param hook interaction hook
+     * @param messageId id of the message
      * @param interaction interaction handler
      * @param multiUse if the interaction can be used multiple times
      * @param duration timout of the interaction
@@ -341,7 +341,6 @@ open class DiscordBot(
      * @param interaction interaction handler
      * @param multiUse if the interaction can be used multiple times
      * @param duration timout of the interaction
-     * @param additionalData additional data
      * @param authorIds only specified users can use it
      * @param interactionUserOnly only the user who created the interaction can use it
      */
@@ -361,11 +360,10 @@ open class DiscordBot(
     /**
      * Register a message for entity select events. If such an event happens, Aluna will trigger the onEntitySelectInteraction method of the interaction handler.
      *
-     * @param hook interaction hook
+     * @param messageId id of the message
      * @param interaction interaction handler
      * @param multiUse if the interaction can be used multiple times
      * @param duration timout of the interaction
-     * @param additionalData additional data
      * @param authorIds only specified users can use it
      * @param interactionUserOnly only the user who created the interaction can use it
      */
@@ -406,7 +404,6 @@ open class DiscordBot(
      * @param interaction interaction handler
      * @param multiUse if the interaction can be used multiple times
      * @param duration timout of the interaction
-     * @param additionalData additional data
      * @param authorIds only specified users can use it
      * @param interactionUserOnly only the user who created the interaction can use it
      */
@@ -495,7 +492,6 @@ open class DiscordBot(
      * @param type event types to register
      * @param multiUse if the interaction can be used multiple times
      * @param duration timout of the interaction
-     * @param additionalData additional data
      * @param authorIds only specified users can use it
      * @param interactionUserOnly only the user who created the interaction can use it
      * @param failure callback for failure
@@ -552,7 +548,6 @@ open class DiscordBot(
      * @param type event types to register
      * @param multiUse if the interaction can be used multiple times
      * @param duration timout of the interaction
-     * @param additionalData additional data
      * @param failure callback for failure
      * @param success callback for success
      */
@@ -593,7 +588,6 @@ open class DiscordBot(
      * @param type event types to register
      * @param multiUse if the interaction can be used multiple times
      * @param duration timout of the interaction
-     * @param additionalData additional data
      * @param authorIds only specified users can use it
      * @param interactionUserOnly only the user who created the interaction can use it
      * @param failure callback for failure
@@ -735,13 +729,11 @@ internal typealias LastUsage = LocalDateTime
  * Queue an interaction and register listeners for it.
  *
  * @param T type of the rest action
- * @param action action to queue
  * @param hook interaction hook
  * @param interaction interaction handler
  * @param type event types to register
  * @param multiUse if the interaction can be used multiple times
  * @param duration timout of the interaction
- * @param additionalData additional data
  * @param authorIds only specified users can use it
  * @param interactionUserOnly only the user who created the interaction can use it
  * @param failure callback for failure
@@ -773,12 +765,10 @@ fun <T : Any> RestAction<T>.queueAndRegisterInteraction(
 /**
  * Queue an interaction and register listeners for it.
  *
- * @param action action to queue
  * @param interaction interaction handler
  * @param type event types to register
  * @param multiUse if the interaction can be used multiple times
  * @param duration timout of the interaction
- * @param additionalData additional data
  * @param failure callback for failure
  * @param success callback for success
  */
@@ -794,7 +784,6 @@ fun RestAction<Void>.queueAndRegisterInteraction(
 /**
  * Queue an action and set the message id for the interaction.
  *
- * @param action action to queue
  * @param hook interaction hook
  * @param interaction interaction handler
  * @param failure callback for failure
@@ -810,12 +799,10 @@ fun <T : Any> RestAction<T>.queueAndSetMessageId(
 /**
  * Queue an interaction and register listeners for it.
  *
- * @param action action to queue
  * @param interaction interaction handler
  * @param type event types to register
  * @param multiUse if the interaction can be used multiple times
  * @param duration timout of the interaction
- * @param additionalData additional data
  * @param authorIds only specified users can use it
  * @param interactionUserOnly only the user who created the interaction can use it
  * @param failure callback for failure
@@ -845,7 +832,6 @@ fun ReplyCallbackAction.queueAndRegisterInteraction(
 /**
  * Queue an action and set the message id for the interaction.
  *
- * @param action action to queue
  * @param interaction interaction handler
  * @param failure callback for failure
  * @param success callback for success
