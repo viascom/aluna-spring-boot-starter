@@ -100,11 +100,10 @@ fun <T : Any> SubcommandData.addOptions(vararg option: CommandOption<in T>) {
 }
 
 /**
- * Bans the user specified by the provided {@link UserSnowflake} and deletes messages sent by the user based on the {@code deletionTimeframe}.
+ * Bans the user and deletes messages sent by the user if defined.
  *
- * @param  user
- *         The {@link UserSnowflake} for the user to ban.
- *         This can be a member or user instance or {@link User#fromId(long)}.
+ * @param  user The for the user to ban.
+ *              This can be a member or user instance or {@link User#fromId(long)}.
  * @param  deletionTimeframe
  *         The timeframe for the history of messages that will be deleted.
  * @param  reason
@@ -118,7 +117,16 @@ fun Guild.ban(user: UserSnowflake, deletionTimeframe: Duration = Duration.ZERO, 
     return if (reason != null) action.reason(reason) else action
 }
 
+/**
+ * Retrieves the value of a typed option.
+ *
+ * @param option The CommandOption to retrieve the value for.
+ * @param default The default value to return if the option is not found. Default is `null`.
+ * @return The value of the option, or the default value if the option is not found.
+ * @throws IllegalArgumentException if the option type is OptionType.UNKNOWN, OptionType.SUB_COMMAND, or OptionType.SUB_COMMAND_GROUP.
+ */
 @JvmOverloads
+@Throws(IllegalArgumentException::class)
 @Suppress("UNCHECKED_CAST")
 fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<in T>, default: T? = null): T? {
     val optionData = (option as OptionData)
@@ -138,13 +146,32 @@ fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<
     } as T?
 }
 
+/**
+ * Retrieves the value of a typed command option.
+ *
+ * @param option The command option to retrieve the value for.
+ * @param mapper The function to apply to the OptionMapping in order to convert it to the desired type.
+ * @param default The default value to return if the option is not found. Defaults to null.
+ * @return The value of the command option, or the default value if not found.
+ * @throws IllegalArgumentException if the option type is OptionType.UNKNOWN, OptionType.SUB_COMMAND, or OptionType.SUB_COMMAND_GROUP.
+ */
 @JvmOverloads
+@Throws(IllegalArgumentException::class)
 fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<in T>, mapper: Function<in OptionMapping, out T?>, default: T? = null): T? {
     val optionData = (option as OptionData)
     return this.getOption(optionData.name)?.let { mapper.apply(it) } ?: default
 }
 
+/**
+ * Retrieves the value of a typed command option.
+ *
+ * @param option The command option to retrieve the value for.
+ * @param default The default value to return if the option is not present in the event. Defaults to null.
+ * @return The value of the command option, converted to the specified type T, or the default value if not present.
+ * @throws IllegalArgumentException If the option type is OptionType.UNKNOWN, OptionType.SUB_COMMAND, or OptionType.SUB_COMMAND_GROUP.
+ */
 @JvmOverloads
+@Throws(IllegalArgumentException::class)
 @Suppress("UNCHECKED_CAST")
 fun <T : Any> CommandAutoCompleteInteractionEvent.getTypedOption(option: CommandOption<in T>, default: T? = null): T? {
     val optionData = (option as OptionData)
@@ -164,7 +191,17 @@ fun <T : Any> CommandAutoCompleteInteractionEvent.getTypedOption(option: Command
     } as T?
 }
 
+/**
+ * Returns the typed value of the specified command option.
+ *
+ * @param option The command option to retrieve the value for.
+ * @param mapper The function responsible for mapping the option mapping to the desired type.
+ * @param default The default value to return if the option is not found or cannot be mapped.
+ * @return The typed value of the specified command option, or the default value if not found or unable to map.
+ * @throws IllegalArgumentException If the option type is OptionType.UNKNOWN, OptionType.SUB_COMMAND, or OptionType.SUB_COMMAND_GROUP.
+ */
 @JvmOverloads
+@Throws(IllegalArgumentException::class)
 fun <T : Any> CommandAutoCompleteInteractionEvent.getTypedOption(
     option: CommandOption<in T>,
     mapper: Function<in OptionMapping, out T?>,
@@ -221,10 +258,23 @@ fun SlashCommandInteractionEvent.getOptionAsMember(name: String, default: Member
 @JvmOverloads
 fun SlashCommandInteractionEvent.getOptionAsUser(name: String, default: User? = null): User? = this.getOption(name, default, OptionMapping::getAsUser)
 
+/**
+ * Retrieves the option with the specified [name] as a `GuildChannel` or the specified [default] value if the option is not present or cannot be cast to a `GuildChannel`.
+ * @param name The name of the option.
+ * @param default The default value to use if the option is not present or cannot be cast to a `GuildChannel`. Default is `null`.
+ * @return The option value as a [GuildChannel], or the specified default value if the option is not present or cannot be cast to a `GuildChannel`.
+ */
 @JvmOverloads
 fun SlashCommandInteractionEvent.getOptionAsGuildChannel(name: String, default: GuildChannel? = null): GuildChannel? =
     this.getOption(name, default, OptionMapping::getAsChannel)
 
+/**
+ * Retrieves the value of a specified option as an Int.
+ *
+ * @param name The name of the option.
+ * @param default The default value to return if the option is not present (default is null).
+ * @return The value of the option as an Int, or the default value if the option is not present.
+ */
 @JvmOverloads
 fun CommandAutoCompleteInteractionEvent.getOptionAsInt(name: String, default: Int? = null): Int? = this.getOption(name, default, OptionMapping::getAsInt)
 
@@ -649,14 +699,36 @@ fun secondsToTime(inputSeconds: Long, noTimeText: String = "**No time**"): Strin
     return str
 }
 
+/**
+ * Pluralizes the given word based on the count.
+ *
+ * @param x The count of the word.
+ * @param singular The singular form of the word.
+ * @param plural The plural form of the word.
+ * @return Returns the pluralized word based on the count.
+ */
 fun pluralise(x: Int, singular: String?, plural: String?): String? {
     return if (x == 1) singular else plural
 }
 
+/**
+ * Pluralizes the given word based on the count.
+ *
+ * @param x The count of the word.
+ * @param singular The singular form of the word.
+ * @param plural The plural form of the word.
+ * @return Returns the pluralized word based on the count.
+ */
 fun pluralise(x: Long, singular: String?, plural: String?): String? {
     return if (x == 1L) singular else plural
 }
 
+/**
+ * Escapes Markdown links in a given input string.
+ *
+ * @param input The input string containing Markdown links to be escaped.
+ * @return The input string with escaped Markdown links.
+ */
 fun escapeMarkdownLinks(input: String): String {
     var result = input
 

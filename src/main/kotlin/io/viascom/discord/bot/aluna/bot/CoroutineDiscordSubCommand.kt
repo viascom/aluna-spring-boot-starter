@@ -29,6 +29,9 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 
+/**
+ * Coroutine discord sub command abstract base class
+ */
 abstract class CoroutineDiscordSubCommand(name: String, description: String) : DiscordSubCommandHandler(name, description), DiscordSubCommandElement {
 
     /**
