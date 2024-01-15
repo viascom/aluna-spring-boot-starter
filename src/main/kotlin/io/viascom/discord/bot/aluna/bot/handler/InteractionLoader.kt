@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Viascom Ltd liab. Co
+ * Copyright 2024 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -29,7 +29,7 @@ import io.viascom.discord.bot.aluna.event.DiscordFirstShardConnectedEvent
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import kotlinx.coroutines.launch
-import net.dv8tion.jda.api.interactions.commands.Command.*
+import net.dv8tion.jda.api.interactions.commands.Command.Type
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
