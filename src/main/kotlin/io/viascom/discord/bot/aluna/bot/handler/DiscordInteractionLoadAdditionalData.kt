@@ -21,9 +21,9 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
+import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
 /**
  * Interface to implement if you need to load additional data before the interaction gets executed.
@@ -34,19 +34,37 @@ interface DiscordInteractionLoadAdditionalData {
      * This method get called before the command is executed.
      * Make sure to not block the execution for to long as the command needs to be acknowledged in 3 seconds.
      *
-     * @param discordCommandHandler Discord command handler instance
-     * @param event Slash command event
+     * @param discordCommandHandler The Discord command handler where the command is being executed
+     * @param event A Generic Interaction command event provided by JDA
      */
-    fun loadData(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent)
+    fun loadData(discordCommandHandler: DiscordCommandHandler, event: GenericInteractionCreateEvent)
 
     /**
      * This method get called before the additional requirements are checked.
      * Make sure to not block the execution for to long as the command needs to be acknowledged in 3 seconds.
      *
-     * @param discordCommandHandler Discord command handler instance
-     * @param event Slash command event
+     * @param discordCommandHandler The Discord command handler where the command is being executed
+     * @param event A Generic Interaction command event provided by JDA
      */
-    fun loadDataBeforeAdditionalRequirements(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent)
+    fun loadDataBeforeAdditionalRequirements(discordCommandHandler: DiscordCommandHandler, event: GenericInteractionCreateEvent)
+
+//    /**
+//     * This method get called before the command is executed.
+//     * Make sure to not block the execution for to long as the command needs to be acknowledged in 3 seconds.
+//     *
+//     * @param discordCommandHandler Discord command handler instance
+//     * @param event Slash command event
+//     */
+//    fun loadData(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent)
+//
+//    /**
+//     * This method get called before the additional requirements are checked.
+//     * Make sure to not block the execution for to long as the command needs to be acknowledged in 3 seconds.
+//     *
+//     * @param discordCommandHandler Discord command handler instance
+//     * @param event Slash command event
+//     */
+//    fun loadDataBeforeAdditionalRequirements(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent)
 
     /**
      * This method get called before the command is executed.

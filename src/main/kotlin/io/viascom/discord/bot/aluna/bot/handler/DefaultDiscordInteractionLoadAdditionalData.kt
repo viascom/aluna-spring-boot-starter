@@ -21,15 +21,16 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
+import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
 open class DefaultDiscordInteractionLoadAdditionalData : DiscordInteractionLoadAdditionalData {
-    override fun loadData(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent) {
+
+    override fun loadData(discordCommandHandler: DiscordCommandHandler, event: GenericInteractionCreateEvent) {
     }
 
-    override fun loadDataBeforeAdditionalRequirements(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent) {
+    override fun loadDataBeforeAdditionalRequirements(discordCommandHandler: DiscordCommandHandler, event: GenericInteractionCreateEvent) {
     }
 
     override fun loadData(discordCommandHandler: DiscordCommandHandler, event: CommandAutoCompleteInteractionEvent) {

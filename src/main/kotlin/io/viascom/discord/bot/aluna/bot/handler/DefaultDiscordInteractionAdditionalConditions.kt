@@ -22,16 +22,23 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.model.AdditionalRequirements
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent
 
 open class DefaultDiscordInteractionAdditionalConditions : DiscordInteractionAdditionalConditions {
-    override fun checkForAdditionalCommandRequirements(
-        discordCommandHandler: DiscordCommandHandler,
-        event: SlashCommandInteractionEvent
-    ): AdditionalRequirements {
+    override fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent): AdditionalRequirements {
+        return AdditionalRequirements()
+    }
+
+    override fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: GenericComponentInteractionCreateEvent): AdditionalRequirements {
+        return AdditionalRequirements()
+    }
+
+    override fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: ModalInteractionEvent): AdditionalRequirements {
         return AdditionalRequirements()
     }
 
@@ -39,17 +46,11 @@ open class DefaultDiscordInteractionAdditionalConditions : DiscordInteractionAdd
         return AdditionalRequirements()
     }
 
-    override fun checkForAdditionalContextRequirements(
-        contextMenu: DiscordContextMenuHandler,
-        event: UserContextInteractionEvent
-    ): AdditionalRequirements {
+    override fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenuHandler, event: UserContextInteractionEvent): AdditionalRequirements {
         return AdditionalRequirements()
     }
 
-    override fun checkForAdditionalContextRequirements(
-        contextMenu: DiscordContextMenuHandler,
-        event: MessageContextInteractionEvent
-    ): AdditionalRequirements {
+    override fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenuHandler, event: MessageContextInteractionEvent): AdditionalRequirements {
         return AdditionalRequirements()
     }
 

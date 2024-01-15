@@ -58,10 +58,11 @@ class SendMessageProvider(
         val serverId: TextInput = textInput("serverId", "Server ID (0 = current or if DM)", TextInputStyle.SHORT)
         val channelId: TextInput = textInput("channelId", "Channel ID (0 = current, @<id> = for DM)", TextInputStyle.SHORT)
         val messageReferenceId: TextInput = textInput("messageReferenceId", "Message Reference ID (Only works on server)", TextInputStyle.SHORT, required = false)
+        val messageId: TextInput = textInput("messageId", "MessageID override (has to be from the bot)", TextInputStyle.SHORT, required = false)
         val message: TextInput = textInput("message", "Message", TextInputStyle.PARAGRAPH)
 
         val modal: Modal = Modal.create("send_message", "Send Message")
-            .addComponents(ActionRow.of(serverId), ActionRow.of(channelId), ActionRow.of(messageReferenceId), ActionRow.of(message))
+            .addComponents(ActionRow.of(serverId), ActionRow.of(channelId), ActionRow.of(messageReferenceId), ActionRow.of(messageId), ActionRow.of(message))
             .build()
 
         event.replyModal(modal).queueAndRegisterInteraction(command)
@@ -71,6 +72,7 @@ class SendMessageProvider(
         var serverId = event.getValueAsString("serverId", "0")!!
         var channelId = event.getValueAsString("channelId", "0")!!
         var messageReferenceId = event.getValueAsString("messageReferenceId", "")!!
+        var messageId = event.getValueAsString("messageId", "")!!
         var isDM = false
         val message = event.getValueAsString("message")!!
         val messageObj = if (message.startsWith("{")) {
@@ -109,11 +111,28 @@ class SendMessageProvider(
                     return true
                 }
 
-                dmChannel.sendMessage(messageObj).queue()
-                event.deferReply(true).queue {
-                    it.editOriginal("Message Sent!").queue()
+                return if (messageId != "") {
+                    val messageToEdit = dmChannel.retrieveMessageById(messageId).complete()
+                    if (messageToEdit == null) {
+                        event.deferReply(true).queue {
+                            it.editOriginal("Could not find message: $messageId").queue()
+                        }
+                        return true
+                    }
+                    messageToEdit.editMessage(messageObj.toEditData()).queue()
+                    event.deferReply(true).queue {
+                        it.editOriginal("Message Edited!").queue()
+                    }
+
+                    true
+                } else {
+                    dmChannel.sendMessage(messageObj).queue()
+                    event.deferReply(true).queue {
+                        it.editOriginal("Message Sent!").queue()
+                    }
+
+                    true
                 }
-                return true
             }
 
             (serverId != "0" && channelId != "0") -> {
@@ -125,24 +144,42 @@ class SendMessageProvider(
                     return true
                 }
 
-                val newMessage = channel.sendMessage(messageObj)
-
-                if (messageReferenceId != "") {
-                    val refMessage = shardManager.getGuildMessage(serverId, channelId, messageReferenceId)
-                    if (refMessage == null) {
+                return if (messageId != "") {
+                    val messageToEdit = channel.retrieveMessageById(messageId).complete()
+                    if (messageToEdit == null) {
                         event.deferReply(true).queue {
-                            it.editOriginal("Could not find message reference ${messageReferenceId} in channel $channelId on $serverId!").queue()
+                            it.editOriginal("Could not find message: $messageId").queue()
                         }
                         return true
                     }
-                    newMessage.setMessageReference(messageReferenceId)
-                }
-                newMessage.queue()
+                    messageToEdit.editMessage(messageObj.toEditData()).queue()
+                    event.deferReply(true).queue {
+                        it.editOriginal("Message Edited!").queue()
+                    }
 
-                event.deferReply(true).queue {
-                    it.editOriginal("Message Sent!").queue()
+                    true
+                } else {
+
+                    val newMessage = channel.sendMessage(messageObj)
+
+                    if (messageReferenceId != "") {
+                        val refMessage = shardManager.getGuildMessage(serverId, channelId, messageReferenceId)
+                        if (refMessage == null) {
+                            event.deferReply(true).queue {
+                                it.editOriginal("Could not find message reference ${messageReferenceId} in channel $channelId on $serverId!").queue()
+                            }
+                            return true
+                        }
+                        newMessage.setMessageReference(messageReferenceId)
+                    }
+                    newMessage.queue()
+
+                    event.deferReply(true).queue {
+                        it.editOriginal("Message Sent!").queue()
+                    }
+
+                    true
                 }
-                return true
             }
 
             else -> {

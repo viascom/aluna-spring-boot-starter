@@ -66,7 +66,7 @@ class DebugInfoPrinter(
                 }
                 val healthIndicator = try {
                     context.getBean(AlunaHealthIndicator::class.java)
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     null
                 }
                 val actuator = if (healthIndicator != null) {

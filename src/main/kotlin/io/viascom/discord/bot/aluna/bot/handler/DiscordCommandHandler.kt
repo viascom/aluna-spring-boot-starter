@@ -48,6 +48,7 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.Command
@@ -307,11 +308,7 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnButtonInteractionTimeout() {
         if (handleSubCommands) {
-            handleSubCommandInteraction(
-                null,
-                { it.runOnButtonInteractionTimeout(); true },
-                { onSubCommandInteractionTimeoutFallback(); true }
-            )
+            handleSubCommandInteraction(null, { it.runOnButtonInteractionTimeout(); true }, { onSubCommandInteractionTimeoutFallback(); true })
         }
 
         runOnButtonInteractionTimeout()
@@ -328,11 +325,7 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnStringSelectInteractionTimeout() {
         if (handleSubCommands) {
-            handleSubCommandInteraction(
-                null,
-                { it.runOnStringSelectInteractionTimeout(); true },
-                { onSubCommandInteractionTimeoutFallback(); true }
-            )
+            handleSubCommandInteraction(null, { it.runOnStringSelectInteractionTimeout(); true }, { onSubCommandInteractionTimeoutFallback(); true })
         }
 
         runOnStringSelectInteractionTimeout()
@@ -349,11 +342,7 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnEntitySelectInteractionTimeout() {
         if (handleSubCommands) {
-            handleSubCommandInteraction(
-                null,
-                { it.runOnEntitySelectInteractionTimeout(); true },
-                { onSubCommandInteractionTimeoutFallback(); true }
-            )
+            handleSubCommandInteraction(null, { it.runOnEntitySelectInteractionTimeout(); true }, { onSubCommandInteractionTimeoutFallback(); true })
         }
 
         runOnEntitySelectInteractionTimeout()
@@ -362,10 +351,7 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnModalInteraction(event: ModalInteractionEvent): Boolean {
         return if (handleSubCommands) {
-            handleSubCommandInteraction(
-                event,
-                { it.runOnModalInteraction(event) },
-                { onSubCommandInteractionFallback(event) })
+            handleSubCommandInteraction(event, { it.runOnModalInteraction(event) }, { onSubCommandInteractionFallback(event) })
         } else {
             runOnModalInteraction(event)
         }
@@ -373,18 +359,65 @@ abstract class DiscordCommandHandler(
 
     override suspend fun handleOnModalInteractionTimeout() {
         if (handleSubCommands) {
-            handleSubCommandInteraction(
-                null,
-                { it.runOnModalInteractionTimeout(); true },
-                { onSubCommandInteractionTimeoutFallback(); true }
-            )
+            handleSubCommandInteraction(null, { it.runOnModalInteractionTimeout(); true }, { onSubCommandInteractionTimeoutFallback(); true })
         }
 
         runOnModalInteractionTimeout()
     }
 
     @JvmSynthetic
+    internal fun initHandlerFromComponent(event: GenericComponentInteractionCreateEvent): Boolean {
+        discordRepresentation = discordBot.discordRepresentations[name]!!
+        setProperties(event)
+
+        if (shouldLoadAdditionalData(name, alunaProperties)) {
+            discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this, event)
+        }
+
+        //Check additional requirements for this command
+        if (shouldCheckAdditionalConditions(name, alunaProperties)) {
+            val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
+            if (additionalRequirements.failed) {
+                onFailedAdditionalRequirements(event, additionalRequirements)
+                return false
+            }
+        }
+
+        if (shouldLoadAdditionalData(name, alunaProperties)) {
+            discordInteractionLoadAdditionalData.loadData(this, event)
+        }
+
+        return true
+    }
+
+    @JvmSynthetic
+    internal fun initHandlerFromComponent(event: ModalInteractionEvent): Boolean {
+        discordRepresentation = discordBot.discordRepresentations[name]!!
+        setProperties(event)
+
+        if (shouldLoadAdditionalData(name, alunaProperties)) {
+            discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this, event)
+        }
+
+        //Check additional requirements for this command
+        if (shouldCheckAdditionalConditions(name, alunaProperties)) {
+            val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this, event)
+            if (additionalRequirements.failed) {
+                onFailedAdditionalRequirements(event, additionalRequirements)
+                return false
+            }
+        }
+
+        if (shouldLoadAdditionalData(name, alunaProperties)) {
+            discordInteractionLoadAdditionalData.loadData(this, event)
+        }
+
+        return true
+    }
+
+    @JvmSynthetic
     internal suspend fun handleAutoCompleteEventCall(option: String, event: CommandAutoCompleteInteractionEvent) {
+        discordRepresentation = discordBot.discordRepresentations[name]!!
         setProperties(event)
 
         currentSubFullCommandName = event.fullCommandName
@@ -498,6 +531,14 @@ abstract class DiscordCommandHandler(
         event.deferReply(true)
             .setContent("⛔ This interaction is still on cooldown and will be usable ${lastUse.plusNanos(cooldown.toNanos()).toDiscordTimestamp(TimestampFormat.RELATIVE_TIME)}.")
             .queue()
+    }
+
+    open fun onFailedAdditionalRequirements(event: GenericComponentInteractionCreateEvent, additionalRequirements: AdditionalRequirements) {
+        event.deferReply(true).setContent("⛔ Additional requirements for this command failed.").queue()
+    }
+
+    open fun onFailedAdditionalRequirements(event: ModalInteractionEvent, additionalRequirements: AdditionalRequirements) {
+        event.deferReply(true).setContent("⛔ Additional requirements for this command failed.").queue()
     }
 
     open fun onFailedAdditionalRequirements(event: CommandAutoCompleteInteractionEvent, additionalRequirements: AdditionalRequirements) {
@@ -909,21 +950,37 @@ abstract class DiscordCommandHandler(
 
     @JvmSynthetic
     internal suspend fun onButtonGlobalInteraction(event: ButtonInteractionEvent) {
+        if (freshInstance && !initHandlerFromComponent(event)) {
+            return
+        }
+
         this.handleOnButtonInteraction(event)
     }
 
     @JvmSynthetic
     internal suspend fun onStringSelectGlobalInteraction(event: StringSelectInteractionEvent) {
+        if (freshInstance && !initHandlerFromComponent(event)) {
+            return
+        }
+
         this.handleOnStringSelectInteraction(event)
     }
 
     @JvmSynthetic
     internal suspend fun onEntitySelectGlobalInteraction(event: EntitySelectInteractionEvent) {
+        if (freshInstance && !initHandlerFromComponent(event)) {
+            return
+        }
+
         this.handleOnEntitySelectInteraction(event)
     }
 
     @JvmSynthetic
     internal suspend fun onModalGlobalInteraction(event: ModalInteractionEvent) {
+        if (freshInstance && !initHandlerFromComponent(event)) {
+            return
+        }
+
         this.handleOnModalInteraction(event)
     }
 
@@ -958,10 +1015,16 @@ abstract class DiscordCommandHandler(
     }
 
     fun generateGlobalInteractionId(componentId: String): String {
-        if (componentId.length + 43 > 100) {
-            throw IllegalArgumentException("componentId can not be longer than 57 characters")
+        //Check if discordRepresentation is initialized
+        if (!this::discordRepresentation.isInitialized) {
+            throw IllegalStateException("discordRepresentation is not initialized. generateGlobalInteractionId() can only be called after Aluna initialized the command. This happens when an interaction is used.")
         }
-        return "/${this.discordRepresentation.id}:${this.uniqueId}:$componentId"
+
+        val prefix = "/${this.discordRepresentation.id}:${this.uniqueId}"
+        if (componentId.length + prefix.length > 100) {
+            throw IllegalArgumentException("componentId can not be longer than ${100 - prefix.length} characters")
+        }
+        return "$prefix:$componentId"
     }
 
     fun extractGlobalInteractionId(componentId: String): String {

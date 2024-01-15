@@ -97,12 +97,12 @@ data class Webhook(
 
     @JsonInclude(Include.NON_NULL)
     data class Thumbnail(
-        var url: String
+        var url: String? = null
     )
 
     @JsonInclude(Include.NON_NULL)
     data class Image(
-        var url: String
+        var url: String? = null
     )
 
     @JsonInclude(Include.NON_NULL)
@@ -125,9 +125,9 @@ data class Webhook(
                 it.title?.let { title -> embed.setTitle(title, it.url) }
                 it.color?.let { color -> embed.setColor(color) }
                 it.description?.let { description -> embed.setDescription(description) }
-                it.thumbnail?.let { thumbnail -> embed.setThumbnail(thumbnail.url) }
+                it.thumbnail?.url?.let { thumbnail -> embed.setThumbnail(thumbnail) }
                 it.footer?.let { footer -> embed.setFooter(footer.text, footer.iconUrl) }
-                it.image?.let { image -> embed.setImage(image.url) }
+                it.image?.url?.let { image -> embed.setImage(image) }
                 it.timestamp?.let { timestamp -> embed.setTimestamp(timestamp) }
                 it.fields?.ifEmpty { null }
                     ?.let { fields -> fields.forEach { field -> embed.addField(MessageEmbed.Field(field.name, field.value, field.inline)) } }

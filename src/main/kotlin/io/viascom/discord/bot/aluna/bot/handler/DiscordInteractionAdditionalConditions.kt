@@ -22,10 +22,12 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.model.AdditionalRequirements
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent
 
 interface DiscordInteractionAdditionalConditions {
 
@@ -38,6 +40,26 @@ interface DiscordInteractionAdditionalConditions {
      * @return AdditionalRequirements
      */
     fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent): AdditionalRequirements
+
+    /**
+     * Check for additional requirements.
+     * Make sure to not block the execution for to long as the interaction needs to be acknowledged in 3 seconds.
+     *
+     * @param discordCommandHandler Discord command handler instance
+     * @param event component event
+     * @return AdditionalRequirements
+     */
+    fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: GenericComponentInteractionCreateEvent): AdditionalRequirements
+
+    /**
+     * Check for additional requirements.
+     * Make sure to not block the execution for to long as the interaction needs to be acknowledged in 3 seconds.
+     *
+     * @param discordCommandHandler Discord command handler instance
+     * @param event modal event
+     * @return AdditionalRequirements
+     */
+    fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: ModalInteractionEvent): AdditionalRequirements
 
     /**
      * Check for additional requirements.
