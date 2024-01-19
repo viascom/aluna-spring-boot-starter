@@ -2,6 +2,7 @@ package io.viascom.discord.bot.aluna.util
 
 object ProgressBarGenerator {
 
+    @JvmStatic
     fun generate(value: Double, max: Int, progressElements: ArrayList<String> = arrayListOf(" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█")): String {
         var bar = ""
 

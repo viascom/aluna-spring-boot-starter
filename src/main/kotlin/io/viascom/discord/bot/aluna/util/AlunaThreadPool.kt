@@ -47,6 +47,7 @@ object AlunaThreadPool {
      * @param uncaughtExceptionHandler the handler which is invoked on an uncaught exception during the execution.
      */
     @JvmOverloads
+    @JvmStatic
     fun getDynamicThreadPool(
         nThreads: Int,
         ttl: Duration,
@@ -72,6 +73,7 @@ object AlunaThreadPool {
      * @param uncaughtExceptionHandler the handler which is invoked on an uncaught exception during the execution.
      */
     @JvmOverloads
+    @JvmStatic
     fun getDynamicThreadPool(
         minThreads: Int,
         maxThreads: Int,
@@ -102,6 +104,7 @@ object AlunaThreadPool {
      * @param uncaughtExceptionHandler the handler which is invoked on an uncaught exception during the execution.
      */
     @JvmOverloads
+    @JvmStatic
     fun getDynamicSingleThreadPool(
         ttl: Duration, name: String,
         uncaughtExceptionHandler: (Thread, Throwable) -> (Unit) = { t, e -> logger.warn("Uncaught Exception in Thread: ${t.name} - ${e.message}\n${e.stackTraceToString()}") }
@@ -132,6 +135,7 @@ object AlunaThreadPool {
      * @param uncaughtExceptionHandler the handler which is invoked on an uncaught exception during the execution.
      */
     @JvmOverloads
+    @JvmStatic
     fun getScheduledThreadPool(
         minThreads: Int,
         maxThreads: Int,
@@ -161,6 +165,7 @@ object AlunaThreadPool {
      * @param uncaughtExceptionHandler the handler which is invoked on an uncaught exception during the execution.
      */
     @JvmOverloads
+    @JvmStatic
     fun getFixedScheduledThreadPool(
         nThreads: Int,
         name: String,
@@ -287,6 +292,7 @@ object AlunaThreadPool {
         }
 
         companion object {
+            @JvmStatic
             fun newWithCurrentMdc(
                 corePoolSize: Int,
                 maximumPoolSize: Int,

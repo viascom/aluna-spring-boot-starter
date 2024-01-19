@@ -44,6 +44,7 @@ object LogicEvaluator {
      * @return the boolean result of the evaluated expression
      * @throws IllegalArgumentException if the input string contains syntax errors or unsupported operations
      */
+    @JvmStatic
     @Throws(IllegalArgumentException::class)
     fun eval(inputString: String) = evaluate(parse(scan(inputString)))
 
