@@ -99,7 +99,7 @@ dependencies {
     api "org.json:json:20240303"
 
     //====== NanoId ======
-    api "io.viascom.nanoid:nanoid:1.0.0"
+    api "io.viascom.nanoid:nanoid:1.0.1"
 
     //====== BotBlock ======
     compileOnly "org.botblock:javabotblockapi-core:$javabotblockapiVersion"
