@@ -24,7 +24,7 @@ ext {
     jdaVersion = "5.0.0-beta.21"
     retrofitVersion = "2.9.0"
     jacksonSpringBootVersion = "3.2.3"
-    jacksonVersion = "2.16.1"
+    jacksonVersion = "2.16.2"
     emojiJavaVersion = "5.1.1"
     gsonVersion = "2.10.1"
     javabotblockapiVersion = "6.7.4_347"
