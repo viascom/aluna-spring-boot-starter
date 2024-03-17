@@ -235,6 +235,44 @@ open class DiscordBot(
     }
 
     /**
+     * Get the lower bound of Snowflakes.
+     *
+     * This method calculates the lower bound of Snowflakes based on the sharding configuration.
+     *
+     * @return The lower bound of Snowflakes as a [Long] value.
+     */
+    fun getLowerBoundOfSnowflake(): Long {
+        return if (alunaProperties.discord.sharding.type == AlunaDiscordProperties.Sharding.Type.SUBSET) {
+            alunaProperties.discord.sharding.fromShard * (Long.MAX_VALUE / alunaProperties.discord.sharding.totalShards)
+        } else {
+            0L
+        }
+    }
+
+    /**
+     * Get the upper bound of Snowflakes.
+     *
+     * This method calculates the upper bound ofSnowflakes based on the sharding configuration.
+     *
+     *  @return The upper bound of Snowflakes as a [Long] value.
+     */
+    fun getUpperBoundOfSnowflake(): Long {
+        return if (alunaProperties.discord.sharding.type == AlunaDiscordProperties.Sharding.Type.SUBSET) {
+            (alunaProperties.discord.sharding.fromShard + alunaProperties.discord.sharding.shardAmount) * (Long.MAX_VALUE / alunaProperties.discord.sharding.totalShards) - 1
+        } else {
+            Long.MAX_VALUE
+        }
+    }
+
+    fun getShardBySnowflake(snowflake: Long): Long {
+        return (snowflake shr 22) % alunaProperties.discord.sharding.totalShards
+    }
+
+    fun getShardOfBotDM(): Long {
+        return alunaProperties.discord.applicationId?.let { getShardBySnowflake(it.toLong()) } ?: throw IllegalArgumentException("alunaProperties.discord.applicationId is not set")
+    }
+
+    /**
      * Register a message for button events. If such an event happens, Aluna will trigger the onButtonInteraction method of the interaction handler.
      *
      * @param messageId message id
@@ -293,9 +331,7 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        hook.retrieveOriginal()
-            .queue { registerMessageForButtonEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
-
+        hook.retrieveOriginal().queue { registerMessageForButtonEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
     }
 
     /**
@@ -357,8 +393,7 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        hook.retrieveOriginal()
-            .queue { registerMessageForStringSelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
+        hook.retrieveOriginal().queue { registerMessageForStringSelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
     }
 
     /**
@@ -420,8 +455,7 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        hook.retrieveOriginal()
-            .queue { registerMessageForEntitySelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
+        hook.retrieveOriginal().queue { registerMessageForEntitySelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
     }
 
     /**

@@ -26,7 +26,7 @@ import java.time.Duration
 interface InteractionScopedObject {
     /**
      * Unique id for this object.
-     * It's recommended to use NanoId.generate()
+     * It's recommended to use DiscordContext.newUniqueId()
      */
     var uniqueId: String
 
