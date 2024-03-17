@@ -202,4 +202,32 @@ abstract class DiscordSubCommandHandler(
             callModalTimeout
         )
     }
+
+    /**
+     * Generate global interaction id
+     *
+     * @param componentId The id of the component
+     * @param userId The id of the user which is allowed to use the interaction (optional, default value is null which means that all users are allowed to use the interaction)
+     * @return The generated global interaction id
+     */
+    @JvmOverloads
+    fun generateGlobalInteractionId(componentId: String, userId: String? = null): String {
+        //Check if discordRepresentation is initialized
+        if (!this::discordRepresentation.isInitialized) {
+            throw IllegalStateException("discordRepresentation is not initialized. generateGlobalInteractionId() can only be called after Aluna initialized the command. This happens when an interaction is used.")
+        }
+
+        val path = discordRepresentation.fullCommandName.split(" ").drop(1).joinToString("/")
+        var prefix = "/${discordRepresentation.id}/$path:${this.uniqueId}"
+        prefix += if (userId != null) ":$userId" else ":*"
+        if (componentId.length + prefix.length > 100) {
+            throw IllegalArgumentException("componentId can not be longer than ${100 - prefix.length} characters")
+        }
+        return "$prefix:$componentId"
+    }
+
+    fun extractGlobalInteractionId(componentId: String): String {
+        return parentCommand.extractGlobalInteractionId(componentId)
+    }
+
 }

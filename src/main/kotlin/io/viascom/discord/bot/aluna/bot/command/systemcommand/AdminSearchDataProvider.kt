@@ -250,7 +250,7 @@ class AdminSearchDataProvider(
             null
         } else {
             try {
-                shardManager.getChannelById(GuildChannel::class.java, id)
+                shardManager.getChannelById<GuildChannel>(GuildChannel::class.java, id) as GuildChannel
             } catch (e: Exception) {
                 null
             }

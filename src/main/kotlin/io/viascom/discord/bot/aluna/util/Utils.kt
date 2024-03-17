@@ -392,16 +392,16 @@ fun EntitySelectInteractionEvent.getUserSelections(): List<User?> = this.values.
  *
  * @return The selected channel, or null if not found.
  */
-inline fun <reified T : Channel> EntitySelectInteractionEvent.getChannelSelection(): T? =
-    this.jda.shardManager?.getChannelById(T::class.java, this.values.first().id)
+inline fun <reified T : Channel> EntitySelectInteractionEvent.getChannelSelection(): T? = this.jda.shardManager?.getChannelById<T>(T::class.java, this.values.first().id) as T?
 
 /**
  * Retrieves all channels of type [T] corresponding to the values in the [EntitySelectInteractionEvent].
  *
  * @return A list of selected channels, with nulls if not found.
  */
+@Suppress("UNCHECKED_CAST")
 inline fun <reified T : Channel> EntitySelectInteractionEvent.getChannelSelections(): List<T?> =
-    this.values.map { this.jda.shardManager?.getChannelById(T::class.java, it.id) }
+    this.values.map { this.jda.shardManager?.getChannelById<T>(T::class.java, it.id) } as List<T?>
 
 /**
  * Retrieves the category corresponding to the first value in the [EntitySelectInteractionEvent].

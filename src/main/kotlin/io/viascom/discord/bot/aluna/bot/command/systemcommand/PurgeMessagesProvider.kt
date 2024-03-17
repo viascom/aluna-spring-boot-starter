@@ -40,6 +40,8 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -57,6 +59,8 @@ class PurgeMessagesProvider(
     false
 ) {
 
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+
     private lateinit var selectedChannel: GuildMessageChannel
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
@@ -73,7 +77,7 @@ class PurgeMessagesProvider(
             id = event.channel.id
         }
 
-        val channel = shardManager.getChannelById(GuildMessageChannel::class.java, id)
+        val channel = shardManager.getChannelById<GuildMessageChannel>(GuildMessageChannel::class.java, id)
         if (channel == null) {
             event.deferReply()
                 .setContent("${systemCommandEmojiProvider.crossEmoji().formatted} Please specify a valid channel ID as argument for this command.")
@@ -112,6 +116,8 @@ class PurgeMessagesProvider(
 
             val amount = event.getValueAsString("amount", "0")!!.toInt()
 
+            logger.info("Removing $amount messages from ${selectedChannel.name} (${selectedChannel.id}) by ${event.user.name} (${event.user.id})")
+
             selectedChannel.iterableHistory
                 .takeAsync(amount)
                 .thenAccept(selectedChannel::purgeMessages)
@@ -127,7 +133,7 @@ class PurgeMessagesProvider(
             return
         }
 
-        val possibleChannel = shardManager.getChannelById(GuildMessageChannel::class.java, input)
+        val possibleChannel = shardManager.getChannelById<GuildMessageChannel>(GuildMessageChannel::class.java, input) as GuildMessageChannel?
 
         if (possibleChannel != null) {
             event.replyChoices(Command.Choice(possibleChannel.name, possibleChannel.id)).queue()

@@ -27,7 +27,6 @@ import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
 import io.viascom.discord.bot.aluna.property.AlunaProperties
-import io.viascom.nanoid.NanoId
 import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -60,11 +59,30 @@ open class InteractionComponentEventListener(
             return@withContext
         }
 
-        val commandId = id.substring(1).split(":")[0]
+        val componentData = id.substring(1).split(":")
+        if (componentData.size < 4) {
+            return@withContext
+        }
+
+        val commandId = componentData[0].split("/")[0]
         if (!discordBot.commandsWithPersistentInteractions.contains(commandId)) {
             return@withContext
         }
-        val uniqueId = id.substring(1).split(":").getOrNull(1) ?: NanoId.generate()
+        val commandName = discordBot.discordRepresentations.entries.firstOrNull { it.value.id == commandId }?.key ?: return@withContext
+
+        //If we have data for a subcommand, we need to add it to the command path
+        val fullCommandPath = if (componentData[0] != commandId) {
+            commandName + " " + componentData[0].substring(commandId.length + 1).replace("/", " ")
+        } else {
+            commandName
+        }
+
+        val uniqueId = componentData[1]
+        val userId = componentData[2]
+        if (userId != event.user.id && userId != "*") {
+            return@withContext
+        }
+
         DiscordContext.setDiscordState(
             event.user.id,
             event.guild?.id,
@@ -73,7 +91,7 @@ open class InteractionComponentEventListener(
             event.messageId
         )
         val interaction = discordBot.commands[commandId] ?: return@withContext
-        context.getBean(interaction).onButtonGlobalInteraction(event)
+        context.getBean(interaction).onButtonGlobalInteraction(event, fullCommandPath)
     }
 
     private suspend fun onStringSelectInteraction(event: StringSelectInteractionEvent) = withContext(AlunaDispatchers.Interaction) {
@@ -82,11 +100,30 @@ open class InteractionComponentEventListener(
             return@withContext
         }
 
-        val commandId = id.substring(1).split(":")[0]
+        val componentData = id.substring(1).split(":")
+        if (componentData.size < 4) {
+            return@withContext
+        }
+
+        val commandId = componentData[0].split("/")[0]
         if (!discordBot.commandsWithPersistentInteractions.contains(commandId)) {
             return@withContext
         }
-        val uniqueId = id.substring(1).split(":").getOrNull(1) ?: NanoId.generate()
+        val commandName = discordBot.discordRepresentations.entries.firstOrNull { it.value.id == commandId }?.key ?: return@withContext
+
+        //If we have data for a subcommand, we need to add it to the command path
+        val fullCommandPath = if (componentData[0] != commandId) {
+            commandName + " " + componentData[0].substring(commandId.length + 1).replace("/", " ")
+        } else {
+            commandName
+        }
+
+        val uniqueId = componentData[1]
+        val userId = componentData[2]
+        if (userId != event.user.id && userId != "*") {
+            return@withContext
+        }
+
         DiscordContext.setDiscordState(
             event.user.id,
             event.guild?.id,
@@ -95,7 +132,7 @@ open class InteractionComponentEventListener(
             event.messageId
         )
         val interaction = discordBot.commands[commandId] ?: return@withContext
-        context.getBean(interaction).onStringSelectGlobalInteraction(event)
+        context.getBean(interaction).onStringSelectGlobalInteraction(event, fullCommandPath)
     }
 
     private suspend fun onEntitySelectInteraction(event: EntitySelectInteractionEvent) = withContext(AlunaDispatchers.Interaction) {
@@ -104,11 +141,30 @@ open class InteractionComponentEventListener(
             return@withContext
         }
 
-        val commandId = id.substring(1).split(":")[0]
+        val componentData = id.substring(1).split(":")
+        if (componentData.size < 4) {
+            return@withContext
+        }
+
+        val commandId = componentData[0].split("/")[0]
         if (!discordBot.commandsWithPersistentInteractions.contains(commandId)) {
             return@withContext
         }
-        val uniqueId = id.substring(1).split(":").getOrNull(1) ?: NanoId.generate()
+        val commandName = discordBot.discordRepresentations.entries.firstOrNull { it.value.id == commandId }?.key ?: return@withContext
+
+        //If we have data for a subcommand, we need to add it to the command path
+        val fullCommandPath = if (componentData[0] != commandId) {
+            commandName + " " + componentData[0].substring(commandId.length + 1).replace("/", " ")
+        } else {
+            commandName
+        }
+
+        val uniqueId = componentData[1]
+        val userId = componentData[2]
+        if (userId != event.user.id && userId != "*") {
+            return@withContext
+        }
+
         DiscordContext.setDiscordState(
             event.user.id,
             event.guild?.id,
@@ -117,7 +173,7 @@ open class InteractionComponentEventListener(
             event.messageId
         )
         val interaction = discordBot.commands[commandId] ?: return@withContext
-        context.getBean(interaction).onEntitySelectGlobalInteraction(event)
+        context.getBean(interaction).onEntitySelectGlobalInteraction(event, fullCommandPath)
     }
 
     private suspend fun onModalInteraction(event: ModalInteractionEvent) = withContext(AlunaDispatchers.Interaction) {
@@ -126,11 +182,30 @@ open class InteractionComponentEventListener(
             return@withContext
         }
 
-        val commandId = id.substring(1).split(":")[0]
+        val componentData = id.substring(1).split(":")
+        if (componentData.size < 4) {
+            return@withContext
+        }
+
+        val commandId = componentData[0].split("/")[0]
         if (!discordBot.commandsWithPersistentInteractions.contains(commandId)) {
             return@withContext
         }
-        val uniqueId = id.substring(1).split(":").getOrNull(1) ?: NanoId.generate()
+        val commandName = discordBot.discordRepresentations.entries.firstOrNull { it.value.id == commandId }?.key ?: return@withContext
+
+        //If we have data for a subcommand, we need to add it to the command path
+        val fullCommandPath = if (componentData[0] != commandId) {
+            commandName + " " + componentData[0].substring(commandId.length + 1).replace("/", " ")
+        } else {
+            commandName
+        }
+
+        val uniqueId = componentData[1]
+        val userId = componentData[2]
+        if (userId != event.user.id && userId != "*") {
+            return@withContext
+        }
+
         DiscordContext.setDiscordState(
             event.user.id,
             event.guild?.id,
@@ -138,6 +213,6 @@ open class InteractionComponentEventListener(
             uniqueId
         )
         val interaction = discordBot.commands[commandId] ?: return@withContext
-        context.getBean(interaction).onModalGlobalInteraction(event)
+        context.getBean(interaction).onModalGlobalInteraction(event, fullCommandPath)
     }
 }

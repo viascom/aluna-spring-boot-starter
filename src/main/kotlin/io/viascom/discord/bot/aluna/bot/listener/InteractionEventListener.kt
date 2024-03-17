@@ -28,7 +28,6 @@ import io.viascom.discord.bot.aluna.bot.handler.DiscordMessageContextMenuHandler
 import io.viascom.discord.bot.aluna.bot.handler.DiscordUserContextMenuHandler
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
-import io.viascom.nanoid.NanoId
 import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
@@ -57,7 +56,7 @@ open class InteractionEventListener(
             event.user.id,
             event.guild?.id,
             DiscordContext.Type.INTERACTION,
-            NanoId.generate()
+            DiscordContext.newUniqueId()
         )
         discordBot.commands[event.commandId]?.let { interaction ->
             context.getBean(interaction).run(event)
@@ -69,7 +68,7 @@ open class InteractionEventListener(
             event.user.id,
             event.guild?.id,
             DiscordContext.Type.INTERACTION,
-            NanoId.generate()
+            DiscordContext.newUniqueId()
         )
         discordBot.contextMenus[event.commandId]?.let { interaction ->
             (context.getBean(interaction) as DiscordUserContextMenuHandler).run(event)
@@ -81,7 +80,7 @@ open class InteractionEventListener(
             event.user.id,
             event.guild?.id,
             DiscordContext.Type.INTERACTION,
-            NanoId.generate()
+            DiscordContext.newUniqueId()
         )
         discordBot.contextMenus[event.commandId]?.let { interaction ->
             (context.getBean(interaction) as DiscordMessageContextMenuHandler).run(event)

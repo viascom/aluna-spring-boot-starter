@@ -58,7 +58,7 @@ class SendMessageProvider(
         val serverId: TextInput = textInput("serverId", "Server ID (0 = current or if DM)", TextInputStyle.SHORT)
         val channelId: TextInput = textInput("channelId", "Channel ID (0 = current, @<id> = for DM)", TextInputStyle.SHORT)
         val messageReferenceId: TextInput = textInput("messageReferenceId", "Message Reference ID (Only works on server)", TextInputStyle.SHORT, required = false)
-        val messageId: TextInput = textInput("messageId", "MessageID override (has to be from the bot)", TextInputStyle.SHORT, required = false)
+        val messageId: TextInput = textInput("messageId", "Message ID override (has to be from the bot)", TextInputStyle.SHORT, required = false)
         val message: TextInput = textInput("message", "Message", TextInputStyle.PARAGRAPH)
 
         val modal: Modal = Modal.create("send_message", "Send Message")
@@ -71,8 +71,8 @@ class SendMessageProvider(
     override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         var serverId = event.getValueAsString("serverId", "0")!!
         var channelId = event.getValueAsString("channelId", "0")!!
-        var messageReferenceId = event.getValueAsString("messageReferenceId", "")!!
-        var messageId = event.getValueAsString("messageId", "")!!
+        val messageReferenceId = event.getValueAsString("messageReferenceId", "")!!
+        val messageId = event.getValueAsString("messageId", "")!!
         var isDM = false
         val message = event.getValueAsString("message")!!
         val messageObj = if (message.startsWith("{")) {

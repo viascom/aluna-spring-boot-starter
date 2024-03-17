@@ -26,7 +26,6 @@ import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
-import io.viascom.nanoid.NanoId
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.events.GenericEvent
@@ -60,7 +59,7 @@ open class GenericInteractionListener(
             val commandId = discordBot.commandsWithAutocomplete.firstOrNull { it == event.commandId }
             if (commandId != null) {
                 discordBot.commands[commandId]?.let { command ->
-                    DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, NanoId.generate())
+                    DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, DiscordContext.newUniqueId())
                     context.getBean(command).handleAutoCompleteEventCall(event.focusedOption.name, event)
                 }
             }
@@ -71,7 +70,7 @@ open class GenericInteractionListener(
                 entry.key.first == event.commandId && (entry.key.second == null || entry.key.second == event.focusedOption.name)
             }
             if (handler != null) {
-                DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, NanoId.generate())
+                DiscordContext.setDiscordState(event.user.id, event.guild?.id, DiscordContext.Type.AUTO_COMPLETE, DiscordContext.newUniqueId())
                 context.getBean(handler.value).onRequestCall(event)
             }
         }

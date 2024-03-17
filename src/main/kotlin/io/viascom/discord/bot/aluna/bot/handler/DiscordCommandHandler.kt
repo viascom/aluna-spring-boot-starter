@@ -865,7 +865,10 @@ abstract class DiscordCommandHandler(
         loadDynamicSubCommandElements()
 
         val path = currentSubFullCommandName.split(" ")
-        discordRepresentation = discordBot.discordRepresentations[path[0]]!!
+        discordRepresentation = discordBot.discordRepresentations[path[0]] ?: run {
+            logger.debug("Command '${path[0]}' not found in the registered elements")
+            return@withContext fallback.invoke(event)
+        }
 
         val firstLevel = path[1]
         if (!subCommandElements.containsKey(firstLevel)) {
@@ -949,36 +952,52 @@ abstract class DiscordCommandHandler(
     }
 
     @JvmSynthetic
-    internal suspend fun onButtonGlobalInteraction(event: ButtonInteractionEvent) {
+    internal suspend fun onButtonGlobalInteraction(event: ButtonInteractionEvent, fullCommandPath: String) {
         if (freshInstance && !initHandlerFromComponent(event)) {
             return
+        }
+
+        if (handleSubCommands) {
+            currentSubFullCommandName = fullCommandPath
         }
 
         this.handleOnButtonInteraction(event)
     }
 
     @JvmSynthetic
-    internal suspend fun onStringSelectGlobalInteraction(event: StringSelectInteractionEvent) {
+    internal suspend fun onStringSelectGlobalInteraction(event: StringSelectInteractionEvent, fullCommandPath: String) {
         if (freshInstance && !initHandlerFromComponent(event)) {
             return
+        }
+
+        if (handleSubCommands) {
+            currentSubFullCommandName = fullCommandPath
         }
 
         this.handleOnStringSelectInteraction(event)
     }
 
     @JvmSynthetic
-    internal suspend fun onEntitySelectGlobalInteraction(event: EntitySelectInteractionEvent) {
+    internal suspend fun onEntitySelectGlobalInteraction(event: EntitySelectInteractionEvent, fullCommandPath: String) {
         if (freshInstance && !initHandlerFromComponent(event)) {
             return
+        }
+
+        if (handleSubCommands) {
+            currentSubFullCommandName = fullCommandPath
         }
 
         this.handleOnEntitySelectInteraction(event)
     }
 
     @JvmSynthetic
-    internal suspend fun onModalGlobalInteraction(event: ModalInteractionEvent) {
+    internal suspend fun onModalGlobalInteraction(event: ModalInteractionEvent, fullCommandPath: String) {
         if (freshInstance && !initHandlerFromComponent(event)) {
             return
+        }
+
+        if (handleSubCommands) {
+            currentSubFullCommandName = fullCommandPath
         }
 
         this.handleOnModalInteraction(event)
@@ -1014,13 +1033,22 @@ abstract class DiscordCommandHandler(
         }
     }
 
-    fun generateGlobalInteractionId(componentId: String): String {
+    /**
+     * Generate global interaction id
+     *
+     * @param componentId The id of the component
+     * @param userId The id of the user which is allowed to use the interaction (optional, default value is null which means that all users are allowed to use the interaction)
+     * @return The generated global interaction id
+     */
+    @JvmOverloads
+    fun generateGlobalInteractionId(componentId: String, userId: String? = null): String {
         //Check if discordRepresentation is initialized
         if (!this::discordRepresentation.isInitialized) {
             throw IllegalStateException("discordRepresentation is not initialized. generateGlobalInteractionId() can only be called after Aluna initialized the command. This happens when an interaction is used.")
         }
 
-        val prefix = "/${this.discordRepresentation.id}:${this.uniqueId}"
+        var prefix = "/${discordRepresentation.id}:${this.uniqueId}"
+        prefix += if (userId != null) ":$userId" else ":*"
         if (componentId.length + prefix.length > 100) {
             throw IllegalArgumentException("componentId can not be longer than ${100 - prefix.length} characters")
         }
@@ -1030,7 +1058,8 @@ abstract class DiscordCommandHandler(
     fun extractGlobalInteractionId(componentId: String): String {
         val commandId = componentId.split(":")[0]
         val uniqueId = componentId.split(":")[1]
-        return componentId.substring(commandId.length + 1 + uniqueId.length + 1)
+        val userId = componentId.split(":")[2]
+        return componentId.substring(commandId.length + 1 + uniqueId.length + 1 + userId.length + 1)
     }
 
 

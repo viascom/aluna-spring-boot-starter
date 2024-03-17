@@ -154,7 +154,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
                 return data.value.obj
             } else {
                 //No bean exists, so we create one
-                DiscordContext.discordState!!.uniqueId = DiscordContext.discordState!!.uniqueId ?: NanoId.generate()
+                DiscordContext.discordState!!.uniqueId = DiscordContext.discordState!!.uniqueId ?: DiscordContext.newUniqueId()
                 val newObj = objectFactory.getObject() as InteractionScopedObject
                 newObj.uniqueId = DiscordContext.discordState!!.uniqueId!!
                 newObj.freshInstance = true
@@ -227,7 +227,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
             }
 
             //No bean exists, so we create one
-            DiscordContext.discordState!!.uniqueId = DiscordContext.discordState!!.uniqueId ?: NanoId.generate()
+            DiscordContext.discordState!!.uniqueId = DiscordContext.discordState!!.uniqueId ?: DiscordContext.newUniqueId()
             logger.debug("[$name] - ${DiscordContext.discordState} -> new instance")
             val newObj = objectFactory.getObject() as InteractionScopedObject
             newObj.uniqueId = DiscordContext.discordState!!.uniqueId!!
@@ -497,6 +497,10 @@ object DiscordContext {
     private val CONTEXT = NamedInheritableThreadLocal<Data>("discord")
     fun setDiscordState(userId: String, serverId: String? = null, type: Type = Type.OTHER, uniqueId: String? = null, messageId: String? = null) {
         CONTEXT.set(Data(userId + ":" + (serverId ?: ""), type, uniqueId, messageId))
+    }
+
+    fun newUniqueId(): String {
+        return NanoId.generate(16)
     }
 
     var discordState: Data?
