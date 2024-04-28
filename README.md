@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/viascom/aluna-spring-boot-starter/releases"><img src="https://img.shields.io/maven-metadata/v.svg?label=maven-central&metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fio%2Fviascom%2Fdiscord%2Fbot%2Faluna-spring-boot-starter%2Fmaven-metadata.xml"
          alt="Maven central"></a>
-  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--beta.22-blue.svg"
+  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--beta.23-blue.svg"
               alt="JDA-Version "></a>
   <img src="https://img.shields.io/badge/Kotlin-1.9.23-%238052ff?logo=kotlin"
          alt="Kotlin Version">
