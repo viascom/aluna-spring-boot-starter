@@ -78,7 +78,11 @@ open class CoroutineEventManager(
     }
 
     protected open suspend fun runListener(listener: Any, event: GenericEvent) = when (listener) {
-        is CoroutineEventListener -> listener.onEvent(event)
+        is CoroutineEventListener -> {
+            AlunaDispatchers.EventScope.launch { listener.onEvent(event) }
+            Unit
+        }
+
         is EventListener -> eventThreadPool.execute { listener.onEvent(event) }
         else -> Unit
     }

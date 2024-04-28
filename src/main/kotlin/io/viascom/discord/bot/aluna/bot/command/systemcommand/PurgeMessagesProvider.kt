@@ -133,7 +133,7 @@ class PurgeMessagesProvider(
             return
         }
 
-        val possibleChannel = shardManager.getChannelById<GuildMessageChannel>(GuildMessageChannel::class.java, input) as GuildMessageChannel?
+        val possibleChannel = shardManager.getChannelById(GuildMessageChannel::class.java, input)
 
         if (possibleChannel != null) {
             event.replyChoices(Command.Choice(possibleChannel.name, possibleChannel.id)).queue()

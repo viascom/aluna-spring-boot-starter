@@ -24,7 +24,7 @@ package io.viascom.discord.bot.aluna.bot.listener
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
-import io.viascom.discord.bot.aluna.event.DiscordNodeReadyEvent
+import io.viascom.discord.bot.aluna.event.DiscordFirstShardConnectedEvent
 import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -35,12 +35,19 @@ import org.springframework.stereotype.Service
 
 @Service
 @ConditionalOnJdaEnabled
-class ListenerRegistration(private val coroutineListeners: List<CoroutineEventListener>, private val listeners: List<ListenerAdapter>, private val shardManager: ShardManager) :
-    ApplicationListener<DiscordNodeReadyEvent> {
+class ListenerRegistration(
+    private val coroutineListeners: List<CoroutineEventListener>,
+    private val listeners: List<ListenerAdapter>,
+    private val shardManager: ShardManager
+) : ApplicationListener<DiscordFirstShardConnectedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onApplicationEvent(event: DiscordNodeReadyEvent) {
+    private var didAlreadyRun = false
+
+    override fun onApplicationEvent(event: DiscordFirstShardConnectedEvent) {
+        if (didAlreadyRun) return
+        didAlreadyRun = true
         AlunaDispatchers.InternalScope.launch {
             val combinedListener = arrayListOf<Any>()
             combinedListener.addAll(listeners)

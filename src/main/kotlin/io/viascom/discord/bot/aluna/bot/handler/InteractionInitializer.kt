@@ -167,10 +167,12 @@ internal open class InteractionInitializer(
                     logger.debug("All interactions are up to date")
                 }
 
-                eventPublisher.publishDiscordSlashCommandInitializedEvent(
-                    interactionToUpdate.filter { it.name in newCommands.map { it.name } }.map { it::class },
-                    interactionToUpdate.filter { it.name in changedCommands.map { it.name } }.map { it::class },
-                    removedCommands.map { it.name })
+                AlunaDispatchers.InternalScope.launch {
+                    eventPublisher.publishDiscordSlashCommandInitializedEvent(
+                        interactionToUpdate.filter { it.name in newCommands.map { it.name } }.map { it::class },
+                        interactionToUpdate.filter { it.name in changedCommands.map { it.name } }.map { it::class },
+                        removedCommands.map { it.name })
+                }
             }
 
         //Check if we need /system-command

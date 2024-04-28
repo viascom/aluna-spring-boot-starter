@@ -53,7 +53,6 @@ import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallback
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import java.awt.Color
 import java.time.Duration
-import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.function.Function
 
@@ -392,16 +391,14 @@ fun EntitySelectInteractionEvent.getUserSelections(): List<User?> = this.values.
  *
  * @return The selected channel, or null if not found.
  */
-inline fun <reified T : Channel> EntitySelectInteractionEvent.getChannelSelection(): T? = this.jda.shardManager?.getChannelById<T>(T::class.java, this.values.first().id) as T?
+inline fun <reified T : Channel> EntitySelectInteractionEvent.getChannelSelection(): T? = this.jda.shardManager?.getChannelById<T>(T::class.java, this.values.first().id)
 
 /**
  * Retrieves all channels of type [T] corresponding to the values in the [EntitySelectInteractionEvent].
  *
  * @return A list of selected channels, with nulls if not found.
  */
-@Suppress("UNCHECKED_CAST")
-inline fun <reified T : Channel> EntitySelectInteractionEvent.getChannelSelections(): List<T?> =
-    this.values.map { this.jda.shardManager?.getChannelById<T>(T::class.java, it.id) } as List<T?>
+inline fun <reified T : Channel> EntitySelectInteractionEvent.getChannelSelections(): List<T?> = this.values.map { this.jda.shardManager?.getChannelById<T>(T::class.java, it.id) }
 
 /**
  * Retrieves the category corresponding to the first value in the [EntitySelectInteractionEvent].

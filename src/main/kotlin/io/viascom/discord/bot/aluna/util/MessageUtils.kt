@@ -135,9 +135,7 @@ fun MessageChannel.sendOrEditMessage(
  */
 @Throws(IllegalArgumentException::class)
 fun splitListInFields(values: List<String>, name: String = "", inline: Boolean = false): List<MessageEmbed.Field> {
-    if (name.length > MessageEmbed.TITLE_MAX_LENGTH) {
-        throw IllegalArgumentException("Name cannot be longer than " + MessageEmbed.TITLE_MAX_LENGTH + " characters.")
-    }
+    require(name.length <= MessageEmbed.TITLE_MAX_LENGTH) { "Name cannot be longer than " + MessageEmbed.TITLE_MAX_LENGTH + " characters." }
 
     val fields = arrayListOf<MessageEmbed.Field>()
     var list = ""
@@ -159,6 +157,16 @@ fun splitListInFields(values: List<String>, name: String = "", inline: Boolean =
 
     return fields
 }
+
+/**
+ * Split list of elements in multiple fields to keep the embed valid
+ *
+ * @param name Title for the first field
+ * @param inline Define if the fields are inline
+ * @return List of Fields
+ */
+@Throws(IllegalArgumentException::class)
+fun List<String>.splitInFields(name: String = "", inline: Boolean = false): List<MessageEmbed.Field> = splitListInFields(this, name, inline)
 
 /**
  * Replace mentions to be displayed with id instead of the resolved version of discord.

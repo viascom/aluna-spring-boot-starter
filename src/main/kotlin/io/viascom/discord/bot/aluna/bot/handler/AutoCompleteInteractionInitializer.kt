@@ -48,7 +48,7 @@ internal open class AutoCompleteInteractionInitializer(
         }
     }
 
-    private fun initAutoCompleteHandlers() {
+    private suspend fun initAutoCompleteHandlers() {
         logger.debug("Register AutoCompleteHandlers")
 
         autoCompleteHandlers.forEach { handler ->

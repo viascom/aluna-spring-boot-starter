@@ -47,4 +47,25 @@ class AlunaThreadProperties {
      * Max amount of threads for event publish handling.
      */
     var eventThreadPool: Int = 10
+
+    /**
+     * Amount of parallelism used for the interaction coroutine context.
+     *
+     * A value of -1 indicates that the level of parallelism is not explicitly set and will be determined by the system.
+     */
+    var interactionParallelism: Int = -1
+
+    /**
+     * Amount of parallelism used for the event coroutine context.
+     *
+     * A value of -1 indicates that the level of parallelism is not explicitly set and will be determined by the system.
+     */
+    var eventParallelism: Int = -1
+
+    /**
+     * Amount of parallelism used for the detached coroutine context.
+     *
+     * A value of -1 indicates that the level of parallelism is not explicitly set and will be determined by the system.
+     */
+    var detachedParallelism: Int = -1
 }

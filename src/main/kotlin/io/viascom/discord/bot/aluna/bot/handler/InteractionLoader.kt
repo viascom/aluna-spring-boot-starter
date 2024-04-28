@@ -86,7 +86,9 @@ internal open class InteractionLoader(
                     }
                 }
 
-                eventPublisher.publishDiscordSlashCommandInitializedEvent(arrayListOf(), arrayListOf(), arrayListOf())
+                AlunaDispatchers.InternalScope.launch {
+                    eventPublisher.publishDiscordSlashCommandInitializedEvent(arrayListOf(), arrayListOf(), arrayListOf())
+                }
             }
         }
     }

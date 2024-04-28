@@ -21,15 +21,15 @@
 
 package io.viascom.discord.bot.aluna.bot.interaction
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.CoroutineDiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.util.toDiscordEmbed
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
 @Interaction
-class PingCommand : DiscordCommand("ping", "Send a ping") {
+class PingCommand : CoroutineDiscordCommand("ping", "Send a ping") {
 
-    override fun execute(event: SlashCommandInteractionEvent) {
+    override suspend fun execute(event: SlashCommandInteractionEvent) {
         val startTime = System.currentTimeMillis()
 
         //Send a reply and acknowledge the event with it

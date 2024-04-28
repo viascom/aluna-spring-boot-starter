@@ -29,6 +29,26 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 object AlunaDispatchers {
 
+    @JvmSynthetic
+    internal lateinit var interactionScope: CoroutineScope
+
+    @JvmSynthetic
+    internal lateinit var eventScope: CoroutineScope
+
+    @JvmSynthetic
+    internal lateinit var detachedScope: CoroutineScope
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @JvmSynthetic
+    internal fun initScopes(interactionParallelism: Int = -1, eventParallelism: Int = -1, detachedParallelism: Int = -1) {
+        val interactionScopeDispatcher = if (interactionParallelism == -1) Dispatchers.Default else Dispatchers.Default.limitedParallelism(interactionParallelism)
+        interactionScope = getScope("Aluna-Interaction", interactionScopeDispatcher, cancelParent = true)
+        val eventScopeDispatcher = if (eventParallelism == -1) Dispatchers.Default else Dispatchers.Default.limitedParallelism(eventParallelism)
+        eventScope = getScope("Aluna-Event", eventScopeDispatcher, cancelParent = true)
+        val detachedScopeDispatcher = if (detachedParallelism == -1) Dispatchers.IO else Dispatchers.IO.limitedParallelism(detachedParallelism)
+        detachedScope = getScope("Aluna-Detached", detachedScopeDispatcher, cancelParent = false)
+    }
+
     @get:JvmSynthetic
     internal val Internal: CoroutineContext
         get() = InternalScope.coroutineContext
@@ -40,16 +60,20 @@ object AlunaDispatchers {
     val Interaction: CoroutineContext
         get() = InteractionScope.coroutineContext
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val InteractionScope: CoroutineScope
-        get() = getScope("Aluna-Interaction", Dispatchers.IO.limitedParallelism(50), cancelParent = true)
+        get() = interactionScope
+
+    val Event: CoroutineContext
+        get() = EventScope.coroutineContext
+
+    val EventScope: CoroutineScope
+        get() = eventScope
 
     val Detached: CoroutineContext
         get() = DetachedScope.coroutineContext
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val DetachedScope: CoroutineScope
-        get() = getScope("Aluna-Detached", Dispatchers.IO.limitedParallelism(50), cancelParent = false)
+        get() = detachedScope
 
     private fun getScope(
         name: String = "Aluna",
@@ -61,7 +85,7 @@ object AlunaDispatchers {
     ): CoroutineScope {
         val exceptionHandler = errorHandler ?: CoroutineExceptionHandler { _, throwable ->
             LoggerFactory.getLogger(AlunaDispatchers::class.java).also {
-                it.error("Uncaught exception from coroutine", throwable)
+                it.error("Uncaught exception from coroutine: ${throwable.message}", throwable)
             }
             if (throwable is Error) {
                 if (cancelParent) {

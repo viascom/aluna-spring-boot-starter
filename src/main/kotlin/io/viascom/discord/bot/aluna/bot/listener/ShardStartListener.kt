@@ -34,8 +34,8 @@ import java.util.concurrent.CountDownLatch
 class ShardStartListener(val eventPublisher: EventPublisher) : CoroutineEventListener {
 
     var latch: CountDownLatch = CountDownLatch(1)
-    private val initialLatchCount = latch.count
     private var mainShardLoaded = false
+    private var firstShardLoaded = false
 
     override suspend fun onEvent(event: GenericEvent) {
         if (event is ReadyEvent) {
@@ -49,7 +49,8 @@ class ShardStartListener(val eventPublisher: EventPublisher) : CoroutineEventLis
             }
 
             //If first shard is connected.
-            if (latch.count + 1 == initialLatchCount) {
+            if (!firstShardLoaded) {
+                firstShardLoaded = true
                 eventPublisher.publishDiscordFirstShardConnectedEvent(event, event.jda.shardManager!!)
             }
 
