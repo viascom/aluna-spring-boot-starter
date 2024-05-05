@@ -68,7 +68,7 @@ open class InteractionComponentEventListener(
         if (!discordBot.commandsWithPersistentInteractions.contains(commandId)) {
             return@withContext
         }
-        val commandName = discordBot.discordRepresentations.entries.firstOrNull { it.value.id == commandId }?.key ?: return@withContext
+        val commandName = discordBot.discordRepresentations.entries.firstOrNull { it.key == commandId }?.key ?: return@withContext
 
         //If we have data for a subcommand, we need to add it to the command path
         val fullCommandPath = if (componentData[0] != commandId) {

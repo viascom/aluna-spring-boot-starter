@@ -25,6 +25,7 @@ import io.viascom.discord.bot.aluna.bot.CoroutineDiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandDataProvider
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandEmojiProvider
+import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.StringOption
@@ -61,7 +62,8 @@ class SystemCommand(
     var argsOption = StringOption("args", "Arguments", isRequired = false, isAutoComplete = true)
 
     override fun initCommandOptions() {
-        specificServer = alunaProperties.command.systemCommand.server
+        @OptIn(Experimental::class)
+        specificServers = alunaProperties.command.systemCommand.servers
         addOptions(commandOption, argsOption)
     }
 
@@ -141,8 +143,8 @@ class SystemCommand(
             val input = event.getTypedOption(commandOption, "")!!
 
             val filteredDataProviders = dataProviders.filter {
-                it.id in (alunaProperties.command.systemCommand.enabledFunctions
-                    ?: arrayListOf()) || alunaProperties.command.systemCommand.enabledFunctions == null
+                it.id in (alunaProperties.command.systemCommand.enabledFunctions ?: arrayListOf()) ||
+                        alunaProperties.command.systemCommand.enabledFunctions == null
             }
 
             val options = if (input.isEmpty()) {

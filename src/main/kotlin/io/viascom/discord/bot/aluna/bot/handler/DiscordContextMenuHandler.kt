@@ -24,6 +24,7 @@ package io.viascom.discord.bot.aluna.bot.handler
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
+import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.model.*
@@ -114,6 +115,12 @@ abstract class DiscordContextMenuHandler(
      * *This gets mapped to [isGuildOnly] if set to [UseScope.GUILD_ONLY].*
      */
     var useScope = UseScope.GLOBAL
+
+    /**
+     * Restrict this command to specific servers. If null, the command is available in all servers. When enabled, make sure to also enable 'alunaProperties.command.enableServerSpecificCommands' in your configuration.
+     */
+    @set:Experimental("This is an experimental feature and my not always work as expected. Please report any issues you find.")
+    var specificServers: ArrayList<String>? = null
 
     override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
     override var beanUseAutoCompleteBean: Boolean = false

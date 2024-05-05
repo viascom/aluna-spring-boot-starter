@@ -86,7 +86,7 @@ open class DiscordBot(
         internal set
 
     @get:JvmSynthetic
-    internal val discordRepresentations = hashMapOf<InteractionName, Command>()
+    internal val discordRepresentations = hashMapOf<InteractionId, Command>()
 
     @get:JvmSynthetic
     internal val cooldowns = hashMapOf<CooldownKey, LastUsage>()
@@ -757,7 +757,6 @@ open class DiscordBot(
 }
 
 internal typealias InteractionId = String
-internal typealias InteractionName = String
 internal typealias OptionName = String
 internal typealias CooldownKey = String
 internal typealias MessageId = String

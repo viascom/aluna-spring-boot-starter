@@ -21,16 +21,18 @@
 
 package io.viascom.discord.bot.aluna.bot.interaction
 
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.CoroutineDiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
+import io.viascom.discord.bot.aluna.bot.coQueue
 import io.viascom.discord.bot.aluna.model.AttachmentOption
 import io.viascom.discord.bot.aluna.util.addOption
 import io.viascom.discord.bot.aluna.util.getTypedOption
+import kotlinx.coroutines.future.asDeferred
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.utils.FileUpload
 
 @Interaction
-class FileUploadCommand : DiscordCommand("upload-file", "Upload a file to Aluna") {
+class FileUploadCommand : CoroutineDiscordCommand("upload-file", "Upload a file to Aluna") {
 
     private val fileOption = AttachmentOption("file", "Awesome file", true)
 
@@ -38,7 +40,7 @@ class FileUploadCommand : DiscordCommand("upload-file", "Upload a file to Aluna"
         this.addOption(fileOption)
     }
 
-    override fun execute(event: SlashCommandInteractionEvent) {
+    override suspend fun execute(event: SlashCommandInteractionEvent) {
         val file = event.getTypedOption(fileOption)!! //This can't be null as it is required
 
         val text = """
@@ -48,13 +50,11 @@ class FileUploadCommand : DiscordCommand("upload-file", "Upload a file to Aluna"
             """.trimIndent()
 
         //Send initial response
-        event.reply(text).queue { hook ->
+        event.reply(text).coQueue { hook ->
             //Download file
-            file.proxy.download().whenComplete { t, _ ->
-                //Update the response with the downloaded file as attachment
-                hook.editOriginal(text).setFiles(FileUpload.fromData(t, file.fileName)).queue()
-            }
-
+            val inputStream = file.proxy.download().asDeferred().await()
+            //Update the response with the downloaded file as attachment
+            hook.editOriginal(text).setFiles(FileUpload.fromData(inputStream, file.fileName)).queue()
         }
     }
 }

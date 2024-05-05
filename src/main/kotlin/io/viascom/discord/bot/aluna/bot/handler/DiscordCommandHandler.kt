@@ -24,6 +24,7 @@ package io.viascom.discord.bot.aluna.bot.handler
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.*
 import io.viascom.discord.bot.aluna.bot.handler.*
+import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.configuration.scope.InteractionScope
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.exception.AlunaInteractionRepresentationNotFoundException
@@ -147,9 +148,11 @@ abstract class DiscordCommandHandler(
      */
     var useScope = UseScope.GLOBAL
 
-    @get:JvmSynthetic
-    @set:JvmSynthetic
-    internal var specificServer: String? = null
+    /**
+     * Restrict this command to specific servers. If null, the command is available in all servers. When enabled, make sure to also enable 'alunaProperties.command.enableServerSpecificCommands' in your configuration.
+     */
+    @set:Experimental("This is an experimental feature and my not always work as expected. Please report any issues you find.")
+    var specificServers: ArrayList<String>? = null
 
     /**
      * Sets whether this command can only be used by users which are returned by [OwnerIdProvider.getOwnerIds].
@@ -185,6 +188,13 @@ abstract class DiscordCommandHandler(
      */
     @set:JvmSynthetic
     lateinit var discordRepresentation: Command
+        internal set
+
+    /**
+     * Discord id of this interaction
+     */
+    @set:JvmSynthetic
+    lateinit var discordInteractionId: String
         internal set
 
     private val subCommandElements: HashMap<String, DiscordSubCommandElement> = hashMapOf()
@@ -365,9 +375,13 @@ abstract class DiscordCommandHandler(
         runOnModalInteractionTimeout()
     }
 
+    /**
+     * This method is used to initialize the command handler from a global component event.
+     */
     @JvmSynthetic
     internal fun initHandlerFromComponent(event: GenericComponentInteractionCreateEvent): Boolean {
-        discordRepresentation = discordBot.discordRepresentations[name]!!
+        discordInteractionId = event.componentId.split(":")[0].substring(1)
+        discordRepresentation = discordBot.discordRepresentations[discordInteractionId]!!
         setProperties(event)
 
         if (shouldLoadAdditionalData(name, alunaProperties)) {
@@ -392,7 +406,8 @@ abstract class DiscordCommandHandler(
 
     @JvmSynthetic
     internal fun initHandlerFromComponent(event: ModalInteractionEvent): Boolean {
-        discordRepresentation = discordBot.discordRepresentations[name]!!
+        discordInteractionId = event.modalId.split(":")[0].substring(1)
+        discordRepresentation = discordBot.discordRepresentations[discordInteractionId]!!
         setProperties(event)
 
         if (shouldLoadAdditionalData(name, alunaProperties)) {
@@ -417,7 +432,7 @@ abstract class DiscordCommandHandler(
 
     @JvmSynthetic
     internal suspend fun handleAutoCompleteEventCall(option: String, event: CommandAutoCompleteInteractionEvent) {
-        discordRepresentation = discordBot.discordRepresentations[name]!!
+        discordRepresentation = discordBot.discordRepresentations[event.commandId]!!
         setProperties(event)
 
         currentSubFullCommandName = event.fullCommandName
@@ -605,8 +620,10 @@ abstract class DiscordCommandHandler(
         }
         timeMarks?.add(START at markNow())
 
-        if (!discordBot.discordRepresentations.containsKey(event.name)) {
-            val exception = AlunaInteractionRepresentationNotFoundException(event.name)
+        val discordRepresentationName = if (event.isGuildCommand) "${event.name}:${event.guild!!.id}" else event.name
+
+        if (!discordBot.discordRepresentations.containsKey(event.commandId)) {
+            val exception = AlunaInteractionRepresentationNotFoundException("${event.name} - ${event.id}")
             try {
                 onExecutionException(event, exception)
             } catch (exceptionError: Exception) {
@@ -615,7 +632,7 @@ abstract class DiscordCommandHandler(
             return@withContext
         }
 
-        discordRepresentation = discordBot.discordRepresentations[event.name]!!
+        discordRepresentation = discordBot.discordRepresentations[event.commandId]!!
 
         setProperties(event)
 
@@ -821,7 +838,7 @@ abstract class DiscordCommandHandler(
         timeMarks?.add(LOAD_DYNAMIC_SUB_COMMAND_ELEMENTS at markNow())
 
         val path = event.fullCommandName.split(" ")
-        discordRepresentation = discordBot.discordRepresentations[path[0]]!!
+        discordRepresentation = discordBot.discordRepresentations[event.commandId]!!
 
         val firstLevel = path[1]
         if (!subCommandElements.containsKey(firstLevel)) {
@@ -864,10 +881,14 @@ abstract class DiscordCommandHandler(
     ): Boolean = withContext(AlunaDispatchers.Interaction) {
         loadDynamicSubCommandElements()
 
+
         val path = currentSubFullCommandName.split(" ")
-        discordRepresentation = discordBot.discordRepresentations[path[0]] ?: run {
-            logger.debug("Command '${path[0]}' not found in the registered elements")
-            return@withContext fallback.invoke(event)
+        //Check if discordRepresentation is initialized
+        if (!this@DiscordCommandHandler::discordRepresentation.isInitialized) {
+            discordRepresentation = discordBot.discordRepresentations[discordInteractionId] ?: run {
+                logger.debug("Command '${path[0]}' not found in the registered elements")
+                return@withContext fallback.invoke(event)
+            }
         }
 
         val firstLevel = path[1]

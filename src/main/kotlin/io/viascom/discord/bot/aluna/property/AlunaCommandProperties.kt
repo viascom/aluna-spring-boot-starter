@@ -25,6 +25,12 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty
 
 class AlunaCommandProperties {
 
+    /**
+     * Enable logic to manage server specific commands
+     * Using this on bigger bots can lead to longer startup times as Aluna has to check all the servers if their commands are available.
+     */
+    var enableServerSpecificCommands: Boolean = false
+
     @NestedConfigurationProperty
     var systemCommand: SystemCommandProperties = SystemCommandProperties()
 
@@ -43,7 +49,7 @@ class SystemCommandProperties {
      * If set to 0 the command will be removed completely.
      * If set to null, the command can be used on every server and in DMs.
      */
-    var server: String? = null
+    var servers: ArrayList<String>? = null
 
     /**
      * Define which system command features should be enabled. If not defined, all implementations of SystemCommandDataProvider are available.

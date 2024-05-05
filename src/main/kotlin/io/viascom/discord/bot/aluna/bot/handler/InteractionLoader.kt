@@ -24,6 +24,7 @@ package io.viascom.discord.bot.aluna.bot.handler
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
+import io.viascom.discord.bot.aluna.bot.coQueue
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordFirstShardConnectedEvent
 import io.viascom.discord.bot.aluna.event.EventPublisher
@@ -46,7 +47,8 @@ internal open class InteractionLoader(
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
     private val eventPublisher: EventPublisher,
-    private val alunaProperties: AlunaProperties
+    private val alunaProperties: AlunaProperties,
+    private val interactionInitializer: InteractionInitializer
 ) : ApplicationListener<DiscordFirstShardConnectedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -60,9 +62,10 @@ internal open class InteractionLoader(
 
             logger.debug("Load interactions")
 
-            shardManager.shards.first().retrieveCommands(true).queue { currentCommands ->
-                discordBot.discordRepresentations.clear()
-                discordBot.discordRepresentations.putAll(currentCommands.associateBy { it.name })
+            discordBot.discordRepresentations.clear()
+
+            shardManager.shards.first().retrieveCommands(true).coQueue { currentCommands ->
+                discordBot.discordRepresentations.putAll(currentCommands.associateBy { it.id })
 
                 currentCommands.filter { it.type == Type.SLASH }.filter { it.name in commands.map { it.name } }.forEach { filteredCommand ->
                     try {
@@ -85,6 +88,8 @@ internal open class InteractionLoader(
                         logger.error("Could not add context menu '${filteredCommand.name}' to available commands")
                     }
                 }
+
+                interactionInitializer.initServerSpecificCommands(interactionInitializer.getFilteredCommands(), interactionInitializer.getFilteredContext())
 
                 AlunaDispatchers.InternalScope.launch {
                     eventPublisher.publishDiscordSlashCommandInitializedEvent(arrayListOf(), arrayListOf(), arrayListOf())

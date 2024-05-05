@@ -52,8 +52,8 @@ abstract class DiscordMessageContextMenuHandler(name: String, localizations: Loc
         }
         timeMarks?.add(START at markNow())
 
-        if (!discordBot.discordRepresentations.containsKey(event.name)) {
-            val exception = AlunaInteractionRepresentationNotFoundException(event.name)
+        if (!discordBot.discordRepresentations.containsKey(event.commandId)) {
+            val exception = AlunaInteractionRepresentationNotFoundException(event.commandId)
             try {
                 onExecutionException(event, exception)
             } catch (exceptionError: Exception) {
@@ -62,7 +62,7 @@ abstract class DiscordMessageContextMenuHandler(name: String, localizations: Loc
             return@withContext
         }
 
-        discordRepresentation = discordBot.discordRepresentations[event.name]!!
+        discordRepresentation = discordBot.discordRepresentations[event.commandId]!!
 
         MDC.put("interaction", event.fullCommandName)
         MDC.put("uniqueId", uniqueId)
