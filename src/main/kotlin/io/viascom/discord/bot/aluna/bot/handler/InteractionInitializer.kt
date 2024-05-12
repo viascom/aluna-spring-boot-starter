@@ -247,8 +247,9 @@ internal open class InteractionInitializer(
             }
 
             val beforeUpdate = OffsetDateTime.now()
-            val server = shardManager.getGuildById(serverId)
-            server!!.updateCommands().addCommands(relevantCommands).queue { updatedCommands ->
+            val server = shardManager.getGuildById(serverId) ?: continue
+
+            server.updateCommands().addCommands(relevantCommands).queue { updatedCommands ->
 
                 discordBot.discordRepresentations.putAll(updatedCommands.associateBy { it.id })
 
