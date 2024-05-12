@@ -8,9 +8,9 @@
 <p align="center">
   <a href="https://github.com/viascom/aluna-spring-boot-starter/releases"><img src="https://img.shields.io/maven-metadata/v.svg?label=maven-central&metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fio%2Fviascom%2Fdiscord%2Fbot%2Faluna-spring-boot-starter%2Fmaven-metadata.xml"
          alt="Maven central"></a>
-  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--beta.23-blue.svg"
+  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.0--beta.24-blue.svg"
               alt="JDA-Version "></a>
-  <img src="https://img.shields.io/badge/Kotlin-1.9.23-%238052ff?logo=kotlin"
+  <img src="https://img.shields.io/badge/Kotlin-1.9.24-%238052ff?logo=kotlin"
          alt="Kotlin Version">
   <a href="http://www.apache.org/licenses/"><img src="https://img.shields.io/badge/license-Apache_2.0-blue.svg"
          alt="license Apache 2.0"></a>
@@ -23,10 +23,10 @@
 
 | aluna-spring-boot-starter |                                          JDA                                          |                                Spring Boot                                 |                                    Kotlin                                    |                                           Emoji Library                                           |                               nanoid-kotlin                                |
 |:--------------------------|:-------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|
+| `1.1.5`                   | <img src="https://img.shields.io/badge/5.0.0-beta.24-yellow.svg" alt="5.0.0-beta.24"> | <img src="https://img.shields.io/badge/3.2.5-brightgreen.svg" alt="3.2.5"> | <img src="https://img.shields.io/badge/1.9.24-brightgreen.svg" alt="1.9.24"> |     <img src="https://img.shields.io/badge/JEmoji-1.4.0-brightgreen.svg" alt="JEmoji 1.4.0">      | <img src="https://img.shields.io/badge/1.0.1-brightgreen.svg" alt="1.0.1"> |
 | `1.1.4`                   | <img src="https://img.shields.io/badge/5.0.0-beta.23-yellow.svg" alt="5.0.0-beta.23"> | <img src="https://img.shields.io/badge/3.2.5-brightgreen.svg" alt="3.2.5"> | <img src="https://img.shields.io/badge/1.9.23-brightgreen.svg" alt="1.9.23"> |     <img src="https://img.shields.io/badge/JEmoji-1.4.0-brightgreen.svg" alt="JEmoji 1.4.0">      | <img src="https://img.shields.io/badge/1.0.1-brightgreen.svg" alt="1.0.1"> |
 | `1.1.3`                   | <img src="https://img.shields.io/badge/5.0.0-beta.21-yellow.svg" alt="5.0.0-beta.21"> | <img src="https://img.shields.io/badge/3.2.3-brightgreen.svg" alt="3.2.3"> | <img src="https://img.shields.io/badge/1.9.23-brightgreen.svg" alt="1.9.23"> |     <img src="https://img.shields.io/badge/JEmoji-1.4.0-brightgreen.svg" alt="JEmoji 1.4.0">      | <img src="https://img.shields.io/badge/1.0.1-brightgreen.svg" alt="1.0.1"> |
 | `1.1.2`                   | <img src="https://img.shields.io/badge/5.0.0-beta.19-yellow.svg" alt="5.0.0-beta.19"> | <img src="https://img.shields.io/badge/3.2.1-brightgreen.svg" alt="3.2.1"> | <img src="https://img.shields.io/badge/1.9.22-brightgreen.svg" alt="1.9.22"> | <img src="https://img.shields.io/badge/emoji--java-5.1.1-brightgreen.svg" alt="emoji-java 5.1.1"> | <img src="https://img.shields.io/badge/1.0.0-brightgreen.svg" alt="1.0.0"> |
-| `1.1.1`                   | <img src="https://img.shields.io/badge/5.0.0-beta.18-yellow.svg" alt="5.0.0-beta.18"> | <img src="https://img.shields.io/badge/3.1.5-brightgreen.svg" alt="3.1.5"> | <img src="https://img.shields.io/badge/1.9.20-brightgreen.svg" alt="1.9.20"> | <img src="https://img.shields.io/badge/emoji--java-5.1.1-brightgreen.svg" alt="emoji-java 5.1.1"> | <img src="https://img.shields.io/badge/1.0.0-brightgreen.svg" alt="1.0.0"> |
 
 For older versions, please have a look at the [VERSION.md](VERSION.md)
 
@@ -35,7 +35,7 @@ For older versions, please have a look at the [VERSION.md](VERSION.md)
 Gradle:
 ```gradle
 dependencies {
-  implementation 'io.viascom.discord.bot:aluna-spring-boot-starter:1.1.4'
+  implementation 'io.viascom.discord.bot:aluna-spring-boot-starter:1.1.5'
 }
 ```
 
@@ -44,7 +44,7 @@ Maven:
 <dependency>
     <groupId>io.viascom.discord.bot</groupId>
     <artifactId>aluna-spring-boot-starter</artifactId>
-    <version>1.1.4</version>
+    <version>1.1.5</version>
 </dependency>
 ```
 
