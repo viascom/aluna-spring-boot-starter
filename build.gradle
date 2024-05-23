@@ -23,7 +23,7 @@ ext {
 
     jdaVersion = "5.0.0-beta.24"
     retrofitVersion = "2.9.0"
-    jacksonSpringBootVersion = "3.2.5"
+    jacksonSpringBootVersion = "3.2.6"
     jacksonVersion = "2.17.1"
     jemojiVersion = "1.4.1"
     gsonVersion = "2.10.1"
