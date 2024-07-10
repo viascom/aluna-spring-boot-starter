@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
+import net.dv8tion.jda.api.interactions.commands.ICommandReference
 import net.dv8tion.jda.api.requests.RestAction
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -157,8 +158,24 @@ open class DiscordBot(
      * @param name name of the command
      * @return class of the command
      */
-    fun getDiscordCommandByName(name: String): Command? {
-        return discordRepresentations.getOrElse(name) { null }
+    fun getDiscordCommandByName(name: String): ICommandReference? {
+        if (name.isEmpty()) return null
+
+        //Check if subcommand
+        if (name.contains(" ")) {
+            val split = name.split(" ")
+            val commandName = split[0]
+            val firstSubCommandName = split[1]
+
+            if (split.size > 2) {
+                val secondSubCommandName = split[2]
+                return discordRepresentations.values.firstOrNull { it.name == commandName }?.subcommandGroups?.firstOrNull { it.name == firstSubCommandName }?.subcommands?.firstOrNull { it.name == secondSubCommandName }
+            }
+
+            return discordRepresentations.values.firstOrNull { it.name == commandName }?.subcommands?.firstOrNull { it.name == firstSubCommandName }
+        }
+
+        return discordRepresentations.values.firstOrNull { it.name == name }
     }
 
     /**

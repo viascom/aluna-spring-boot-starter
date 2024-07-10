@@ -207,6 +207,8 @@ internal open class InteractionInitializer(
     }
 
     suspend fun initServerSpecificCommands(commands: ArrayList<DiscordCommandHandler>, context: ArrayList<DiscordContextMenuHandler>) = withContext(AlunaDispatchers.Internal) {
+        if (!alunaProperties.command.enableServerSpecificCommands) return@withContext
+
         //Get all interactions, filter not needed interactions and call init methods
         val filteredCommands = commands.filter { it.specificServers?.isNotEmpty() == true }
         val filteredContext = context.filter { it.specificServers?.isNotEmpty() == true }

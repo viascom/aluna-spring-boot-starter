@@ -23,6 +23,7 @@ package io.viascom.discord.bot.aluna.bot.interaction
 
 import io.viascom.discord.bot.aluna.bot.CoroutineDiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
+import io.viascom.discord.bot.aluna.bot.coQueue
 import io.viascom.discord.bot.aluna.util.toDiscordEmbed
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
@@ -33,7 +34,7 @@ class PingCommand : CoroutineDiscordCommand("ping", "Send a ping") {
         val startTime = System.currentTimeMillis()
 
         //Send a reply and acknowledge the event with it
-        event.replyEmbeds("↔\uFE0F Ping ...".toDiscordEmbed().build()).setEphemeral(true).queue {
+        event.replyEmbeds("↔\uFE0F Ping ...".toDiscordEmbed().build()).setEphemeral(true).coQueue {
             //As soon as it got successful sent, we edit the message with the duration between now and the first message.
             it.editOriginalEmbeds("↔\uFE0F Pong: ${System.currentTimeMillis() - startTime}ms".toDiscordEmbed().build()).queue()
         }

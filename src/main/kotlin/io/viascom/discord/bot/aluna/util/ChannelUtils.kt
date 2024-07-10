@@ -97,7 +97,9 @@ fun Guild.getChannelsWithBotAndMember(member: Member, type: ArrayList<ChannelTyp
  * @param channelId The ID of the text channel to be retrieved.
  * @return The text channel with the specified ID if found, null otherwise.
  */
-fun ShardManager.getGuildTextChannel(guildId: String, channelId: String): MessageChannel? = this.getGuildById(guildId)?.getTextChannelById(channelId)
+fun ShardManager.getGuildTextChannel(guildId: String, channelId: String): MessageChannel? =
+    this.getGuildById(guildId)?.getTextChannelById(channelId) ?: this.getGuildById(guildId)?.getNewsChannelById(channelId) ?: this.getGuildById(guildId)
+        ?.getThreadChannelById(channelId) ?: this.getGuildById(guildId)?.getStageChannelById(channelId) ?: this.getGuildById(guildId)?.getVoiceChannelById(channelId)
 
 /**
  * Retrieves a guild voice channel

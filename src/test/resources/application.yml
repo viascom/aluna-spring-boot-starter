@@ -45,7 +45,7 @@ aluna:
     base-path: i18n/interactions
   debug:
     use-time-marks: true
-    show-detail-time-marks: true
+    show-detail-time-marks: ON_EXCEPTION
     show-hash-code: true
     show-translation-keys: none
   bot-stats:

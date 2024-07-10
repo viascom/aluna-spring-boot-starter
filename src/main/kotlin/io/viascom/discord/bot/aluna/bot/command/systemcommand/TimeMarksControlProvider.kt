@@ -26,16 +26,17 @@ import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.EventRegisterType
+import io.viascom.discord.bot.aluna.property.AlunaDebugProperties
 import io.viascom.discord.bot.aluna.property.AlunaProperties
-import io.viascom.discord.bot.aluna.util.dangerButton
-import io.viascom.discord.bot.aluna.util.removeComponents
-import io.viascom.discord.bot.aluna.util.successButton
+import io.viascom.discord.bot.aluna.util.*
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.components.ActionComponent
 import net.dv8tion.jda.api.interactions.components.ActionRow
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
 import org.springframework.stereotype.Component
 import java.awt.Color
 
@@ -76,14 +77,19 @@ class TimeMarksControlProvider(
         )
         lastEmbed.addField(
             "Show Detailed Time Marks",
-            if (alunaProperties.debug.showDetailTimeMarks) systemCommandEmojiProvider.tickEmoji().formatted + " Yes" else systemCommandEmojiProvider.crossEmoji().formatted + " No",
+
+            if (alunaProperties.debug.showDetailTimeMarks != AlunaDebugProperties.ShowDetailTimeMarks.NONE && alunaProperties.debug.useTimeMarks) {
+                systemCommandEmojiProvider.tickEmoji().formatted + " Yes - ${alunaProperties.debug.showDetailTimeMarks}"
+            } else {
+                systemCommandEmojiProvider.crossEmoji().formatted + " No"
+            },
             true
         )
 
         lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(getComponents()).queueAndRegisterInteraction(
             lastHook,
             command,
-            arrayListOf(EventRegisterType.BUTTON),
+            arrayListOf(EventRegisterType.BUTTON, EventRegisterType.STRING_SELECT),
             true
         )
     }
@@ -104,25 +110,27 @@ class TimeMarksControlProvider(
                 showEmbed()
             }
 
-            "disable_detailed_time_marks" -> {
-                lastHook = event.deferEdit().complete()
-
-                alunaProperties.debug.showDetailTimeMarks = false
-                showEmbed()
-            }
-
-            "enable_detailed_time_marks" -> {
-                lastHook = event.deferEdit().complete()
-
-                alunaProperties.debug.showDetailTimeMarks = true
-                showEmbed()
-            }
-
         }
         return true
     }
 
     override fun onButtonInteractionTimeout() {
+        lastHook.editOriginalEmbeds(lastEmbed.build()).removeComponents().queue()
+    }
+
+    override fun onStringSelectMenuInteraction(event: StringSelectInteractionEvent): Boolean {
+        when (event.componentId) {
+            "show_detailed_time_marks" -> {
+                lastHook = event.deferEdit().complete()
+                alunaProperties.debug.showDetailTimeMarks = AlunaDebugProperties.ShowDetailTimeMarks.valueOf(event.getSelection())
+                showEmbed()
+            }
+        }
+
+        return true
+    }
+
+    override fun onStringSelectInteractionTimeout() {
         lastHook.editOriginalEmbeds(lastEmbed.build()).removeComponents().queue()
     }
 
@@ -135,13 +143,41 @@ class TimeMarksControlProvider(
             row.add(successButton("enable_time_marks", "Enable Time Marks"))
         }
 
-        if (alunaProperties.debug.showDetailTimeMarks) {
-            row.add(dangerButton("disable_detailed_time_marks", "Disable Detailed Time Marks"))
-        } else {
-            row.add(successButton("enable_detailed_time_marks", "Enable Detailed Time Marks"))
-        }
+        val selectRow = arrayListOf<ActionComponent>()
+        val select = StringSelectMenu.create("show_detailed_time_marks")
+            .addOption(
+                "Disable",
+                "NONE",
+                "No detailed time marks will be processed",
+                systemCommandEmojiProvider.crossEmoji(),
+                alunaProperties.debug.showDetailTimeMarks == AlunaDebugProperties.ShowDetailTimeMarks.NONE
+            )
+            .addOption(
+                "Always",
+                "ALWAYS",
+                "Detailed time marks will be processed and logged",
+                systemCommandEmojiProvider.tickEmoji(),
+                alunaProperties.debug.showDetailTimeMarks == AlunaDebugProperties.ShowDetailTimeMarks.ALWAYS
+            )
+            .addOption(
+                "On Exception only",
+                "ON_EXCEPTION",
+                "Detailed time marks will only be processed if an exception is thrown",
+                systemCommandEmojiProvider.tickEmoji(),
+                alunaProperties.debug.showDetailTimeMarks == AlunaDebugProperties.ShowDetailTimeMarks.ON_EXCEPTION
+            )
+            .addOption(
+                "Add to MDC only",
+                "MDC_ONLY",
+                "Detailed time marks will be processed and added to MDC",
+                systemCommandEmojiProvider.tickEmoji(),
+                alunaProperties.debug.showDetailTimeMarks == AlunaDebugProperties.ShowDetailTimeMarks.MDC_ONLY
+            )
+            .build()
+        selectRow.add(select)
 
         rows.add(ActionRow.of(row))
+        rows.add(ActionRow.of(selectRow))
         return rows
     }
 

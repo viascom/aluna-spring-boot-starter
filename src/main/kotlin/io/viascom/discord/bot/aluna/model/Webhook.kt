@@ -26,9 +26,13 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.annotations.SerializedName
+import io.viascom.discord.bot.aluna.util.getGuildMessage
+import io.viascom.discord.bot.aluna.util.getMessage
 import io.viascom.discord.bot.aluna.util.toEditData
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.MessageEmbed
+import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.api.utils.data.DataObject
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
@@ -77,6 +81,14 @@ data class Webhook(
 
         fun toEmbedBuilder() = EmbedBuilder.fromData(DataObject.fromJson(ObjectMapper().writeValueAsBytes(this)))
         fun toMessageEmbed() = this.toEmbedBuilder().build()
+
+        fun getSize(): Int {
+            return (title?.length ?: 0) + (description?.length ?: 0) +
+                    (fields?.sumOf { it.name.length + it.value.length } ?: 0) +
+                    (author?.name?.length ?: 0) + (author?.iconUrl?.length ?: 0) +
+                    (footer?.text?.length ?: 0) + (footer?.iconUrl?.length ?: 0) +
+                    (thumbnail?.url?.length ?: 0) + (image?.url?.length ?: 0)
+        }
     }
 
     @JsonInclude(Include.NON_NULL)
@@ -141,6 +153,10 @@ data class Webhook(
 
     fun toMessageEditData(): MessageEditData = toMessageCreateData().toEditData()
 
+    fun getSize(): Int {
+        return (content?.length ?: 0) + (embeds?.sumOf(Embed::getSize) ?: 0)
+    }
+
     companion object {
         fun fromMessage(message: MessageData): Webhook {
             val embeds = message.embeds.map { embed ->
@@ -154,6 +170,33 @@ data class Webhook(
             }
 
             return Webhook(message.content.ifEmpty { null }, embeds)
+        }
+
+        fun fromMessageLink(messageLink: String, user: User, shardManager: ShardManager): Webhook? {
+            val elements = messageLink.split("/")
+            val serverId = elements[4]
+            val channelId = elements[5]
+            val messageId = elements[6]
+
+            val message = if (serverId == "@me") {
+                try {
+                    user.getMessage(messageId)
+                } catch (e: Exception) {
+                    null
+                }
+            } else {
+                try {
+                    shardManager.getGuildMessage(serverId, channelId, messageId)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+
+            if (message == null) {
+                return null
+            }
+
+            return Webhook.fromMessage(MessageEditData.fromMessage(message))
         }
     }
 

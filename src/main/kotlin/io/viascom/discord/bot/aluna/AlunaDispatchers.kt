@@ -24,8 +24,8 @@ package io.viascom.discord.bot.aluna
 import kotlinx.coroutines.*
 import kotlinx.coroutines.slf4j.MDCContext
 import org.slf4j.LoggerFactory
+import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 object AlunaDispatchers {
 
@@ -45,7 +45,7 @@ object AlunaDispatchers {
         interactionScope = getScope("Aluna-Interaction", interactionScopeDispatcher, cancelParent = true)
         val eventScopeDispatcher = if (eventParallelism == -1) Dispatchers.Default else Dispatchers.Default.limitedParallelism(eventParallelism)
         eventScope = getScope("Aluna-Event", eventScopeDispatcher, cancelParent = true)
-        val detachedScopeDispatcher = if (detachedParallelism == -1) Dispatchers.IO else Dispatchers.IO.limitedParallelism(detachedParallelism)
+        val detachedScopeDispatcher = if (detachedParallelism == -1) Dispatchers.VT else Dispatchers.VT.limitedParallelism(detachedParallelism)
         detachedScope = getScope("Aluna-Detached", detachedScopeDispatcher, cancelParent = false)
     }
 
@@ -75,12 +75,22 @@ object AlunaDispatchers {
     val DetachedScope: CoroutineScope
         get() = detachedScope
 
+    val Dispatchers.VT: CoroutineDispatcher
+        get() = if (isJava21()) {
+            Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("AlunaVirtualDispatcher-worker-", 0L).factory()).asCoroutineDispatcher()
+        } else {
+            IO
+        }
+
+    private fun isJava21(): Boolean {
+        return System.getProperty("java.version").startsWith("21")
+    }
+
     private fun getScope(
         name: String = "Aluna",
         dispatcher: CoroutineDispatcher = Dispatchers.Default,
         parent: Job = SupervisorJob(),
         errorHandler: CoroutineExceptionHandler? = null,
-        context: CoroutineContext = EmptyCoroutineContext,
         cancelParent: Boolean = false //TODO we should allow the developer to decide if the parent should be cancelled or not. As maybe we don't want to cancel the parent if the exception happens in a logger
     ): CoroutineScope {
         val exceptionHandler = errorHandler ?: CoroutineExceptionHandler { _, throwable ->
@@ -95,7 +105,7 @@ object AlunaDispatchers {
             }
         }
 
-        return CoroutineScope(dispatcher + parent + exceptionHandler + context + CoroutineName(name) + MDCContext())
+        return CoroutineScope(dispatcher + parent + exceptionHandler + CoroutineName(name) + MDCContext())
     }
 
 }

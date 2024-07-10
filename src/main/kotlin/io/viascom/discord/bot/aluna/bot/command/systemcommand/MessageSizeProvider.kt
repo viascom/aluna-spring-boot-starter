@@ -27,26 +27,29 @@ import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.Webhook
-import io.viascom.discord.bot.aluna.util.*
+import io.viascom.discord.bot.aluna.util.addTextField
+import io.viascom.discord.bot.aluna.util.getTypedOption
+import io.viascom.discord.bot.aluna.util.getValueAsString
+import io.viascom.discord.bot.aluna.util.toDiscordEmbed
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
-import net.dv8tion.jda.api.utils.FileUpload
-import net.dv8tion.jda.api.utils.messages.MessageEditData
+import net.dv8tion.jda.api.utils.messages.MessageCreateData
 import org.springframework.stereotype.Component
+import java.awt.Color
 
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class ExtractMessageProvider(
+class MessageSizeProvider(
     private val shardManager: ShardManager,
     private val objectMapper: ObjectMapper
 ) : SystemCommandDataProvider(
-    "extract_message",
-    "Get Message as JSON",
+    "calculate_message_size",
+    "Calculate Message Size",
     true,
     true,
     false,
@@ -54,63 +57,49 @@ class ExtractMessageProvider(
 ) {
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
-        val elements = event.getTypedOption(command.argsOption)?.split("/")
+        val url = event.getTypedOption(command.argsOption)
 
-        if (elements == null) {
-            val modal = Modal.create("extract_message", "Get Message as JSON")
+        if (url == null) {
+            val modal = Modal.create("extract_message", "Calculate Message Size")
                 .addTextField("message_url", "Message-Link")
                 .build()
             event.replyModal(modal).queueAndRegisterInteraction(command)
         } else {
-            extractMessage(elements, event.user) {
-                if (it == null) {
-                    event.reply("Message not found").setEphemeral(true).queue()
-                } else {
-                    event.reply("Message Json:").setEphemeral(true).setFiles(FileUpload.fromData(it.toByteArray(), "message.json")).queue()
-                }
+            handleMessageLink(url, event.user) { messageCreateData ->
+                event.reply(messageCreateData).setEphemeral(true).queue()
             }
+        }
+    }
+
+    private fun handleMessageLink(url: String, user: User, replyHandler: (MessageCreateData) -> Unit) {
+        val webhook = Webhook.fromMessageLink(url, user, shardManager)
+        if (webhook == null) {
+            replyHandler.invoke(MessageCreateData.fromContent("Message not found"))
+        } else {
+            val embedMessage = "This message has a total size of **${webhook.getSize()}** characters."
+                .toDiscordEmbed("Message Size")
+                .setColor(Color.GREEN)
+                .addField("Message", url, false)
+                .addField("Embeds", webhook.embeds?.size?.toString() ?: "0", false)
+
+            webhook.embeds?.forEachIndexed { index, embed ->
+                embedMessage.addField(
+                    "Embed ${index + 1}",
+                    "**${embed.getSize()}** characters\n${embed.fields?.size ?: 0} fields",
+                    true
+                )
+            }
+
+            replyHandler.invoke(MessageCreateData.fromEmbeds(embedMessage.build()))
         }
     }
 
     override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
-        val elements = event.getValueAsString("message_url")!!.split("/")
-        extractMessage(elements, event.user) {
-            if (it == null) {
-                event.reply("Message not found").setEphemeral(true).queue()
-            } else {
-                event.reply("Message Json:").setEphemeral(true).setFiles(FileUpload.fromData(it.toByteArray(), "message.json")).queue()
-            }
+        val url = event.getValueAsString("message_url")!!
+        handleMessageLink(url, event.user) { messageCreateData ->
+            event.reply(messageCreateData).setEphemeral(true).queue()
         }
+
         return true
-    }
-
-    private fun extractMessage(elements: List<String>, user: User, replyHandler: (String?) -> Unit) {
-        val serverId = elements[4]
-        val channelId = elements[5]
-        val messageId = elements[6]
-
-        val message = if (serverId == "@me") {
-            try {
-                user.getMessage(messageId)
-            } catch (e: Exception) {
-                null
-            }
-        } else {
-            try {
-                shardManager.getGuildMessage(serverId, channelId, messageId)
-            } catch (e: Exception) {
-                null
-            }
-        }
-
-        if (message == null) {
-            replyHandler.invoke(null)
-            return
-        }
-
-        val webhook = Webhook.fromMessage(MessageEditData.fromMessage(message))
-        val webhookJson = objectMapper.writeValueAsString(webhook)
-
-        replyHandler.invoke(webhookJson)
     }
 }

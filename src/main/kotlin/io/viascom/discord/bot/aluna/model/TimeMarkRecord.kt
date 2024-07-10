@@ -85,7 +85,13 @@ fun ArrayList<TimeMarkRecord>.getDuration(possibleStartMarks: List<TimeMarkStep>
 @JvmSynthetic
 internal fun ArrayList<TimeMarkRecord>.getDurationRunExecute(): Duration? = getDuration(
     listOf(TimeMarkStep.ASYNC_TASKS_STARTED),
-    listOf(TimeMarkStep.RUN_EXECUTE, TimeMarkStep.SUB_COMMAND_RUN_EXECUTE, TimeMarkStep.SECOND_SUB_COMMAND_RUN_EXECUTE)
+    listOf(
+        TimeMarkStep.RUN_EXECUTE,
+        TimeMarkStep.SUB_COMMAND_RUN_EXECUTE,
+        TimeMarkStep.SECOND_SUB_COMMAND_RUN_EXECUTE,
+        TimeMarkStep.ON_EXECUTION_EXCEPTION,
+        TimeMarkStep.EXIT_COMMAND
+    )
 )
 
 @JvmSynthetic

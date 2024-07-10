@@ -41,7 +41,11 @@ class AlunaDebugProperties {
     /**
      * Show detailed time elapsed for commands
      */
-    var showDetailTimeMarks: Boolean = true
+    var showDetailTimeMarks: ShowDetailTimeMarks = ShowDetailTimeMarks.ON_EXCEPTION
+
+    enum class ShowDetailTimeMarks {
+        NONE, ALWAYS, ON_EXCEPTION, MDC_ONLY
+    }
 
     /**
      * Show hash code for commands

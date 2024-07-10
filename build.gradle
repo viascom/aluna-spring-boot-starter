@@ -6,9 +6,9 @@ plugins {
     id "java-library"
     id "maven-publish"
     id "signing"
-    id "org.jetbrains.kotlin.jvm" version "1.9.24"
-    id "org.jetbrains.kotlin.kapt" version "1.9.24"
-    id "org.springframework.boot" version "3.2.5"
+    id "org.jetbrains.kotlin.jvm" version "2.0.0"
+    id "org.jetbrains.kotlin.kapt" version "2.0.0"
+    id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
     id "de.undercouch.download" version "5.6.0"
     id "org.jetbrains.dokka" version "1.9.20"
@@ -17,14 +17,14 @@ plugins {
 ext {
     major = 1
     minor = 1
-    patch = 5
+    patch = 6
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
-    jdaVersion = "5.0.0-beta.24"
+    jdaVersion = "5.0.0"
     retrofitVersion = "2.9.0"
-    jacksonSpringBootVersion = "3.2.5"
-    jacksonVersion = "2.17.1"
+    jacksonSpringBootVersion = "3.3.0"
+    jacksonVersion = "2.17.2"
     jemojiVersion = "1.4.1"
     gsonVersion = "2.10.1"
     javabotblockapiVersion = "6.7.4_347"
@@ -116,6 +116,9 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable"
     testImplementation "org.jetbrains.kotlin:kotlin-compiler-embeddable"
 }
+
+sourceCompatibility = JavaVersion.VERSION_19
+targetCompatibility = JavaVersion.VERSION_19
 
 tasks.withType(KotlinCompile).configureEach {
     kotlinOptions.jvmTarget = JavaVersion.VERSION_19
@@ -241,7 +244,7 @@ tasks.withType(DokkaTask.class).configureEach {
         }
 
         externalDocumentationLink {
-            url.set(new URL("ttps://ci.dv8tion.net/job/JDA5/javadoc/"))
+            url.set(new URI("ttps://ci.dv8tion.net/job/JDA5/javadoc/").toURL())
         }
 
     }

@@ -26,6 +26,7 @@ import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.exception.AlunaInteractionRepresentationNotFoundException
 import io.viascom.discord.bot.aluna.model.TimeMarkStep.*
 import io.viascom.discord.bot.aluna.model.at
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
@@ -82,24 +83,28 @@ abstract class DiscordUserContextMenuHandler(name: String, localizations: Locali
         }
         timeMarks?.add(INITIALIZED at markNow())
 
-        val missingUserPermissions = discordInteractionConditions.checkForNeededUserPermissions(this@DiscordUserContextMenuHandler, userPermissions, event)
+        val missingUserPermissions =
+            async(AlunaDispatchers.Detached) { discordInteractionConditions.checkForNeededUserPermissions(this@DiscordUserContextMenuHandler, userPermissions, event) }.await()
         if (missingUserPermissions.hasMissingPermissions) {
             onMissingUserPermission(event, missingUserPermissions)
             return@withContext
         }
         timeMarks?.add(NEEDED_USER_PERMISSIONS at markNow())
 
-        val missingBotPermissions = discordInteractionConditions.checkForNeededBotPermissions(this@DiscordUserContextMenuHandler, botPermissions, event)
+        val missingBotPermissions =
+            async(AlunaDispatchers.Detached) { discordInteractionConditions.checkForNeededBotPermissions(this@DiscordUserContextMenuHandler, botPermissions, event) }.await()
         if (missingBotPermissions.hasMissingPermissions) {
             onMissingBotPermission(event, missingBotPermissions)
             return@withContext
         }
         timeMarks?.add(NEEDED_BOT_PERMISSIONS at markNow())
 
-        discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this@DiscordUserContextMenuHandler, event)
+        async(AlunaDispatchers.Detached) { discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this@DiscordUserContextMenuHandler, event) }.await()
         timeMarks?.add(LOAD_DATA_BEFORE_ADDITIONAL_REQUIREMENTS at markNow())
 
-        val additionalRequirements = discordInteractionAdditionalConditions.checkForAdditionalContextRequirements(this@DiscordUserContextMenuHandler, event)
+        val additionalRequirements = async(AlunaDispatchers.Detached) {
+            discordInteractionAdditionalConditions.checkForAdditionalContextRequirements(this@DiscordUserContextMenuHandler, event)
+        }.await()
         if (additionalRequirements.failed) {
             onFailedAdditionalRequirements(event, additionalRequirements)
             return@withContext
@@ -107,7 +112,7 @@ abstract class DiscordUserContextMenuHandler(name: String, localizations: Locali
         timeMarks?.add(CHECK_FOR_ADDITIONAL_COMMAND_REQUIREMENTS at markNow())
 
         //Load additional data for this interaction
-        discordInteractionLoadAdditionalData.loadData(this@DiscordUserContextMenuHandler, event)
+        async(AlunaDispatchers.Detached) { discordInteractionLoadAdditionalData.loadData(this@DiscordUserContextMenuHandler, event) }.await()
         timeMarks?.add(LOAD_ADDITIONAL_DATA at markNow())
 
         //Run onCommandExecution in asyncExecutor to ensure it is not blocking the execution of the interaction itself
@@ -119,19 +124,30 @@ abstract class DiscordUserContextMenuHandler(name: String, localizations: Locali
         }
         timeMarks?.add(ASYNC_TASKS_STARTED at markNow())
 
+        var endedWithException = false
+
         try {
             logger.info("Run context menu '${event.fullCommandName}'" + if (alunaProperties.debug.showHashCode) " [${this@DiscordUserContextMenuHandler.hashCode()}]" else "")
             runExecute(event)
             timeMarks?.add(RUN_EXECUTE at markNow())
         } catch (e: Exception) {
+            endedWithException = true
             try {
-                onExecutionException(event, e)
+                async(AlunaDispatchers.Detached) { onExecutionException(event, e) }.await()
                 timeMarks?.add(ON_EXECUTION_EXCEPTION at markNow())
             } catch (exceptionError: Exception) {
-                discordInteractionMetaDataHandler.onGenericExecutionException(this@DiscordUserContextMenuHandler, e, exceptionError, event)
+                async(AlunaDispatchers.Detached) {
+                    discordInteractionMetaDataHandler.onGenericExecutionException(
+                        this@DiscordUserContextMenuHandler,
+                        e,
+                        exceptionError,
+                        event
+                    )
+                }.await()
+                timeMarks?.add(ON_EXECUTION_EXCEPTION at markNow())
             }
         } finally {
-            exitCommand(event)
+            exitCommand(event, endedWithException)
         }
     }
 }
