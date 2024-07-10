@@ -353,8 +353,13 @@ class EventWaiter(
      */
     @JvmOverloads
     fun <T : Event> waitForEvent(
-        id: String = NanoId.generate(), type: Class<T>, action: Consumer<T>, condition: Predicate<T>,
-        timeout: Duration? = Duration.ofMinutes(14), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
+        id: String = NanoId.generate(),
+        type: Class<T>,
+        action: Consumer<T>,
+        condition: Predicate<T>,
+        timeout: Duration? = Duration.ofMinutes(14),
+        timeoutAction: (() -> Unit)? = null,
+        stayActive: Boolean = false
     ) {
         Checks.notNull(type, "The provided type")
         Checks.notNull(condition, "The provided condition predicate")
@@ -365,16 +370,14 @@ class EventWaiter(
         if (timeout != null) {
             we.timeoutTask = scheduledThreadPool.schedule({
                 AlunaDispatchers.InternalScope.launch {
-                    if (waitingEvents.containsKey(type) && waitingEvents[type]!!.containsKey(id) &&
-                        waitingEvents[type]!![id]!!.remove(we) && timeoutAction != null
+                    if (waitingEvents.containsKey(type) && waitingEvents[type]!!.containsKey(id) && waitingEvents[type]!![id]!!.remove(we)
                     ) {
-                        launch(AlunaDispatchers.Interaction) { timeoutAction.invoke() }
+                        launch(AlunaDispatchers.Interaction) { timeoutAction?.invoke() }
                     }
                 }
 
             }, timeout.seconds, TimeUnit.SECONDS)
         }
-        @Suppress("UNCHECKED_CAST")
-        waitingEvents.computeIfAbsent(type) { ConcurrentHashMap() }.computeIfAbsent(id) { arrayListOf() }.add(we as WaitingEvent<GenericEvent>)
+        @Suppress("UNCHECKED_CAST") waitingEvents.computeIfAbsent(type) { ConcurrentHashMap() }.computeIfAbsent(id) { arrayListOf() }.add(we as WaitingEvent<GenericEvent>)
     }
 }

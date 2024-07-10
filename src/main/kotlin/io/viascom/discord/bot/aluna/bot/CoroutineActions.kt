@@ -54,7 +54,7 @@ suspend fun <T> RestAction<T>.coQueue(success: (suspend CoroutineScope.(T) -> Un
     }
 })
 
-suspend fun ReplyCallbackAction.coQueue(success: suspend CoroutineScope.(InteractionHook) -> Unit?, failure: (suspend CoroutineScope.(Throwable) -> Unit)?) = this@coQueue.queue({
+suspend fun ReplyCallbackAction.coQueue(success: (suspend CoroutineScope.(InteractionHook) -> Unit)?, failure: (suspend CoroutineScope.(Throwable) -> Unit)?) = this@coQueue.queue({
     if (success != null) {
         AlunaDispatchers.InternalScope.launch { success(it) }
     }
