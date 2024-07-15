@@ -28,8 +28,8 @@ jobs:
           cache: 'gradle'
           check-latest: false
 
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v3
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3.5.0
 
       - name: Decode GPG Key
         run: |

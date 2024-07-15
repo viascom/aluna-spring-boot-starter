@@ -36,8 +36,8 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
         
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v3
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3.5.0
 
       - name: Build with Gradle
         run: ./gradlew build --warn --full-stacktrace
