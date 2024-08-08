@@ -10,7 +10,7 @@
          alt="Maven central"></a>
   <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.2-blue.svg"
               alt="JDA-Version "></a>
-  <img src="https://img.shields.io/badge/Kotlin-2.0.0-%238052ff?logo=kotlin"
+  <img src="https://img.shields.io/badge/Kotlin-2.0.10-%238052ff?logo=kotlin"
          alt="Kotlin Version">
   <a href="http://www.apache.org/licenses/"><img src="https://img.shields.io/badge/license-Apache_2.0-blue.svg"
          alt="license Apache 2.0"></a>
@@ -21,11 +21,11 @@
 
 *These are the versions of all exposed dependencies related to the aluna-spring-boot-starter version.*
 
-| aluna-spring-boot-starter |                                    JDA                                     |                                Spring Boot                                 |                                   Kotlin                                   |                                      Emoji Library                                       |                               nanoid-kotlin                                |
-|:--------------------------|:--------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|
-| `1.1.8`                   | <img src="https://img.shields.io/badge/5.0.2-brightgreen.svg" alt="5.0.2"> | <img src="https://img.shields.io/badge/3.3.2-brightgreen.svg" alt="3.3.2"> | <img src="https://img.shields.io/badge/2.0.0-brightgreen.svg" alt="2.0.0"> | <img src="https://img.shields.io/badge/JEmoji-1.4.1-brightgreen.svg" alt="JEmoji 1.4.1"> | <img src="https://img.shields.io/badge/1.0.1-brightgreen.svg" alt="1.0.1"> |
-| `1.1.7`                   | <img src="https://img.shields.io/badge/5.0.1-brightgreen.svg" alt="5.0.1"> | <img src="https://img.shields.io/badge/3.3.1-brightgreen.svg" alt="3.3.1"> | <img src="https://img.shields.io/badge/2.0.0-brightgreen.svg" alt="2.0.0"> | <img src="https://img.shields.io/badge/JEmoji-1.4.1-brightgreen.svg" alt="JEmoji 1.4.1"> | <img src="https://img.shields.io/badge/1.0.1-brightgreen.svg" alt="1.0.1"> |
-| `1.1.6`                   | <img src="https://img.shields.io/badge/5.0.0-brightgreen.svg" alt="5.0.0"> | <img src="https://img.shields.io/badge/3.3.0-brightgreen.svg" alt="3.3.0"> | <img src="https://img.shields.io/badge/2.0.0-brightgreen.svg" alt="2.0.0"> | <img src="https://img.shields.io/badge/JEmoji-1.4.1-brightgreen.svg" alt="JEmoji 1.4.1"> | <img src="https://img.shields.io/badge/1.0.1-brightgreen.svg" alt="1.0.1"> |
+| aluna-spring-boot-starter |                                    JDA                                     |                                Spring Boot                                 |                                    Kotlin                                    |                                      Emoji Library                                       |                               nanoid-kotlin                                |
+|:--------------------------|:--------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|
+| `1.1.8`                   | <img src="https://img.shields.io/badge/5.0.2-brightgreen.svg" alt="5.0.2"> | <img src="https://img.shields.io/badge/3.3.2-brightgreen.svg" alt="3.3.2"> | <img src="https://img.shields.io/badge/2.0.10-brightgreen.svg" alt="2.0.10"> | <img src="https://img.shields.io/badge/JEmoji-1.4.1-brightgreen.svg" alt="JEmoji 1.4.1"> | <img src="https://img.shields.io/badge/1.0.1-brightgreen.svg" alt="1.0.1"> |
+| `1.1.7`                   | <img src="https://img.shields.io/badge/5.0.1-brightgreen.svg" alt="5.0.1"> | <img src="https://img.shields.io/badge/3.3.1-brightgreen.svg" alt="3.3.1"> |  <img src="https://img.shields.io/badge/2.0.0-brightgreen.svg" alt="2.0.0">  | <img src="https://img.shields.io/badge/JEmoji-1.4.1-brightgreen.svg" alt="JEmoji 1.4.1"> | <img src="https://img.shields.io/badge/1.0.1-brightgreen.svg" alt="1.0.1"> |
+| `1.1.6`                   | <img src="https://img.shields.io/badge/5.0.0-brightgreen.svg" alt="5.0.0"> | <img src="https://img.shields.io/badge/3.3.0-brightgreen.svg" alt="3.3.0"> |  <img src="https://img.shields.io/badge/2.0.0-brightgreen.svg" alt="2.0.0">  | <img src="https://img.shields.io/badge/JEmoji-1.4.1-brightgreen.svg" alt="JEmoji 1.4.1"> | <img src="https://img.shields.io/badge/1.0.1-brightgreen.svg" alt="1.0.1"> |
 
 For older versions, please have a look at the [VERSION.md](VERSION.md)
 
