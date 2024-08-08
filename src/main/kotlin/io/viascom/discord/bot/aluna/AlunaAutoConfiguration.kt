@@ -272,4 +272,16 @@ open class AlunaAutoConfiguration {
         return DefaultDiscordInteractionLocalization(alunaProperties)
     }
 
+    /**
+     * Returns the default implementation of the DefaultInteractionInitializerCondition instance.
+     *
+     * @return the created instance of DefaultInteractionInitializerCondition
+     */
+    @Bean
+    @ConditionalOnJdaEnabled
+    @ConditionalOnMissingBean
+    open fun defaultInteractionInitializerCondition(): InteractionInitializerCondition {
+        return DefaultInteractionInitializerCondition()
+    }
+
 }

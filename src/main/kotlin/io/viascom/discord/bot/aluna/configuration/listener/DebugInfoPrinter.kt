@@ -23,6 +23,7 @@ package io.viascom.discord.bot.aluna.configuration.listener
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.bot.handler.InteractionInitializerCondition
 import io.viascom.discord.bot.aluna.configuration.AlunaHealthIndicator
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordSlashCommandInitializedEvent
@@ -46,6 +47,7 @@ class DebugInfoPrinter(
     private val alunaProperties: AlunaProperties,
     private val ownerIdProvider: OwnerIdProvider,
     private val moderatorIdProvider: ModeratorIdProvider,
+    private val initializationCondition: InteractionInitializerCondition,
     private val context: ConfigurableApplicationContext
 ) : ApplicationListener<DiscordSlashCommandInitializedEvent> {
 
@@ -73,6 +75,11 @@ class DebugInfoPrinter(
                     val serverProperties = context.getBean(ServerProperties::class.java)
                     "-> healthIndicator: http://localhost:${serverProperties.port}/actuator/health/aluna\n"
                 } else ""
+
+                val initializer = if (!initializationCondition.isInitializeNeeded()) {
+                    "-> initialization:  skipped\n"
+                } else ""
+
                 logger.info(
                     """
                 
@@ -87,6 +94,7 @@ class DebugInfoPrinter(
                 """.trimIndent() + "\n" +
                             token +
                             actuator +
+                            initializer +
                             "###############################################"
 
                 )

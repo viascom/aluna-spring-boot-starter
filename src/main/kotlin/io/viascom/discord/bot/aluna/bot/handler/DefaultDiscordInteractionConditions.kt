@@ -55,6 +55,8 @@ open class DefaultDiscordInteractionConditions : DiscordInteractionConditions {
         userPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
     ): MissingPermissions {
+        if (userPermissions.isEmpty()) return MissingPermissions()
+
         val missingPermissions = MissingPermissions()
         val server = event.guild ?: return missingPermissions
         val serverChannel = event.guildChannel
@@ -79,6 +81,8 @@ open class DefaultDiscordInteractionConditions : DiscordInteractionConditions {
         botPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
     ): MissingPermissions {
+        if (botPermissions.isEmpty()) return MissingPermissions()
+
         val missingPermissions = MissingPermissions()
         val server = event.guild ?: return missingPermissions
         val serverChannel = event.guildChannel
@@ -88,8 +92,8 @@ open class DefaultDiscordInteractionConditions : DiscordInteractionConditions {
 
         botPermissions.forEach { permission ->
             if (permission.isChannel) {
-                if (permission.isVoice) {
-                    val voiceChannel = member?.voiceState?.channel
+                if (member?.voiceState?.channel != null) {
+                    val voiceChannel = member.voiceState?.channel
                     if (voiceChannel == null) {
                         missingPermissions.notInVoice = true
                         return missingPermissions

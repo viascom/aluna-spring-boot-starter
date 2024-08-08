@@ -23,7 +23,6 @@ package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
-import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.coQueue
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordFirstShardConnectedEvent
@@ -42,8 +41,9 @@ import org.springframework.stereotype.Service
 @Order(100)
 @ConditionalOnJdaEnabled
 internal open class InteractionLoader(
-    private val commands: List<DiscordCommand>,
+    private val commands: List<DiscordCommandHandler>,
     private val contextMenus: List<DiscordContextMenuHandler>,
+    private val initializationCondition: InteractionInitializerCondition,
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
     private val eventPublisher: EventPublisher,
@@ -56,9 +56,10 @@ internal open class InteractionLoader(
     override fun onApplicationEvent(event: DiscordFirstShardConnectedEvent) {
         AlunaDispatchers.InternalScope.launch {
             //No need to load interactions if it is the main shard
-            if (alunaProperties.discord.sharding.fromShard == 0) {
+            if ((alunaProperties.discord.sharding.fromShard == 0 && initializationCondition.isInitializeNeeded()) || discordBot.interactionsInitialized) {
                 return@launch
             }
+            discordBot.interactionsInitialized = true
 
             logger.debug("Load interactions")
 

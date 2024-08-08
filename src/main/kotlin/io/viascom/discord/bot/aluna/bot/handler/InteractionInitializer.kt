@@ -26,6 +26,7 @@ import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.coQueue
 import io.viascom.discord.bot.aluna.bot.command.DefaultHelpCommand
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import io.viascom.discord.bot.aluna.event.DiscordFirstShardConnectedEvent
 import io.viascom.discord.bot.aluna.event.DiscordMainShardConnectedEvent
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.exception.AlunaInitializationException
@@ -40,6 +41,7 @@ import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.ApplicationListener
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Service
@@ -52,10 +54,12 @@ import java.util.concurrent.CountDownLatch
 internal open class InteractionInitializer(
     private val commands: List<DiscordCommandHandler>,
     private val contextMenus: List<DiscordContextMenuHandler>,
+    private val initializationCondition: InteractionInitializerCondition,
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
     private val eventPublisher: EventPublisher,
-    private val alunaProperties: AlunaProperties
+    private val alunaProperties: AlunaProperties,
+    private val applicationEventPublisher: ApplicationEventPublisher
 ) : ApplicationListener<DiscordMainShardConnectedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -65,9 +69,15 @@ internal open class InteractionInitializer(
             if (discordBot.interactionsInitialized) {
                 return@launch
             }
-            discordBot.interactionsInitialized = true
 
-            initSlashCommands()
+            //Check if initialization is necessary and if so, init slash commands otherwise call interaction loader
+            if (initializationCondition.isInitializeNeeded()) {
+                discordBot.interactionsInitialized = true
+                initSlashCommands()
+            } else {
+                logger.debug("Initialization is not necessary. Call interaction loader")
+                applicationEventPublisher.publishEvent(DiscordFirstShardConnectedEvent(event.source, event.jdaEvent, event.shardManager))
+            }
         }
     }
 
@@ -75,11 +85,11 @@ internal open class InteractionInitializer(
         logger.debug("Check interactions to update")
         val deferredCurrentInteractions = async { shardManager.shards.first().retrieveCommands(true).complete() }
 
-        //Get all interactions, filter not needed interactions and call init methods
+        //Get all interactions, filter not necessary interactions and call init methods
         val filteredCommands = getFilteredCommands()
         val filteredContext = getFilteredContext()
 
-        //Check if bot has its own help command and forgot to disable default help command
+        //Check if the bot has its own help command and forgot to disable the default help command
         if (filteredCommands.count { it.name == "help" } > 1 && alunaProperties.command.helpCommand.enabled) {
             logger.warn("Found /help command in your commands, but help command is enabled in your configuration. Please disable help command in your configuration. Default help command will be disabled for this run.")
             filteredCommands.removeIf { it.name == "help" && it is DefaultHelpCommand }
