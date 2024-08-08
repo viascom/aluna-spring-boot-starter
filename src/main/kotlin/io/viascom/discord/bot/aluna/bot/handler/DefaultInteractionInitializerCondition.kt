@@ -22,5 +22,5 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
 class DefaultInteractionInitializerCondition : InteractionInitializerCondition {
-    override fun isInitializeNeeded(): Boolean = false
+    override fun isInitializeNeeded(): Boolean = true
 }
