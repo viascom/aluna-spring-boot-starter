@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/viascom/aluna-spring-boot-starter/releases"><img src="https://img.shields.io/maven-metadata/v.svg?label=maven-central&metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fio%2Fviascom%2Fdiscord%2Fbot%2Faluna-spring-boot-starter%2Fmaven-metadata.xml"
          alt="Maven central"></a>
-  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.0.2-blue.svg"
+  <a href=""><img src="https://img.shields.io/badge/JDA--Version-5.1.0-blue.svg"
               alt="JDA-Version "></a>
   <img src="https://img.shields.io/badge/Kotlin-2.0.10-%238052ff?logo=kotlin"
          alt="Kotlin Version">
@@ -23,6 +23,7 @@
 
 | aluna-spring-boot-starter |                                    JDA                                     |                                Spring Boot                                 |                                    Kotlin                                    |                                      Emoji Library                                       |                               nanoid-kotlin                                |
 |:--------------------------|:--------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|
+| `1.1.9`                   | <img src="https://img.shields.io/badge/5.1.0-brightgreen.svg" alt="5.1.0"> | <img src="https://img.shields.io/badge/3.3.2-brightgreen.svg" alt="3.3.2"> | <img src="https://img.shields.io/badge/2.0.10-brightgreen.svg" alt="2.0.10"> | <img src="https://img.shields.io/badge/JEmoji-1.5.1-brightgreen.svg" alt="JEmoji 1.5.1"> | <img src="https://img.shields.io/badge/1.0.1-brightgreen.svg" alt="1.0.1"> |
 | `1.1.8`                   | <img src="https://img.shields.io/badge/5.0.2-brightgreen.svg" alt="5.0.2"> | <img src="https://img.shields.io/badge/3.3.2-brightgreen.svg" alt="3.3.2"> | <img src="https://img.shields.io/badge/2.0.10-brightgreen.svg" alt="2.0.10"> | <img src="https://img.shields.io/badge/JEmoji-1.4.1-brightgreen.svg" alt="JEmoji 1.4.1"> | <img src="https://img.shields.io/badge/1.0.1-brightgreen.svg" alt="1.0.1"> |
 | `1.1.7`                   | <img src="https://img.shields.io/badge/5.0.1-brightgreen.svg" alt="5.0.1"> | <img src="https://img.shields.io/badge/3.3.1-brightgreen.svg" alt="3.3.1"> |  <img src="https://img.shields.io/badge/2.0.0-brightgreen.svg" alt="2.0.0">  | <img src="https://img.shields.io/badge/JEmoji-1.4.1-brightgreen.svg" alt="JEmoji 1.4.1"> | <img src="https://img.shields.io/badge/1.0.1-brightgreen.svg" alt="1.0.1"> |
 | `1.1.6`                   | <img src="https://img.shields.io/badge/5.0.0-brightgreen.svg" alt="5.0.0"> | <img src="https://img.shields.io/badge/3.3.0-brightgreen.svg" alt="3.3.0"> |  <img src="https://img.shields.io/badge/2.0.0-brightgreen.svg" alt="2.0.0">  | <img src="https://img.shields.io/badge/JEmoji-1.4.1-brightgreen.svg" alt="JEmoji 1.4.1"> | <img src="https://img.shields.io/badge/1.0.1-brightgreen.svg" alt="1.0.1"> |
@@ -35,7 +36,7 @@ Gradle:
 
 ```gradle
 dependencies {
-  implementation 'io.viascom.discord.bot:aluna-spring-boot-starter:1.1.8'
+  implementation 'io.viascom.discord.bot:aluna-spring-boot-starter:1.1.9'
 }
 ```
 
@@ -45,7 +46,7 @@ Maven:
 <dependency>
     <groupId>io.viascom.discord.bot</groupId>
     <artifactId>aluna-spring-boot-starter</artifactId>
-    <version>1.1.8</version>
+    <version>1.1.9</version>
 </dependency>
 ```
 
