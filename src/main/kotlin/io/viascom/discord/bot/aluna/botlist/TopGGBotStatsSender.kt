@@ -21,6 +21,7 @@
 
 package io.viascom.discord.bot.aluna.botlist
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.property.AlunaProperties
@@ -67,7 +68,7 @@ class TopGGBotStatsSender(
 
         val request =
             Request.Builder().url("https://top.gg/api/bots/${alunaProperties.discord.applicationId}/stats").post(
-                objectMapper.writeValueAsBytes(TopGGData(shardManager.shards.map { it.guilds.size }))
+                objectMapper.writeValueAsBytes(TopGGData(shardManager.shards.map { it.guilds.size }, shardManager.shardsTotal))
                     .toRequestBody("application/json".toMediaType())
             ).header("Authorization", topGGToken).build()
 
@@ -75,6 +76,9 @@ class TopGGBotStatsSender(
     }
 
     class TopGGData(
-        val shards: List<Int>
+        @JsonProperty("server_count")
+        val serverCount: List<Int>,
+        @JsonProperty("shard_count")
+        val shardCount: Int
     )
 }
