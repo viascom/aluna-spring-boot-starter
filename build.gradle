@@ -104,7 +104,7 @@ dependencies {
         exclude group: "org.json", module: "json"
         //Because of https://advisory.checkmarx.net/advisory/vulnerability/Cx08fcacc9-cb99/
     }
-    compileOnly "org.json:json:20240303"
+    compileOnly "org.json:json:20250107"
     compileOnly "org.botblock:javabotblockapi-request:$javabotblockapiVersion"
     compileOnly "org.botblock:javabotblockapi-jda:$javabotblockapiVersion"
 
