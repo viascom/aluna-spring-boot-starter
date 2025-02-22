@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -124,7 +124,6 @@ open class DiscordBot(
     @JvmSynthetic
     internal val commandHistory = MutableSharedFlow<CommandUsage>(replay = 15, extraBufferCapacity = 15, BufferOverflow.DROP_OLDEST)
     val commandHistoryFlow = commandHistory.asSharedFlow()
-
 
     fun login() {
         if (isLoggedIn) {
@@ -773,12 +772,6 @@ open class DiscordBot(
 
 }
 
-internal typealias InteractionId = String
-internal typealias OptionName = String
-internal typealias CooldownKey = String
-internal typealias MessageId = String
-internal typealias LastUsage = LocalDateTime
-
 /**
  * Queue an interaction and register listeners for it.
  *
@@ -907,3 +900,13 @@ val JDA.scope: CoroutineScope get() = (eventManager as? CoroutineEventManager) ?
  * If this instance does not use the coroutine event manager, this returns the default scope from [getDefaultJDAScope].
  */
 val ShardManager.scope: CoroutineScope get() = (shardCache.firstOrNull()?.eventManager as? CoroutineEventManager) ?: AlunaDispatchers.InternalScope
+
+internal typealias InteractionId = String
+internal typealias OptionName = String
+internal typealias CooldownKey = String
+internal typealias LastUsage = LocalDateTime
+
+typealias UserId = Long
+typealias GuildId = Long
+typealias ChannelId = Long
+typealias MessageId = String

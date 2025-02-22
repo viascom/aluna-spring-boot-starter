@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -57,7 +57,7 @@ open class CoroutineEventManager(
     }
 
     override fun handle(event: GenericEvent) {
-        launch(AlunaDispatchers.Internal) {
+        launch(AlunaDispatchers.Event) {
             for (listener in listeners) try {
                 val actualTimeout = timeout(listener)
                 if (actualTimeout.isPositive() && actualTimeout.isFinite()) {

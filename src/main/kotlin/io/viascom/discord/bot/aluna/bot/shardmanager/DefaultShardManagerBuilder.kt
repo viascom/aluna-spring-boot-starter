@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -49,7 +49,6 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.system.exitProcess
-
 
 open class DefaultShardManagerBuilder(
     private val interactionEventListener: InteractionEventListener,

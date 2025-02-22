@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -610,6 +610,18 @@ fun dangerButton(id: String, label: String? = null, emoji: Emoji? = null, disabl
 @JvmOverloads
 fun linkButton(url: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.LINK, url, label, emoji).withDisabled(disabled)
+
+/**
+ * Creates a premium button with the specified properties.
+ *
+ * @param url The URL to be associated with the button.
+ * @param label The optional label to be displayed on the button.
+ * @param emoji The optional emoji to be displayed on the button.
+ * @param disabled Whether the button should be disabled or not.
+ * @return A Button object with the specified properties.
+ */
+fun premiumButton(url: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+    Button.of(ButtonStyle.PREMIUM, url, label, emoji).withDisabled(disabled)
 
 /**
  * Converts a formatted string into an Emoji instance.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -59,10 +59,15 @@ class DebugInfoPrinter(
                 var permission = 0L
                 alunaProperties.discord.defaultPermissions.forEach { permission = permission or it.rawValue }
                 val token = if (!alunaProperties.debug.hideTokenInDebugConfigurationLog) {
-                    "-> token:           ${alunaProperties.discord.token}\n"
+                    "-> token:             ${alunaProperties.discord.token}\n"
                 } else ""
-                val invite = if (alunaProperties.discord.applicationId != null) {
-                    "https://discord.com/oauth2/authorize?client_id=${alunaProperties.discord.applicationId}&scope=bot%20applications.commands&permissions=$permission"
+                val inviteGuild = if (alunaProperties.discord.applicationId != null) {
+                    "https://discord.com/oauth2/authorize?client_id=${alunaProperties.discord.applicationId}&integration_type=0&scope=bot%20applications.commands&permissions=$permission"
+                } else {
+                    "<Please add an applicationId to see this invite link!>"
+                }
+                val inviteUser = if (alunaProperties.discord.applicationId != null) {
+                    "https://discord.com/oauth2/authorize?client_id=${alunaProperties.discord.applicationId}&integration_type=1&scope=applications.commands"
                 } else {
                     "<Please add an applicationId to see this invite link!>"
                 }
@@ -73,11 +78,11 @@ class DebugInfoPrinter(
                 }
                 val actuator = if (healthIndicator != null) {
                     val serverProperties = context.getBean(ServerProperties::class.java)
-                    "-> healthIndicator: http://localhost:${serverProperties.port}/actuator/health/aluna\n"
+                    "-> healthIndicator:   http://localhost:${serverProperties.port}/actuator/health/aluna\n"
                 } else ""
 
                 val initializer = if (!initializationCondition.isInitializeNeeded()) {
-                    "-> initialization:  skipped\n"
+                    "-> initialization:    skipped\n"
                 } else ""
 
                 logger.info(
@@ -85,12 +90,13 @@ class DebugInfoPrinter(
                 
                 ###############################################
                                 Configuration
-                -> interaction:     ${discordBot.commands.size + discordBot.contextMenus.size}
-                -> ownerIds:        ${ownerIdProvider.getOwnerIds().joinToString { it.toString() }.ifBlank { "<not defined>" }}
-                -> modIds:          ${moderatorIdProvider.getModeratorIds().joinToString { it.toString() }.ifBlank { "<not defined>" }}
-                -> applicationId:   ${alunaProperties.discord.applicationId ?: "<not defined>"}
-                -> supportServer:   ${alunaProperties.discord.supportServer ?: "<not defined>"}
-                -> invite:          $invite
+                -> interaction:       ${discordBot.commands.size + discordBot.contextMenus.size}
+                -> ownerIds:          ${ownerIdProvider.getOwnerIds().joinToString { it.toString() }.ifBlank { "<not defined>" }}
+                -> modIds:            ${moderatorIdProvider.getModeratorIds().joinToString { it.toString() }.ifBlank { "<not defined>" }}
+                -> applicationId:     ${alunaProperties.discord.applicationId ?: "<not defined>"}
+                -> supportServer:     ${alunaProperties.discord.supportServer ?: "<not defined>"}
+                -> invite (Guild):    $inviteGuild
+                -> invite (User-App): $inviteUser
                 """.trimIndent() + "\n" +
                             token +
                             actuator +

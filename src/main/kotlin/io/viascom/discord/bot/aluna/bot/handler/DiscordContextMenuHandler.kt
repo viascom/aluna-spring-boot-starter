@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -45,6 +45,8 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.DiscordLocale
+import net.dv8tion.jda.api.interactions.IntegrationType
+import net.dv8tion.jda.api.interactions.InteractionContextType
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFunction
@@ -56,6 +58,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import java.time.Duration
 import java.util.*
+import kotlin.properties.Delegates
 import kotlin.time.TimeSource.Monotonic.markNow
 
 abstract class DiscordContextMenuHandler(
@@ -115,6 +118,7 @@ abstract class DiscordContextMenuHandler(
      *
      * *This gets mapped to [isGuildOnly] if set to [UseScope.GUILD_ONLY].*
      */
+    @Deprecated("Use setContexts instead", level = DeprecationLevel.ERROR)
     var useScope = UseScope.GLOBAL
 
     /**
@@ -193,6 +197,17 @@ abstract class DiscordContextMenuHandler(
     var timeMarks: ArrayList<TimeMarkRecord>? = null
         internal set
 
+    @set:JvmSynthetic
+    var isUserIntegration by Delegates.notNull<Boolean>()
+        internal set
+
+    @set:JvmSynthetic
+    var isGuildIntegration by Delegates.notNull<Boolean>()
+        internal set
+
+    @set:JvmSynthetic
+    var isInBotDM by Delegates.notNull<Boolean>()
+        internal set
 
     @JvmSynthetic
     internal abstract suspend fun runOnButtonInteraction(event: ButtonInteractionEvent): Boolean
@@ -222,7 +237,9 @@ abstract class DiscordContextMenuHandler(
         if (isAdministratorOnlyCommand) {
             this.defaultPermissions = DefaultMemberPermissions.DISABLED
         }
-        this.isGuildOnly = (useScope == UseScope.GUILD_ONLY)
+        if (this.contexts.contains(InteractionContextType.PRIVATE_CHANNEL) && !this.integrationTypes.contains(IntegrationType.USER_INSTALL)) {
+            logger.warn("The interaction '$name' contains the context PRIVATE_CHANNEL enabled, but does not have the integration type USER_INSTALL enabled. This interaction will therefore not be available in private channels!")
+        }
 
         if (!alunaProperties.productionMode) {
             if ((isAdministratorOnlyCommand || this.defaultPermissions == DefaultMemberPermissions.DISABLED) && !this.isGuildOnly) {

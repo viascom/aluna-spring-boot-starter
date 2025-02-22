@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -25,7 +25,6 @@ import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.component.AlunaPaginator
 import io.viascom.discord.bot.aluna.bot.listener.EventWaiter
-import io.viascom.discord.bot.aluna.model.UseScope
 import net.dv8tion.jda.api.entities.MessageEmbed.Field
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
@@ -33,10 +32,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 class ServerMembersCommand(
     private val eventWaiter: EventWaiter
 ) : DiscordCommand("server-members", "Show server members") {
-
-    init {
-        this.useScope = UseScope.GUILD_ONLY
-    }
 
     override fun execute(event: SlashCommandInteractionEvent) {
         val hook = event.deferReply().complete()

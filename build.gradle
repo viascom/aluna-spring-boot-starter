@@ -1,3 +1,4 @@
+import org.jetbrains.dokka.DokkaConfiguration
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -6,7 +7,7 @@ plugins {
     id "java-library"
     id "maven-publish"
     id "signing"
-    id "org.jetbrains.kotlin.jvm" version "2.1.0"
+    id "org.jetbrains.kotlin.jvm" version "2.1.10"
     id "org.jetbrains.kotlin.kapt" version "2.1.10"
     id "org.springframework.boot" version "3.4.3"
     id "io.spring.dependency-management" version "1.1.7"
@@ -16,8 +17,8 @@ plugins {
 
 ext {
     major = 1
-    minor = 1
-    patch = 10
+    minor = 3
+    patch = 0
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
@@ -92,6 +93,9 @@ dependencies {
 
     //====== Gson ======
     compileOnly "com.google.code.gson:gson:$gsonVersion"
+
+    //====== Caching ======
+    implementation "com.github.ben-manes.caffeine:caffeine:3.1.8"
 
     //====== Emoji Helper ======
     api "net.fellbaum:jemoji:$jemojiVersion"
@@ -227,26 +231,27 @@ tasks.withType(Sign).configureEach {
     onlyIf { isCiServer }
 }
 
-tasks.withType(DokkaTask.class).configureEach {
+tasks.withType(DokkaTask).configureEach {
     dokkaSourceSets.configureEach {
         moduleName.set(project.name)
         moduleVersion.set(project.version.toString())
         includes.from("README.md")
         jdkVersion.set(17)
+
         sourceLink {
             localDirectory.set(file("src/main/kotlin"))
-            remoteUrl.set(URL("https://github.com/viascom/aluna-spring-boot-starter/tree/master/src/main/kotlin"))
+            remoteUrl.set(new URI("https://github.com/viascom/aluna-spring-boot-starter/tree/master/src/main/kotlin").toURL())
             remoteLineSuffix.set("#L")
         }
 
-        perPackageOption {
-            documentedVisibilities.set([Visibility.PUBLIC])
-        }
-
         externalDocumentationLink {
-            url.set(new URI("ttps://ci.dv8tion.net/job/JDA5/javadoc/").toURL())
+            url.set(new URI("https://ci.dv8tion.net/job/JDA5/javadoc/").toURL())
         }
 
+        perPackageOption {
+            matchingRegex.set(".*")
+            suppress.set(false)
+            documentedVisibilities.set([DokkaConfiguration.Visibility.PUBLIC]) // Only public elements
+        }
     }
-
 }

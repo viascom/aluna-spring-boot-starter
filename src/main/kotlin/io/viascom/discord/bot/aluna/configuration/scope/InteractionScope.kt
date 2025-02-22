@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -460,7 +460,9 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
 
     fun setMessageIdForInstance(uniqueId: UniqueId, messageId: String) {
         try {
-            val obj = scopedObjects.values.firstOrNull { it.containsKey(DiscordContext.discordState!!.id) }?.get(DiscordContext.discordState!!.id)?.get(uniqueId)
+            val ids = scopedObjects.values.firstOrNull { it.containsKey(DiscordContext.discordState!!.id) && it[DiscordContext.discordState!!.id]?.containsKey(uniqueId) == true }
+            val obj = ids?.values?.firstOrNull { it.containsKey(uniqueId) }?.get(uniqueId)
+
             if (obj == null) {
                 logger.debug("[$uniqueId] -> id does not exist")
                 return

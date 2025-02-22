@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,6 +21,8 @@
 
 package io.viascom.discord.bot.aluna.property
 
+import net.dv8tion.jda.api.interactions.IntegrationType
+import net.dv8tion.jda.api.interactions.InteractionContextType
 import org.springframework.boot.context.properties.NestedConfigurationProperty
 
 class AlunaCommandProperties {
@@ -43,6 +45,16 @@ class SystemCommandProperties {
      * Enable /system-command
      */
     var enabled: Boolean = false
+
+    /**
+     * Represents where commands can be used.
+     */
+    var contexts: List<InteractionContextType> = listOf(InteractionContextType.GUILD, InteractionContextType.BOT_DM)
+
+    /**
+     * Represents how an app was installed, or where a command can be used.
+     */
+    var integrationTypes: List<IntegrationType> = listOf(IntegrationType.GUILD_INSTALL)
 
     /**
      * Server id on which this command can be used.
@@ -98,6 +110,16 @@ class HelpCommandProperties {
      * Enable /help
      */
     var enabled: Boolean = false
+
+    /**
+     * Represents where commands can be used.
+     */
+    var contexts: List<InteractionContextType> = InteractionContextType.ALL.toList()
+
+    /**
+     * Represents how an app was installed, or where a command can be used.
+     */
+    var integrationTypes: List<IntegrationType> = listOf(IntegrationType.GUILD_INSTALL, IntegrationType.USER_INSTALL)
 
     /**
      * Title used in the command

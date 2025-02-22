@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -41,6 +41,11 @@ class DefaultHelpCommand : CoroutineDiscordCommand("help", "Shows information ab
 
     init {
         this.beanCallOnDestroy = false
+    }
+
+    override fun initCommandOptions() {
+        setContexts(alunaProperties.command.helpCommand.contexts)
+        setIntegrationTypes(alunaProperties.command.helpCommand.integrationTypes)
     }
 
     override suspend fun execute(event: SlashCommandInteractionEvent) {

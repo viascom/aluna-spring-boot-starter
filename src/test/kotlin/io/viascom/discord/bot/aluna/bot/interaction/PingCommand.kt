@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -35,7 +35,7 @@ class PingCommand : CoroutineDiscordCommand("ping", "Send a ping") {
 
         //Send a reply and acknowledge the event with it
         event.replyEmbeds("↔\uFE0F Ping ...".toDiscordEmbed().build()).setEphemeral(true).coQueue {
-            //As soon as it got successful sent, we edit the message with the duration between now and the first message.
+            //As soon as it got successfully sent, we edit the message with the duration between now and the first message.
             it.editOriginalEmbeds("↔\uFE0F Pong: ${System.currentTimeMillis() - startTime}ms".toDiscordEmbed().build()).queue()
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -64,6 +64,8 @@ class SystemCommand(
     override fun initCommandOptions() {
         @OptIn(Experimental::class)
         specificServers = alunaProperties.command.systemCommand.servers
+        setContexts(alunaProperties.command.systemCommand.contexts)
+        setIntegrationTypes(alunaProperties.command.systemCommand.integrationTypes)
         addOptions(commandOption, argsOption)
     }
 

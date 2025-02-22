@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -28,12 +28,10 @@ import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandEmoji
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.bot.listener.*
 import io.viascom.discord.bot.aluna.bot.shardmanager.*
-import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnAlunaShutdownHook
-import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
-import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
-import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnTranslationEnabled
+import io.viascom.discord.bot.aluna.configuration.condition.*
 import io.viascom.discord.bot.aluna.event.EventPublisher
 import io.viascom.discord.bot.aluna.property.*
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -116,7 +114,9 @@ open class AlunaAutoConfiguration {
         discordBot.latchCount = shardManagerBuilder.getLatchCount()
 
         if (alunaProperties.discord.autoLoginOnStartup) {
-            discordBot.login()
+            AlunaDispatchers.InternalScope.launch {
+                discordBot.login()
+            }
         } else {
             logger.debug("AutoLoginOnStartup is disabled. Not awaiting for shards to connect.")
         }
@@ -141,7 +141,9 @@ open class AlunaAutoConfiguration {
         discordBot.latchCount = shardManagerBuilder.getLatchCount()
 
         if (alunaProperties.discord.autoLoginOnStartup) {
-            discordBot.login()
+            AlunaDispatchers.InternalScope.launch {
+                discordBot.login()
+            }
         } else {
             logger.debug("AutoLoginOnStartup is disabled. Not awaiting for shards to connect.")
         }
@@ -281,7 +283,22 @@ open class AlunaAutoConfiguration {
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
     open fun defaultInteractionInitializerCondition(): InteractionInitializerCondition {
+        logger.debug("Enable DefaultInteractionInitializerCondition")
         return DefaultInteractionInitializerCondition()
+    }
+
+    /**
+     * Returns the default implementation of the FastMutualGuildsCache interface.
+     *
+     * @return the created instance of DefaultFastMutualGuildsCache
+     */
+    @Bean
+    @ConditionalOnJdaEnabled
+    @ConditionalOnFastMutualGuildCacheEnabled
+    @ConditionalOnMissingBean(FastMutualGuildsCache::class)
+    open fun defaultFastMutualGuildsCache(shardManager: ShardManager, alunaProperties: AlunaProperties): FastMutualGuildsCache {
+        logger.debug("Enable DefaultFastMutualGuildsCache")
+        return DefaultFastMutualGuildsCache(shardManager, alunaProperties)
     }
 
 }

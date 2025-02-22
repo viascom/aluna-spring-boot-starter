@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -24,12 +24,12 @@ package io.viascom.discord.bot.aluna.bot.interaction
 import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenu
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
-import io.viascom.discord.bot.aluna.model.UseScope
 import io.viascom.discord.bot.aluna.util.addTextField
 import io.viascom.discord.bot.aluna.util.getValueAsString
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
+import net.dv8tion.jda.api.interactions.InteractionContextType
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.interactions.modals.Modal
 
@@ -39,7 +39,7 @@ class SayHiUserMenuHandler : DiscordUserContextMenu(
 ) {
     init {
         //Make this context menu only usable in guilds as it makes no sense in dm with the bot
-        this.useScope = UseScope.GUILD_ONLY
+        setContexts(InteractionContextType.GUILD)
     }
 
     private lateinit var target: User

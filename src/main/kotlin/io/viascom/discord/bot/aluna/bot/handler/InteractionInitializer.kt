@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -148,7 +148,11 @@ internal open class InteractionInitializer(
                 val removedCommands = currentInteractions.filter { it.id !in updatedCommands.map { it.id } }
 
                 interactionToUpdate.filter { it.name in newCommands.map { it.name } }.forEach {
-                    printCommand((it as DiscordCommandHandler))
+                    if (it is DiscordCommandHandler) {
+                        printCommand(it)
+                    } else {
+                        printContextMenu(it as DiscordContextMenuHandler)
+                    }
                 }
                 changedCommands.forEach {
                     logger.debug("Update interaction '${it.name}'")
@@ -365,6 +369,22 @@ internal open class InteractionInitializer(
         }
 
         logger.debug(commandText)
+    }
+
+    private fun printContextMenu(contextMenu: DiscordContextMenuHandler, isSpecific: Boolean = false, serverIds: ArrayList<String>? = null) {
+        var contextMenuText = ""
+        val type = when (contextMenu.type) {
+            Type.USER -> "User"
+            Type.MESSAGE -> "Message"
+            else -> "Unknown"
+        }
+        contextMenuText += "Add${if (isSpecific) " server specific" else ""} context menu ($type) '${contextMenu.name}'${
+            if (serverIds != null) " in servers ${
+                serverIds.joinToString(
+                    ", "
+                )
+            }" else ""
+        }"
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -54,6 +54,8 @@ import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionE
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.DiscordLocale
+import net.dv8tion.jda.api.interactions.IntegrationType
+import net.dv8tion.jda.api.interactions.InteractionContextType
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
@@ -68,6 +70,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
+import kotlin.properties.Delegates
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.isAccessible
 import kotlin.time.TimeSource.Monotonic.markNow
@@ -148,6 +151,7 @@ abstract class DiscordCommandHandler(
      *
      * *This gets mapped to [isGuildOnly] if set to [UseScope.GUILD_ONLY].*
      */
+    @Deprecated("Use setContexts instead", level = DeprecationLevel.ERROR)
     var useScope = UseScope.GLOBAL
 
     /**
@@ -278,6 +282,17 @@ abstract class DiscordCommandHandler(
     var timeMarks: ArrayList<TimeMarkRecord>? = null
         internal set
 
+    @set:JvmSynthetic
+    var isUserIntegration by Delegates.notNull<Boolean>()
+        internal set
+
+    @set:JvmSynthetic
+    var isGuildIntegration by Delegates.notNull<Boolean>()
+        internal set
+
+    @set:JvmSynthetic
+    var isInBotDM by Delegates.notNull<Boolean>()
+        internal set
 
     @JvmSynthetic
     internal abstract suspend fun runExecute(event: SlashCommandInteractionEvent)
@@ -468,8 +483,27 @@ abstract class DiscordCommandHandler(
     internal fun setProperties(event: GenericInteractionCreateEvent) {
         MDC.put("uniqueId", uniqueId)
 
+        val integrationType = if (event.integrationOwners.isGuildIntegration) "GUILD" else "USER"
+        MDC.put("discord.integration.type", integrationType)
         guild = event.guild
-        guild?.let { MDC.put("discord.server", "${it.id} (${it.name})") }
+
+        isGuildIntegration = event.integrationOwners.isGuildIntegration
+        isUserIntegration = event.integrationOwners.isUserIntegration
+
+        isInBotDM = event.context == InteractionContextType.BOT_DM
+
+        if (event.integrationOwners.isGuildIntegration) {
+            guild?.let { MDC.put("discord.server", "${it.id} (${it.name})") }
+            MDC.put("discord.integration.guild", event.integrationOwners.authorizingGuildId)
+        } else {
+            guild?.let { MDC.put("discord.server", it.id) }
+            MDC.put("discord.integration.user", event.integrationOwners.authorizingUserId)
+        }
+
+        if (event.integrationOwners.isUserIntegration) {
+            MDC.put("discord.integration.user", event.integrationOwners.authorizingUserId)
+        }
+
         author = event.user
         MDC.put("discord.author", "${author.id} (${author.name})")
 
@@ -477,7 +511,9 @@ abstract class DiscordCommandHandler(
         MDC.put("discord.author_locale", userLocale.locale)
 
         if (guild != null) {
-            member = guild!!.getMember(author)
+            if (event.integrationOwners.isGuildIntegration) {
+                member = guild!!.getMember(author)
+            }
             guildChannel = event.guildChannel
             guildLocale = event.guildLocale
             MDC.put("discord.server_locale", guildLocale.locale)
@@ -531,10 +567,11 @@ abstract class DiscordCommandHandler(
             }
 
             (missingPermissions.hasMissingPermissions) -> {
-                event.deferReply(true).setContent("⛔ I'm missing the following permission to execute this command:\n" +
-                        missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
-                        missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
-                        missingPermissions.guild.joinToString("\n") { "└ ${it.getName()}" }
+                event.deferReply(true).setContent(
+                    "⛔ I'm missing the following permission to execute this command:\n" +
+                            missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
+                            missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
+                            missingPermissions.guild.joinToString("\n") { "└ ${it.getName()}" }
                 ).queue()
             }
         }
@@ -578,7 +615,10 @@ abstract class DiscordCommandHandler(
         if (isAdministratorOnlyCommand) {
             this@DiscordCommandHandler.defaultPermissions = DefaultMemberPermissions.DISABLED
         }
-        this@DiscordCommandHandler.isGuildOnly = (useScope == UseScope.GUILD_ONLY)
+
+        if (this@DiscordCommandHandler.contexts.contains(InteractionContextType.PRIVATE_CHANNEL) && !this@DiscordCommandHandler.integrationTypes.contains(IntegrationType.USER_INSTALL)) {
+            logger.warn("The interaction '$name' contains the context PRIVATE_CHANNEL enabled, but does not have the integration type USER_INSTALL enabled. This interaction will therefore not be available in private channels!")
+        }
 
         if (!alunaProperties.productionMode) {
             if ((isAdministratorOnlyCommand || this@DiscordCommandHandler.defaultPermissions == DefaultMemberPermissions.DISABLED) && !this@DiscordCommandHandler.isGuildOnly) {
@@ -1113,6 +1153,5 @@ abstract class DiscordCommandHandler(
         val userId = componentId.split(":")[2]
         return componentId.substring(commandId.length + 1 + uniqueId.length + 1 + userId.length + 1)
     }
-
 
 }

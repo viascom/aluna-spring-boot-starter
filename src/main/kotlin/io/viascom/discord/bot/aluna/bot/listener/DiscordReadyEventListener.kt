@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,6 +23,7 @@ package io.viascom.discord.bot.aluna.bot.listener
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
+import io.viascom.discord.bot.aluna.bot.handler.FastMutualGuildsCache
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.event.DiscordAllShardsReadyEvent
 import io.viascom.discord.bot.aluna.property.AlunaProperties
@@ -34,9 +35,13 @@ import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationListener
+import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.core.annotation.Order
+import org.springframework.scheduling.TaskScheduler
+import org.springframework.scheduling.support.CronTrigger
 import org.springframework.stereotype.Service
 import java.awt.Color
+import java.util.*
 
 @Service
 @Order(100)
@@ -44,7 +49,9 @@ import java.awt.Color
 internal open class DiscordReadyEventListener(
     private val discordBot: DiscordBot,
     private val shardManager: ShardManager,
-    private val alunaProperties: AlunaProperties
+    private val alunaProperties: AlunaProperties,
+    private val taskScheduler: TaskScheduler,
+    private val context: ConfigurableApplicationContext
 ) : ApplicationListener<DiscordAllShardsReadyEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -52,31 +59,58 @@ internal open class DiscordReadyEventListener(
     override fun onApplicationEvent(event: DiscordAllShardsReadyEvent) {
         AlunaDispatchers.InternalScope.launch {
             if (alunaProperties.discord.setStatusToOnlineWhenReady) {
-                //Set status to online and remove activity
-                shardManager.setStatus(OnlineStatus.ONLINE)
-                shardManager.setActivity(null)
+                try {
+                    //Set status to online and remove activity
+                    shardManager.setStatus(OnlineStatus.ONLINE)
+                    shardManager.setActivity(null)
+                } catch (e: Exception) {
+                    logger.error("Failed to set status to online and remove activity", e)
+                }
             }
 
             if (alunaProperties.notification.botReady.enabled) {
-                val embedMessage = EmbedBuilder()
-                    .setTitle("⚡ Bot Ready")
-                    .setColor(Color.GREEN)
-                    .setDescription("Bot is up and ready to answer interactions.")
-                    .addField("» Client-Id", alunaProperties.discord.applicationId ?: "n/a", false)
-                    .addField("» Total Interactions", (discordBot.commands.size + discordBot.contextMenus.size).toString(), true)
-                    .addField("» Production Mode", alunaProperties.productionMode.toString(), true)
+                try {
+                    val embedMessage = EmbedBuilder()
+                        .setTitle("⚡ Bot Ready")
+                        .setColor(Color.GREEN)
+                        .setDescription("Bot is up and ready to answer interactions.")
+                        .addField("» Client-Id", alunaProperties.discord.applicationId ?: "n/a", false)
+                        .addField("» Total Interactions", (discordBot.commands.size + discordBot.contextMenus.size).toString(), true)
+                        .addField("» Production Mode", alunaProperties.productionMode.toString(), true)
 
-                val channel = shardManager.getGuildTextChannel(
-                    alunaProperties.notification.botReady.server.toString(),
-                    alunaProperties.notification.botReady.channel.toString()
-                )
+                    val channel = shardManager.getGuildTextChannel(
+                        alunaProperties.notification.botReady.server.toString(),
+                        alunaProperties.notification.botReady.channel.toString()
+                    )
 
-                if (channel == null) {
-                    logger.warn("Aluna was not able to send a DiscordAllShardsReadyEvent to the defined channel.")
-                    return@launch
+                    if (channel == null) {
+                        logger.warn("Aluna was not able to send a DiscordAllShardsReadyEvent to the defined channel.")
+                        return@launch
+                    }
+
+                    channel.sendMessageEmbeds(embedMessage.build()).queue()
+                } catch (e: Exception) {
+                    logger.error("Failed to send bot ready message", e)
                 }
+            }
 
-                channel.sendMessageEmbeds(embedMessage.build()).queue()
+            if (alunaProperties.discord.fastMutualGuildCache.enabled) {
+                val fastMutualGuildsCache = context.getBean(FastMutualGuildsCache::class.java) as FastMutualGuildsCache
+
+                try {
+                    fastMutualGuildsCache.seedCache()
+                } catch (e: Exception) {
+                    logger.error("Failed to seed FastMutualGuildsCache", e)
+                }
+                try {
+                    if (alunaProperties.discord.fastMutualGuildCache.reSeedCache) {
+                        taskScheduler.schedule({
+                            fastMutualGuildsCache.seedCache()
+                        }, CronTrigger(alunaProperties.discord.fastMutualGuildCache.reSeedInterval, TimeZone.getTimeZone(TimeZone.getDefault().id)))
+                    }
+                } catch (e: Exception) {
+                    logger.error("Failed to enable FastMutualGuildsCache re-seed scheduler", e)
+                }
             }
         }
     }

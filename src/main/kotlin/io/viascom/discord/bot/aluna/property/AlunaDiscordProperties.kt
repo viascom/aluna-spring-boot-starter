@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,6 +23,7 @@ package io.viascom.discord.bot.aluna.property
 
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.requests.GatewayIntent
+import java.time.Duration
 
 class AlunaDiscordProperties {
 
@@ -175,6 +176,8 @@ class AlunaDiscordProperties {
 
     var shutdownHook: ShutdownHook = ShutdownHook.JDA
 
+    var fastMutualGuildCache: FastMutualGuildCacheProperties = FastMutualGuildCacheProperties()
+
     class Sharding {
         var type: Type = Type.SINGLE
 
@@ -241,5 +244,29 @@ class AlunaDiscordProperties {
         JDA,
         ALUNA,
         NONE
+    }
+
+    class FastMutualGuildCacheProperties {
+        /**
+         * Should Aluna use and manage the FastMutualGuildCache?
+         */
+        var enabled: Boolean = false
+
+        /**
+         * Should Aluna use shardManager.getMutualGuilds(user) if the user is not found in the cache?
+         */
+        var useShardManagerFallback: Boolean = true
+
+        var clearOnSessionDisconnect: Boolean = true
+
+        var seedOnSessionResume: Boolean = true
+
+        var eventBuffer: Duration = Duration.ofMillis(10)
+
+        var invalidateBeforeSeedingCache: Boolean = true
+
+        var reSeedCache: Boolean = false
+
+        var reSeedInterval: String = "0 5,35 * * * *"
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -60,7 +60,7 @@ internal open class AutoCompleteInteractionInitializer(
                 }
 
                 discordBot.autoCompleteHandlers[Pair(commandElement.key, handler.option)] = handler::class.java
-                logger.debug("\t--> ${handler::class.simpleName} for ${commandElement.value.simpleName} (${handler.option ?: "<all>"})")
+                logger.trace("\t--> ${handler::class.simpleName} for ${commandElement.value.simpleName} (${handler.option ?: "<all>"})")
             }
         }
 

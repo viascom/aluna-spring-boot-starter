@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -30,6 +30,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
+import net.dv8tion.jda.api.interactions.InteractionContextType
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFunction
 import org.slf4j.MDC
@@ -67,19 +68,44 @@ abstract class DiscordUserContextMenuHandler(name: String, localizations: Locali
         MDC.put("interaction", event.fullCommandName)
         MDC.put("uniqueId", uniqueId)
 
+        val integrationType = if (event.integrationOwners.isGuildIntegration) "GUILD" else "USER"
+        MDC.put("discord.integration.type", integrationType)
+
         guild = event.guild
-        guild?.let { MDC.put("discord.server", "${it.id} (${it.name})") }
-        channel = event.channel
-        channel?.let { MDC.put("discord.channel", it.id) }
+
+        isGuildIntegration = event.integrationOwners.isGuildIntegration
+        isUserIntegration = event.integrationOwners.isUserIntegration
+
+        isInBotDM = event.context == InteractionContextType.BOT_DM
+
+        if (event.integrationOwners.isGuildIntegration) {
+            guild?.let { MDC.put("discord.server", "${it.id} (${it.name})") }
+            MDC.put("discord.integration.guild", event.integrationOwners.authorizingGuildId)
+        } else {
+            guild?.let { MDC.put("discord.server", it.id) }
+            MDC.put("discord.integration.user", event.integrationOwners.authorizingUserId)
+        }
+
+        if (event.integrationOwners.isUserIntegration) {
+            MDC.put("discord.integration.user", event.integrationOwners.authorizingUserId)
+        }
+
         author = event.user
         MDC.put("discord.author", "${author.id} (${author.name})")
 
         userLocale = event.userLocale
+        MDC.put("discord.author_locale", userLocale.locale)
+
+        channel = event.channel
+        channel?.let { MDC.put("discord.channel", it.id) }
 
         if (guild != null) {
-            member = guild!!.getMember(author)
+            if (event.integrationOwners.isGuildIntegration) {
+                member = guild!!.getMember(author)
+            }
             guildChannel = event.guildChannel
             guildLocale = event.guildLocale
+            MDC.put("discord.server_locale", guildLocale.locale)
         }
         timeMarks?.add(INITIALIZED at markNow())
 

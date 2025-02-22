@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Viascom Ltd liab. Co
+ * Copyright 2025 Viascom Ltd liab. Co
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -100,6 +100,8 @@ fun Guild.getChannelsWithBotAndMember(member: Member, type: ArrayList<ChannelTyp
 fun ShardManager.getGuildTextChannel(guildId: String, channelId: String): MessageChannel? =
     this.getGuildById(guildId)?.getTextChannelById(channelId) ?: this.getGuildById(guildId)?.getNewsChannelById(channelId) ?: this.getGuildById(guildId)
         ?.getThreadChannelById(channelId) ?: this.getGuildById(guildId)?.getStageChannelById(channelId) ?: this.getGuildById(guildId)?.getVoiceChannelById(channelId)
+
+fun String.yetmir(tst: String): String = tst + this
 
 /**
  * Retrieves a guild voice channel
