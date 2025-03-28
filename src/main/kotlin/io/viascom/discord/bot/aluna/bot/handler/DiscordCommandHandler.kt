@@ -687,6 +687,10 @@ abstract class DiscordCommandHandler(
         channel = event.channel
         MDC.put("discord.channel", channel.id)
 
+        if (alunaProperties.command.printArgs) {
+            event.options.map { MDC.put("interaction.arg.${it.name.replace("-", "_")}", it.asString) }
+        }
+
         val mdcMap = MDC.getCopyOfContextMap()
 
         timeMarks?.add(INITIALIZED at markNow())
@@ -785,7 +789,10 @@ abstract class DiscordCommandHandler(
 
         try {
             MDC.setContextMap(mdcMap)
-            logger.info("Run command /${event.fullCommandName}" + if (alunaProperties.debug.showHashCode) " [${this@DiscordCommandHandler.hashCode()}]" else "")
+            logger.info(
+                "Run command /${event.fullCommandName}" +
+                        (if (alunaProperties.command.printArgs) " [" + event.options.joinToString { "${it.name}: ${it.asString}" } + "]" else "") +
+                        (if (alunaProperties.debug.showHashCode) " [${this@DiscordCommandHandler.hashCode()}]" else ""))
             runExecute(event)
             timeMarks?.add(RUN_EXECUTE at markNow())
             if (handleSubCommands) {
@@ -804,14 +811,16 @@ abstract class DiscordCommandHandler(
             }
         } finally {
             MDC.setContextMap(mdcMap)
-            exitCommand(event, endedWithException)
+            exitCommand(event, endedWithException, mdcMap)
         }
     }
 
     @JvmSynthetic
-    internal suspend fun exitCommand(event: SlashCommandInteractionEvent, endedWithException: Boolean) = withContext(AlunaDispatchers.Detached) {
+    internal suspend fun exitCommand(event: SlashCommandInteractionEvent, endedWithException: Boolean, mdcMap: Map<String, String>?) = withContext(AlunaDispatchers.Detached) {
         launch {
             timeMarks?.add(EXIT_COMMAND at markNow())
+
+            MDC.setContextMap(mdcMap)
 
             if (alunaProperties.debug.useTimeMarks && timeMarks != null) {
 

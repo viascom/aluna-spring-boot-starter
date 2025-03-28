@@ -22,6 +22,7 @@ aluna:
   thread:
     scoped-objects-timeout-scheduler: 5
   command:
+    print-args: true
     system-command:
       enabled: true
       enable-kotlin-script-evaluate: true

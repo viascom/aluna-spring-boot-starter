@@ -23,7 +23,7 @@ package io.viascom.discord.bot.aluna.bot.command
 
 import io.viascom.discord.bot.aluna.bot.CoroutineDiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
-import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandDataProvider
+import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandDataProviderHandler
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandEmojiProvider
 import io.viascom.discord.bot.aluna.configuration.Experimental
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
@@ -43,7 +43,7 @@ import net.dv8tion.jda.api.interactions.commands.Command
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 class SystemCommand(
-    private val dataProviders: List<SystemCommandDataProvider>,
+    private val dataProviders: List<SystemCommandDataProviderHandler>,
     private val moderatorIdProvider: ModeratorIdProvider,
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : CoroutineDiscordCommand(
@@ -56,9 +56,9 @@ class SystemCommand(
         this.beanCallOnDestroy = false
     }
 
-    private var selectedProvider: SystemCommandDataProvider? = null
+    private var selectedProvider: SystemCommandDataProviderHandler? = null
 
-    var commandOption = StringOption("command", "System command to execute", isRequired = true, isAutoComplete = true)
+    private var commandOption = StringOption("command", "System command to execute", isRequired = true, isAutoComplete = true)
     var argsOption = StringOption("args", "Arguments", isRequired = false, isAutoComplete = true)
 
     override fun initCommandOptions() {
@@ -99,43 +99,43 @@ class SystemCommand(
         }
 
         if (!selectedProvider!!.autoAcknowledgeEvent) {
-            selectedProvider!!.execute(event, null, this)
+            selectedProvider!!.runExecute(event, null, this)
         } else {
             val hook = event.deferReply(ephemeral).complete()
-            selectedProvider!!.execute(event, hook, this)
+            selectedProvider!!.runExecute(event, hook, this)
         }
     }
 
     override suspend fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
-        return selectedProvider?.onButtonInteraction(event) ?: true
+        return selectedProvider?.runOnButtonInteraction(event) ?: true
     }
 
     override suspend fun onButtonInteractionTimeout() {
-        selectedProvider?.onButtonInteractionTimeout()
+        selectedProvider?.runOnButtonInteractionTimeout()
     }
 
     override suspend fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
-        return selectedProvider?.onStringSelectMenuInteraction(event) ?: true
+        return selectedProvider?.runOnStringSelectMenuInteraction(event) ?: true
     }
 
     override suspend fun onStringSelectInteractionTimeout() {
-        selectedProvider?.onStringSelectInteractionTimeout()
+        selectedProvider?.runOnStringSelectInteractionTimeout()
     }
 
     override suspend fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
-        return selectedProvider?.onEntitySelectInteraction(event) ?: true
+        return selectedProvider?.runOnEntitySelectInteraction(event) ?: true
     }
 
     override suspend fun onEntitySelectInteractionTimeout() {
-        selectedProvider?.onEntitySelectInteractionTimeout()
+        selectedProvider?.runOnEntitySelectInteractionTimeout()
     }
 
     override suspend fun onModalInteraction(event: ModalInteractionEvent): Boolean {
-        return selectedProvider?.onModalInteraction(event) ?: true
+        return selectedProvider?.runOnModalInteraction(event) ?: true
     }
 
     override suspend fun onModalInteractionTimeout() {
-        selectedProvider?.onModalInteractionTimeout()
+        selectedProvider?.runOnModalInteractionTimeout()
     }
 
     override suspend fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
@@ -172,14 +172,14 @@ class SystemCommand(
         if (option == "args") {
             val possibleProvider = dataProviders.firstOrNull { it.id == event.getTypedOption(commandOption, "")!! && it.supportArgsAutoComplete }
             if (possibleProvider != null) {
-                possibleProvider.onArgsAutoComplete(event, this)
+                possibleProvider.runOnArgsAutoComplete(event, this)
             } else {
                 event.replyChoices().queue()
             }
         }
     }
 
-    private fun isModAllowed(selectedProvider: SystemCommandDataProvider): Boolean {
+    private fun isModAllowed(selectedProvider: SystemCommandDataProviderHandler): Boolean {
         val propertiesOverride = alunaProperties.command.systemCommand.allowedForModeratorsFunctions?.firstOrNull { it == selectedProvider.id }
 
         return when {

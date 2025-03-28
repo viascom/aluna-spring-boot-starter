@@ -33,6 +33,11 @@ class AlunaCommandProperties {
      */
     var enableServerSpecificCommands: Boolean = false
 
+    /**
+     * Print all defined arguments of a used command in the log
+     */
+    var printArgs: Boolean = false
+
     @NestedConfigurationProperty
     var systemCommand: SystemCommandProperties = SystemCommandProperties()
 
