@@ -27,7 +27,7 @@ ext {
     jacksonSpringBootVersion = "3.4.4"
     jacksonVersion = "2.18.3"
     jemojiVersion = "1.7.3"
-    gsonVersion = "2.12.1"
+    gsonVersion = "2.13.0"
     javabotblockapiVersion = "6.7.4_347"
     nanoidVersion = "1.0.1"
 }
