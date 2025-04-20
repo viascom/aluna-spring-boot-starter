@@ -191,7 +191,7 @@ open class AlunaAutoConfiguration {
     @ConditionalOnAlunaShutdownHook
     open fun defaultBotShutdownHook(shardManager: ShardManager, alunaProperties: AlunaProperties, discordBot: DiscordBot): BotShutdownHook {
         logger.debug("Enable DefaultBotShutdownHook")
-        return DefaultBotShutdownHook(shardManager, alunaProperties, discordBot)
+        return DefaultBotShutdownHook(shardManager, alunaProperties)
     }
 
     /**

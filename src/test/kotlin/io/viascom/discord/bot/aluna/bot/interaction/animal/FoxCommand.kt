@@ -24,6 +24,8 @@ package io.viascom.discord.bot.aluna.bot.interaction.animal
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.viascom.discord.bot.aluna.bot.DiscordSubCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
+import io.viascom.discord.bot.aluna.model.StringOption
+import io.viascom.discord.bot.aluna.util.addOption
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import okhttp3.*
@@ -34,6 +36,12 @@ import java.io.IOException
 class FoxCommand(
     private val objectMapper: ObjectMapper
 ) : DiscordSubCommand("fox", "Show image of a fox") {
+
+    private val animalOption = StringOption("animal", "Preferred animal", isRequired = false)
+
+    override fun initCommandOptions() {
+        this.addOption(animalOption)
+    }
 
     override fun execute(event: SlashCommandInteractionEvent) {
 

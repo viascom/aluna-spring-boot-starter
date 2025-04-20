@@ -26,9 +26,16 @@ import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.coQueue
 import io.viascom.discord.bot.aluna.util.toDiscordEmbed
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.interactions.IntegrationType
+import net.dv8tion.jda.api.interactions.InteractionContextType
 
 @Interaction
 class PingCommand : CoroutineDiscordCommand("ping", "Send a ping") {
+
+    override fun initCommandOptions() {
+        this.setContexts(InteractionContextType.ALL)
+        this.setIntegrationTypes(IntegrationType.GUILD_INSTALL, IntegrationType.USER_INSTALL)
+    }
 
     override suspend fun execute(event: SlashCommandInteractionEvent) {
         val startTime = System.currentTimeMillis()

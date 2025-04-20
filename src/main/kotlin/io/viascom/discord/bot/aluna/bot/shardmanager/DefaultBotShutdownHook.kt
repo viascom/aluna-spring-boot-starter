@@ -21,7 +21,6 @@
 
 package io.viascom.discord.bot.aluna.bot.shardmanager
 
-import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.Activity
@@ -29,8 +28,7 @@ import net.dv8tion.jda.api.sharding.ShardManager
 
 class DefaultBotShutdownHook(
     private val shardManager: ShardManager,
-    private val alunaProperties: AlunaProperties,
-    private val discordBot: DiscordBot
+    private val alunaProperties: AlunaProperties
 ) : BotShutdownHook() {
 
     override fun run() {

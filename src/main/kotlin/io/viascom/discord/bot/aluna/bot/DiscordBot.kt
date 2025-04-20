@@ -40,9 +40,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.JDA
+import net.dv8tion.jda.api.exceptions.ErrorResponseException
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.ICommandReference
+import net.dv8tion.jda.api.requests.ErrorResponse
+import net.dv8tion.jda.api.requests.Response
 import net.dv8tion.jda.api.requests.RestAction
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -347,7 +350,8 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        hook.retrieveOriginal().queue { registerMessageForButtonEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
+        hook.callbackResponse.message?.let { registerMessageForButtonEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
+            ?: throw ErrorResponseException.create(ErrorResponse.UNKNOWN_MESSAGE, (object : Response(null, 400, "", 0, emptySet()) {}))
     }
 
     /**
@@ -409,7 +413,8 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        hook.retrieveOriginal().queue { registerMessageForStringSelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
+        hook.callbackResponse.message?.let { registerMessageForStringSelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
+            ?: throw ErrorResponseException.create(ErrorResponse.UNKNOWN_MESSAGE, (object : Response(null, 400, "", 0, emptySet()) {}))
     }
 
     /**
@@ -471,7 +476,8 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        hook.retrieveOriginal().queue { registerMessageForEntitySelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
+        hook.callbackResponse.message?.let { registerMessageForEntitySelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
+            ?: throw ErrorResponseException.create(ErrorResponse.UNKNOWN_MESSAGE, (object : Response(null, 400, "", 0, emptySet()) {}))
     }
 
     /**
@@ -711,10 +717,10 @@ open class DiscordBot(
         action.queue({
             AlunaDispatchers.InternalScope.launch {
                 launch {
-                    hook.retrieveOriginal().queue {
+                    hook.callbackResponse.message?.let {
                         val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
                         interactionScope.setMessageIdForInstance(interaction.uniqueId, it.id)
-                    }
+                    } ?: throw ErrorResponseException.create(ErrorResponse.UNKNOWN_MESSAGE, (object : Response(null, 400, "", 0, emptySet()) {}))
                 }
 
                 launch(AlunaDispatchers.Detached) {
@@ -746,10 +752,10 @@ open class DiscordBot(
         action.queue({
             AlunaDispatchers.InternalScope.launch {
                 launch {
-                    it.retrieveOriginal().queue {
+                    it.callbackResponse.message?.let {
                         val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
                         interactionScope.setMessageIdForInstance(interaction.uniqueId, it.id)
-                    }
+                    } ?: throw ErrorResponseException.create(ErrorResponse.UNKNOWN_MESSAGE, (object : Response(null, 400, "", 0, emptySet()) {}))
                 }
 
                 launch(AlunaDispatchers.Detached) {

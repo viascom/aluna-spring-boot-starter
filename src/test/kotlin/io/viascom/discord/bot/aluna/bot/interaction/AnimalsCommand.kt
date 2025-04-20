@@ -27,6 +27,8 @@ import io.viascom.discord.bot.aluna.bot.SubCommandElement
 import io.viascom.discord.bot.aluna.bot.interaction.animal.BunnyCommand
 import io.viascom.discord.bot.aluna.bot.interaction.animal.ForestSubCommandGroup
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.interactions.IntegrationType
+import net.dv8tion.jda.api.interactions.InteractionContextType
 import org.springframework.beans.factory.annotation.Autowired
 
 @Interaction
@@ -38,6 +40,11 @@ class AnimalsCommand(
     @Autowired
     @SubCommandElement
     private lateinit var bunnyCommand: BunnyCommand
+
+    init {
+        this.setContexts(InteractionContextType.PRIVATE_CHANNEL)
+        this.setIntegrationTypes(IntegrationType.GUILD_INSTALL, IntegrationType.USER_INSTALL)
+    }
 
     override fun execute(event: SlashCommandInteractionEvent) {
 

@@ -18,11 +18,11 @@ plugins {
 ext {
     major = 1
     minor = 3
-    patch = 1
+    patch = 2
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
-    jdaVersion = "5.3.2"
+    jdaVersion = "5.4.0"
     retrofitVersion = "2.9.0"
     jacksonSpringBootVersion = "3.4.4"
     jacksonVersion = "2.18.3"

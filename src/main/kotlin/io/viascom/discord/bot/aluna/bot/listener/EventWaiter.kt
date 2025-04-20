@@ -22,7 +22,6 @@
 package io.viascom.discord.bot.aluna.bot.listener
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
-import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventListener
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.scope.DiscordContext
@@ -52,8 +51,7 @@ import kotlin.reflect.full.isSuperclassOf
 @Service
 @ConditionalOnJdaEnabled
 class EventWaiter(
-    private val discordBot: DiscordBot,
-    private val alunaProperties: AlunaProperties
+    alunaProperties: AlunaProperties
 ) : CoroutineEventListener {
 
     private var logger = LoggerFactory.getLogger(javaClass)
@@ -62,14 +60,13 @@ class EventWaiter(
     internal val waitingEvents: ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, ArrayList<WaitingEvent<GenericEvent>>>> = ConcurrentHashMap()
 
     @JvmSynthetic
-    internal val scheduledThreadPool =
-        AlunaThreadPool.getScheduledThreadPool(
-            1,
-            alunaProperties.thread.eventWaiterTimeoutScheduler,
-            Duration.ofSeconds(30),
-            "Aluna-Waiter-Timeout-Pool-%d",
-            true
-        )
+    internal val scheduledThreadPool = AlunaThreadPool.getScheduledThreadPool(
+        1,
+        alunaProperties.thread.eventWaiterTimeoutScheduler,
+        Duration.ofSeconds(30),
+        "Aluna-Waiter-Timeout-Pool-%d",
+        true
+    )
 
     override suspend fun onEvent(event: GenericEvent) {
         var eventClass: Class<*>? = event.javaClass
@@ -332,7 +329,7 @@ class EventWaiter(
             id,
             type,
             action,
-            { !it.user.isBot && it.messageIdLong == hook.retrieveOriginal().complete().idLong && (condition == null || condition.test(it)) },
+            { !it.user.isBot && it.messageIdLong == hook.callbackResponse.message?.idLong && (condition == null || condition.test(it)) },
             timeout,
             timeoutAction,
             stayActive
