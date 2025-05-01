@@ -18,7 +18,7 @@ plugins {
 ext {
     major = 1
     minor = 3
-    patch = 2
+    patch = 3
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
@@ -90,6 +90,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-json:$jacksonSpringBootVersion"
     implementation "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
 
     //====== Gson ======
     compileOnly "com.google.code.gson:gson:$gsonVersion"
