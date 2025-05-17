@@ -350,8 +350,14 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        hook.callbackResponse.message?.let { registerMessageForButtonEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
-            ?: throw ErrorResponseException.create(ErrorResponse.UNKNOWN_MESSAGE, (object : Response(null, 400, "", 0, emptySet()) {}))
+        if (hook.hasCallbackResponse()) {
+            hook.callbackResponse.message?.let { registerMessageForButtonEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
+                ?: throw ErrorResponseException.create(ErrorResponse.UNKNOWN_MESSAGE, (object : Response(null, 400, "", 0, emptySet()) {}))
+        } else {
+            hook.retrieveOriginal().queue {
+                registerMessageForButtonEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly)
+            }
+        }
     }
 
     /**
@@ -413,8 +419,15 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        hook.callbackResponse.message?.let { registerMessageForStringSelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
-            ?: throw ErrorResponseException.create(ErrorResponse.UNKNOWN_MESSAGE, (object : Response(null, 400, "", 0, emptySet()) {}))
+        if (hook.hasCallbackResponse()) {
+            hook.callbackResponse.message?.let { registerMessageForStringSelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
+                ?: throw ErrorResponseException.create(ErrorResponse.UNKNOWN_MESSAGE, (object : Response(null, 400, "", 0, emptySet()) {}))
+        } else {
+            hook.retrieveOriginal().queue {
+                registerMessageForStringSelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly)
+            }
+        }
+
     }
 
     /**
@@ -476,8 +489,14 @@ open class DiscordBot(
         authorIds: ArrayList<String>? = null,
         interactionUserOnly: Boolean = false
     ) {
-        hook.callbackResponse.message?.let { registerMessageForEntitySelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
-            ?: throw ErrorResponseException.create(ErrorResponse.UNKNOWN_MESSAGE, (object : Response(null, 400, "", 0, emptySet()) {}))
+        if (hook.hasCallbackResponse()) {
+            hook.callbackResponse.message?.let { registerMessageForEntitySelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly) }
+                ?: throw ErrorResponseException.create(ErrorResponse.UNKNOWN_MESSAGE, (object : Response(null, 400, "", 0, emptySet()) {}))
+        } else {
+            hook.retrieveOriginal().queue {
+                registerMessageForEntitySelectEvents(it.id, interaction, multiUse, duration, authorIds, interactionUserOnly)
+            }
+        }
     }
 
     /**

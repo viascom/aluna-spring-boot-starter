@@ -72,7 +72,7 @@ abstract class CoroutineDiscordCommand @JvmOverloads constructor(
      *
      * @param event The [SlashCommandInteractionEvent] that triggered this Command
      */
-    protected abstract suspend fun execute(event: SlashCommandInteractionEvent)
+    abstract suspend fun execute(event: SlashCommandInteractionEvent)
 
 
     /**
