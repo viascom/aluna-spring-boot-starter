@@ -118,8 +118,11 @@ object AlunaDispatchers {
         }
 
     private fun isJava21OrHigher(): Boolean {
-        val version = System.getProperty("java.version")
-        return version.split(".").firstOrNull()?.toIntOrNull()?.let { it >= 21 } ?: false
+        return try {
+            (System.getProperty("java.version").split(".").firstOrNull()?.toInt() ?: 0) >= 21
+        } catch (e: NumberFormatException) {
+            false
+        }
     }
 
     private fun getScope(
