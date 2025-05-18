@@ -46,11 +46,6 @@ class AlunaBotStatsProperties {
     var discordBotList: Configuration? = null
 
     /**
-     * discord-botlist.eu
-     */
-    var discordBotListEu: Configuration? = null
-
-    /**
      * Top.gg
      */
     var topgg: Configuration? = null

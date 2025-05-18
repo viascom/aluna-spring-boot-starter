@@ -31,22 +31,39 @@ object AlunaDispatchers {
 
     @JvmSynthetic
     internal lateinit var interactionScope: CoroutineScope
+        private set
 
     @JvmSynthetic
     internal lateinit var eventScope: CoroutineScope
+        private set
 
     @JvmSynthetic
     internal lateinit var detachedScope: CoroutineScope
+        private set
+
+    private var scopesInitialized = false
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @JvmSynthetic
-    internal fun initScopes(interactionParallelism: Int = -1, eventParallelism: Int = -1, detachedParallelism: Int = -1) {
+    internal fun initScopes(
+        interactionParallelism: Int = -1,
+        eventParallelism: Int = -1,
+        detachedParallelism: Int = -1,
+        cancelParent: Boolean = false
+    ) {
         val interactionScopeDispatcher = if (interactionParallelism == -1) Dispatchers.Default else Dispatchers.Default.limitedParallelism(interactionParallelism)
-        interactionScope = getScope("Aluna-Interaction", interactionScopeDispatcher, cancelParent = true)
+        interactionScope = getScope("Aluna-Interaction", interactionScopeDispatcher, cancelParent = cancelParent)
         val eventScopeDispatcher = if (eventParallelism == -1) Dispatchers.Default else Dispatchers.Default.limitedParallelism(eventParallelism)
-        eventScope = getScope("Aluna-Event", eventScopeDispatcher, cancelParent = true)
+        eventScope = getScope("Aluna-Event", eventScopeDispatcher, cancelParent = cancelParent)
         val detachedScopeDispatcher = if (detachedParallelism == -1) Dispatchers.VT else Dispatchers.VT.limitedParallelism(detachedParallelism)
-        detachedScope = getScope("Aluna-Detached", detachedScopeDispatcher, cancelParent = false)
+        detachedScope = getScope("Aluna-Detached", detachedScopeDispatcher, cancelParent = cancelParent)
+        scopesInitialized = true
+    }
+
+    private fun ensureScopesInitialized() {
+        if (!scopesInitialized) {
+            throw IllegalStateException("Scopes are not initialized. Please call initScopes() before accessing them.")
+        }
     }
 
     @get:JvmSynthetic
@@ -58,32 +75,51 @@ object AlunaDispatchers {
         get() = getScope("Aluna-Internal", Dispatchers.Default, cancelParent = true)
 
     val Interaction: CoroutineContext
-        get() = InteractionScope.coroutineContext
+        get() {
+            ensureScopesInitialized()
+            return InteractionScope.coroutineContext
+        }
 
     val InteractionScope: CoroutineScope
-        get() = interactionScope
+        get() {
+            ensureScopesInitialized()
+            return interactionScope
+        }
 
     val Event: CoroutineContext
-        get() = EventScope.coroutineContext
+        get() {
+            ensureScopesInitialized()
+            return EventScope.coroutineContext
+        }
 
     val EventScope: CoroutineScope
-        get() = eventScope
+        get() {
+            ensureScopesInitialized()
+            return eventScope
+        }
 
     val Detached: CoroutineContext
-        get() = DetachedScope.coroutineContext
+        get() {
+            ensureScopesInitialized()
+            return DetachedScope.coroutineContext
+        }
 
     val DetachedScope: CoroutineScope
-        get() = detachedScope
+        get() {
+            ensureScopesInitialized()
+            return detachedScope
+        }
 
     val Dispatchers.VT: CoroutineDispatcher
-        get() = if (isJava21()) {
+        get() = if (isJava21OrHigher()) {
             Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("AlunaVirtualDispatcher-worker-", 0L).factory()).asCoroutineDispatcher()
         } else {
             IO
         }
 
-    private fun isJava21(): Boolean {
-        return System.getProperty("java.version").startsWith("21")
+    private fun isJava21OrHigher(): Boolean {
+        val version = System.getProperty("java.version")
+        return version.split(".").firstOrNull()?.toIntOrNull()?.let { it >= 21 } ?: false
     }
 
     private fun getScope(
@@ -91,7 +127,7 @@ object AlunaDispatchers {
         dispatcher: CoroutineDispatcher = Dispatchers.Default,
         parent: Job = SupervisorJob(),
         errorHandler: CoroutineExceptionHandler? = null,
-        cancelParent: Boolean = false //TODO we should allow the developer to decide if the parent should be cancelled or not. As maybe we don't want to cancel the parent if the exception happens in a logger
+        cancelParent: Boolean = false
     ): CoroutineScope {
         val exceptionHandler = errorHandler ?: CoroutineExceptionHandler { _, throwable ->
             LoggerFactory.getLogger(AlunaDispatchers::class.java).also {
