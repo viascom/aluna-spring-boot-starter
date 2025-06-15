@@ -29,7 +29,7 @@ import org.slf4j.MDC
 import java.time.Duration
 import java.util.concurrent.*
 
-object AlunaThreadPool {
+public object AlunaThreadPool {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
@@ -48,7 +48,7 @@ object AlunaThreadPool {
      */
     @JvmOverloads
     @JvmStatic
-    fun getDynamicThreadPool(
+    public fun getDynamicThreadPool(
         nThreads: Int,
         ttl: Duration,
         name: String,
@@ -74,7 +74,7 @@ object AlunaThreadPool {
      */
     @JvmOverloads
     @JvmStatic
-    fun getDynamicThreadPool(
+    public fun getDynamicThreadPool(
         minThreads: Int,
         maxThreads: Int,
         ttl: Duration,
@@ -105,7 +105,7 @@ object AlunaThreadPool {
      */
     @JvmOverloads
     @JvmStatic
-    fun getDynamicSingleThreadPool(
+    public fun getDynamicSingleThreadPool(
         ttl: Duration, name: String,
         uncaughtExceptionHandler: (Thread, Throwable) -> (Unit) = { t, e -> logger.warn("Uncaught Exception in Thread: ${t.name} - ${e.message}\n${e.stackTraceToString()}") }
     ): ThreadPoolExecutor {
@@ -136,7 +136,7 @@ object AlunaThreadPool {
      */
     @JvmOverloads
     @JvmStatic
-    fun getScheduledThreadPool(
+    public fun getScheduledThreadPool(
         minThreads: Int,
         maxThreads: Int,
         ttl: Duration,
@@ -166,7 +166,7 @@ object AlunaThreadPool {
      */
     @JvmOverloads
     @JvmStatic
-    fun getFixedScheduledThreadPool(
+    public fun getFixedScheduledThreadPool(
         nThreads: Int,
         name: String,
         removeTaskOnCancelPolicy: Boolean = false,
@@ -195,7 +195,7 @@ object AlunaThreadPool {
      * @throws ExecutionException If an exception occurred during the [block] execution.
      * @throws InterruptedException If the thread was interrupted during execution.
      */
-    suspend fun <T> runWithTimeout(executor: ThreadPoolExecutor, timeout: Duration, block: () -> T): T {
+    public suspend fun <T> runWithTimeout(executor: ThreadPoolExecutor, timeout: Duration, block: () -> T): T {
         val future = CompletableFuture.supplyAsync({
             try {
                 block()
@@ -218,7 +218,7 @@ object AlunaThreadPool {
         }
     }
 
-    class AlunaThreadPoolExecutor(
+    public class AlunaThreadPoolExecutor(
         corePoolSize: Int,
         maximumPoolSize: Int,
         keepAliveTime: Duration,
@@ -229,8 +229,8 @@ object AlunaThreadPool {
 
         private val useFixedContext = (fixedContext != null)
 
-        companion object {
-            fun newWithCurrentMdc(
+        public companion object {
+            public fun newWithCurrentMdc(
                 corePoolSize: Int,
                 maximumPoolSize: Int,
                 keepAliveTime: Duration,
@@ -271,7 +271,7 @@ object AlunaThreadPool {
         }
     }
 
-    class AlunaScheduledThreadPoolExecutor(
+    public class AlunaScheduledThreadPoolExecutor(
         corePoolSize: Int,
         maximumPoolSize: Int,
         ttl: Duration? = null,
@@ -291,9 +291,9 @@ object AlunaThreadPool {
             }
         }
 
-        companion object {
+        public companion object {
             @JvmStatic
-            fun newWithCurrentMdc(
+            public fun newWithCurrentMdc(
                 corePoolSize: Int,
                 maximumPoolSize: Int,
                 ttl: Duration,

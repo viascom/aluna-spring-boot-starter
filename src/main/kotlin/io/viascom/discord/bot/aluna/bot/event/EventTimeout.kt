@@ -36,24 +36,24 @@ import kotlin.time.Duration.Companion.milliseconds
  * @see [Limit]
  * @see [Long.toTimeout]
  */
-sealed class EventTimeout(val time: Duration) {
+public sealed class EventTimeout(public val time: Duration) {
     /**
      * Inherit the timeout from the event manager
      */
-    object Inherit : EventTimeout(Duration.ZERO)
+    public data object Inherit : EventTimeout(Duration.ZERO)
 
     /**
      * Set a custom timeout from a [Duration]
      */
-    class Limit(time: Duration) : EventTimeout(time)
+    public class Limit(time: Duration) : EventTimeout(time)
 }
 
 /**
  * Convert this long to [EventTimeout.Limit] or [EventTimeout.Inherit] on null
  */
-fun Long?.toTimeout() = this?.milliseconds?.toTimeout()
+public fun Long?.toTimeout(): EventTimeout? = this?.milliseconds?.toTimeout()
 
 /**
  * Convert this long to [EventTimeout.Limit] or [EventTimeout.Inherit] on null
  */
-fun Duration?.toTimeout() = this?.let { EventTimeout.Limit(it) } ?: EventTimeout.Inherit
+public fun Duration?.toTimeout(): EventTimeout = this?.let { EventTimeout.Limit(it) } ?: EventTimeout.Inherit

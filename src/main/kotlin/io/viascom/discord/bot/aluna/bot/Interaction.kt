@@ -45,4 +45,4 @@ import org.springframework.stereotype.Component
  */
 @Component
 @InteractionScoped
-annotation class Interaction
+public annotation class Interaction

@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service
 @Service
 @ConditionalOnJdaEnabled
 @ConditionalOnBotBlockEnabled
-class BotBlockHandler(
+public class BotBlockHandler(
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties,
 ) : ApplicationListener<DiscordAllShardsReadyEvent> {

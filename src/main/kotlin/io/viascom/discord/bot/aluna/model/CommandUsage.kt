@@ -25,7 +25,7 @@ import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-data class CommandUsage(
+public data class CommandUsage(
     val command: String,
     val instance: String,
     val clazz: Class<out InteractionScopedObject>,

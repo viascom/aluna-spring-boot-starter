@@ -26,4 +26,4 @@ import java.lang.annotation.Inherited
 
 @ConditionalOnProperty(name = ["discord.fast-mutual-guild-cache.enabled"], prefix = "aluna", matchIfMissing = false)
 @Inherited
-annotation class ConditionalOnFastMutualGuildCacheEnabled
+public annotation class ConditionalOnFastMutualGuildCacheEnabled

@@ -46,7 +46,7 @@ import java.awt.Color
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class StatusChangerProvider(
+public class StatusChangerProvider(
     private val shardManager: ShardManager,
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : SystemCommandDataProvider(

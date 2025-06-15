@@ -52,82 +52,82 @@ import kotlin.math.ceil
  * It uses the [EventWaiter] to wait for user interactions.
  *
  */
-class AlunaPaginator(
-    val eventWaiter: EventWaiter,
-    val eventWaiterId: String = NanoId.generate(),
+public class AlunaPaginator(
+    public val eventWaiter: EventWaiter,
+    public val eventWaiterId: String = NanoId.generate(),
 
     /**
      * Which users are allowed to use the Paginator. If null, all users are allowed.
      */
-    val allowedUsers: List<User>? = null,
+    public val allowedUsers: List<User>? = null,
 
-    val author: Function<CurrentPage, String?>? = null,
-    val authorIcon: Function<CurrentPage, String?>? = null,
-    val authorUrl: Function<CurrentPage, String?>? = null,
-    val thumbnail: Function<CurrentPage, String?>? = null,
-    val image: Function<CurrentPage, String?>? = null,
-    val title: Function<CurrentPage, String>? = null,
-    val color: Function<CurrentPage, Color> = Function { Color.DARK_GRAY },
-    val titleLink: Function<CurrentPage, String?>? = null,
-    val description: Function<CurrentPage, String>? = null,
-    val timestamp: TemporalAccessor? = null,
+    public val author: Function<CurrentPage, String?>? = null,
+    public val authorIcon: Function<CurrentPage, String?>? = null,
+    public val authorUrl: Function<CurrentPage, String?>? = null,
+    public val thumbnail: Function<CurrentPage, String?>? = null,
+    public val image: Function<CurrentPage, String?>? = null,
+    public val title: Function<CurrentPage, String>? = null,
+    public val color: Function<CurrentPage, Color> = Function { Color.DARK_GRAY },
+    public val titleLink: Function<CurrentPage, String?>? = null,
+    public val description: Function<CurrentPage, String>? = null,
+    public val timestamp: TemporalAccessor? = null,
 
     /**
      * This field gets added as the last field to every page.
      */
-    val footerElement: Function<CurrentPage, Field?>? = null,
+    public val footerElement: Function<CurrentPage, Field?>? = null,
 
     /**
      * If showFooter is set to true, this string will be used in the footer of the embed.
      */
-    val onPageText: Function<CurrentPage, String>? = null,
+    public val onPageText: Function<CurrentPage, String>? = null,
 
-    var elements: ArrayList<Field> = arrayListOf(),
+    public var elements: ArrayList<Field> = arrayListOf(),
 
-    val columns: Columns = Columns.THREE,
-    val elementsPerPage: Int = 15,
+    public val columns: Columns = Columns.THREE,
+    public val elementsPerPage: Int = 15,
 
-    val showButtons: Boolean = true,
-    val showBulkSkipButtons: Boolean = false,
-    val bulkSkipNumber: Int = 5,
-    val showSelections: Boolean = false,
-    val showCancel: Boolean = true,
-    val showFooter: Boolean = false,
-    val wrapPageEnds: Boolean = true,
+    public val showButtons: Boolean = true,
+    public val showBulkSkipButtons: Boolean = false,
+    public val bulkSkipNumber: Int = 5,
+    public val showSelections: Boolean = false,
+    public val showCancel: Boolean = true,
+    public val showFooter: Boolean = false,
+    public val wrapPageEnds: Boolean = true,
 
-    val timeout: Duration? = Duration.ofMinutes(10),
-    val messageCompleteAction: Consumer<Message> = Consumer { }
+    public val timeout: Duration? = Duration.ofMinutes(10),
+    public val messageCompleteAction: Consumer<Message> = Consumer { }
 ) {
-    var currentPageNumber: Int = 1
+    public var currentPageNumber: Int = 1
         @JvmSynthetic internal set
 
-    var emptyFieldPlaceholder = "##EMPTY##"
-    var timeoutAction: Consumer<Message> = Consumer { message ->
+    public var emptyFieldPlaceholder: String = "##EMPTY##"
+    public var timeoutAction: Consumer<Message> = Consumer { message ->
         message.editMessage(renderPage(currentPageNumber, MessageEditBuilder())).removeComponents().queue()
     }
-    var cancelAction: Consumer<Message> = timeoutAction
+    public var cancelAction: Consumer<Message> = timeoutAction
 
-    var bulkLeftButton: Button = Button.primary("big-left", "<<")
-    var leftButton: Button = Button.primary("left", "<")
-    var bulkRightButton: Button = Button.primary("big-right", ">>")
-    var rightButton: Button = Button.primary("right", ">")
-    var cancelButton: Button = Button.danger("cancel", "Cancel")
+    public var bulkLeftButton: Button = Button.primary("big-left", "<<")
+    public var leftButton: Button = Button.primary("left", "<")
+    public var bulkRightButton: Button = Button.primary("big-right", ">>")
+    public var rightButton: Button = Button.primary("right", ">")
+    public var cancelButton: Button = Button.danger("cancel", "Cancel")
 
-    var selectItem: Function<Int, SelectOption> = Function { SelectOption.of("Page $it", "$it") }
+    public var selectItem: Function<Int, SelectOption> = Function { SelectOption.of("Page $it", "$it") }
 
-    val totalPages: Int
+    public val totalPages: Int
         get() = ceil(elements.size.toDouble() / elementsPerPage).toInt()
 
     init {
         checkElementsPerPageAmount()
     }
 
-    fun addElement(field: Field) = elements.add(field)
+    public fun addElement(field: Field): Boolean = elements.add(field)
 
     @JvmOverloads
-    fun addElement(name: String, value: String, inline: Boolean = true) = elements.add(Field(name, value, inline))
+    public fun addElement(name: String, value: String, inline: Boolean = true): Boolean = elements.add(Field(name, value, inline))
 
-    fun addElements(fields: Collection<Field>) = elements.addAll(fields)
+    public fun addElements(fields: Collection<Field>): Boolean = elements.addAll(fields)
 
     /**
      * Starts pagination on page 1 in the provided [MessageChannel][net.dv8tion.jda.api.entities.channel.middleman.MessageChannel].
@@ -137,7 +137,7 @@ class AlunaPaginator(
      * @return MessageCreateData
      */
     @JvmOverloads
-    fun display(channel: MessageChannel, pageNum: Int = 1): MessageCreateData {
+    public fun display(channel: MessageChannel, pageNum: Int = 1): MessageCreateData {
         val cleanedPageNum = cleanPageNumInput(pageNum)
         val msg = renderPage(cleanedPageNum, MessageCreateBuilder())
         initialize(channel.sendMessage(msg), cleanedPageNum)
@@ -152,7 +152,7 @@ class AlunaPaginator(
      * @param pageNum The page number to begin on
      */
     @JvmOverloads
-    fun display(message: Message, pageNum: Int = 1): MessageEditData {
+    public fun display(message: Message, pageNum: Int = 1): MessageEditData {
         val cleanedPageNum = cleanPageNumInput(pageNum)
         val msg = renderPage(cleanedPageNum, MessageEditBuilder())
         initialize(message.editMessage(msg), cleanedPageNum)
@@ -167,7 +167,7 @@ class AlunaPaginator(
      * @param pageNum The page number to begin on
      */
     @JvmOverloads
-    fun display(hook: InteractionHook, pageNum: Int = 1): MessageEditData {
+    public fun display(hook: InteractionHook, pageNum: Int = 1): MessageEditData {
         val cleanedPageNum = cleanPageNumInput(pageNum)
         val msg = renderPage(cleanedPageNum, MessageEditBuilder())
         initialize(hook.editOriginal(msg), cleanedPageNum)
@@ -417,199 +417,199 @@ class AlunaPaginator(
         }
     }
 
-    inner class CurrentPage(val number: Int, val total: Int, val start: Int, val end: Int)
+    public inner class CurrentPage(public val number: Int, public val total: Int, public val start: Int, public val end: Int)
 
-    enum class Columns(val amount: Int) {
+    public enum class Columns(public val amount: Int) {
         ONE(1),
         TWO(2),
         THREE(3)
     }
 
-    class Builder {
+    public class Builder {
         @JvmSynthetic
-        var eventWaiter: EventWaiter? = null
+        public var eventWaiter: EventWaiter? = null
             private set
 
-        fun eventWaiter(eventWaiter: EventWaiter) = apply { this.eventWaiter = eventWaiter }
+        public fun eventWaiter(eventWaiter: EventWaiter): Builder = apply { this.eventWaiter = eventWaiter }
 
         @JvmSynthetic
-        var eventWaiterId: String = NanoId.generate()
+        public var eventWaiterId: String = NanoId.generate()
             private set
 
-        fun eventWaiterId(eventWaiterId: String) = apply { this.eventWaiterId = eventWaiterId }
+        public fun eventWaiterId(eventWaiterId: String): Builder = apply { this.eventWaiterId = eventWaiterId }
 
         /**
          * Which users are allowed to use the Paginator. If null, all users are allowed.
          */
         @JvmSynthetic
-        var allowedUsers: List<User>? = null
+        public var allowedUsers: List<User>? = null
             private set
 
         /**
          * Which users are allowed to use the Paginator. If null, all users are allowed.
          */
-        fun allowedUsers(allowedUsers: List<User>?) = apply { this.allowedUsers = allowedUsers }
+        public fun allowedUsers(allowedUsers: List<User>?): Builder = apply { this.allowedUsers = allowedUsers }
 
         @JvmSynthetic
-        var author: Function<CurrentPage, String?>? = null
+        public var author: Function<CurrentPage, String?>? = null
             private set
 
-        fun author(author: Function<CurrentPage, String?>?) = apply { this.author = author }
+        public fun author(author: Function<CurrentPage, String?>?): Builder = apply { this.author = author }
 
         @JvmSynthetic
-        var authorIcon: Function<CurrentPage, String?>? = null
+        public var authorIcon: Function<CurrentPage, String?>? = null
             private set
 
-        fun authorIcon(authorIcon: Function<CurrentPage, String?>?) = apply { this.authorIcon = authorIcon }
+        public fun authorIcon(authorIcon: Function<CurrentPage, String?>?): Builder = apply { this.authorIcon = authorIcon }
 
         @JvmSynthetic
-        var authorUrl: Function<CurrentPage, String?>? = null
+        public var authorUrl: Function<CurrentPage, String?>? = null
             private set
 
-        fun authorUrl(authorUrl: Function<CurrentPage, String?>?) = apply { this.authorUrl = authorUrl }
+        public fun authorUrl(authorUrl: Function<CurrentPage, String?>?): Builder = apply { this.authorUrl = authorUrl }
 
         @JvmSynthetic
-        var thumbnail: Function<CurrentPage, String?>? = null
+        public var thumbnail: Function<CurrentPage, String?>? = null
             private set
 
-        fun thumbnail(thumbnail: Function<CurrentPage, String?>?) = apply { this.thumbnail = thumbnail }
+        public fun thumbnail(thumbnail: Function<CurrentPage, String?>?): Builder = apply { this.thumbnail = thumbnail }
 
         @JvmSynthetic
-        var image: Function<CurrentPage, String?>? = null
+        public var image: Function<CurrentPage, String?>? = null
             private set
 
-        fun image(image: Function<CurrentPage, String?>?) = apply { this.image = image }
+        public fun image(image: Function<CurrentPage, String?>?): Builder = apply { this.image = image }
 
         @JvmSynthetic
-        var title: Function<CurrentPage, String>? = null
+        public var title: Function<CurrentPage, String>? = null
             private set
 
-        fun title(title: Function<CurrentPage, String>?) = apply { this.title = title }
+        public fun title(title: Function<CurrentPage, String>?): Builder = apply { this.title = title }
 
         @JvmSynthetic
-        var color: Function<CurrentPage, Color> = Function { Color.DARK_GRAY }
+        public var color: Function<CurrentPage, Color> = Function { Color.DARK_GRAY }
             private set
 
-        fun color(color: Function<CurrentPage, Color>) = apply { this.color = color }
+        public fun color(color: Function<CurrentPage, Color>): Builder = apply { this.color = color }
 
         @JvmSynthetic
-        var titleLink: Function<CurrentPage, String?>? = null
+        public var titleLink: Function<CurrentPage, String?>? = null
             private set
 
-        fun titleLink(titleLink: Function<CurrentPage, String?>?) = apply { this.titleLink = titleLink }
+        public fun titleLink(titleLink: Function<CurrentPage, String?>?): Builder = apply { this.titleLink = titleLink }
 
         @JvmSynthetic
-        var description: Function<CurrentPage, String>? = null
+        public var description: Function<CurrentPage, String>? = null
             private set
 
-        fun description(description: Function<CurrentPage, String>?) = apply { this.description = description }
+        public fun description(description: Function<CurrentPage, String>?): Builder = apply { this.description = description }
 
         @JvmSynthetic
-        var timestamp: TemporalAccessor? = null
+        public var timestamp: TemporalAccessor? = null
             private set
 
-        fun timestamp(timestamp: TemporalAccessor?) = apply { this.timestamp = timestamp }
+        public fun timestamp(timestamp: TemporalAccessor?): Builder = apply { this.timestamp = timestamp }
 
         /**
          * This field gets added as last field to every page.
          */
         @JvmSynthetic
-        var footerElement: Function<CurrentPage, Field?>? = null
+        public var footerElement: Function<CurrentPage, Field?>? = null
             private set
 
-        fun footerElement(footerElement: Function<CurrentPage, Field?>?) = apply { this.footerElement = footerElement }
+        public fun footerElement(footerElement: Function<CurrentPage, Field?>?): Builder = apply { this.footerElement = footerElement }
 
         /**
          * If showFooter is set to true, this string will be used in the footer of the embed.
          */
         @JvmSynthetic
-        var onPageText: Function<CurrentPage, String>? = null
+        public var onPageText: Function<CurrentPage, String>? = null
             private set
 
-        fun onPageText(onPageText: Function<CurrentPage, String>?) = apply { this.onPageText = onPageText }
+        public fun onPageText(onPageText: Function<CurrentPage, String>?): Builder = apply { this.onPageText = onPageText }
 
         @JvmSynthetic
-        var elements: ArrayList<Field> = arrayListOf()
+        public var elements: ArrayList<Field> = arrayListOf()
             private set
 
-        fun elements(elements: ArrayList<Field>) = apply { this.elements = elements }
+        public fun elements(elements: ArrayList<Field>): Builder = apply { this.elements = elements }
 
-        fun addElement(field: Field) = elements.add(field)
+        public fun addElement(field: Field): Boolean = elements.add(field)
 
         @JvmOverloads
-        fun addElement(name: String, value: String, inline: Boolean = true) = elements.add(Field(name, value, inline))
+        public fun addElement(name: String, value: String, inline: Boolean = true): Boolean = elements.add(Field(name, value, inline))
 
-        fun addElements(fields: Collection<Field>) = elements.addAll(fields)
-
-        @JvmSynthetic
-        var columns: Columns = Columns.THREE
-            private set
-
-        fun columns(columns: Columns) = apply { this.columns = columns }
+        public fun addElements(fields: Collection<Field>): Boolean = elements.addAll(fields)
 
         @JvmSynthetic
-        var elementsPerPage: Int = 15
+        public var columns: Columns = Columns.THREE
             private set
 
-        fun elementsPerPage(elementsPerPage: Int) = apply { this.elementsPerPage = elementsPerPage }
+        public fun columns(columns: Columns): Builder = apply { this.columns = columns }
 
         @JvmSynthetic
-        var showButtons: Boolean = true
+        public var elementsPerPage: Int = 15
             private set
 
-        fun showButtons(showButtons: Boolean) = apply { this.showButtons = showButtons }
+        public fun elementsPerPage(elementsPerPage: Int): Builder = apply { this.elementsPerPage = elementsPerPage }
 
         @JvmSynthetic
-        var showBulkSkipButtons: Boolean = false
+        public var showButtons: Boolean = true
             private set
 
-        fun showBulkSkipButtons(showBulkSkipButtons: Boolean) = apply { this.showBulkSkipButtons = showBulkSkipButtons }
+        public fun showButtons(showButtons: Boolean): Builder = apply { this.showButtons = showButtons }
 
         @JvmSynthetic
-        var bulkSkipNumber: Int = 5
+        public var showBulkSkipButtons: Boolean = false
             private set
 
-        fun bulkSkipNumber(bulkSkipNumber: Int) = apply { this.bulkSkipNumber = bulkSkipNumber }
+        public fun showBulkSkipButtons(showBulkSkipButtons: Boolean): Builder = apply { this.showBulkSkipButtons = showBulkSkipButtons }
 
         @JvmSynthetic
-        var showSelections: Boolean = false
+        public var bulkSkipNumber: Int = 5
             private set
 
-        fun showSelections(showSelections: Boolean) = apply { this.showSelections = showSelections }
+        public fun bulkSkipNumber(bulkSkipNumber: Int): Builder = apply { this.bulkSkipNumber = bulkSkipNumber }
 
         @JvmSynthetic
-        var showCancel: Boolean = true
+        private var showSelections: Boolean = false
             private set
 
-        fun showCancel(showCancel: Boolean) = apply { this.showCancel = showCancel }
+        public fun showSelections(showSelections: Boolean): Builder = apply { this.showSelections = showSelections }
 
         @JvmSynthetic
-        var showFooter: Boolean = false
+        public var showCancel: Boolean = true
             private set
 
-        fun showFooter(showFooter: Boolean) = apply { this.showFooter = showFooter }
+        public fun showCancel(showCancel: Boolean): Builder = apply { this.showCancel = showCancel }
 
         @JvmSynthetic
-        var wrapPageEnds: Boolean = true
+        public var showFooter: Boolean = false
             private set
 
-        fun wrapPageEnds(wrapPageEnds: Boolean) = apply { this.wrapPageEnds = wrapPageEnds }
+        public fun showFooter(showFooter: Boolean): Builder = apply { this.showFooter = showFooter }
+
+        @JvmSynthetic
+        public var wrapPageEnds: Boolean = true
+            private set
+
+        public fun wrapPageEnds(wrapPageEnds: Boolean): Builder = apply { this.wrapPageEnds = wrapPageEnds }
 
 
         @JvmSynthetic
-        var timeout: Duration? = Duration.ofMinutes(10)
+        public var timeout: Duration? = Duration.ofMinutes(10)
             private set
 
-        fun timeout(timeout: Duration) = apply { this.timeout = timeout }
+        public fun timeout(timeout: Duration): Builder = apply { this.timeout = timeout }
 
         @JvmSynthetic
-        var messageCompleteAction: Consumer<Message> = Consumer { }
+        public var messageCompleteAction: Consumer<Message> = Consumer { }
             private set
 
-        fun messageCompleteAction(messageCompleteAction: Consumer<Message>) = apply { this.messageCompleteAction = messageCompleteAction }
+        public fun messageCompleteAction(messageCompleteAction: Consumer<Message>): Builder = apply { this.messageCompleteAction = messageCompleteAction }
 
 
-        fun build(): AlunaPaginator {
+        public fun build(): AlunaPaginator {
             if (eventWaiter == null) {
                 throw IllegalStateException("eventWaiter must be set")
             }

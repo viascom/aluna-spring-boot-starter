@@ -45,7 +45,7 @@ import java.awt.Color
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class GenerateEmojiEnumProvider(
+public class GenerateEmojiEnumProvider(
     private val shardManager: ShardManager
 ) : SystemCommandDataProvider(
     "generate_emoji_enum",

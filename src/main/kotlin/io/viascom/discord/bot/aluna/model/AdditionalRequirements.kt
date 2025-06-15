@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.model
 
-class AdditionalRequirements(val failedRequirements: HashMap<String, Any> = hashMapOf()) {
-    val failed: Boolean
+public class AdditionalRequirements(public val failedRequirements: HashMap<String, Any> = hashMapOf()) {
+    public val failed: Boolean
         get() = failedRequirements.isNotEmpty()
 }

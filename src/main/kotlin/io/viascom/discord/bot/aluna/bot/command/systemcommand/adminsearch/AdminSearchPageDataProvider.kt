@@ -30,16 +30,16 @@ import net.dv8tion.jda.api.entities.channel.Channel
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji
 import net.dv8tion.jda.api.interactions.commands.Command
 
-abstract class AdminSearchPageDataProvider(
-    val pageId: String,
-    val pageName: String,
-    val supportedTypes: ArrayList<AdminSearchDataProvider.AdminSearchType>
+public abstract class AdminSearchPageDataProvider(
+    public val pageId: String,
+    public val pageName: String,
+    public val supportedTypes: ArrayList<AdminSearchDataProvider.AdminSearchType>
 ) {
 
-    open fun onUserRequest(discordUser: User, embedBuilder: EmbedBuilder) {}
-    open fun onServerRequest(discordServer: Guild, embedBuilder: EmbedBuilder) {}
-    open fun onRoleRequest(discordRole: Role, embedBuilder: EmbedBuilder) {}
-    open fun onChannelRequest(discordChannel: Channel, embedBuilder: EmbedBuilder) {}
-    open fun onEmoteRequest(discordEmote: RichCustomEmoji, embedBuilder: EmbedBuilder) {}
-    open fun onInteractionCommandRequest(discordCommand: Command, embedBuilder: EmbedBuilder) {}
+    public open fun onUserRequest(discordUser: User, embedBuilder: EmbedBuilder) {}
+    public open fun onServerRequest(discordServer: Guild, embedBuilder: EmbedBuilder) {}
+    public open fun onRoleRequest(discordRole: Role, embedBuilder: EmbedBuilder) {}
+    public open fun onChannelRequest(discordChannel: Channel, embedBuilder: EmbedBuilder) {}
+    public open fun onEmoteRequest(discordEmote: RichCustomEmoji, embedBuilder: EmbedBuilder) {}
+    public open fun onInteractionCommandRequest(discordCommand: Command, embedBuilder: EmbedBuilder) {}
 }

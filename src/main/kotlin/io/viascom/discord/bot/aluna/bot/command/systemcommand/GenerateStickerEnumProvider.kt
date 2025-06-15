@@ -45,7 +45,7 @@ import java.awt.Color
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class GenerateStickerEnumProvider(
+public class GenerateStickerEnumProvider(
     private val shardManager: ShardManager
 ) : SystemCommandDataProvider(
     "generate_sticker_enum",

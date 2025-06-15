@@ -48,7 +48,7 @@ import kotlin.reflect.KClass
 
 @Service
 @ConditionalOnJdaEnabled
-class EventPublisher(
+public class EventPublisher(
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val alunaProperties: AlunaProperties
 ) {

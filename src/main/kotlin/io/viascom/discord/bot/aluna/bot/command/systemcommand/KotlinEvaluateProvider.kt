@@ -42,7 +42,7 @@ import kotlin.math.min
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 @ConditionalOnProperty(name = ["command.system-command.enable-kotlin-script-evaluate"], prefix = "aluna", matchIfMissing = false)
-class KotlinEvaluateProvider(
+public class KotlinEvaluateProvider(
     private val kotlinScriptService: KotlinScriptV2Service,
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : SystemCommandDataProvider(

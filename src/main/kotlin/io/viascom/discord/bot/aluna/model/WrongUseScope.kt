@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.model
 
-class WrongUseScope(var subCommandServerOnly: Boolean = false) {
-    val wrongUseScope: Boolean
+public class WrongUseScope(public var subCommandServerOnly: Boolean = false) {
+    public val wrongUseScope: Boolean
         get() = subCommandServerOnly
 }

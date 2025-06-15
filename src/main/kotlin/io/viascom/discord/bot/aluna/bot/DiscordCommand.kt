@@ -33,7 +33,7 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFunction
 
-abstract class DiscordCommand @JvmOverloads constructor(
+public abstract class DiscordCommand @JvmOverloads constructor(
     name: String,
     description: String,
 
@@ -78,7 +78,7 @@ abstract class DiscordCommand @JvmOverloads constructor(
     /**
      * On destroy gets called, when the object gets destroyed after the defined beanTimoutDelay.
      */
-    open fun onDestroy() {
+    public open fun onDestroy() {
     }
 
     //======= Button Interaction =======
@@ -90,14 +90,14 @@ abstract class DiscordCommand @JvmOverloads constructor(
      * @param event [ButtonInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
+    public open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a button event observer duration timeout is reached.
      */
-    open fun onButtonInteractionTimeout() {
+    public open fun onButtonInteractionTimeout() {
     }
 
     //======= Select Interaction =======
@@ -109,14 +109,14 @@ abstract class DiscordCommand @JvmOverloads constructor(
      * @param event [StringSelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
+    public open fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-    open fun onStringSelectInteractionTimeout() {
+    public open fun onStringSelectInteractionTimeout() {
     }
 
     /**
@@ -126,14 +126,14 @@ abstract class DiscordCommand @JvmOverloads constructor(
      * @param event [EntitySelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
+    public open fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-    open fun onEntitySelectInteractionTimeout() {
+    public open fun onEntitySelectInteractionTimeout() {
     }
 
     //======= Modal Interaction =======
@@ -145,24 +145,24 @@ abstract class DiscordCommand @JvmOverloads constructor(
      * @param event [ModalInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open fun onModalInteraction(event: ModalInteractionEvent): Boolean {
+    public open fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a modal event observer duration timeout is reached.
      */
-    open fun onModalInteractionTimeout() {
+    public open fun onModalInteractionTimeout() {
     }
 
     //======= Auto Complete =======
 
-    open fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
+    public open fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
     }
 
 
     override suspend fun runExecute(event: SlashCommandInteractionEvent) = execute(event)
-    override suspend fun runOnDestroy() = onDestroy()
+    override suspend fun runOnDestroy(): Unit = onDestroy()
     override suspend fun runOnButtonInteraction(event: ButtonInteractionEvent) = onButtonInteraction(event)
     override suspend fun runOnButtonInteractionTimeout() = onButtonInteractionTimeout()
     override suspend fun runOnStringSelectInteraction(event: StringSelectInteractionEvent) = onStringSelectInteraction(event)

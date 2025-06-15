@@ -33,19 +33,19 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
-class ObserveInteraction(
-    val interaction: KClass<out DiscordInteractionHandler>,
-    val uniqueId: String?,
-    val startTime: LocalDateTime,
-    val duration: Duration,
-    val stayActive: Boolean = false,
-    val authorIds: ArrayList<String>? = null,
-    val interactionUserOnly: Boolean = false,
-    var timeoutTask: ScheduledFuture<*>? = null
+public class ObserveInteraction(
+    public val interaction: KClass<out DiscordInteractionHandler>,
+    public val uniqueId: String?,
+    public val startTime: LocalDateTime,
+    public val duration: Duration,
+    public val stayActive: Boolean = false,
+    public val authorIds: ArrayList<String>? = null,
+    public val interactionUserOnly: Boolean = false,
+    public var timeoutTask: ScheduledFuture<*>? = null
 ) {
 
-    companion object {
-        fun scheduleButtonTimeout(
+    public companion object {
+        public fun scheduleButtonTimeout(
             interaction: DiscordInteractionHandler,
             duration: Duration,
             messageId: String,
@@ -68,7 +68,7 @@ class ObserveInteraction(
             }, duration.seconds, TimeUnit.SECONDS)
         }
 
-        fun scheduleStringSelectTimeout(
+        public fun scheduleStringSelectTimeout(
             interaction: DiscordInteractionHandler,
             duration: Duration,
             messageId: String,
@@ -91,7 +91,7 @@ class ObserveInteraction(
             }, duration.seconds, TimeUnit.SECONDS)
         }
 
-        fun scheduleEntitySelectTimeout(
+        public fun scheduleEntitySelectTimeout(
             interaction: DiscordInteractionHandler,
             duration: Duration,
             messageId: String,
@@ -114,7 +114,7 @@ class ObserveInteraction(
             }, duration.seconds, TimeUnit.SECONDS)
         }
 
-        fun scheduleModalTimeout(
+        public fun scheduleModalTimeout(
             interaction: DiscordInteractionHandler,
             duration: Duration,
             authorId: String,

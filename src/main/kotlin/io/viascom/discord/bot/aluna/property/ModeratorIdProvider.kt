@@ -25,7 +25,7 @@ package io.viascom.discord.bot.aluna.property
  * Moderator id provider
  *
  */
-interface ModeratorIdProvider {
+public interface ModeratorIdProvider {
 
     /**
      * Get moderator ids.
@@ -33,7 +33,7 @@ interface ModeratorIdProvider {
      *
      * @return List of moderators (Discord user ids)
      */
-    fun getModeratorIds(): ArrayList<Long>
+    public fun getModeratorIds(): ArrayList<Long>
 
     /**
      * Get moderator ids based on a command path.
@@ -41,6 +41,6 @@ interface ModeratorIdProvider {
      *
      * @return List of moderators for the given command path (Discord user ids)
      */
-    fun getModeratorIdsForCommandPath(commandPath: String): ArrayList<Long>
+    public fun getModeratorIdsForCommandPath(commandPath: String): ArrayList<Long>
 
 }

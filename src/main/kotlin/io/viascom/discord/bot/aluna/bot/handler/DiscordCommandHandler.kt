@@ -36,6 +36,7 @@ import io.viascom.discord.bot.aluna.property.OwnerIdProvider
 import io.viascom.discord.bot.aluna.util.InternalUtil
 import io.viascom.discord.bot.aluna.util.TimestampFormat
 import io.viascom.discord.bot.aluna.util.toDiscordTimestamp
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -76,21 +77,21 @@ import kotlin.reflect.jvm.isAccessible
 import kotlin.time.TimeSource.Monotonic.markNow
 
 
-abstract class DiscordCommandHandler(
+public abstract class DiscordCommandHandler(
     name: String,
     description: String,
 
     /**
      * Define a [LocalizationFunction] for this command. If set no null, Aluna will take the implementation of [DiscordInteractionLocalization].
      */
-    open var localizations: LocalizationFunction? = null,
+    public open var localizations: LocalizationFunction? = null,
 
     /**
      * If enabled, Aluna will register an event listener for auto complete requests and link it to this command.
      *
      * If such an event gets triggered, the method [runOnAutoCompleteEvent] will be invoked.
      */
-    open val observeAutoComplete: Boolean = false,
+    public open val observeAutoComplete: Boolean = false,
 
     /**
      * If enabled, Aluna will automatically forward the command execution as well as interaction events to the matching sub command.
@@ -100,32 +101,32 @@ abstract class DiscordCommandHandler(
      *
      * The Top-Level command can not be used (limitation of Discord), but Aluna will nevertheless always call [execute] on the top-level command before executing the sub command method if you need to do some general stuff.
      */
-    open val handleSubCommands: Boolean = false,
+    public open val handleSubCommands: Boolean = false,
 
     /**
      * If enabled, Aluna will direct matching interactions to this command.
      * If a matching instance of this command (based on uniqueId or message) is found, the corresponding method is called. If not, a new instance gets created.
      */
-    open val handlePersistentInteractions: Boolean = false
+    public open val handlePersistentInteractions: Boolean = false
 ) : CommandDataImpl(name, description), SlashCommandData, InteractionScopedObject, DiscordInteractionHandler {
 
     @Autowired
-    lateinit var alunaProperties: AlunaProperties
+    public lateinit var alunaProperties: AlunaProperties
 
     @Autowired
-    lateinit var discordInteractionConditions: DiscordInteractionConditions
+    public lateinit var discordInteractionConditions: DiscordInteractionConditions
 
     @Autowired
-    lateinit var discordInteractionAdditionalConditions: DiscordInteractionAdditionalConditions
+    public lateinit var discordInteractionAdditionalConditions: DiscordInteractionAdditionalConditions
 
     @Autowired
-    lateinit var discordInteractionLoadAdditionalData: DiscordInteractionLoadAdditionalData
+    public lateinit var discordInteractionLoadAdditionalData: DiscordInteractionLoadAdditionalData
 
     @Autowired
-    lateinit var discordInteractionMetaDataHandler: DiscordInteractionMetaDataHandler
+    public lateinit var discordInteractionMetaDataHandler: DiscordInteractionMetaDataHandler
 
     @Autowired
-    lateinit var eventPublisher: EventPublisher
+    public lateinit var eventPublisher: EventPublisher
 
     @Autowired
     override lateinit var discordBot: DiscordBot
@@ -134,12 +135,12 @@ abstract class DiscordCommandHandler(
     private lateinit var configurableListableBeanFactory: ConfigurableListableBeanFactory
 
     @Autowired
-    lateinit var ownerIdProvider: OwnerIdProvider
+    public lateinit var ownerIdProvider: OwnerIdProvider
 
     @Autowired(required = false)
-    lateinit var localizationProvider: DiscordInteractionLocalization
+    public lateinit var localizationProvider: DiscordInteractionLocalization
 
-    val logger: Logger = LoggerFactory.getLogger(javaClass)
+    public val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     /**
      * This gets set by the CommandContext automatically and should not be changed
@@ -152,35 +153,35 @@ abstract class DiscordCommandHandler(
      * *This gets mapped to [isGuildOnly] if set to [UseScope.GUILD_ONLY].*
      */
     @Deprecated("Use setContexts instead", level = DeprecationLevel.ERROR)
-    var useScope = UseScope.GLOBAL
+    public var useScope: UseScope = UseScope.GLOBAL
 
     /**
      * Restrict this command to specific servers. If null, the command is available in all servers. When enabled, make sure to also enable 'alunaProperties.command.enableServerSpecificCommands' in your configuration.
      */
     @set:Experimental("This is an experimental feature and my not always work as expected. Please report any issues you find.")
-    var specificServers: ArrayList<String>? = null
+    public var specificServers: ArrayList<String>? = null
 
     /**
      * Sets whether this command can only be used by users which are returned by [OwnerIdProvider.getOwnerIds].
      */
-    var isOwnerCommand = false
+    public var isOwnerCommand: Boolean = false
 
     /**
      * Sets whether this command can only be seen by users with the administrator permission on the server!
      *
      * ! Aluna will set `this.defaultPermissions = DefaultMemberPermissions.DISABLED` if true.
      */
-    var isAdministratorOnlyCommand = false
+    public var isAdministratorOnlyCommand: Boolean = false
 
     /**
      * Sets whether this command should redirect auto complete events to the corresponding sub commands
      */
-    var redirectAutoCompleteEventsToSubCommands: Boolean = true
+    public var redirectAutoCompleteEventsToSubCommands: Boolean = true
 
     /**
      * Interaction development status
      */
-    var interactionDevelopmentStatus = DevelopmentStatus.LIVE
+    public var interactionDevelopmentStatus: DevelopmentStatus = DevelopmentStatus.LIVE
 
     override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
     override var beanUseAutoCompleteBean: Boolean = true
@@ -193,14 +194,14 @@ abstract class DiscordCommandHandler(
      * Discord representation of this interaction
      */
     @set:JvmSynthetic
-    lateinit var discordRepresentation: Command
+    public lateinit var discordRepresentation: Command
         internal set
 
     /**
      * Discord id of this interaction
      */
     @set:JvmSynthetic
-    lateinit var discordInteractionId: String
+    public lateinit var discordInteractionId: String
         internal set
 
     private val subCommandElements: HashMap<String, DiscordSubCommandElement> = hashMapOf()
@@ -216,28 +217,28 @@ abstract class DiscordCommandHandler(
     /**
      * The [CooldownScope][CooldownScope] of the command.
      */
-    var cooldownScope = CooldownScope.NO_COOLDOWN
+    public var cooldownScope: CooldownScope = CooldownScope.NO_COOLDOWN
 
-    var cooldown: Duration = Duration.ZERO
+    public var cooldown: Duration = Duration.ZERO
 
     /**
      * Any [Permission]s a Member must have to use this command.
      *
      * These are only checked in a [Guild] environment.
      */
-    var userPermissions = arrayListOf<Permission>()
+    public var userPermissions: ArrayList<Permission> = arrayListOf()
 
     /**
      * Any [Permission]s the bot must have to use a command.
      *
      *These are only checked in a [Guild] environment.
      */
-    var botPermissions = arrayListOf<Permission>()
+    public var botPermissions: ArrayList<Permission> = arrayListOf()
 
     /**
      * [MessageChannel] in which the command was used in.
      */
-    lateinit var channel: MessageChannel
+    public lateinit var channel: MessageChannel
 
     /**
      * [Author][User] of the command
@@ -247,24 +248,24 @@ abstract class DiscordCommandHandler(
     /**
      * [Guild] in which the command was used in. Can be null if the command was used in direct messages.
      */
-    var guild: Guild? = null
+    public var guild: Guild? = null
 
     /**
      * [GuildChannel] in which the command was used in. Can be null if the command was used in direct messages.
      */
-    var guildChannel: GuildChannel? = null
+    public var guildChannel: GuildChannel? = null
 
     /**
      * [Member] which used the command. Can be null if the command was used in direct messages.
      */
-    var member: Member? = null
+    public var member: Member? = null
 
     /**
      * User [Locale]
      *
      * *This is set by Aluna based on the information provided by Discord*
      */
-    var userLocale: DiscordLocale = DiscordLocale.ENGLISH_US
+    public var userLocale: DiscordLocale = DiscordLocale.ENGLISH_US
 
     /**
      * Guild [Locale]
@@ -272,26 +273,26 @@ abstract class DiscordCommandHandler(
      * *This is set by Aluna based on the information provided by Discord*
      */
     @set:JvmSynthetic
-    var guildLocale: DiscordLocale = DiscordLocale.ENGLISH_US
+    public var guildLocale: DiscordLocale = DiscordLocale.ENGLISH_US
         internal set
 
     /**
      * TimeMarks used if enabled by properties
      */
     @set:JvmSynthetic
-    var timeMarks: ArrayList<TimeMarkRecord>? = null
+    public var timeMarks: ArrayList<TimeMarkRecord>? = null
         internal set
 
     @set:JvmSynthetic
-    var isUserIntegration by Delegates.notNull<Boolean>()
+    public var isUserIntegration: Boolean by Delegates.notNull()
         internal set
 
     @set:JvmSynthetic
-    var isGuildIntegration by Delegates.notNull<Boolean>()
+    public var isGuildIntegration: Boolean by Delegates.notNull()
         internal set
 
     @set:JvmSynthetic
-    var isInBotDM by Delegates.notNull<Boolean>()
+    public var isInBotDM: Boolean by Delegates.notNull()
         internal set
 
     @JvmSynthetic
@@ -525,7 +526,7 @@ abstract class DiscordCommandHandler(
      *
      * @param event Original [SlashCommandInteractionEvent]
      */
-    open fun onSubCommandFallback(event: SlashCommandInteractionEvent) {
+    public open fun onSubCommandFallback(event: SlashCommandInteractionEvent) {
     }
 
     /**
@@ -534,21 +535,21 @@ abstract class DiscordCommandHandler(
      * @param event Original [SlashCommandInteractionEvent]
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open fun onSubCommandInteractionFallback(event: GenericInteractionCreateEvent): Boolean {
+    public open fun onSubCommandInteractionFallback(event: GenericInteractionCreateEvent): Boolean {
         return true
     }
 
     /**
      * This method gets called if Aluna can not find a registered sub command for an interaction timeout
      */
-    open fun onSubCommandInteractionTimeoutFallback() {
+    public open fun onSubCommandInteractionTimeoutFallback() {
     }
 
-    open fun onOwnerCommandNotAllowedByUser(event: SlashCommandInteractionEvent) {
+    public open fun onOwnerCommandNotAllowedByUser(event: SlashCommandInteractionEvent) {
         event.deferReply(true).setContent("⛔ This command is to powerful for you.").queue()
     }
 
-    open fun onMissingUserPermission(event: SlashCommandInteractionEvent, missingPermissions: MissingPermissions) {
+    public open fun onMissingUserPermission(event: SlashCommandInteractionEvent, missingPermissions: MissingPermissions) {
         val textChannelPermissions = missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" }
         val voiceChannelPermissions = missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" }
         val guildPermissions = missingPermissions.guild.joinToString("\n") { "└ ${it.getName()}" }
@@ -560,7 +561,7 @@ abstract class DiscordCommandHandler(
         ).queue()
     }
 
-    open fun onMissingBotPermission(event: SlashCommandInteractionEvent, missingPermissions: MissingPermissions) {
+    public open fun onMissingBotPermission(event: SlashCommandInteractionEvent, missingPermissions: MissingPermissions) {
         when {
             missingPermissions.notInVoice -> {
                 event.deferReply(true).setContent("⛔ You need to be in a voice channel yourself to execute this command").queue()
@@ -577,41 +578,41 @@ abstract class DiscordCommandHandler(
         }
     }
 
-    open fun onFailedAdditionalRequirements(event: SlashCommandInteractionEvent, additionalRequirements: AdditionalRequirements) {
+    public open fun onFailedAdditionalRequirements(event: SlashCommandInteractionEvent, additionalRequirements: AdditionalRequirements) {
         if (!event.isAcknowledged) {
             event.deferReply(true).setContent("⛔ Additional requirements for this command failed.").queue()
         }
     }
 
-    open fun onCooldownStillActive(event: SlashCommandInteractionEvent, lastUse: LocalDateTime) {
+    public open fun onCooldownStillActive(event: SlashCommandInteractionEvent, lastUse: LocalDateTime) {
         event.deferReply(true)
             .setContent("⛔ This interaction is still on cooldown and will be usable ${lastUse.plusNanos(cooldown.toNanos()).toDiscordTimestamp(TimestampFormat.RELATIVE_TIME)}.")
             .queue()
     }
 
-    open fun onFailedAdditionalRequirements(event: GenericComponentInteractionCreateEvent, additionalRequirements: AdditionalRequirements) {
+    public open fun onFailedAdditionalRequirements(event: GenericComponentInteractionCreateEvent, additionalRequirements: AdditionalRequirements) {
         if (!event.isAcknowledged) {
             event.deferReply(true).setContent("⛔ Additional requirements for this command failed.").queue()
         }
     }
 
-    open fun onFailedAdditionalRequirements(event: ModalInteractionEvent, additionalRequirements: AdditionalRequirements) {
+    public open fun onFailedAdditionalRequirements(event: ModalInteractionEvent, additionalRequirements: AdditionalRequirements) {
         if (!event.isAcknowledged) {
             event.deferReply(true).setContent("⛔ Additional requirements for this command failed.").queue()
         }
     }
 
-    open fun onFailedAdditionalRequirements(event: CommandAutoCompleteInteractionEvent, additionalRequirements: AdditionalRequirements) {
+    public open fun onFailedAdditionalRequirements(event: CommandAutoCompleteInteractionEvent, additionalRequirements: AdditionalRequirements) {
     }
 
-    open fun onExecutionException(event: SlashCommandInteractionEvent, exception: Exception) {
+    public open fun onExecutionException(event: SlashCommandInteractionEvent, exception: Exception) {
         throw exception
     }
 
-    open fun initCommandOptions() {}
-    open fun initSubCommands() {}
+    public open fun initCommandOptions() {}
+    public open fun initSubCommands() {}
 
-    suspend fun prepareInteraction() = withContext(AlunaDispatchers.Internal) {
+    public suspend fun prepareInteraction(): Unit = withContext(AlunaDispatchers.Internal) {
         if (isAdministratorOnlyCommand) {
             this@DiscordCommandHandler.defaultPermissions = DefaultMemberPermissions.DISABLED
         }
@@ -645,7 +646,7 @@ abstract class DiscordCommandHandler(
         }
     }
 
-    fun prepareLocalization() {
+    public fun prepareLocalization() {
         if (alunaProperties.translation.enabled) {
             if (localizations == null) {
                 localizations = localizationProvider.getLocalizationFunction()
@@ -887,7 +888,7 @@ abstract class DiscordCommandHandler(
         }
     }
 
-    open suspend fun registerSubCommands(vararg elements: DiscordSubCommandElement) = withContext(AlunaDispatchers.Internal) {
+    public open suspend fun registerSubCommands(vararg elements: DiscordSubCommandElement): Unit = withContext(AlunaDispatchers.Internal) {
         elements.filter { element ->
             when {
                 alunaProperties.includeInDevelopmentInteractions -> true
@@ -913,7 +914,7 @@ abstract class DiscordCommandHandler(
         }
     }
 
-    open suspend fun handleSubCommandExecution(event: SlashCommandInteractionEvent, fallback: (SlashCommandInteractionEvent) -> (Unit)) {
+    public open suspend fun handleSubCommandExecution(event: SlashCommandInteractionEvent, fallback: (SlashCommandInteractionEvent) -> (Unit)) {
         loadDynamicSubCommandElements()
         timeMarks?.add(LOAD_DYNAMIC_SUB_COMMAND_ELEMENTS at markNow())
 
@@ -954,7 +955,7 @@ abstract class DiscordCommandHandler(
         timeMarks?.add(SECOND_SUB_COMMAND_RUN_EXECUTE at markNow())
     }
 
-    open suspend fun handleSubCommandInteraction(
+    public open suspend fun handleSubCommandInteraction(
         event: GenericInteractionCreateEvent?,
         function: suspend (DiscordSubCommandHandler) -> (Boolean),
         fallback: (GenericInteractionCreateEvent?) -> (Boolean)
@@ -998,7 +999,7 @@ abstract class DiscordCommandHandler(
         return@withContext result
     }
 
-    fun updateMessageIdForScope(messageId: String) {
+    public fun updateMessageIdForScope(messageId: String) {
         val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
         interactionScope.setMessageIdForInstance(uniqueId, messageId)
     }
@@ -1014,7 +1015,7 @@ abstract class DiscordCommandHandler(
      * @param callEntitySelectTimeout Call onEntitySelectInteractionTimeout of this bean
      * @param callModalTimeout Call onModalInteractionTimeout of this bean
      */
-    suspend fun destroyThisInstance(
+    public suspend fun destroyThisInstance(
         removeObservers: Boolean,
         removeObserverTimeouts: Boolean,
         callOnDestroy: Boolean,
@@ -1022,7 +1023,7 @@ abstract class DiscordCommandHandler(
         callStringSelectTimeout: Boolean,
         callEntitySelectTimeout: Boolean,
         callModalTimeout: Boolean
-    ) = withContext(AlunaDispatchers.Interaction) {
+    ): Job = withContext(AlunaDispatchers.Interaction) {
         val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
         interactionScope.removeByUniqueId(uniqueId)
 
@@ -1142,7 +1143,7 @@ abstract class DiscordCommandHandler(
      * @return The generated global interaction id
      */
     @JvmOverloads
-    fun generateGlobalInteractionId(componentId: String, userId: String? = null): String {
+    public fun generateGlobalInteractionId(componentId: String, userId: String? = null): String {
         //Check if discordRepresentation is initialized
         if (!this::discordRepresentation.isInitialized) {
             throw IllegalStateException("discordRepresentation is not initialized. generateGlobalInteractionId() can only be called after Aluna initialized the command. This happens when an interaction is used.")
@@ -1156,7 +1157,7 @@ abstract class DiscordCommandHandler(
         return "$prefix:$componentId"
     }
 
-    fun extractGlobalInteractionId(componentId: String): String {
+    public fun extractGlobalInteractionId(componentId: String): String {
         val commandId = componentId.split(":")[0]
         val uniqueId = componentId.split(":")[1]
         val userId = componentId.split(":")[2]

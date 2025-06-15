@@ -46,7 +46,7 @@ import java.lang.reflect.Method
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class SpringSchedulerProvider(
+public class SpringSchedulerProvider(
     private val applicationContext: ApplicationContext,
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : SystemCommandDataProvider(
@@ -231,7 +231,7 @@ class SpringSchedulerProvider(
         }.getOrDefault(false)
     }
 
-    data class SchedulerInfo(
+    private data class SchedulerInfo(
         val id: String,
         val name: String,
         val shortName: String,

@@ -29,7 +29,7 @@ import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionE
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFunction
 
-abstract class CoroutineDiscordUserContextMenu(name: String, localizations: LocalizationFunction? = null) : DiscordUserContextMenuHandler(name, localizations) {
+public abstract class CoroutineDiscordUserContextMenu(name: String, localizations: LocalizationFunction? = null) : DiscordUserContextMenuHandler(name, localizations) {
 
     /**
      * The main body method of a [DiscordContextMenuHandler].
@@ -44,7 +44,7 @@ abstract class CoroutineDiscordUserContextMenu(name: String, localizations: Loca
     /**
      * On destroy gets called, when the object gets destroyed after the defined beanTimoutDelay.
      */
-    open suspend fun onDestroy() {
+    public open suspend fun onDestroy() {
     }
 
     //======= Button Interaction =======
@@ -56,14 +56,14 @@ abstract class CoroutineDiscordUserContextMenu(name: String, localizations: Loca
      * @param event [ButtonInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open suspend fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
+    public open suspend fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a button event observer duration timeout is reached.
      */
-    open suspend fun onButtonInteractionTimeout() {
+    public open suspend fun onButtonInteractionTimeout() {
     }
 
     //======= Select Interaction =======
@@ -75,14 +75,14 @@ abstract class CoroutineDiscordUserContextMenu(name: String, localizations: Loca
      * @param event [StringSelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open suspend fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
+    public open suspend fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-    open suspend fun onStringSelectInteractionTimeout() {
+    public open suspend fun onStringSelectInteractionTimeout() {
     }
 
     /**
@@ -92,14 +92,14 @@ abstract class CoroutineDiscordUserContextMenu(name: String, localizations: Loca
      * @param event [EntitySelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open suspend fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
+    public open suspend fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-    open suspend fun onEntitySelectInteractionTimeout() {
+    public open suspend fun onEntitySelectInteractionTimeout() {
     }
 
     //======= Modal Interaction =======
@@ -111,18 +111,18 @@ abstract class CoroutineDiscordUserContextMenu(name: String, localizations: Loca
      * @param event [ModalInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open suspend fun onModalInteraction(event: ModalInteractionEvent): Boolean {
+    public open suspend fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a modal event observer duration timeout is reached.
      */
-    open suspend fun onModalInteractionTimeout() {
+    public open suspend fun onModalInteractionTimeout() {
     }
 
     override suspend fun runExecute(event: UserContextInteractionEvent) = execute(event)
-    override suspend fun runOnDestroy() = onDestroy()
+    override suspend fun runOnDestroy(): Unit = onDestroy()
     override suspend fun runOnButtonInteraction(event: ButtonInteractionEvent) = onButtonInteraction(event)
     override suspend fun runOnButtonInteractionTimeout() = onButtonInteractionTimeout()
     override suspend fun runOnStringSelectInteraction(event: StringSelectInteractionEvent) = onStringSelectInteraction(event)

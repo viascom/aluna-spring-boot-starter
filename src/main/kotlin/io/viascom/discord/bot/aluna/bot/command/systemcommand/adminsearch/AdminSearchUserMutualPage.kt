@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class AdminSearchUserMutualPage(
+public class AdminSearchUserMutualPage(
     private val shardManager: ShardManager,
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : AdminSearchPageDataProvider(

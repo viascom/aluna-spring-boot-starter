@@ -42,7 +42,7 @@ import net.dv8tion.jda.api.interactions.commands.Command
 @Interaction
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class SystemCommand(
+public class SystemCommand(
     private val dataProviders: List<SystemCommandDataProviderHandler>,
     private val moderatorIdProvider: ModeratorIdProvider,
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider
@@ -59,7 +59,7 @@ class SystemCommand(
     private var selectedProvider: SystemCommandDataProviderHandler? = null
 
     private var commandOption = StringOption("command", "System command to execute", isRequired = true, isAutoComplete = true)
-    var argsOption = StringOption("args", "Arguments", isRequired = false, isAutoComplete = true)
+    public var argsOption: StringOption = StringOption("args", "Arguments", isRequired = false, isAutoComplete = true)
 
     override fun initCommandOptions() {
         @OptIn(Experimental::class)

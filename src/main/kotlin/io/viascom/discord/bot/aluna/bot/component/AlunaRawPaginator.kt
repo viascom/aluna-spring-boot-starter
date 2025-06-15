@@ -32,53 +32,53 @@ import kotlin.math.ceil
  * A raw Paginator is a component to paginate through a list of items.
  *
  */
-class AlunaRawPaginator(
-    val author: Function<CurrentPage, String?>? = null,
-    val authorIcon: Function<CurrentPage, String?>? = null,
-    val authorUrl: Function<CurrentPage, String?>? = null,
-    val thumbnail: Function<CurrentPage, String?>? = null,
-    val image: Function<CurrentPage, String?>? = null,
-    val title: Function<CurrentPage, String>? = null,
-    val color: Function<CurrentPage, Color> = Function { Color.DARK_GRAY },
-    val titleLink: Function<CurrentPage, String?>? = null,
-    val description: Function<CurrentPage, String>? = null,
-    val timestamp: TemporalAccessor? = null,
-    val showFooter: Boolean = false,
+public class AlunaRawPaginator(
+    public val author: Function<CurrentPage, String?>? = null,
+    public val authorIcon: Function<CurrentPage, String?>? = null,
+    public val authorUrl: Function<CurrentPage, String?>? = null,
+    public val thumbnail: Function<CurrentPage, String?>? = null,
+    public val image: Function<CurrentPage, String?>? = null,
+    public val title: Function<CurrentPage, String>? = null,
+    public val color: Function<CurrentPage, Color> = Function { Color.DARK_GRAY },
+    public val titleLink: Function<CurrentPage, String?>? = null,
+    public val description: Function<CurrentPage, String>? = null,
+    public val timestamp: TemporalAccessor? = null,
+    public val showFooter: Boolean = false,
 
     /**
      * This field gets added as the last field to every page.
      */
-    val footerElement: Function<CurrentPage, Field?>? = null,
+    public val footerElement: Function<CurrentPage, Field?>? = null,
 
     /**
      * If showFooter is set to true, this string will be used in the footer of the embed.
      */
-    val onPageText: Function<CurrentPage, String>? = null,
+    public val onPageText: Function<CurrentPage, String>? = null,
 
-    var elements: ArrayList<Field> = arrayListOf(),
+    public var elements: ArrayList<Field> = arrayListOf(),
 
-    val columns: Columns = Columns.THREE,
-    val elementsPerPage: Int = 15
+    public val columns: Columns = Columns.THREE,
+    public val elementsPerPage: Int = 15
 ) {
 
-    var emptyFieldPlaceholder = "##EMPTY##"
+    public var emptyFieldPlaceholder: String = "##EMPTY##"
 
-    val totalPages: Int
+    public val totalPages: Int
         get() = ceil(elements.size.toDouble() / elementsPerPage).toInt()
 
     init {
         checkElementsPerPageAmount()
     }
 
-    fun addElement(field: Field) = elements.add(field)
+    public fun addElement(field: Field): Boolean = elements.add(field)
 
     @JvmOverloads
-    fun addElement(name: String, value: String, inline: Boolean = true) = elements.add(Field(name, value, inline))
+    public fun addElement(name: String, value: String, inline: Boolean = true): Boolean = elements.add(Field(name, value, inline))
 
-    fun addElements(fields: Collection<Field>) = elements.addAll(fields)
+    public fun addElements(fields: Collection<Field>): Boolean = elements.addAll(fields)
 
 
-    fun renderPage(pageNum: Int): EmbedBuilder {
+    public fun renderPage(pageNum: Int): EmbedBuilder {
         val cleanedPageNum = cleanPageNumInput(pageNum)
         val embedBuilder = EmbedBuilder()
         val start = (cleanedPageNum - 1) * elementsPerPage
@@ -156,9 +156,9 @@ class AlunaRawPaginator(
         }
     }
 
-    inner class CurrentPage(val number: Int, val total: Int, val start: Int, val end: Int)
+    public inner class CurrentPage(public val number: Int, public val total: Int, public val start: Int, public val end: Int)
 
-    enum class Columns(val amount: Int) {
+    public enum class Columns(public val amount: Int) {
         ONE(1),
         TWO(2),
         THREE(3)

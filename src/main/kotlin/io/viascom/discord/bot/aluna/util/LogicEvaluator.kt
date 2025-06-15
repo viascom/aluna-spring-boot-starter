@@ -34,7 +34,7 @@ package io.viascom.discord.bot.aluna.util
  * </pre>
  *
  */
-object LogicEvaluator {
+public object LogicEvaluator {
 
     /**
      * Evaluates a logical expression given as a string.
@@ -46,7 +46,7 @@ object LogicEvaluator {
      */
     @JvmStatic
     @Throws(IllegalArgumentException::class)
-    fun eval(inputString: String) = evaluate(parse(scan(inputString)))
+    public fun eval(inputString: String): Boolean = evaluate(parse(scan(inputString)))
 
     private fun scan(inputString: String): List<Token> = sequence {
         var index = 0

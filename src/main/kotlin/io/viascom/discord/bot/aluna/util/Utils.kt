@@ -31,6 +31,7 @@ import net.dv8tion.jda.api.entities.channel.Channel
 import net.dv8tion.jda.api.entities.channel.concrete.Category
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
+import net.dv8tion.jda.api.entities.emoji.EmojiUnion
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
@@ -62,7 +63,7 @@ import java.util.function.Function
  * @param decimals The number of decimal places to round to.
  * @return The rounded double value.
  */
-fun Double.round(decimals: Int): Double {
+public fun Double.round(decimals: Int): Double {
     var multiplier = 1.0
     repeat(decimals) { multiplier *= 10 }
     return kotlin.math.round(this * multiplier) / multiplier
@@ -73,28 +74,28 @@ fun Double.round(decimals: Int): Double {
  *
  * @return Color as a hex representation
  */
-fun Color.toHex(): String = String.format("#%02x%02x%02x", this.red, this.green, this.blue)
+public fun Color.toHex(): String = String.format("#%02x%02x%02x", this.red, this.green, this.blue)
 
 /**
  * Get the color as a Discord integer representation
  *
  * @return Color as a Discord integer representation
  */
-fun Color.toDiscordColorInt(): Int = (this.red shl 16) + (this.green shl 8) + this.blue
+public fun Color.toDiscordColorInt(): Int = (this.red shl 16) + (this.green shl 8) + this.blue
 
-fun <T : Any> CommandDataImpl.addOption(option: CommandOption<in T>) {
+public fun <T : Any> CommandDataImpl.addOption(option: CommandOption<in T>) {
     this.addOptions(option as OptionData)
 }
 
-fun <T : Any> CommandDataImpl.addOptions(vararg option: CommandOption<in T>) {
+public fun <T : Any> CommandDataImpl.addOptions(vararg option: CommandOption<in T>) {
     option.forEach { this.addOption(it) }
 }
 
-fun <T : Any> SubcommandData.addOption(option: CommandOption<in T>) {
+public fun <T : Any> SubcommandData.addOption(option: CommandOption<in T>) {
     this.addOptions(option as OptionData)
 }
 
-fun <T : Any> SubcommandData.addOptions(vararg option: CommandOption<in T>) {
+public fun <T : Any> SubcommandData.addOptions(vararg option: CommandOption<in T>) {
     option.forEach { this.addOption(it) }
 }
 
@@ -111,7 +112,7 @@ fun <T : Any> SubcommandData.addOptions(vararg option: CommandOption<in T>) {
  * @see Guild.ban ban
  */
 @JvmOverloads
-fun Guild.ban(user: UserSnowflake, deletionTimeframe: Duration = Duration.ZERO, reason: String? = null): AuditableRestAction<Void> {
+public fun Guild.ban(user: UserSnowflake, deletionTimeframe: Duration = Duration.ZERO, reason: String? = null): AuditableRestAction<Void> {
     val action = this.ban(user, deletionTimeframe.seconds.toInt(), TimeUnit.SECONDS)
     return if (reason != null) action.reason(reason) else action
 }
@@ -127,7 +128,7 @@ fun Guild.ban(user: UserSnowflake, deletionTimeframe: Duration = Duration.ZERO, 
 @JvmOverloads
 @Throws(IllegalArgumentException::class)
 @Suppress("UNCHECKED_CAST")
-fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<in T>, default: T? = null): T? {
+public fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<in T>, default: T? = null): T? {
     val optionData = (option as OptionData)
     return when (optionData.type) {
         OptionType.STRING -> this.getOption(optionData.name, default, OptionMapping::getAsString)
@@ -156,7 +157,7 @@ fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<
  */
 @JvmOverloads
 @Throws(IllegalArgumentException::class)
-fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<in T>, mapper: Function<in OptionMapping, out T?>, default: T? = null): T? {
+public fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<in T>, mapper: Function<in OptionMapping, out T?>, default: T? = null): T? {
     val optionData = (option as OptionData)
     return this.getOption(optionData.name)?.let { mapper.apply(it) } ?: default
 }
@@ -172,7 +173,7 @@ fun <T : Any> SlashCommandInteractionEvent.getTypedOption(option: CommandOption<
 @JvmOverloads
 @Throws(IllegalArgumentException::class)
 @Suppress("UNCHECKED_CAST")
-fun <T : Any> CommandAutoCompleteInteractionEvent.getTypedOption(option: CommandOption<in T>, default: T? = null): T? {
+public fun <T : Any> CommandAutoCompleteInteractionEvent.getTypedOption(option: CommandOption<in T>, default: T? = null): T? {
     val optionData = (option as OptionData)
     return when (optionData.type) {
         OptionType.STRING -> this.getOption(optionData.name, default, OptionMapping::getAsString)
@@ -201,7 +202,7 @@ fun <T : Any> CommandAutoCompleteInteractionEvent.getTypedOption(option: Command
  */
 @JvmOverloads
 @Throws(IllegalArgumentException::class)
-fun <T : Any> CommandAutoCompleteInteractionEvent.getTypedOption(
+public fun <T : Any> CommandAutoCompleteInteractionEvent.getTypedOption(
     option: CommandOption<in T>,
     mapper: Function<in OptionMapping, out T?>,
     default: T? = null
@@ -217,7 +218,7 @@ fun <T : Any> CommandAutoCompleteInteractionEvent.getTypedOption(
  * @return The option value as an [Int], or the specified default value if the option is not present or cannot be cast to an [Int].
  */
 @JvmOverloads
-fun SlashCommandInteractionEvent.getOptionAsInt(name: String, default: Int? = null): Int? = this.getOption(name, default, OptionMapping::getAsInt)
+public fun SlashCommandInteractionEvent.getOptionAsInt(name: String, default: Int? = null): Int? = this.getOption(name, default, OptionMapping::getAsInt)
 
 /**
  * Retrieves the option with the specified [name] as a [String] or the specified [default] value if the option is not present or cannot be cast to a [String].
@@ -226,7 +227,7 @@ fun SlashCommandInteractionEvent.getOptionAsInt(name: String, default: Int? = nu
  * @return The option value as a [String], or the specified default value if the option is not present or cannot be cast to a [String].
  */
 @JvmOverloads
-fun SlashCommandInteractionEvent.getOptionAsString(name: String, default: String? = null): String? = this.getOption(name, default, OptionMapping::getAsString)
+public fun SlashCommandInteractionEvent.getOptionAsString(name: String, default: String? = null): String? = this.getOption(name, default, OptionMapping::getAsString)
 
 
 /**
@@ -236,7 +237,7 @@ fun SlashCommandInteractionEvent.getOptionAsString(name: String, default: String
  * @return The option value as a [Boolean], or the specified default value if the option is not present or cannot be cast to a [Boolean].
  */
 @JvmOverloads
-fun SlashCommandInteractionEvent.getOptionAsBoolean(name: String, default: Boolean? = null): Boolean? =
+public fun SlashCommandInteractionEvent.getOptionAsBoolean(name: String, default: Boolean? = null): Boolean? =
     this.getOption(name, default, OptionMapping::getAsBoolean)
 
 /**
@@ -246,7 +247,7 @@ fun SlashCommandInteractionEvent.getOptionAsBoolean(name: String, default: Boole
  * @return The option value as a [Member], or the specified default value if the option is not present or cannot be cast to a [Member].
  */
 @JvmOverloads
-fun SlashCommandInteractionEvent.getOptionAsMember(name: String, default: Member? = null): Member? = this.getOption(name, default, OptionMapping::getAsMember)
+public fun SlashCommandInteractionEvent.getOptionAsMember(name: String, default: Member? = null): Member? = this.getOption(name, default, OptionMapping::getAsMember)
 
 /**
  * Retrieves the option with the specified [name] as a `User` or the specified [default] value if the option is not present or cannot be cast to a `User`.
@@ -255,7 +256,7 @@ fun SlashCommandInteractionEvent.getOptionAsMember(name: String, default: Member
  * @return The option value as a [User], or the specified default value if the option is not present or cannot be cast to a `User`.
  */
 @JvmOverloads
-fun SlashCommandInteractionEvent.getOptionAsUser(name: String, default: User? = null): User? = this.getOption(name, default, OptionMapping::getAsUser)
+public fun SlashCommandInteractionEvent.getOptionAsUser(name: String, default: User? = null): User? = this.getOption(name, default, OptionMapping::getAsUser)
 
 /**
  * Retrieves the option with the specified [name] as a `GuildChannel` or the specified [default] value if the option is not present or cannot be cast to a `GuildChannel`.
@@ -264,7 +265,7 @@ fun SlashCommandInteractionEvent.getOptionAsUser(name: String, default: User? = 
  * @return The option value as a [GuildChannel], or the specified default value if the option is not present or cannot be cast to a `GuildChannel`.
  */
 @JvmOverloads
-fun SlashCommandInteractionEvent.getOptionAsGuildChannel(name: String, default: GuildChannel? = null): GuildChannel? =
+public fun SlashCommandInteractionEvent.getOptionAsGuildChannel(name: String, default: GuildChannel? = null): GuildChannel? =
     this.getOption(name, default, OptionMapping::getAsChannel)
 
 /**
@@ -275,7 +276,7 @@ fun SlashCommandInteractionEvent.getOptionAsGuildChannel(name: String, default: 
  * @return The value of the option as an Int, or the default value if the option is not present.
  */
 @JvmOverloads
-fun CommandAutoCompleteInteractionEvent.getOptionAsInt(name: String, default: Int? = null): Int? = this.getOption(name, default, OptionMapping::getAsInt)
+public fun CommandAutoCompleteInteractionEvent.getOptionAsInt(name: String, default: Int? = null): Int? = this.getOption(name, default, OptionMapping::getAsInt)
 
 /**
  * Retrieves the value of a specified option as a String.
@@ -285,7 +286,7 @@ fun CommandAutoCompleteInteractionEvent.getOptionAsInt(name: String, default: In
  * @return The value of the option as a String, or the default value if the option is not present.
  */
 @JvmOverloads
-fun CommandAutoCompleteInteractionEvent.getOptionAsString(name: String, default: String? = null): String? =
+public fun CommandAutoCompleteInteractionEvent.getOptionAsString(name: String, default: String? = null): String? =
     this.getOption(name, default, OptionMapping::getAsString)
 
 /**
@@ -296,7 +297,7 @@ fun CommandAutoCompleteInteractionEvent.getOptionAsString(name: String, default:
  * @return The value of the option as a Boolean, or the default value if the option is not present.
  */
 @JvmOverloads
-fun CommandAutoCompleteInteractionEvent.getOptionAsBoolean(name: String, default: Boolean? = null): Boolean? =
+public fun CommandAutoCompleteInteractionEvent.getOptionAsBoolean(name: String, default: Boolean? = null): Boolean? =
     this.getOption(name, default, OptionMapping::getAsBoolean)
 
 /**
@@ -307,7 +308,7 @@ fun CommandAutoCompleteInteractionEvent.getOptionAsBoolean(name: String, default
  * @return The value of the option as a Member, or the default value if the option is not present.
  */
 @JvmOverloads
-fun CommandAutoCompleteInteractionEvent.getOptionAsMember(name: String, default: Member? = null): Member? =
+public fun CommandAutoCompleteInteractionEvent.getOptionAsMember(name: String, default: Member? = null): Member? =
     this.getOption(name, default, OptionMapping::getAsMember)
 
 /**
@@ -318,7 +319,7 @@ fun CommandAutoCompleteInteractionEvent.getOptionAsMember(name: String, default:
  * @return The value of the option as a User, or the default value if the option is not present.
  */
 @JvmOverloads
-fun CommandAutoCompleteInteractionEvent.getOptionAsUser(name: String, default: User? = null): User? = this.getOption(name, default, OptionMapping::getAsUser)
+public fun CommandAutoCompleteInteractionEvent.getOptionAsUser(name: String, default: User? = null): User? = this.getOption(name, default, OptionMapping::getAsUser)
 
 /**
  * Retrieves the value of a specified option as an Attachment.
@@ -328,7 +329,7 @@ fun CommandAutoCompleteInteractionEvent.getOptionAsUser(name: String, default: U
  * @return The value of the option as an Attachment, or the default value if the option is not present.
  */
 @JvmOverloads
-fun CommandAutoCompleteInteractionEvent.getOptionAsAttachment(name: String, default: Attachment? = null): Attachment? =
+public fun CommandAutoCompleteInteractionEvent.getOptionAsAttachment(name: String, default: Attachment? = null): Attachment? =
     this.getOption(name, default, OptionMapping::getAsAttachment)
 
 /**
@@ -337,7 +338,7 @@ fun CommandAutoCompleteInteractionEvent.getOptionAsAttachment(name: String, defa
  * @param choices HashMap of choices (Key , Value)
  * @return AutoCompleteCallbackAction
  */
-fun CommandAutoCompleteInteractionEvent.replyStringChoices(choices: Map<String, String>): AutoCompleteCallbackAction =
+public fun CommandAutoCompleteInteractionEvent.replyStringChoices(choices: Map<String, String>): AutoCompleteCallbackAction =
     this.replyChoices(choices.entries.map { Command.Choice(it.key, it.value) })
 
 /**
@@ -346,7 +347,7 @@ fun CommandAutoCompleteInteractionEvent.replyStringChoices(choices: Map<String, 
  * @param choices HashMap of choices (Key , Value)
  * @return AutoCompleteCallbackAction
  */
-fun CommandAutoCompleteInteractionEvent.replyLongChoices(choices: Map<String, Long>): AutoCompleteCallbackAction =
+public fun CommandAutoCompleteInteractionEvent.replyLongChoices(choices: Map<String, Long>): AutoCompleteCallbackAction =
     this.replyChoices(choices.entries.map { Command.Choice(it.key, it.value) })
 
 /**
@@ -355,7 +356,7 @@ fun CommandAutoCompleteInteractionEvent.replyLongChoices(choices: Map<String, Lo
  * @param choices HashMap of choices (Key , Value)
  * @return AutoCompleteCallbackAction
  */
-fun CommandAutoCompleteInteractionEvent.replyDoubleChoices(choices: Map<String, Double>): AutoCompleteCallbackAction =
+public fun CommandAutoCompleteInteractionEvent.replyDoubleChoices(choices: Map<String, Double>): AutoCompleteCallbackAction =
     this.replyChoices(choices.entries.map { Command.Choice(it.key, it.value) })
 
 /**
@@ -363,70 +364,71 @@ fun CommandAutoCompleteInteractionEvent.replyDoubleChoices(choices: Map<String, 
  *
  * @return The selected string.
  */
-fun StringSelectInteractionEvent.getSelection(): String = this.values.first()
+public fun StringSelectInteractionEvent.getSelection(): String = this.values.first()
 
 /**
  * Returns all values of the [StringSelectInteractionEvent].
  *
  * @return A list of selected strings.
  */
-fun StringSelectInteractionEvent.getSelections(): List<String> = this.values
+public fun StringSelectInteractionEvent.getSelections(): List<String> = this.values
 
 /**
  * Retrieves the user corresponding to the first value in the [EntitySelectInteractionEvent].
  *
  * @return The selected user, or null if not found.
  */
-fun EntitySelectInteractionEvent.getUserSelection(): User? = this.jda.shardManager?.getUserById(this.values.first().id)
+public fun EntitySelectInteractionEvent.getUserSelection(): User? = this.jda.shardManager?.getUserById(this.values.first().id)
 
 /**
  * Retrieves all users corresponding to the values in the [EntitySelectInteractionEvent].
  *
  * @return A list of selected users, with nulls if not found.
  */
-fun EntitySelectInteractionEvent.getUserSelections(): List<User?> = this.values.map { this.jda.shardManager?.getUserById(it.id) }
+public fun EntitySelectInteractionEvent.getUserSelections(): List<User?> = this.values.map { this.jda.shardManager?.getUserById(it.id) }
 
 /**
  * Retrieves the channel of type [T] corresponding to the first value in the [EntitySelectInteractionEvent].
  *
  * @return The selected channel, or null if not found.
  */
-inline fun <reified T : Channel> EntitySelectInteractionEvent.getChannelSelection(): T? = this.jda.shardManager?.getChannelById<T>(T::class.java, this.values.first().id)
+public inline fun <reified T : Channel> EntitySelectInteractionEvent.getChannelSelection(): T? = this.jda.shardManager?.getChannelById<T>(T::class.java, this.values.first().id)
 
 /**
  * Retrieves all channels of type [T] corresponding to the values in the [EntitySelectInteractionEvent].
  *
  * @return A list of selected channels, with nulls if not found.
  */
-inline fun <reified T : Channel> EntitySelectInteractionEvent.getChannelSelections(): List<T?> = this.values.map { this.jda.shardManager?.getChannelById<T>(T::class.java, it.id) }
+public inline fun <reified T : Channel> EntitySelectInteractionEvent.getChannelSelections(): List<T?> =
+    this.values.map { this.jda.shardManager?.getChannelById<T>(T::class.java, it.id) }
 
 /**
  * Retrieves the category corresponding to the first value in the [EntitySelectInteractionEvent].
  *
  * @return The selected category, or null if not found.
  */
-fun EntitySelectInteractionEvent.getCategorySelection(): Category? = this.jda.shardManager?.getCategoryById(this.values.first().id)
+public fun EntitySelectInteractionEvent.getCategorySelection(): Category? = this.jda.shardManager?.getCategoryById(this.values.first().id)
 
 /**
  * Retrieves all categories corresponding to the values in the [EntitySelectInteractionEvent].
  *
  * @return A list of selected categories, with nulls if not found.
  */
-fun EntitySelectInteractionEvent.getCategorySelections(): List<Category?> = this.values.map { this.jda.shardManager?.getCategoryById(it.id) }
+public fun EntitySelectInteractionEvent.getCategorySelections(): List<Category?> = this.values.map { this.jda.shardManager?.getCategoryById(it.id) }
 
 /**
  * Retrieves the role corresponding to the first value in the [EntitySelectInteractionEvent].
  *
  * @return The selected role, or null if not found.
  */
-fun EntitySelectInteractionEvent.getRoleSelection(): Role? = this.jda.shardManager?.getRoleById(this.values.first().id)
+public fun EntitySelectInteractionEvent.getRoleSelection(): Role? = this.jda.shardManager?.getRoleById(this.values.first().id)
 
 /**
  * Retrieves all roles corresponding to the values in the [EntitySelectInteractionEvent].
  *
  * @return A list of selected roles, with nulls if not found.
  */
-fun EntitySelectInteractionEvent.getRoleSelections(): List<Role?> = this.values.map { this.jda.shardManager?.getRoleById(it.id) }
+public fun EntitySelectInteractionEvent.getRoleSelections(): List<Role?> = this.values.map { this.jda.shardManager?.getRoleById(it.id) }
 
 /**
  * Adds a text field to the [Modal.Builder].
@@ -442,7 +444,7 @@ fun EntitySelectInteractionEvent.getRoleSelections(): List<Role?> = this.values.
  * @return The updated [Modal.Builder] with the added text field.
  */
 @JvmOverloads
-fun Modal.Builder.addTextField(
+public fun Modal.Builder.addTextField(
     id: String,
     label: String,
     style: TextInputStyle = TextInputStyle.SHORT,
@@ -461,7 +463,7 @@ fun Modal.Builder.addTextField(
  * @return The value associated with the given [name] as a [String], or the [default] value if not found.
  */
 @JvmOverloads
-fun ModalInteraction.getValueAsString(name: String, default: String? = null): String? = this.getValue(name)?.asString ?: default
+public fun ModalInteraction.getValueAsString(name: String, default: String? = null): String? = this.getValue(name)?.asString ?: default
 
 /**
  * Creates a [SelectOption] with the given parameters.
@@ -474,7 +476,7 @@ fun ModalInteraction.getValueAsString(name: String, default: String? = null): St
  * @return The created [SelectOption] instance.
  */
 @JvmOverloads
-fun selectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {
+public fun selectOption(label: String, value: String, description: String? = null, emoji: Emoji? = null, isDefault: Boolean? = null): SelectOption {
     var option = SelectOption.of(label, value)
     description?.let { option = option.withDescription(description) }
     emoji?.let { option = option.withEmoji(emoji) }
@@ -494,7 +496,7 @@ fun selectOption(label: String, value: String, description: String? = null, emoj
  * @return The modified [StringSelectMenu.Builder] instance with the added option.
  */
 @JvmOverloads
-fun StringSelectMenu.Builder.addOption(
+public fun StringSelectMenu.Builder.addOption(
     label: String,
     value: String,
     description: String? = null,
@@ -516,7 +518,7 @@ fun StringSelectMenu.Builder.addOption(
  * @return The created [TextInput] instance.
  */
 @JvmOverloads
-fun textInput(
+public fun textInput(
     id: String,
     label: String,
     style: TextInputStyle = TextInputStyle.SHORT,
@@ -556,7 +558,7 @@ fun textInput(
  * @return A primary-styled Button instance.
  */
 @JvmOverloads
-fun primaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+public fun primaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.PRIMARY, id, label, emoji).withDisabled(disabled)
 
 /**
@@ -569,7 +571,7 @@ fun primaryButton(id: String, label: String? = null, emoji: Emoji? = null, disab
  * @return A secondary-styled Button instance.
  */
 @JvmOverloads
-fun secondaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+public fun secondaryButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.SECONDARY, id, label, emoji).withDisabled(disabled)
 
 /**
@@ -582,7 +584,7 @@ fun secondaryButton(id: String, label: String? = null, emoji: Emoji? = null, dis
  * @return A success-styled Button instance.
  */
 @JvmOverloads
-fun successButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+public fun successButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.SUCCESS, id, label, emoji).withDisabled(disabled)
 
 /**
@@ -595,7 +597,7 @@ fun successButton(id: String, label: String? = null, emoji: Emoji? = null, disab
  * @return A danger-styled Button instance.
  */
 @JvmOverloads
-fun dangerButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+public fun dangerButton(id: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.DANGER, id, label, emoji).withDisabled(disabled)
 
 /**
@@ -608,7 +610,7 @@ fun dangerButton(id: String, label: String? = null, emoji: Emoji? = null, disabl
  * @return A link-styled Button instance.
  */
 @JvmOverloads
-fun linkButton(url: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+public fun linkButton(url: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.LINK, url, label, emoji).withDisabled(disabled)
 
 /**
@@ -620,7 +622,7 @@ fun linkButton(url: String, label: String? = null, emoji: Emoji? = null, disable
  * @param disabled Whether the button should be disabled or not.
  * @return A Button object with the specified properties.
  */
-fun premiumButton(url: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
+public fun premiumButton(url: String, label: String? = null, emoji: Emoji? = null, disabled: Boolean = false): Button =
     Button.of(ButtonStyle.PREMIUM, url, label, emoji).withDisabled(disabled)
 
 /**
@@ -628,7 +630,9 @@ fun premiumButton(url: String, label: String? = null, emoji: Emoji? = null, disa
  *
  * @return An Emoji instance based on the formatted string.
  */
-fun String.toEmoji() = Emoji.fromFormatted(this)
+public fun String.toEmoji(): EmojiUnion {
+    return Emoji.fromFormatted(this)
+}
 
 /**
  * Computes the normalized Levenshtein distance between two strings.
@@ -648,7 +652,7 @@ fun String.toEmoji() = Emoji.fromFormatted(this)
  * @param str2 The second input string.
  * @return The normalized Levenshtein distance (a Double value between 0 and 1).
  * */
-fun levenshteinDistance(str1: String, str2: String): Double {
+public fun levenshteinDistance(str1: String, str2: String): Double {
     val len1 = str1.length
     val len2 = str2.length
     val dp = Array(len1 + 1) { IntArray(len2 + 1) }
@@ -671,7 +675,7 @@ fun levenshteinDistance(str1: String, str2: String): Double {
     return 1.0 - (distance.toDouble() / maxOf(str1.length, str2.length))
 }
 
-fun secondsToTime(inputSeconds: Long, noTimeText: String = "**No time**"): String {
+public fun secondsToTime(inputSeconds: Long, noTimeText: String = "**No time**"): String {
     var timeseconds = inputSeconds
     val builder = StringBuilder()
     val years = (timeseconds / (60 * 60 * 24 * 365)).toInt()
@@ -716,7 +720,7 @@ fun secondsToTime(inputSeconds: Long, noTimeText: String = "**No time**"): Strin
  * @param plural The plural form of the word.
  * @return Returns the pluralized word based on the count.
  */
-fun pluralise(x: Int, singular: String?, plural: String?): String? {
+public fun pluralise(x: Int, singular: String?, plural: String?): String? {
     return if (x == 1) singular else plural
 }
 
@@ -728,7 +732,7 @@ fun pluralise(x: Int, singular: String?, plural: String?): String? {
  * @param plural The plural form of the word.
  * @return Returns the pluralized word based on the count.
  */
-fun pluralise(x: Long, singular: String?, plural: String?): String? {
+public fun pluralise(x: Long, singular: String?, plural: String?): String? {
     return if (x == 1L) singular else plural
 }
 
@@ -738,7 +742,7 @@ fun pluralise(x: Long, singular: String?, plural: String?): String? {
  * @param input The input string containing Markdown links to be escaped.
  * @return The input string with escaped Markdown links.
  */
-fun escapeMarkdownLinks(input: String): String {
+public fun escapeMarkdownLinks(input: String): String {
     var result = input
 
     // Escape inline links: [link text](URL)

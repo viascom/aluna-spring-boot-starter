@@ -30,7 +30,7 @@ import org.springframework.context.ApplicationListener
 /**
  * Executes checks against the configuration present on startup to ensure that all needed parameters are set.
  */
-class PropertiesListener : ApplicationListener<ApplicationContextInitializedEvent> {
+public class PropertiesListener : ApplicationListener<ApplicationContextInitializedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 

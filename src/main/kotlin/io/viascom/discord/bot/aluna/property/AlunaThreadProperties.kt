@@ -21,51 +21,51 @@
 
 package io.viascom.discord.bot.aluna.property
 
-class AlunaThreadProperties {
+public class AlunaThreadProperties {
 
     /**
      * Max amount of scheduler threads for timeout handling on interaction observers.
      */
-    var messagesToObserveScheduledThreadPool: Int = 2
+    public var messagesToObserveScheduledThreadPool: Int = 2
 
     /**
      * Max amount of scheduler threads for timeout handling on discord scoped objects.
      */
-    var scopedObjectsTimeoutScheduler: Int = 2
+    public var scopedObjectsTimeoutScheduler: Int = 2
 
     /**
      * Max amount of scheduler threads for event waiter timeout handling.
      */
-    var eventWaiterTimeoutScheduler: Int = 2
+    public var eventWaiterTimeoutScheduler: Int = 2
 
     /**
      * Max amount of threads for jda callback handling.
      */
-    var jdaCallbackThreadPool: Int = 10
+    public var jdaCallbackThreadPool: Int = 10
 
     /**
      * Max amount of threads for event publish handling.
      */
-    var eventThreadPool: Int = 10
+    public var eventThreadPool: Int = 10
 
     /**
      * Amount of parallelism used for the interaction coroutine context.
      *
      * A value of -1 indicates that the level of parallelism is not explicitly set and will be determined by the system.
      */
-    var interactionParallelism: Int = -1
+    public var interactionParallelism: Int = -1
 
     /**
      * Amount of parallelism used for the event coroutine context.
      *
      * A value of -1 indicates that the level of parallelism is not explicitly set and will be determined by the system.
      */
-    var eventParallelism: Int = -1
+    public var eventParallelism: Int = -1
 
     /**
      * Amount of parallelism used for the detached coroutine context.
      *
      * A value of -1 indicates that the level of parallelism is not explicitly set and will be determined by the system.
      */
-    var detachedParallelism: Int = -1
+    public var detachedParallelism: Int = -1
 }

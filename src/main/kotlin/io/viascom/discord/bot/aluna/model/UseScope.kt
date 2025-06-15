@@ -23,7 +23,7 @@ package io.viascom.discord.bot.aluna.model
 
 import io.viascom.discord.bot.aluna.configuration.Experimental
 
-enum class UseScope {
+public enum class UseScope {
     GLOBAL,
     GUILD_ONLY,
 

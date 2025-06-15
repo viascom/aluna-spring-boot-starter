@@ -23,10 +23,10 @@ package io.viascom.discord.bot.aluna.bot.shardmanager
 
 import net.dv8tion.jda.api.sharding.ShardManager
 
-interface ShardManagerBuilder {
+public interface ShardManagerBuilder {
 
-    fun build(): ShardManager
+    public fun build(): ShardManager
 
-    fun getLatchCount(): Int
+    public fun getLatchCount(): Int
 
 }

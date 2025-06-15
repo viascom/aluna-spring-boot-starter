@@ -33,7 +33,7 @@ import net.fellbaum.jemoji.EmojiManager
  *
  * @see UnicodeEmoji
  */
-object EmojiUtil {
+public object EmojiUtil {
 
     private const val REGIONAL_INDICATOR_A_CODEPOINT = 127462
     private const val REGIONAL_INDICATOR_Z_CODEPOINT = 127487
@@ -54,7 +54,7 @@ object EmojiUtil {
      * @throws NoSuchElementException if no emoji alias or unicode matches
      * @see resolveJDAEmoji
      */
-    fun resolveEmoji(input: String): String = resolveEmojiOrNull(input) ?: throw NoSuchElementException("No emoji for input: $input")
+    public fun resolveEmoji(input: String): String = resolveEmojiOrNull(input) ?: throw NoSuchElementException("No emoji for input: $input")
 
     /**
      * Returns the unicode emoji from a Discord alias (e.g. `:joy:`), or `null` if unresolvable.
@@ -71,7 +71,7 @@ object EmojiUtil {
      *
      * @see .resolveJDAEmojiOrNull
      */
-    fun resolveEmojiOrNull(input: String): String? {
+    public fun resolveEmojiOrNull(input: String): String? {
         val emoji = EmojiManager.getByDiscordAlias(input).orElse(EmojiManager.getEmoji(input).orElse(null))
 
         if (emoji == null) {
@@ -89,7 +89,7 @@ object EmojiUtil {
             }
             return null
         }
-        return emoji.unicode
+        return emoji.unicodeText
     }
 
     private fun removeColonFromAlias(alias: String): String {
@@ -112,7 +112,7 @@ object EmojiUtil {
      * @throws NoSuchElementException if no emoji alias or unicode matches
      * @see .resolveEmoji
      */
-    fun resolveJDAEmoji(input: String): UnicodeEmoji = Emoji.fromUnicode(resolveEmoji(input))
+    public fun resolveJDAEmoji(input: String): UnicodeEmoji = Emoji.fromUnicode(resolveEmoji(input))
 
     /**
      * Returns the [UnicodeEmoji] from a Discord alias (e.g. `:joy:`), or `null` if unresolvable.
@@ -129,7 +129,7 @@ object EmojiUtil {
      *
      * @see .resolveEmoji
      */
-    fun resolveJDAEmojiOrNull(input: String): UnicodeEmoji? {
+    public fun resolveJDAEmojiOrNull(input: String): UnicodeEmoji? {
         val unicode = resolveEmojiOrNull(input) ?: return null
         return Emoji.fromUnicode(unicode)
     }

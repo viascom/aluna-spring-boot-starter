@@ -35,7 +35,7 @@ import java.time.ZoneOffset
 
 @Service
 @ConditionalOnJdaEnabled
-class SessionStartLimitListener(
+public class SessionStartLimitListener(
     private val discordBot: DiscordBot,
 ) : ApplicationListener<DiscordAllShardsReadyEvent> {
 

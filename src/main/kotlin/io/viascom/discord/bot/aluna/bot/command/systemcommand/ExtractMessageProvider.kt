@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class ExtractMessageProvider(
+public class ExtractMessageProvider(
     private val shardManager: ShardManager,
     private val objectMapper: ObjectMapper
 ) : SystemCommandDataProvider(

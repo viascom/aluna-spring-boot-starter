@@ -26,4 +26,4 @@ import java.lang.annotation.Inherited
 
 @Conditional(ShutdownHookCondition::class)
 @Inherited
-annotation class ConditionalOnShutdownHook
+public annotation class ConditionalOnShutdownHook

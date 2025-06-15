@@ -26,4 +26,4 @@ import java.lang.annotation.Inherited
 
 @ConditionalOnProperty(name = ["command.system-command.enabled"], prefix = "aluna", matchIfMissing = false)
 @Inherited
-annotation class ConditionalOnSystemCommandEnabled()
+public annotation class ConditionalOnSystemCommandEnabled()

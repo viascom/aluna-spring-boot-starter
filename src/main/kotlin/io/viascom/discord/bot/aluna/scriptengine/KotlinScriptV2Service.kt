@@ -33,7 +33,7 @@ import kotlin.reflect.KClass
 @Service
 @ConditionalOnJdaEnabled
 @ConditionalOnProperty(name = ["command.system-command.enable-kotlin-script-evaluate"], prefix = "aluna", matchIfMissing = false)
-class KotlinScriptV2Service(
+public class KotlinScriptV2Service(
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
     private val alunaProperties: AlunaProperties,
@@ -59,7 +59,7 @@ class KotlinScriptV2Service(
         }
     }
 
-    fun eval(kotlin: String): Any {
+    public fun eval(kotlin: String): Any {
 
         val bindings = arrayListOf(
             Binding("shardManager", shardManager, ShardManager::class),
@@ -105,5 +105,5 @@ class KotlinScriptV2Service(
         )
     }
 
-    open class Binding(val name: String, val obj: Any, val type: KClass<out Any>)
+    public open class Binding(public val name: String, public val obj: Any, public val type: KClass<out Any>)
 }

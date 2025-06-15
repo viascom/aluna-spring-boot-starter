@@ -31,7 +31,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData
 import java.time.Duration
 import kotlin.reflect.jvm.isAccessible
 
-abstract class DiscordSubCommandGroupHandler(name: String, description: String) : SubcommandGroupData(name, description), InteractionScopedObject, DiscordSubCommandElement {
+public abstract class DiscordSubCommandGroupHandler(name: String, description: String) : SubcommandGroupData(name, description), InteractionScopedObject, DiscordSubCommandElement {
 
     /**
      * This gets set by the CommandContext automatically and should not be changed
@@ -45,12 +45,12 @@ abstract class DiscordSubCommandGroupHandler(name: String, description: String) 
     override var beanCallOnDestroy: Boolean = true
     override var freshInstance: Boolean = true
 
-    val subCommands: HashMap<String, DiscordSubCommandHandler> = hashMapOf()
+    public val subCommands: HashMap<String, DiscordSubCommandHandler> = hashMapOf()
 
     /**
      * Interaction development status
      */
-    var interactionDevelopmentStatus = DevelopmentStatus.LIVE
+    public var interactionDevelopmentStatus: DevelopmentStatus = DevelopmentStatus.LIVE
 
     @JvmSynthetic
     internal suspend fun initSubCommands() = withContext(AlunaDispatchers.Internal) {
@@ -62,13 +62,13 @@ abstract class DiscordSubCommandGroupHandler(name: String, description: String) 
         }
     }
 
-    suspend fun registerSubCommand(subCommand: DiscordSubCommandHandler) {
+    public suspend fun registerSubCommand(subCommand: DiscordSubCommandHandler) {
         subCommands[subCommand.name] = subCommand
         subCommand.runInitCommandOptions()
         this.addSubcommands(subCommand)
     }
 
-    suspend fun registerSubCommands(vararg subCommands: DiscordSubCommandHandler) {
+    public suspend fun registerSubCommands(vararg subCommands: DiscordSubCommandHandler) {
         subCommands.forEach {
             registerSubCommand(it)
         }

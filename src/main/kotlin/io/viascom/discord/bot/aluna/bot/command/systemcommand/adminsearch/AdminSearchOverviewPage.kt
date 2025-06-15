@@ -43,6 +43,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji
+import net.dv8tion.jda.api.interactions.InteractionContextType
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -51,7 +52,7 @@ import org.springframework.stereotype.Component
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class AdminSearchOverviewPage(
+public class AdminSearchOverviewPage(
     private val shardManager: ShardManager, private val alunaProperties: AlunaProperties, private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : AdminSearchPageDataProvider(
     "OVERVIEW", "Overview", arrayListOf(
@@ -364,7 +365,7 @@ class AdminSearchOverviewPage(
         embedBuilder.addField("Time Modified", discordCommand.timeModified.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
         embedBuilder.addField(
             "Is Guild Only",
-            (if (discordCommand.isGuildOnly) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
+            (if (discordCommand.contexts.contains(InteractionContextType.GUILD)) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted,
             true
         )
         embedBuilder.addField("Is NSFW", (if (discordCommand.isNSFW) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted, true)

@@ -23,12 +23,12 @@ package io.viascom.discord.bot.aluna.model
 
 import net.dv8tion.jda.api.Permission
 
-class MissingPermissions(
-    val textChannel: ArrayList<Permission> = arrayListOf(),
-    val voiceChannel: ArrayList<Permission> = arrayListOf(),
-    val guild: ArrayList<Permission> = arrayListOf(),
-    var notInVoice: Boolean = false,
+public class MissingPermissions(
+    public val textChannel: ArrayList<Permission> = arrayListOf(),
+    public val voiceChannel: ArrayList<Permission> = arrayListOf(),
+    public val guild: ArrayList<Permission> = arrayListOf(),
+    public var notInVoice: Boolean = false,
 ) {
-    val hasMissingPermissions: Boolean
+    public val hasMissingPermissions: Boolean
         get() = textChannel.isNotEmpty() || voiceChannel.isNotEmpty() || guild.isNotEmpty()
 }

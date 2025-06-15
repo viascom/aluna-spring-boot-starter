@@ -47,7 +47,7 @@ import org.springframework.stereotype.Component
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class PurgeMessagesProvider(
+public class PurgeMessagesProvider(
     private val shardManager: ShardManager,
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : SystemCommandDataProvider(

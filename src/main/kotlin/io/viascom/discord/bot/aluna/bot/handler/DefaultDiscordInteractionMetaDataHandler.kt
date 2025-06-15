@@ -25,7 +25,7 @@ import io.viascom.discord.bot.aluna.model.TimeMarkRecord
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 
-open class DefaultDiscordInteractionMetaDataHandler : DiscordInteractionMetaDataHandler {
+public open class DefaultDiscordInteractionMetaDataHandler : DiscordInteractionMetaDataHandler {
     override fun onCommandExecution(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent) {
     }
 

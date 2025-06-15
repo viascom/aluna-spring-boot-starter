@@ -45,7 +45,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnFastMutualGuildCacheEnabled
-open class FastMutualGuildsCacheListener(
+public open class FastMutualGuildsCacheListener(
     private val fastMutualGuildsCache: FastMutualGuildsCache,
     private val alunaProperties: AlunaProperties
 ) : CoroutineEventListener {

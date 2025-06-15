@@ -32,7 +32,7 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 import net.dv8tion.jda.api.interactions.InteractionHook
 import java.time.Duration
 
-abstract class SystemCommandCoroutineDataProvider(
+public abstract class SystemCommandCoroutineDataProvider(
     override val id: String,
     override val name: String,
     override var ephemeral: Boolean = true,
@@ -62,34 +62,34 @@ abstract class SystemCommandCoroutineDataProvider(
     override var beanCallOnDestroy: Boolean = false
     override var freshInstance: Boolean = true
 
-    abstract suspend fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand)
+    public abstract suspend fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand)
 
     override suspend fun runOnDestroy() {
     }
 
-    open suspend fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
+    public open suspend fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return true
     }
 
-    open suspend fun onButtonInteractionTimeout() {}
-    open suspend fun onStringSelectMenuInteraction(event: StringSelectInteractionEvent): Boolean {
+    public open suspend fun onButtonInteractionTimeout() {}
+    public open suspend fun onStringSelectMenuInteraction(event: StringSelectInteractionEvent): Boolean {
         return true
     }
 
-    open suspend fun onStringSelectInteractionTimeout() {}
-    open suspend fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
+    public open suspend fun onStringSelectInteractionTimeout() {}
+    public open suspend fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
         return true
     }
 
-    open suspend fun onEntitySelectInteractionTimeout() {}
-    open suspend fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: SystemCommand) {}
+    public open suspend fun onEntitySelectInteractionTimeout() {}
+    public open suspend fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: SystemCommand) {}
 
 
-    open suspend fun onModalInteraction(event: ModalInteractionEvent): Boolean {
+    public open suspend fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         return true
     }
 
-    open suspend fun onModalInteractionTimeout() {}
+    public open suspend fun onModalInteractionTimeout() {}
 
     override suspend fun runExecute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) = execute(event, hook, command)
     override suspend fun runOnButtonInteraction(event: ButtonInteractionEvent) = onButtonInteraction(event)

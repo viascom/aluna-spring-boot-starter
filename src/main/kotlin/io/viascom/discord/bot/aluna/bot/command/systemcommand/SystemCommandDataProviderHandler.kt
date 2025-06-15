@@ -32,19 +32,19 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 import net.dv8tion.jda.api.interactions.InteractionHook
 import java.time.Duration
 
-abstract class SystemCommandDataProviderHandler(
-    open val id: String,
-    open val name: String,
-    open var ephemeral: Boolean = true,
-    open var allowMods: Boolean = false,
+public abstract class SystemCommandDataProviderHandler(
+    public open val id: String,
+    public open val name: String,
+    public open var ephemeral: Boolean = true,
+    public open var allowMods: Boolean = false,
     /**
      * Should Aluna call the onArgsAutoComplete method when the user focusing the args field.
      */
-    open var supportArgsAutoComplete: Boolean = false,
+    public open var supportArgsAutoComplete: Boolean = false,
     /**
      * Should Aluna keep the event open or not. If not, Aluna will acknowledge the event before calling execute() and hook is in this case provided.
      */
-    open var autoAcknowledgeEvent: Boolean = true
+    public open var autoAcknowledgeEvent: Boolean = true
 ) : InteractionScopedObject {
 
     override var uniqueId: String = ""

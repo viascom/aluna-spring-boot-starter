@@ -48,7 +48,7 @@ import java.awt.Color
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class GenerateCommandListProvider(
+public class GenerateCommandListProvider(
     private val shardManager: ShardManager,
     private val context: ConfigurableApplicationContext
 ) : SystemCommandDataProvider(

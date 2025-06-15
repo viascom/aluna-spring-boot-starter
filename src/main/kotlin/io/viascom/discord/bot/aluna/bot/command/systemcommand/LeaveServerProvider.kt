@@ -45,7 +45,7 @@ import java.time.Duration
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class LeaveServerProvider(
+public class LeaveServerProvider(
     private val shardManager: ShardManager,
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : SystemCommandDataProvider(

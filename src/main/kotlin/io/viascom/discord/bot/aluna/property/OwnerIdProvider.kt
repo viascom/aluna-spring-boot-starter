@@ -25,7 +25,7 @@ package io.viascom.discord.bot.aluna.property
  * Owner id provider
  *
  */
-interface OwnerIdProvider {
+public interface OwnerIdProvider {
 
     /**
      * Get owner ids.
@@ -33,6 +33,6 @@ interface OwnerIdProvider {
      *
      * @return List of owners (Discord user ids)
      */
-    fun getOwnerIds(): ArrayList<Long>
+    public fun getOwnerIds(): ArrayList<Long>
 
 }

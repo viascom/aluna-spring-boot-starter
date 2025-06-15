@@ -44,7 +44,7 @@ import kotlin.time.toDuration
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class LastUsedCommands(
+public class LastUsedCommands(
     private val discordBot: DiscordBot
 ) : SystemCommandDataProvider(
     "last_used_commands",

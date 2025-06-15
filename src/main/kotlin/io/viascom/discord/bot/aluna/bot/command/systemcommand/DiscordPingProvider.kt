@@ -36,7 +36,7 @@ import java.time.temporal.ChronoUnit
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class DiscordPingProvider : SystemCommandDataProvider(
+public class DiscordPingProvider : SystemCommandDataProvider(
     "discord_ping",
     "Get Discord Ping",
     true,

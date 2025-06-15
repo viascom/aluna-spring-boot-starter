@@ -24,15 +24,15 @@ package io.viascom.discord.bot.aluna.model
 import io.viascom.discord.bot.aluna.util.toHex
 import java.awt.Color
 
-class ReleaseNotes(
-    val title: String = "Release Notes - {now:LONG_DATE_TIME}",
-    val description: String = "",
-    val color: String = Color.BLUE.toHex(),
-    val thumbnail: String? = null,
-    val image: String? = null,
-    val creator: String = "",
-    val newCommands: List<String> = arrayListOf(),
-    val newFeatures: List<String> = arrayListOf(),
-    val bugFixes: List<String> = arrayListOf(),
-    val internalChanges: List<String> = arrayListOf()
+public class ReleaseNotes(
+    public val title: String = "Release Notes - {now:LONG_DATE_TIME}",
+    public val description: String = "",
+    public val color: String = Color.BLUE.toHex(),
+    public val thumbnail: String? = null,
+    public val image: String? = null,
+    public val creator: String = "",
+    public val newCommands: List<String> = arrayListOf(),
+    public val newFeatures: List<String> = arrayListOf(),
+    public val bugFixes: List<String> = arrayListOf(),
+    public val internalChanges: List<String> = arrayListOf()
 )

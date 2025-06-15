@@ -41,17 +41,17 @@ import kotlin.time.Duration
  *
  * This enables [the coroutine listener extension][listener].
  */
-open class CoroutineEventManager(
-    val eventThreadPool: ThreadPoolExecutor,
+public open class CoroutineEventManager(
+    public val eventThreadPool: ThreadPoolExecutor,
     scope: CoroutineScope = AlunaDispatchers.InternalScope,
     /** Timeout [Duration] each event listener is allowed to run. Set to [Duration.INFINITE] for no timeout. Default: [Duration.INFINITE] */
-    var timeout: Duration = Duration.INFINITE
+    public var timeout: Duration = Duration.INFINITE
 ) : IEventManager, CoroutineScope by scope {
     private val listeners = CopyOnWriteArrayList<Any>()
 
-    val logger: Logger = LoggerFactory.getLogger(CoroutineEventManager::class.java)
+    public val logger: Logger = LoggerFactory.getLogger(CoroutineEventManager::class.java)
 
-    protected fun timeout(listener: Any) = when {
+    protected fun timeout(listener: Any): Duration = when {
         listener is CoroutineEventListener && listener.timeout != EventTimeout.Inherit -> listener.timeout.time
         else -> timeout
     }
@@ -77,7 +77,7 @@ open class CoroutineEventManager(
         }
     }
 
-    protected open suspend fun runListener(listener: Any, event: GenericEvent) = when (listener) {
+    protected open suspend fun runListener(listener: Any, event: GenericEvent): Unit = when (listener) {
         is CoroutineEventListener -> {
             AlunaDispatchers.EventScope.launch { listener.onEvent(event) }
             Unit

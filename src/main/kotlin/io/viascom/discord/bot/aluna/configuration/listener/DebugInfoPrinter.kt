@@ -42,7 +42,7 @@ import org.springframework.stereotype.Service
 @Service
 @ConditionalOnJdaEnabled
 @ConditionalOnExpression("\${aluna.debug.enable-debug-configuration-log:true} && \${aluna.production-mode:false} == false")
-class DebugInfoPrinter(
+public class DebugInfoPrinter(
     private val discordBot: DiscordBot,
     private val alunaProperties: AlunaProperties,
     private val ownerIdProvider: OwnerIdProvider,

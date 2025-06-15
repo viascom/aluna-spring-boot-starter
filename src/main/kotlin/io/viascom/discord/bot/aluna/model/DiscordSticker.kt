@@ -37,16 +37,16 @@ import net.dv8tion.jda.api.entities.sticker.StickerSnowflake
  *
  */
 @JvmDefaultWithCompatibility
-interface DiscordSticker {
-    val id: String
-    val guildId: String
+public interface DiscordSticker {
+    public val id: String
+    public val guildId: String
 
     /**
      * Get sticker
      *
      * @return Sticker.
      */
-    fun toSticker(): StickerSnowflake {
+    public fun toSticker(): StickerSnowflake {
         return Sticker.fromId(id)
     }
 }

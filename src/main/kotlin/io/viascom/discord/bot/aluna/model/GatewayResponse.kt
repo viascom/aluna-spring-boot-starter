@@ -25,24 +25,24 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 
-class GatewayResponse(
-    val shards: Int,
+public class GatewayResponse(
+    public val shards: Int,
     @JsonProperty("session_start_limit")
-    val sessionStartLimit: SessionStartLimit
+    public val sessionStartLimit: SessionStartLimit
 ) {
-    class SessionStartLimit(
-        val total: Int,
-        var remaining: Int,
+    public class SessionStartLimit(
+        public val total: Int,
+        public var remaining: Int,
 
         @set:JsonProperty("reset_after")
         @get:JsonIgnore
-        var resetAfter: Int,
+        public var resetAfter: Int,
 
         @JsonProperty("max_concurrency")
-        val maxConcurrency: Int
+        public val maxConcurrency: Int
     ) {
 
-        var resetTimestamp: LocalDateTime? = null
+        public var resetTimestamp: LocalDateTime? = null
 
     }
 }

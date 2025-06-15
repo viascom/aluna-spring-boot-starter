@@ -50,7 +50,7 @@ import kotlin.reflect.full.isSuperclassOf
 
 @Service
 @ConditionalOnJdaEnabled
-class EventWaiter(
+public class EventWaiter(
     alunaProperties: AlunaProperties
 ) : CoroutineEventListener {
 
@@ -137,7 +137,7 @@ class EventWaiter(
      * @param isTimeout Defines if the timeout action should be called
      */
     @JvmOverloads
-    fun removeWaiter(id: String, isTimeout: Boolean = false) {
+    public fun removeWaiter(id: String, isTimeout: Boolean = false) {
         waitingEvents.forEach {
             run {
                 if (it.value.containsKey(id)) {
@@ -163,7 +163,7 @@ class EventWaiter(
      *
      * @param id ID of the waiter
      */
-    fun suspendWaiter(id: String) {
+    public fun suspendWaiter(id: String) {
         waitingEvents.filter { it.value.containsKey(id) }.forEach {
             it.value[id]?.forEach { it.suspended = true }
         }
@@ -174,7 +174,7 @@ class EventWaiter(
      *
      * @param id ID of the waiter
      */
-    fun unsuspendWaiter(id: String) {
+    public fun unsuspendWaiter(id: String) {
         waitingEvents.filter { it.value.containsKey(id) }.forEach {
             it.value[id]?.forEach { it.suspended = false }
         }
@@ -187,7 +187,7 @@ class EventWaiter(
      * @param timeout New timeout duration. If null, the old duration of the waiter timeout will be used.
      */
     @JvmOverloads
-    fun overrideTimeout(id: String, timeout: Duration? = null) {
+    public fun overrideTimeout(id: String, timeout: Duration? = null) {
         waitingEvents.filter { it.value.containsKey(id) }.forEach { entry ->
             entry.value[id]?.forEach {
                 //Cancel current task
@@ -214,7 +214,7 @@ class EventWaiter(
      *
      * @param id ID of the waiter
      */
-    fun removeTimeout(id: String) {
+    public fun removeTimeout(id: String) {
         waitingEvents.filter { it.value.containsKey(id) }.forEach { entry ->
             entry.value[id]?.forEach {
                 //Cancel current task
@@ -223,29 +223,26 @@ class EventWaiter(
         }
     }
 
-    fun <T : GenericEvent> hasWaiter(id: String, type: Class<in T>? = null): Boolean =
+    public fun <T : GenericEvent> hasWaiter(id: String, type: Class<in T>? = null): Boolean =
         waitingEvents.filter { (it.key == type || type == null) && it.value.containsKey(id) }.isNotEmpty()
 
-    inner class WaitingEvent<in T : GenericEvent>(
+    public inner class WaitingEvent<in T : GenericEvent>(
         private val condition: Predicate<T>,
         private val action: Consumer<T>,
-        val stayActive: Boolean = false,
-        val type: Class<in T>,
-        val timeout: Duration?,
-        val timeoutAction: (() -> Unit)?,
-        var timeoutTask: ScheduledFuture<*>?
+        public val stayActive: Boolean = false,
+        public val type: Class<in T>,
+        public val timeout: Duration?,
+        public val timeoutAction: (() -> Unit)?,
+        public var timeoutTask: ScheduledFuture<*>?
     ) {
 
-        var suspended = false
+        public var suspended: Boolean = false
 
-        fun attempt(event: T): Boolean {
-            if (!suspended && condition.test(event)) {
-                return true
-            }
-            return false
+        public fun attempt(event: T): Boolean {
+            return !suspended && condition.test(event)
         }
 
-        fun execute(event: T) {
+        public fun execute(event: T) {
             action.accept(event)
         }
     }
@@ -264,7 +261,7 @@ class EventWaiter(
      * @param stayActive Defines if the waiter should stay active after the execution of the action.
      */
     @JvmOverloads
-    fun <T : GenericComponentInteractionCreateEvent> waitForInteraction(
+    public fun <T : GenericComponentInteractionCreateEvent> waitForInteraction(
         id: String = NanoId.generate(), type: Class<T>, message: Message, action: Consumer<T>, condition: Predicate<T>? = null,
         timeout: Duration? = Duration.ofMinutes(14), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
     ) {
@@ -292,7 +289,7 @@ class EventWaiter(
      * @param stayActive Defines if the waiter should stay active after the execution of the action.
      */
     @JvmOverloads
-    fun <T : ModalInteractionEvent> waitForInteraction(
+    public fun <T : ModalInteractionEvent> waitForInteraction(
         id: String = NanoId.generate(), type: Class<T>, action: Consumer<T>, condition: Predicate<T>? = null,
         timeout: Duration? = Duration.ofMinutes(14), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
     ) {
@@ -321,7 +318,7 @@ class EventWaiter(
      * @param stayActive Defines if the waiter should stay active after the execution of the action.
      */
     @JvmOverloads
-    fun <T : GenericComponentInteractionCreateEvent> waitForInteraction(
+    public fun <T : GenericComponentInteractionCreateEvent> waitForInteraction(
         id: String = NanoId.generate(), type: Class<T>, hook: InteractionHook, action: Consumer<T>, condition: Predicate<T>? = null,
         timeout: Duration? = Duration.ofMinutes(14), timeoutAction: (() -> (Unit))? = {}, stayActive: Boolean = false
     ) {
@@ -349,7 +346,7 @@ class EventWaiter(
      * @param stayActive Defines if the waiter should stay active after the execution of the action.
      */
     @JvmOverloads
-    fun <T : Event> waitForEvent(
+    public fun <T : Event> waitForEvent(
         id: String = NanoId.generate(),
         type: Class<T>,
         action: Consumer<T>,

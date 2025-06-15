@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit
 
 @Component
 @ConditionalOnJdaEnabled
-class TopGGBotStatsSender(
+public class TopGGBotStatsSender(
     private val alunaProperties: AlunaProperties,
     private val shardManager: ShardManager,
     private val objectMapper: ObjectMapper
@@ -75,10 +75,10 @@ class TopGGBotStatsSender(
         httpClient.newCall(request).execute().body?.close()
     }
 
-    class TopGGData(
+    public class TopGGData(
         @JsonProperty("server_count")
-        val serverCount: List<Int>,
+        public val serverCount: List<Int>,
         @JsonProperty("shard_count")
-        val shardCount: Int
+        public val shardCount: Int
     )
 }

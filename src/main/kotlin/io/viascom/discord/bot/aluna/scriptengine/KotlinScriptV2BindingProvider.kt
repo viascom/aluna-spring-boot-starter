@@ -26,19 +26,19 @@ package io.viascom.discord.bot.aluna.scriptengine
  * Implement this interface in order to add additional bindings and imports to the KotlinScriptService.
  *
  */
-interface KotlinScriptV2BindingProvider {
+public interface KotlinScriptV2BindingProvider {
 
     /**
      * Get binding definitions.
      *
      * @return List of Bindings.
      */
-    fun getBindings(): List<KotlinScriptV2Service.Binding>
+    public fun getBindings(): List<KotlinScriptV2Service.Binding>
 
     /**
      * Get import definitions
      *
      * @return List of imports
      */
-    fun getImports(): List<String>
+    public fun getImports(): List<String>
 }

@@ -29,18 +29,18 @@ import net.dv8tion.jda.api.events.GenericEvent
 /**
  * Identical to [EventListener][net.dv8tion.jda.api.hooks.EventListener] but uses suspending function.
  */
-fun interface CoroutineEventListener {
+public fun interface CoroutineEventListener {
     /**
      * The timeout [kotlin.time.Duration] to use, or [EventTimeout.Inherit] to use event manager default.
      *
      * This timeout decides how long a listener function is allowed to run, not when to unregister it.
      */
-    val timeout: EventTimeout get() = EventTimeout.Inherit
+    public val timeout: EventTimeout get() = EventTimeout.Inherit
 
-    suspend fun onEvent(event: GenericEvent)
+    public suspend fun onEvent(event: GenericEvent)
 
     /**
      * Unregisters this listener
      */
-    fun cancel() {}
+    public fun cancel() {}
 }

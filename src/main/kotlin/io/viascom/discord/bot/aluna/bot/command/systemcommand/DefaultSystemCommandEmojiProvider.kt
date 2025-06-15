@@ -2,7 +2,7 @@ package io.viascom.discord.bot.aluna.bot.command.systemcommand
 
 import net.dv8tion.jda.api.entities.emoji.Emoji
 
-class DefaultSystemCommandEmojiProvider : SystemCommandEmojiProvider {
+public class DefaultSystemCommandEmojiProvider : SystemCommandEmojiProvider {
     override fun loadingEmoji(): Emoji = Emoji.fromUnicode("\uD83D\uDD04")
 
     override fun tickEmoji(): Emoji = Emoji.fromUnicode("✅")

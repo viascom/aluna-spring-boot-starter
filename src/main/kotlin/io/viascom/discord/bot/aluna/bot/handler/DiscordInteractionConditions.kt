@@ -25,7 +25,7 @@ import io.viascom.discord.bot.aluna.model.MissingPermissions
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 
-interface DiscordInteractionConditions {
+public interface DiscordInteractionConditions {
 
     /**
      * Check if the user has all the needed permissions.
@@ -36,7 +36,7 @@ interface DiscordInteractionConditions {
      * @param event Generic interaction event
      * @return MissingPermissions
      */
-    fun checkForNeededUserPermissions(
+    public fun checkForNeededUserPermissions(
         discordCommandHandler: DiscordCommandHandler,
         userPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
@@ -51,7 +51,7 @@ interface DiscordInteractionConditions {
      * @param event Generic interaction event
      * @return MissingPermissions
      */
-    fun checkForNeededBotPermissions(
+    public fun checkForNeededBotPermissions(
         discordCommandHandler: DiscordCommandHandler,
         botPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
@@ -66,7 +66,7 @@ interface DiscordInteractionConditions {
      * @param event Generic interaction event
      * @return MissingPermissions
      */
-    fun checkForNeededUserPermissions(
+    public fun checkForNeededUserPermissions(
         contextMenu: DiscordContextMenuHandler,
         userPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
@@ -81,7 +81,7 @@ interface DiscordInteractionConditions {
      * @param event Generic interaction event
      * @return MissingPermissions
      */
-    fun checkForNeededBotPermissions(
+    public fun checkForNeededBotPermissions(
         contextMenu: DiscordContextMenuHandler,
         botPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent

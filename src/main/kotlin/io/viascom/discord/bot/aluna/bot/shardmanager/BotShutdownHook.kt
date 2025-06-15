@@ -21,4 +21,4 @@
 
 package io.viascom.discord.bot.aluna.bot.shardmanager
 
-abstract class BotShutdownHook : Thread()
+public abstract class BotShutdownHook : Thread()

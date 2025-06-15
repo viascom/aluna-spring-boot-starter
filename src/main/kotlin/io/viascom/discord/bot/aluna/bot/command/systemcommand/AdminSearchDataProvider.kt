@@ -54,7 +54,7 @@ import java.awt.Color
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class AdminSearchDataProvider(
+public class AdminSearchDataProvider(
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
     private val adminSearchPageDataProviders: List<AdminSearchPageDataProvider>,
@@ -431,7 +431,7 @@ class AdminSearchDataProvider(
         event.replyChoices().queue()
     }
 
-    enum class AdminSearchType {
+    public enum class AdminSearchType {
         USER, SERVER, ROLE, CHANNEL, EMOTE, INTERACTION_COMMAND
     }
 }

@@ -29,4 +29,4 @@ import org.springframework.stereotype.Component
  */
 @Component
 @InteractionScoped
-annotation class AutoComplete
+public annotation class AutoComplete

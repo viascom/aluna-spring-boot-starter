@@ -23,43 +23,43 @@ package io.viascom.discord.bot.aluna.bot
 
 import java.time.Duration
 
-interface InteractionScopedObject {
+public interface InteractionScopedObject {
     /**
      * Unique id for this object.
      * It's recommended to use DiscordContext.newUniqueId()
      */
-    var uniqueId: String
+    public var uniqueId: String
 
     /**
      * Bean timout delay before it gets destroyed
      */
-    var beanTimoutDelay: Duration
+    public var beanTimoutDelay: Duration
 
     /**
      * Should interaction execution use the bean created during auto complete request if present.
      */
-    var beanUseAutoCompleteBean: Boolean
+    public var beanUseAutoCompleteBean: Boolean
 
     /**
      * Should observers be removed if the bean gets destroyed.
      */
-    var beanRemoveObserverOnDestroy: Boolean
+    public var beanRemoveObserverOnDestroy: Boolean
 
     /**
      * Should observer timeouts be reset if bean timeout gets reset.
      */
-    var beanResetObserverTimeoutOnBeanExtend: Boolean
+    public var beanResetObserverTimeoutOnBeanExtend: Boolean
 
     /**
      * Should onDestroy be called if the bean gets destroyed.
      */
-    var beanCallOnDestroy: Boolean
+    public var beanCallOnDestroy: Boolean
 
     /**
      * If true, this instance got freshly created by Spring
      */
-    var freshInstance: Boolean
+    public var freshInstance: Boolean
 
 
-    suspend fun runOnDestroy()
+    public suspend fun runOnDestroy()
 }

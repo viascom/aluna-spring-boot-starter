@@ -36,7 +36,7 @@ import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFuncti
 import org.slf4j.MDC
 import kotlin.time.TimeSource.Monotonic.markNow
 
-abstract class DiscordMessageContextMenuHandler(name: String, localizations: LocalizationFunction? = null) :
+public abstract class DiscordMessageContextMenuHandler(name: String, localizations: LocalizationFunction? = null) :
     DiscordContextMenuHandler(Command.Type.MESSAGE, name, localizations) {
 
     internal abstract suspend fun runExecute(event: MessageContextInteractionEvent)

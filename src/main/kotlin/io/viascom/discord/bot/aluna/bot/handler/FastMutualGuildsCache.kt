@@ -26,29 +26,29 @@ import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.User
 
-interface FastMutualGuildsCache {
+public interface FastMutualGuildsCache {
 
-    val size: Int
+    public val size: Int
 
-    fun seedCache()
+    public fun seedCache()
 
-    fun clear(reason: String)
+    public fun clear(reason: String)
 
-    operator fun get(user: User): Collection<GuildId>
+    public operator fun get(user: User): Collection<GuildId>
 
-    operator fun get(member: Member): Collection<GuildId>
+    public operator fun get(member: Member): Collection<GuildId>
 
-    operator fun get(userId: String): Collection<GuildId>
+    public operator fun get(userId: String): Collection<GuildId>
 
-    operator fun get(userId: Long): Collection<GuildId>
+    public operator fun get(userId: Long): Collection<GuildId>
 
-    fun getAsGuilds(user: User): Collection<Guild>
-    fun getAsGuilds(member: Member): Collection<Guild>
-    fun getAsGuilds(userId: String): Collection<Guild>
-    fun getAsGuilds(userId: Long): Collection<Guild>
+    public fun getAsGuilds(user: User): Collection<Guild>
+    public fun getAsGuilds(member: Member): Collection<Guild>
+    public fun getAsGuilds(userId: String): Collection<Guild>
+    public fun getAsGuilds(userId: Long): Collection<Guild>
 
-    fun add(userId: Long, guildId: Long)
-    fun remove(userId: Long, guildId: Long)
-    fun importGuild(guildId: Long)
-    fun removeGuild(guildId: Long)
+    public fun add(userId: Long, guildId: Long)
+    public fun remove(userId: Long, guildId: Long)
+    public fun importGuild(guildId: Long)
+    public fun removeGuild(guildId: Long)
 }

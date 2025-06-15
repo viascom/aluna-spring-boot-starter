@@ -24,9 +24,9 @@ package io.viascom.discord.bot.aluna.bot.handler
 import net.dv8tion.jda.api.interactions.DiscordLocale
 import net.dv8tion.jda.api.interactions.commands.localization.LocalizationFunction
 
-interface DiscordInteractionLocalization {
+public interface DiscordInteractionLocalization {
 
-    fun getLocalizationFunction(): LocalizationFunction
+    public fun getLocalizationFunction(): LocalizationFunction
 
-    fun getMissingTranslationKeys(): HashMap<DiscordLocale, ArrayList<String>>
+    public fun getMissingTranslationKeys(): HashMap<DiscordLocale, ArrayList<String>>
 }

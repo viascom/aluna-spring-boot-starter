@@ -25,39 +25,39 @@ import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.requests.GatewayIntent
 import java.time.Duration
 
-class AlunaDiscordProperties {
+public class AlunaDiscordProperties {
 
     /**
      * Should Aluna auto create a shard manager
      */
-    var enableJda: Boolean = true
+    public var enableJda: Boolean = true
 
     /**
      * Automatically start the login process on startup. If this is false, then you will need to manually call ShardManager.login() to start it.
      */
-    var autoLoginOnStartup: Boolean = true
+    public var autoLoginOnStartup: Boolean = true
 
     /**
      * Discord Bot Token
      * Can be generated here: https://discord.com/developers/applications
      */
-    var token: String? = null
+    public var token: String? = null
 
     /**
      * Discord Bot Application-Id
      * Can be found here: https://discord.com/developers/applications
      */
-    var applicationId: String? = null
+    public var applicationId: String? = null
 
     /**
      * Defines the support server which will be used for certain information..
      */
-    var supportServer: String? = null
+    public var supportServer: String? = null
 
     /**
      * Sharding configuration
      */
-    var sharding: Sharding = Sharding()
+    public var sharding: Sharding = Sharding()
 
     /**
      * Intents which enable specific events from the discord gateway.
@@ -88,7 +88,7 @@ class AlunaDiscordProperties {
      * <p>You must use [ChunkingFilter.NONE] if GUILD_MEMBERS is disabled.
      * To enable chunking the discord api requires the privileged GUILD_MEMBERS intent.
      */
-    var gatewayIntents: ArrayList<GatewayIntent> = arrayListOf()
+    public var gatewayIntents: ArrayList<GatewayIntent> = arrayListOf()
 
     /**
      * Configure the member caching policy.
@@ -99,18 +99,18 @@ class AlunaDiscordProperties {
      * <p>It is not possible to disable [GatewayIntent.GUILD_MEMBERS] when
      * using [MemberCachePolicy.ALL] as the members cannot be removed from cache by a leave event without this intent.
      */
-    var memberCachePolicy: MemberCachePolicyType = MemberCachePolicyType.ONLINE
+    public var memberCachePolicy: MemberCachePolicyType = MemberCachePolicyType.ONLINE
 
     /**
      * Flags used to disable cache services for JDA.
      */
-    var cacheFlagsDisabled: ArrayList<CacheFlag> = arrayListOf()
+    public var cacheFlagsDisabled: ArrayList<CacheFlag> = arrayListOf()
 
     /**
      * Flags used to enable cache services for JDA.
      * <br>Check the flag descriptions to see which intents are required to use them.
      */
-    var cacheFlagsEnabled: ArrayList<CacheFlag> = arrayListOf()
+    public var cacheFlagsEnabled: ArrayList<CacheFlag> = arrayListOf()
 
     /**
      * Filter function for member chunking of guilds.
@@ -120,84 +120,84 @@ class AlunaDiscordProperties {
      * <b>To use chunking, the [GatewayIntent.GUILD_MEMBERS] intent must be enabled!
      * Otherwise you <u>must</u> use [ChunkingFilter.NONE]!</b>
      */
-    var chunkingFilter: ChunkingFilter? = null
+    public var chunkingFilter: ChunkingFilter? = null
 
     /**
      * Sets whether JDA should try to reconnect if a connection-error is encountered.
      */
-    var autoReconnect: Boolean = true
+    public var autoReconnect: Boolean = true
 
     /**
      * If enabled, JDA will separate the bulk delete event into individual delete events, but this isn't as efficient as
      * handling a single event would be. It is recommended that BulkDelete Splitting be disabled and that the developer
      * should instead handle the {@link net.dv8tion.jda.api.events.message.MessageBulkDeleteEvent MessageBulkDeleteEvent}.
      */
-    var bulkDeleteSplitting: Boolean = true
+    public var bulkDeleteSplitting: Boolean = true
 
     /**
      * Default permissions which are used for /system-command and invite generation
      */
-    var defaultPermissions: ArrayList<Permission> = arrayListOf()
+    public var defaultPermissions: ArrayList<Permission> = arrayListOf()
 
     /**
      * Publish jda events as Spring Boot events.
      */
-    var publishEvents: Boolean = false
+    public var publishEvents: Boolean = false
 
     /**
      * Publish only first event and don't publish parent events
      */
-    var publishOnlyFirstEvent: Boolean = true
+    public var publishOnlyFirstEvent: Boolean = true
 
     /**
      * Publish gate ping event. This may cause a lot of events!
      */
-    var publishGatePingEvent: Boolean = false
+    public var publishGatePingEvent: Boolean = false
 
     /**
      * Publish guild ready event. This may cause a lot of events!
      */
-    var publishGuildReadyEvent: Boolean = false
+    public var publishGuildReadyEvent: Boolean = false
 
     /**
      * Publish Aluna discord interaction event. This event should not be used to answer the interaction!
      */
-    var publishDiscordCommandEvent: Boolean = false
+    public var publishDiscordCommandEvent: Boolean = false
 
     /**
      * Publish Aluna discord context menu event. This event should not be used to answer the context menu!
      */
-    var publishDiscordContextEvent: Boolean = false
+    public var publishDiscordContextEvent: Boolean = false
 
     /**
      * Set status to online and remove activity as soon as Aluna is finished with the startup process and is connected to Discord.
      */
-    var setStatusToOnlineWhenReady: Boolean = true
+    public var setStatusToOnlineWhenReady: Boolean = true
 
-    var shutdownHook: ShutdownHook = ShutdownHook.JDA
+    public var shutdownHook: ShutdownHook = ShutdownHook.JDA
 
-    var fastMutualGuildCache: FastMutualGuildCacheProperties = FastMutualGuildCacheProperties()
+    public var fastMutualGuildCache: FastMutualGuildCacheProperties = FastMutualGuildCacheProperties()
 
-    class Sharding {
-        var type: Type = Type.SINGLE
+    public class Sharding {
+        public var type: Type = Type.SINGLE
 
         /**
          * This will set the total amount of shards the DefaultShardManager should use.
          * <p> If this is set to -1 JDA will automatically retrieve the recommended amount of shards from discord (default behavior).
          */
-        var totalShards: Int = -1
+        public var totalShards: Int = -1
 
-        var fromShard: Int = 0
-        var shardAmount: Int = 1
+        public var fromShard: Int = 0
+        public var shardAmount: Int = 1
 
-        var grouping: Grouping = Grouping()
+        public var grouping: Grouping = Grouping()
 
-        enum class Type {
+        public enum class Type {
             SINGLE, SUBSET
         }
 
-        class Grouping {
-            var enabled: Boolean = false
+        public class Grouping {
+            public var enabled: Boolean = false
 
             /**
              * Only change this if really have to.
@@ -205,11 +205,11 @@ class AlunaDiscordProperties {
              * Which in the longer run will eat up your allowed session start limit.
              * Concurrency higher than 1 is only granted to bigger bots with at least 150'000 servers.
              */
-            var concurrency: Int = 1
+            public var concurrency: Int = 1
         }
     }
 
-    enum class MemberCachePolicyType {
+    public enum class MemberCachePolicyType {
         NONE,
         ALL,
         OWNER,
@@ -220,7 +220,7 @@ class AlunaDiscordProperties {
         DEFAULT
     }
 
-    enum class CacheFlag {
+    public enum class CacheFlag {
         ALL,
         ACTIVITY,
         VOICE_STATE,
@@ -234,39 +234,39 @@ class AlunaDiscordProperties {
         STICKER
     }
 
-    class CacheFlags : ArrayList<CacheFlag>()
+    public class CacheFlags : ArrayList<CacheFlag>()
 
-    enum class ChunkingFilter {
+    public enum class ChunkingFilter {
         ALL, NONE
     }
 
-    enum class ShutdownHook {
+    public enum class ShutdownHook {
         JDA,
         ALUNA,
         NONE
     }
 
-    class FastMutualGuildCacheProperties {
+    public class FastMutualGuildCacheProperties {
         /**
          * Should Aluna use and manage the FastMutualGuildCache?
          */
-        var enabled: Boolean = false
+        public var enabled: Boolean = false
 
         /**
          * Should Aluna use shardManager.getMutualGuilds(user) if the user is not found in the cache?
          */
-        var useShardManagerFallback: Boolean = true
+        public var useShardManagerFallback: Boolean = true
 
-        var clearOnSessionDisconnect: Boolean = true
+        public var clearOnSessionDisconnect: Boolean = true
 
-        var seedOnSessionResume: Boolean = true
+        public var seedOnSessionResume: Boolean = true
 
-        var eventBuffer: Duration = Duration.ofMillis(10)
+        public var eventBuffer: Duration = Duration.ofMillis(10)
 
-        var invalidateBeforeSeedingCache: Boolean = true
+        public var invalidateBeforeSeedingCache: Boolean = true
 
-        var reSeedCache: Boolean = false
+        public var reSeedCache: Boolean = false
 
-        var reSeedInterval: String = "0 5,35 * * * *"
+        public var reSeedInterval: String = "0 5,35 * * * *"
     }
 }

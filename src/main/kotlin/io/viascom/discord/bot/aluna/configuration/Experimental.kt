@@ -45,4 +45,4 @@ import java.lang.annotation.Inherited
     AnnotationTarget.PROPERTY
 )
 @Inherited
-annotation class Experimental(val description: String)
+public annotation class Experimental(val description: String)

@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service
 
 @Service
 @ConditionalOnJdaEnabled
-class GenericEventPublisher(
+public class GenericEventPublisher(
     private val eventPublisher: EventPublisher
 ) : CoroutineEventListener {
     override suspend fun onEvent(event: GenericEvent) {

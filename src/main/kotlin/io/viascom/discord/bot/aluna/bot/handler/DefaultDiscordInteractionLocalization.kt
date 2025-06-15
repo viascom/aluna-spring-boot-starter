@@ -31,7 +31,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
 
-open class DefaultDiscordInteractionLocalization(
+public open class DefaultDiscordInteractionLocalization(
     private val alunaProperties: AlunaProperties
 ) : DiscordInteractionLocalization {
 
@@ -57,7 +57,7 @@ open class DefaultDiscordInteractionLocalization(
         return missingTranslations
     }
 
-    class AlunaResourceBundleLocalizationFunction private constructor(
+    public class AlunaResourceBundleLocalizationFunction private constructor(
         private val bundles: Set<Bundle>,
         private val alunaProperties: AlunaProperties,
         private val missingTranslations: HashMap<DiscordLocale, ArrayList<String>>
@@ -101,7 +101,7 @@ open class DefaultDiscordInteractionLocalization(
          * @see ResourceBundleLocalizationFunction.fromBundle
          * @see ResourceBundleLocalizationFunction.fromBundles
          */
-        class Builder {
+        public class Builder {
             private val bundles: MutableSet<Bundle> = HashSet()
 
             /**
@@ -128,7 +128,7 @@ open class DefaultDiscordInteractionLocalization(
              * @see .fromBundle
              */
 
-            fun addBundle(resourceBundle: ResourceBundle, locale: DiscordLocale): Builder {
+            public fun addBundle(resourceBundle: ResourceBundle, locale: DiscordLocale): Builder {
                 Checks.notNull(resourceBundle, "Resource bundle")
                 Checks.notNull(locale, "Locale")
                 Checks.check(locale != DiscordLocale.UNKNOWN, "Cannot use UNKNOWN DiscordLocale")
@@ -160,7 +160,7 @@ open class DefaultDiscordInteractionLocalization(
              * @see .fromBundles
              */
 
-            fun addBundles(baseName: String?, vararg locales: DiscordLocale): Builder {
+            public fun addBundles(baseName: String?, vararg locales: DiscordLocale): Builder {
                 Checks.notNull(baseName, "Base name")
                 Checks.noneNull(locales, "Locale")
                 for (locale in locales) {
@@ -177,7 +177,7 @@ open class DefaultDiscordInteractionLocalization(
              * @return The new [ResourceBundleLocalizationFunction]
              */
 
-            fun build(
+            public fun build(
                 alunaProperties: AlunaProperties,
                 missingTranslations: HashMap<DiscordLocale, ArrayList<String>>
             ): AlunaResourceBundleLocalizationFunction {
@@ -197,7 +197,7 @@ open class DefaultDiscordInteractionLocalization(
             }
         }
 
-        companion object {
+        public companion object {
             /**
              * Creates an empty [ResourceBundleLocalizationFunction] builder and adds the provided bundle and locale.
              * <br></br>This is the same as using `ResourceBundleLocalizationFunction.empty().addBundle(resourceBundle, locale)`
@@ -228,7 +228,7 @@ open class DefaultDiscordInteractionLocalization(
              * @return The new builder
              */
 
-            fun fromBundle(resourceBundle: ResourceBundle, locale: DiscordLocale): Builder {
+            public fun fromBundle(resourceBundle: ResourceBundle, locale: DiscordLocale): Builder {
                 return Builder()
                     .addBundle(resourceBundle, locale)
             }
@@ -264,7 +264,7 @@ open class DefaultDiscordInteractionLocalization(
              * @return The new builder
              */
 
-            fun fromBundles(baseName: String?, vararg locales: DiscordLocale): Builder {
+            public fun fromBundles(baseName: String?, vararg locales: DiscordLocale): Builder {
                 return Builder().addBundles(baseName, *locales)
             }
 
@@ -274,7 +274,7 @@ open class DefaultDiscordInteractionLocalization(
              * @return The empty builder
              */
 
-            fun empty(): Builder {
+            public fun empty(): Builder {
                 return Builder()
             }
         }

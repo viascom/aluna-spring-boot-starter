@@ -50,7 +50,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.system.exitProcess
 
-open class DefaultShardManagerBuilder(
+public open class DefaultShardManagerBuilder(
     private val interactionEventListener: InteractionEventListener,
     private val genericInteractionListener: GenericInteractionListener,
     private val interactionComponentEventListener: InteractionComponentEventListener,

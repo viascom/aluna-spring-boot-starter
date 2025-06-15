@@ -45,7 +45,7 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
-class InteractionScope(private val context: ConfigurableApplicationContext) : Scope {
+public class InteractionScope(private val context: ConfigurableApplicationContext) : Scope {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
@@ -444,7 +444,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
         return scopedObjects.getOrElse(name) { null }?.remove(DiscordContext.discordState?.id)
     }
 
-    fun removeByUniqueId(uniqueId: String) {
+    public fun removeByUniqueId(uniqueId: String) {
         logger.debug("[$uniqueId] -> remove beans by unique id")
         scopedObjectsTimeoutScheduledTask[uniqueId]!!.cancel(true)
 
@@ -458,7 +458,7 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
         }.forEach { scopedObjects.remove(it.key) }
     }
 
-    fun setMessageIdForInstance(uniqueId: UniqueId, messageId: String) {
+    public fun setMessageIdForInstance(uniqueId: UniqueId, messageId: String) {
         try {
             val ids = scopedObjects.values.firstOrNull { it.containsKey(DiscordContext.discordState!!.id) && it[DiscordContext.discordState!!.id]?.containsKey(uniqueId) == true }
             val obj = ids?.values?.firstOrNull { it.containsKey(uniqueId) }?.get(uniqueId)
@@ -486,47 +486,47 @@ class InteractionScope(private val context: ConfigurableApplicationContext) : Sc
         return DiscordContext.discordState?.id ?: ""
     }
 
-    fun getInstanceCount(): Int {
+    public fun getInstanceCount(): Int {
         return scopedObjects.entries.sumOf { scopedObject -> scopedObject.value.entries.sumOf { it.value.size } }
     }
 
-    fun getTimeoutCount(): Int {
+    public fun getTimeoutCount(): Int {
         return scopedObjectsTimeoutScheduledTask.size
     }
 }
 
-object DiscordContext {
+public object DiscordContext {
     private val CONTEXT = NamedInheritableThreadLocal<Data>("discord")
-    fun setDiscordState(userId: String, serverId: String? = null, type: Type = Type.OTHER, uniqueId: String? = null, messageId: String? = null) {
+    public fun setDiscordState(userId: String, serverId: String? = null, type: Type = Type.OTHER, uniqueId: String? = null, messageId: String? = null) {
         CONTEXT.set(Data(userId + ":" + (serverId ?: ""), type, uniqueId, messageId))
     }
 
-    fun newUniqueId(): String {
+    public fun newUniqueId(): String {
         return NanoId.generate(16)
     }
 
-    var discordState: Data?
+    public var discordState: Data?
         get() = CONTEXT.get()
         set(discordStateId) {
             CONTEXT.set(discordStateId)
         }
 
-    fun clear() {
+    public fun clear() {
         CONTEXT.remove()
     }
 
-    class Data(
-        val id: DiscordStateId,
-        val type: Type = Type.OTHER,
-        var uniqueId: String? = null,
-        var messageId: String? = null
+    public class Data(
+        public val id: DiscordStateId,
+        public val type: Type = Type.OTHER,
+        public var uniqueId: String? = null,
+        public var messageId: String? = null
     ) {
         override fun toString(): String {
             return "[id='$id', uniqueId='$uniqueId', messageId='$messageId', type='$type']"
         }
     }
 
-    enum class Type {
+    public enum class Type {
         INTERACTION, AUTO_COMPLETE, OTHER
     }
 }

@@ -32,7 +32,7 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 /**
  * Coroutine discord sub command abstract base class
  */
-abstract class CoroutineDiscordSubCommand(name: String, description: String) : DiscordSubCommandHandler(name, description), DiscordSubCommandElement {
+public abstract class CoroutineDiscordSubCommand(name: String, description: String) : DiscordSubCommandHandler(name, description), DiscordSubCommandElement {
 
     /**
      * Method to implement for command execution
@@ -42,12 +42,12 @@ abstract class CoroutineDiscordSubCommand(name: String, description: String) : D
     protected abstract suspend fun execute(event: SlashCommandInteractionEvent)
 
 
-    open suspend fun initCommandOptions() {}
+    public open suspend fun initCommandOptions() {}
 
     /**
      * On destroy gets called, when the object gets destroyed after the defined beanTimoutDelay.
      */
-    open suspend fun onDestroy() {
+    public open suspend fun onDestroy() {
     }
 
     //======= Button Interaction =======
@@ -59,14 +59,14 @@ abstract class CoroutineDiscordSubCommand(name: String, description: String) : D
      * @param event [ButtonInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open suspend fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
+    public open suspend fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a button event observer duration timeout is reached.
      */
-    open suspend fun onButtonInteractionTimeout() {
+    public open suspend fun onButtonInteractionTimeout() {
     }
 
     //======= Select Interaction =======
@@ -78,14 +78,14 @@ abstract class CoroutineDiscordSubCommand(name: String, description: String) : D
      * @param event [StringSelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open suspend fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
+    public open suspend fun onStringSelectInteraction(event: StringSelectInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-    open suspend fun onStringSelectInteractionTimeout() {
+    public open suspend fun onStringSelectInteractionTimeout() {
     }
 
     /**
@@ -95,14 +95,14 @@ abstract class CoroutineDiscordSubCommand(name: String, description: String) : D
      * @param event [EntitySelectInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open suspend fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
+    public open suspend fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a select event observer duration timeout is reached.
      */
-    open suspend fun onEntitySelectInteractionTimeout() {
+    public open suspend fun onEntitySelectInteractionTimeout() {
     }
 
     //======= Modal Interaction =======
@@ -114,23 +114,23 @@ abstract class CoroutineDiscordSubCommand(name: String, description: String) : D
      * @param event [ModalInteractionEvent] this method is based on
      * @return Returns true if you acknowledge the event. If false is returned, the aluna will wait for the next event.
      */
-    open suspend fun onModalInteraction(event: ModalInteractionEvent): Boolean {
+    public open suspend fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         return false
     }
 
     /**
      * This method gets triggered, as soon as a modal event observer duration timeout is reached.
      */
-    open suspend fun onModalInteractionTimeout() {
+    public open suspend fun onModalInteractionTimeout() {
     }
 
     //======= Auto Complete =======
 
-    open suspend fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
+    public open suspend fun onAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent) {
     }
 
     override suspend fun runExecute(event: SlashCommandInteractionEvent) = execute(event)
-    override suspend fun runOnDestroy() = onDestroy()
+    override suspend fun runOnDestroy(): Unit = onDestroy()
     override suspend fun runOnButtonInteraction(event: ButtonInteractionEvent) = onButtonInteraction(event)
     override suspend fun runOnButtonInteractionTimeout() = onButtonInteractionTimeout()
     override suspend fun runOnStringSelectInteraction(event: StringSelectInteractionEvent) = onStringSelectInteraction(event)

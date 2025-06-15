@@ -37,7 +37,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button
 @Interaction
 @ConditionalOnJdaEnabled
 @ConditionalOnDefaultHelpCommandEnabled
-class DefaultHelpCommand : CoroutineDiscordCommand("help", "Shows information about the bot") {
+public class DefaultHelpCommand : CoroutineDiscordCommand("help", "Shows information about the bot") {
 
     init {
         this.beanCallOnDestroy = false

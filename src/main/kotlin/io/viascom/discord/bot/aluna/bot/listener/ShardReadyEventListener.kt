@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @ConditionalOnJdaEnabled
-class ShardReadyEventListener(private val discordReadyEventPublisher: EventPublisher) : CoroutineEventListener {
+public class ShardReadyEventListener(private val discordReadyEventPublisher: EventPublisher) : CoroutineEventListener {
 
     private var allShardsReady: Boolean = false
 

@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @ConditionalOnJdaEnabled
-open class InteractionComponentEventListener(
+public open class InteractionComponentEventListener(
     private val discordBot: DiscordBot,
     private val context: ConfigurableApplicationContext
 ) : CoroutineEventListener {

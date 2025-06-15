@@ -21,6 +21,6 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
-enum class CooldownScope {
+public enum class CooldownScope {
     NO_COOLDOWN, USER, CHANNEL, GUILD, USER_GUILD, GLOBAL
 }

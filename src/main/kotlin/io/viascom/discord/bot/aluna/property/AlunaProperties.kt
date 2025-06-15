@@ -25,74 +25,74 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.NestedConfigurationProperty
 
 @ConfigurationProperties(AlunaProperties.PREFIX)
-class AlunaProperties {
+public class AlunaProperties {
 
-    companion object {
-        const val PREFIX = "aluna"
+    public companion object {
+        public const val PREFIX: String = "aluna"
     }
 
     /**
      * Discord settings
      */
     @NestedConfigurationProperty
-    var discord: AlunaDiscordProperties = AlunaDiscordProperties()
+    public var discord: AlunaDiscordProperties = AlunaDiscordProperties()
 
     /**
      * Notification settings
      */
     @NestedConfigurationProperty
-    var notification: AlunaNotificationProperties = AlunaNotificationProperties()
+    public var notification: AlunaNotificationProperties = AlunaNotificationProperties()
 
     /**
      * BotStats settings
      */
     @NestedConfigurationProperty
-    var botStats: AlunaBotStatsProperties = AlunaBotStatsProperties()
+    public var botStats: AlunaBotStatsProperties = AlunaBotStatsProperties()
 
     /**
      * BotLists settings
      */
     @NestedConfigurationProperty
-    var thread: AlunaThreadProperties = AlunaThreadProperties()
+    public var thread: AlunaThreadProperties = AlunaThreadProperties()
 
     /**
      * Command settings
      */
     @NestedConfigurationProperty
-    var command: AlunaCommandProperties = AlunaCommandProperties()
+    public var command: AlunaCommandProperties = AlunaCommandProperties()
 
     /**
      * Is in production mode
      */
-    var productionMode: Boolean = false
+    public var productionMode: Boolean = false
 
     /**
      * Owner ids. This is used by the DefaultOwnerIdProvider.
      */
-    var ownerIds: ArrayList<Long> = arrayListOf()
+    public var ownerIds: ArrayList<Long> = arrayListOf()
 
     /**
      * Moderator ids. This is used by the DefaultModeratorIdProvider.
      */
-    var modIds: ArrayList<Long> = arrayListOf()
+    public var modIds: ArrayList<Long> = arrayListOf()
 
     @NestedConfigurationProperty
-    var debug: AlunaDebugProperties = AlunaDebugProperties()
+    public var debug: AlunaDebugProperties = AlunaDebugProperties()
 
     @NestedConfigurationProperty
-    var translation: AlunaTranslationProperties = AlunaTranslationProperties()
+    public var translation: AlunaTranslationProperties = AlunaTranslationProperties()
 
     /**
      * Should Aluna register interactions in production mode which are in interactionDevelopmentStatus == IN_DEVELOPMENT
      */
-    var includeInDevelopmentInteractions: Boolean = false
+    public var includeInDevelopmentInteractions: Boolean = false
 
     /**
      * Should Aluna enable its actuator health indicator
      *
      * Url: /actuator/health/aluna
      */
-    var enableActuatorHealthIndicator: Boolean = true
+    public var enableActuatorHealthIndicator: Boolean = true
 
-    var nodeNumber: Int = 0
+    public var nodeNumber: Int = 0
 }

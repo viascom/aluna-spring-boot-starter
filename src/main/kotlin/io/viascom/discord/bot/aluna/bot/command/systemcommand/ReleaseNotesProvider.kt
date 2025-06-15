@@ -53,7 +53,7 @@ import java.time.ZoneOffset
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class ReleaseNotesProvider(
+public class ReleaseNotesProvider(
     private val alunaProperties: AlunaProperties,
     private val objectMapper: ObjectMapper,
     private val discordBot: DiscordBot

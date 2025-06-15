@@ -33,9 +33,9 @@ import kotlin.reflect.KClass
  * @property removedCommands
  *
  */
-class DiscordSlashCommandInitializedEvent(
+public class DiscordSlashCommandInitializedEvent(
     source: Any,
-    val newCommands: List<KClass<out CommandDataImpl>>,
-    val updatedCommands: List<KClass<out CommandDataImpl>>,
-    val removedCommands: List<String>
+    public val newCommands: List<KClass<out CommandDataImpl>>,
+    public val updatedCommands: List<KClass<out CommandDataImpl>>,
+    public val removedCommands: List<String>
 ) : ApplicationEvent(source)

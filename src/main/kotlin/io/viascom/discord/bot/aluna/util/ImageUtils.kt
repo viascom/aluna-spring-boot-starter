@@ -44,7 +44,7 @@ import javax.imageio.ImageWriteParam
  * @return Rescaled BufferedImage
  */
 @Throws(IOException::class)
-fun BufferedImage.rescale(scale: Double): BufferedImage {
+public fun BufferedImage.rescale(scale: Double): BufferedImage {
     val originalWidth = this.width
     val originalHeight = this.height
     val type = if (this.type == 0) BufferedImage.TYPE_INT_ARGB else this.type
@@ -68,7 +68,7 @@ fun BufferedImage.rescale(scale: Double): BufferedImage {
  * @param out OutputStream where to write the compressed image
  */
 @Throws(FileNotFoundException::class, IOException::class)
-fun BufferedImage.compress(compression: Float, out: OutputStream) {
+public fun BufferedImage.compress(compression: Float, out: OutputStream) {
     val jpegWriter = ImageIO.getImageWritersByFormatName("jpeg").next()
 
     // Set the compression quality
@@ -89,7 +89,7 @@ fun BufferedImage.compress(compression: Float, out: OutputStream) {
  * @param mask Mask to use
  * @return BufferedImage with the mask applied
  */
-fun BufferedImage.applyMask(mask: BufferedImage): BufferedImage {
+public fun BufferedImage.applyMask(mask: BufferedImage): BufferedImage {
     val result = BufferedImage(this.getWidth(null), this.getHeight(null), Transparency.BITMASK)
     val temp = BufferedImage(this.getWidth(null), this.getHeight(null), Transparency.BITMASK)
     val raster = result.raster

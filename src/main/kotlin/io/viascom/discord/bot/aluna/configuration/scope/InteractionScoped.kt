@@ -41,4 +41,4 @@ import org.springframework.context.annotation.Scope
  * @since 0.0.10
  */
 @Scope("interaction")
-annotation class InteractionScoped
+public annotation class InteractionScoped

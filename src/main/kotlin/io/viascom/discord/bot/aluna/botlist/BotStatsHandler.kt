@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service
 
 @Service
 @ConditionalOnJdaEnabled
-open class BotStatsHandler(
+public open class BotStatsHandler(
     private val senders: List<BotStatsSender>,
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties,
@@ -68,7 +68,7 @@ open class BotStatsHandler(
     }
 
     @Scheduled(cron = "0 */10 * * * *", zone = "UTC") //Send updates every 10 minutes
-    open fun sendStats() {
+    public open fun sendStats() {
         AlunaDispatchers.DetachedScope.launch {
             if (!discordBot.isLoggedIn) return@launch
 

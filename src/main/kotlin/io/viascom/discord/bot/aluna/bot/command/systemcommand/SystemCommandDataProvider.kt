@@ -32,7 +32,7 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 import net.dv8tion.jda.api.interactions.InteractionHook
 import java.time.Duration
 
-abstract class SystemCommandDataProvider(
+public abstract class SystemCommandDataProvider(
     override val id: String,
     override val name: String,
     override var ephemeral: Boolean = true,
@@ -62,34 +62,34 @@ abstract class SystemCommandDataProvider(
     override var beanCallOnDestroy: Boolean = false
     override var freshInstance: Boolean = true
 
-    abstract fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand)
+    public abstract fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand)
 
     override suspend fun runOnDestroy() {
     }
 
-    open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
+    public open fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         return true
     }
 
-    open fun onButtonInteractionTimeout() {}
-    open fun onStringSelectMenuInteraction(event: StringSelectInteractionEvent): Boolean {
+    public open fun onButtonInteractionTimeout() {}
+    public open fun onStringSelectMenuInteraction(event: StringSelectInteractionEvent): Boolean {
         return true
     }
 
-    open fun onStringSelectInteractionTimeout() {}
-    open fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
+    public open fun onStringSelectInteractionTimeout() {}
+    public open fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
         return true
     }
 
-    open fun onEntitySelectInteractionTimeout() {}
-    open fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: SystemCommand) {}
+    public open fun onEntitySelectInteractionTimeout() {}
+    public open fun onArgsAutoComplete(event: CommandAutoCompleteInteractionEvent, command: SystemCommand) {}
 
 
-    open fun onModalInteraction(event: ModalInteractionEvent): Boolean {
+    public open fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         return true
     }
 
-    open fun onModalInteractionTimeout() {}
+    public open fun onModalInteractionTimeout() {}
 
     override suspend fun runExecute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) = execute(event, hook, command)
     override suspend fun runOnButtonInteraction(event: ButtonInteractionEvent) = onButtonInteraction(event)

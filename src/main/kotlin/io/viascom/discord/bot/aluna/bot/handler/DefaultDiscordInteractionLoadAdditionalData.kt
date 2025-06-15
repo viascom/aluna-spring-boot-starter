@@ -25,7 +25,7 @@ import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 
-open class DefaultDiscordInteractionLoadAdditionalData : DiscordInteractionLoadAdditionalData {
+public open class DefaultDiscordInteractionLoadAdditionalData : DiscordInteractionLoadAdditionalData {
 
     override fun loadData(discordCommandHandler: DiscordCommandHandler, event: GenericInteractionCreateEvent) {
     }

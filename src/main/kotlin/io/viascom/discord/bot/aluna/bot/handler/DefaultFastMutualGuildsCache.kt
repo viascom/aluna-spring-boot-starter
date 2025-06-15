@@ -32,7 +32,7 @@ import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.LoggerFactory
 
-open class DefaultFastMutualGuildsCache(
+public open class DefaultFastMutualGuildsCache(
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties
 ) : FastMutualGuildsCache {

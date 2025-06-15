@@ -31,9 +31,9 @@ import java.util.concurrent.CountDownLatch
 
 @Component
 @ConditionalOnJdaEnabled
-class ShardStartListener(val eventPublisher: EventPublisher) : CoroutineEventListener {
+public class ShardStartListener(public val eventPublisher: EventPublisher) : CoroutineEventListener {
 
-    var latch: CountDownLatch = CountDownLatch(1)
+    public var latch: CountDownLatch = CountDownLatch(1)
     private var mainShardLoaded = false
     private var firstShardLoaded = false
 

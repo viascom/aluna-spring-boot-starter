@@ -35,22 +35,22 @@ import java.time.Duration
  * @property commands Commands which this auto complete handler is mapped to
  * @property option Name of the option or null if this auto complete handler should reply on all options
  */
-abstract class AutoCompleteHandler @JvmOverloads constructor(val commands: ArrayList<Class<out DiscordCommandHandler>>, val option: String? = null) :
+public abstract class AutoCompleteHandler @JvmOverloads constructor(public val commands: ArrayList<Class<out DiscordCommandHandler>>, public val option: String? = null) :
     InteractionScopedObject {
 
     /**
      * @property command Command which this auto complete handler is mapped to
      * @property option Name of the option or null if this auto complete handler should reply on all options
      */
-    constructor(command: Class<out DiscordCommandHandler>, option: String? = null) : this(arrayListOf(command), option)
+    public constructor(command: Class<out DiscordCommandHandler>, option: String? = null) : this(arrayListOf(command), option)
 
     @Autowired
-    lateinit var discordBot: DiscordBot
+    public lateinit var discordBot: DiscordBot
 
     @Autowired
-    lateinit var discordInteractionLoadAdditionalData: DiscordInteractionLoadAdditionalData
+    public lateinit var discordInteractionLoadAdditionalData: DiscordInteractionLoadAdditionalData
 
-    val logger: Logger = LoggerFactory.getLogger(javaClass)
+    public val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     //This gets set by the CommandContext automatically
     override lateinit var uniqueId: String
@@ -68,7 +68,7 @@ abstract class AutoCompleteHandler @JvmOverloads constructor(val commands: Array
      *
      * @param event
      */
-    abstract fun onRequest(event: CommandAutoCompleteInteractionEvent)
+    public abstract fun onRequest(event: CommandAutoCompleteInteractionEvent)
 
     @JvmSynthetic
     internal fun onRequestCall(event: CommandAutoCompleteInteractionEvent) {

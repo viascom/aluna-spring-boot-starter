@@ -29,6 +29,7 @@ import io.viascom.discord.bot.aluna.model.DevelopmentStatus
 import io.viascom.discord.bot.aluna.model.UseScope
 import io.viascom.discord.bot.aluna.util.TimestampFormat
 import io.viascom.discord.bot.aluna.util.toDiscordTimestamp
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
@@ -43,13 +44,13 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-abstract class DiscordSubCommandHandler(
+public abstract class DiscordSubCommandHandler(
     name: String,
     description: String
 ) : SubcommandData(name, description), InteractionScopedObject, DiscordSubCommandElement {
 
     @Autowired
-    lateinit var discordBot: DiscordBot
+    public lateinit var discordBot: DiscordBot
 
     /**
      * This gets set by the CommandContext automatically and should not be changed
@@ -66,27 +67,27 @@ abstract class DiscordSubCommandHandler(
     /**
      * The [CooldownScope][CooldownScope] of the command.
      */
-    var cooldownScope = CooldownScope.NO_COOLDOWN
+    public var cooldownScope: CooldownScope = CooldownScope.NO_COOLDOWN
 
-    var cooldown: Duration = Duration.ZERO
+    public var cooldown: Duration = Duration.ZERO
 
-    var useScope = UseScope.GLOBAL
+    public var useScope: UseScope = UseScope.GLOBAL
 
     @set:JvmSynthetic
-    lateinit var parentCommand: DiscordCommandHandler
+    public lateinit var parentCommand: DiscordCommandHandler
         internal set
 
     /**
      * Discord representation of this interaction
      */
     @set:JvmSynthetic
-    lateinit var discordRepresentation: Command.Subcommand
+    public lateinit var discordRepresentation: Command.Subcommand
         internal set
 
     /**
      * Interaction development status
      */
-    var interactionDevelopmentStatus = DevelopmentStatus.LIVE
+    public var interactionDevelopmentStatus: DevelopmentStatus = DevelopmentStatus.LIVE
 
     @JvmSynthetic
     internal suspend fun initialize(currentSubFullCommandName: String, parentCommand: DiscordCommandHandler, parentDiscordRepresentation: Command) =
@@ -155,7 +156,7 @@ abstract class DiscordSubCommandHandler(
     @JvmSynthetic
     internal abstract suspend fun runOnAutoCompleteEvent(option: String, event: CommandAutoCompleteInteractionEvent)
 
-    open fun onCooldownStillActive(
+    public open fun onCooldownStillActive(
         event: SlashCommandInteractionEvent,
         lastUse: LocalDateTime
     ) {
@@ -164,11 +165,11 @@ abstract class DiscordSubCommandHandler(
             .queue()
     }
 
-    open fun onWrongUseScope(event: SlashCommandInteractionEvent) {
+    public open fun onWrongUseScope(event: SlashCommandInteractionEvent) {
         event.deferReply(true).setContent("⛔ This command can only be used on a server directly.").queue()
     }
 
-    fun updateMessageIdForScope(messageId: String) {
+    public fun updateMessageIdForScope(messageId: String) {
         parentCommand.updateMessageIdForScope(messageId)
     }
 
@@ -183,7 +184,7 @@ abstract class DiscordSubCommandHandler(
      * @param callEntitySelectTimeout Call onEntitySelectInteractionTimeout of this bean
      * @param callModalTimeout Call onModalInteractionTimeout of this bean
      */
-    suspend fun destroyThisInstance(
+    public suspend fun destroyThisInstance(
         removeObservers: Boolean = true,
         removeObserverTimeouts: Boolean = true,
         callOnDestroy: Boolean = false,
@@ -191,7 +192,7 @@ abstract class DiscordSubCommandHandler(
         callStringSelectTimeout: Boolean = false,
         callEntitySelectTimeout: Boolean = false,
         callModalTimeout: Boolean = false
-    ) = withContext(AlunaDispatchers.Interaction) {
+    ): Job = withContext(AlunaDispatchers.Interaction) {
         parentCommand.destroyThisInstance(
             removeObservers,
             removeObserverTimeouts,
@@ -211,7 +212,7 @@ abstract class DiscordSubCommandHandler(
      * @return The generated global interaction id
      */
     @JvmOverloads
-    fun generateGlobalInteractionId(componentId: String, userId: String? = null): String {
+    public fun generateGlobalInteractionId(componentId: String, userId: String? = null): String {
         //Check if discordRepresentation is initialized
         if (!this::discordRepresentation.isInitialized) {
             throw IllegalStateException("discordRepresentation is not initialized. generateGlobalInteractionId() can only be called after Aluna initialized the command. This happens when an interaction is used.")
@@ -226,7 +227,7 @@ abstract class DiscordSubCommandHandler(
         return "$prefix:$componentId"
     }
 
-    fun extractGlobalInteractionId(componentId: String): String {
+    public fun extractGlobalInteractionId(componentId: String): String {
         return parentCommand.extractGlobalInteractionId(componentId)
     }
 

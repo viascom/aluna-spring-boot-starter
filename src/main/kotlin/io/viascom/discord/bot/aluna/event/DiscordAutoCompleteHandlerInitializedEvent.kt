@@ -31,4 +31,4 @@ import kotlin.reflect.KClass
  * @property handlers
  *
  */
-class DiscordAutoCompleteHandlerInitializedEvent(source: Any, val handlers: List<KClass<out AutoCompleteHandler>>) : ApplicationEvent(source)
+public class DiscordAutoCompleteHandlerInitializedEvent(source: Any, public val handlers: List<KClass<out AutoCompleteHandler>>) : ApplicationEvent(source)

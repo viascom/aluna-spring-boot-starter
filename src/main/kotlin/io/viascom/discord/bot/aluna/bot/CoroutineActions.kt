@@ -19,8 +19,7 @@
  * under the License.
  */
 
-@file:JvmName("CoroutineActions")
-@file:JvmMultifileClass
+@file:JvmName("CoroutineActions") @file:JvmMultifileClass
 
 package io.viascom.discord.bot.aluna.bot
 
@@ -30,21 +29,22 @@ import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.requests.RestAction
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction
 import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
-suspend fun <T> RestAction<T>.coQueue(success: suspend CoroutineScope.(T) -> Unit) = this@coQueue.queue({
+public suspend fun <T> RestAction<T>.coQueue(success: suspend CoroutineScope.(T) -> Unit): Unit = this@coQueue.queue({
     AlunaDispatchers.InternalScope.launch {
         success(it)
     }
 }, null)
 
-suspend fun ReplyCallbackAction.coQueue(success: suspend CoroutineScope.(InteractionHook) -> Unit) = this@coQueue.queue({
+public suspend fun ReplyCallbackAction.coQueue(success: suspend CoroutineScope.(InteractionHook) -> Unit): Unit = this@coQueue.queue({
     AlunaDispatchers.InternalScope.launch {
         success(it)
     }
 }, null)
 
-suspend fun <T> RestAction<T>.coQueue(success: (suspend CoroutineScope.(T) -> Unit)?, failure: (suspend CoroutineScope.(Throwable) -> Unit)?) = this@coQueue.queue({
+public suspend fun <T> RestAction<T>.coQueue(success: (suspend CoroutineScope.(T) -> Unit)?, failure: (suspend CoroutineScope.(Throwable) -> Unit)?): Unit = this@coQueue.queue({
     if (success != null) {
         AlunaDispatchers.InternalScope.launch { success(it) }
     }
@@ -54,58 +54,56 @@ suspend fun <T> RestAction<T>.coQueue(success: (suspend CoroutineScope.(T) -> Un
     }
 })
 
-suspend fun ReplyCallbackAction.coQueue(success: (suspend CoroutineScope.(InteractionHook) -> Unit)?, failure: (suspend CoroutineScope.(Throwable) -> Unit)?) = this@coQueue.queue({
-    if (success != null) {
-        AlunaDispatchers.InternalScope.launch { success(it) }
-    }
-}, {
-    if (failure != null) {
-        AlunaDispatchers.InternalScope.launch { failure(it) }
-    }
-})
+public suspend fun ReplyCallbackAction.coQueue(success: (suspend CoroutineScope.(InteractionHook) -> Unit)?, failure: (suspend CoroutineScope.(Throwable) -> Unit)?): Unit =
+    this@coQueue.queue({
+        if (success != null) {
+            AlunaDispatchers.InternalScope.launch { success(it) }
+        }
+    }, {
+        if (failure != null) {
+            AlunaDispatchers.InternalScope.launch { failure(it) }
+        }
+    })
 
-suspend fun <T> RestAction<T>.coComplete(shouldQueue: Boolean = true): Deferred<T> = withContext(AlunaDispatchers.Internal) {
+public suspend fun <T> RestAction<T>.coComplete(shouldQueue: Boolean = true): Deferred<T> = withContext(AlunaDispatchers.Internal) {
     return@withContext async {
         this@coComplete.complete(shouldQueue)
     }
 }
 
-suspend fun ReplyCallbackAction.coComplete(shouldQueue: Boolean = true): Deferred<InteractionHook> = withContext(AlunaDispatchers.Internal) {
+public suspend fun ReplyCallbackAction.coComplete(shouldQueue: Boolean = true): Deferred<InteractionHook> = withContext(AlunaDispatchers.Internal) {
     return@withContext async {
         this@coComplete.complete(shouldQueue)
     }
 }
 
-suspend fun <T> RestAction<T>.coOnSuccess(success: suspend CoroutineScope.(T) -> Unit) = this@coOnSuccess.onSuccess {
+public suspend fun <T> RestAction<T>.coOnSuccess(success: suspend CoroutineScope.(T) -> Unit): RestAction<T> = this@coOnSuccess.onSuccess {
     AlunaDispatchers.InternalScope.launch {
         success(it)
     }
 }
 
-suspend fun ReplyCallbackAction.coOnSuccess(success: suspend CoroutineScope.(InteractionHook) -> Unit) = this@coOnSuccess.onSuccess {
+public suspend fun ReplyCallbackAction.coOnSuccess(success: suspend CoroutineScope.(InteractionHook) -> Unit): RestAction<InteractionHook> = this@coOnSuccess.onSuccess {
     AlunaDispatchers.InternalScope.launch {
         success(it)
     }
 }
 
-suspend fun <T> RestAction<T>.coQueueAfter(
-    delay: Long,
-    unit: TimeUnit,
-    executor: ScheduledExecutorService? = null,
-    success: (suspend CoroutineScope.(T) -> Unit)? = null
-) = this@coQueueAfter.queueAfter(delay, unit, {
+public suspend fun <T> RestAction<T>.coQueueAfter(
+    delay: Long, unit: TimeUnit, executor: ScheduledExecutorService? = null, success: (suspend CoroutineScope.(T) -> Unit)? = null
+): ScheduledFuture<*> = this@coQueueAfter.queueAfter(delay, unit, {
     if (success != null) {
         AlunaDispatchers.InternalScope.launch { success(it) }
     }
 }, null, executor)
 
-suspend fun <T> RestAction<T>.coQueueAfter(
+public suspend fun <T> RestAction<T>.coQueueAfter(
     delay: Long,
     unit: TimeUnit,
     executor: ScheduledExecutorService? = null,
     success: (suspend CoroutineScope.(T) -> Unit)? = null,
     failure: (suspend CoroutineScope.(Throwable) -> Unit)? = null
-) = this@coQueueAfter.queueAfter(delay, unit, {
+): ScheduledFuture<*> = this@coQueueAfter.queueAfter(delay, unit, {
     if (success != null) {
         AlunaDispatchers.InternalScope.launch { success(it) }
     }
@@ -115,24 +113,21 @@ suspend fun <T> RestAction<T>.coQueueAfter(
     }
 }, executor)
 
-suspend fun ReplyCallbackAction.coQueueAfter(
-    delay: Long,
-    unit: TimeUnit,
-    executor: ScheduledExecutorService? = null,
-    success: (suspend CoroutineScope.(InteractionHook) -> Unit)? = null
-) = this@coQueueAfter.queueAfter(delay, unit, {
+public suspend fun ReplyCallbackAction.coQueueAfter(
+    delay: Long, unit: TimeUnit, executor: ScheduledExecutorService? = null, success: (suspend CoroutineScope.(InteractionHook) -> Unit)? = null
+): ScheduledFuture<*> = this@coQueueAfter.queueAfter(delay, unit, {
     if (success != null) {
         AlunaDispatchers.InternalScope.launch { success(it) }
     }
 }, null, executor)
 
-suspend fun ReplyCallbackAction.coQueueAfter(
+public suspend fun ReplyCallbackAction.coQueueAfter(
     delay: Long,
     unit: TimeUnit,
     executor: ScheduledExecutorService? = null,
     success: (suspend CoroutineScope.(InteractionHook) -> Unit)? = null,
     failure: (suspend CoroutineScope.(Throwable) -> Unit)? = null
-) = this@coQueueAfter.queueAfter(delay, unit, {
+): ScheduledFuture<*> = this@coQueueAfter.queueAfter(delay, unit, {
     if (success != null) {
         AlunaDispatchers.InternalScope.launch { success(it) }
     }

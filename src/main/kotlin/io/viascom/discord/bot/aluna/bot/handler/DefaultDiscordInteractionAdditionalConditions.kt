@@ -29,7 +29,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent
 
-open class DefaultDiscordInteractionAdditionalConditions : DiscordInteractionAdditionalConditions {
+public open class DefaultDiscordInteractionAdditionalConditions : DiscordInteractionAdditionalConditions {
     override fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent): AdditionalRequirements {
         return AdditionalRequirements()
     }

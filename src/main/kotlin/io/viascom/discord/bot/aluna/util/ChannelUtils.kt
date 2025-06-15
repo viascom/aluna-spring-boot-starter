@@ -43,11 +43,11 @@ import net.dv8tion.jda.api.sharding.ShardManager
  * @param failure Failure consumer
  * @param success Success consumer
  */
-fun Category.sortTextChannelsBy(
+public fun Category.sortTextChannelsBy(
     comparator: Comparator<GuildChannel>,
     failure: (exception: Throwable) -> Unit = {},
     success: (Void) -> Unit
-) = this.guild.modifyTextChannelPositions(this).sortOrder(comparator).queue(success, failure)
+): Unit = this.guild.modifyTextChannelPositions(this).sortOrder(comparator).queue(success, failure)
 
 /**
  * Sort voice channels by comparator
@@ -56,11 +56,11 @@ fun Category.sortTextChannelsBy(
  * @param failure Failure consumer
  * @param success Success consumer
  */
-fun Category.sortVoiceChannelsBy(
+public fun Category.sortVoiceChannelsBy(
     comparator: Comparator<GuildChannel>,
     failure: (exception: Throwable) -> Unit = {},
     success: (Void) -> Unit
-) = this.guild.modifyVoiceChannelPositions(this).sortOrder(comparator).queue(success, failure)
+): Unit = this.guild.modifyVoiceChannelPositions(this).sortOrder(comparator).queue(success, failure)
 
 /**
  * Sort categories by comparator
@@ -69,11 +69,11 @@ fun Category.sortVoiceChannelsBy(
  * @param failure Failure consumer
  * @param success Success consumer
  */
-fun Guild.sortCategoriesBy(
+public fun Guild.sortCategoriesBy(
     comparator: Comparator<GuildChannel>,
     failure: (exception: Throwable) -> Unit = {},
     success: (Void) -> Unit
-) = this.modifyCategoryPositions().sortOrder(comparator).queue(success, failure)
+): Unit = this.modifyCategoryPositions().sortOrder(comparator).queue(success, failure)
 
 /**
  * Get channels where both the bot and member have view permissions
@@ -82,7 +82,7 @@ fun Guild.sortCategoriesBy(
  * @param type Type of channels to include
  * @return list of channels where the bot and the member have view permissions
  */
-fun Guild.getChannelsWithBotAndMember(member: Member, type: ArrayList<ChannelType>): List<GuildChannel> {
+public fun Guild.getChannelsWithBotAndMember(member: Member, type: ArrayList<ChannelType>): List<GuildChannel> {
     val aleevaChannels = this.getChannels(false).filter { it.type in type }
     return aleevaChannels
         .filter { member.hasChannelPermission(it, Permission.VIEW_CHANNEL) }
@@ -97,11 +97,9 @@ fun Guild.getChannelsWithBotAndMember(member: Member, type: ArrayList<ChannelTyp
  * @param channelId The ID of the text channel to be retrieved.
  * @return The text channel with the specified ID if found, null otherwise.
  */
-fun ShardManager.getGuildTextChannel(guildId: String, channelId: String): MessageChannel? =
+public fun ShardManager.getGuildTextChannel(guildId: String, channelId: String): MessageChannel? =
     this.getGuildById(guildId)?.getTextChannelById(channelId) ?: this.getGuildById(guildId)?.getNewsChannelById(channelId) ?: this.getGuildById(guildId)
         ?.getThreadChannelById(channelId) ?: this.getGuildById(guildId)?.getStageChannelById(channelId) ?: this.getGuildById(guildId)?.getVoiceChannelById(channelId)
-
-fun String.yetmir(tst: String): String = tst + this
 
 /**
  * Retrieves a guild voice channel
@@ -110,7 +108,7 @@ fun String.yetmir(tst: String): String = tst + this
  * @param channelId The ID of the voice channel to be retrieved.
  * @return The voice channel with the specified ID if found, null otherwise.
  */
-fun ShardManager.getGuildVoiceChannel(guildId: String, channelId: String): VoiceChannel? = this.getGuildById(guildId)?.getVoiceChannelById(channelId)
+public fun ShardManager.getGuildVoiceChannel(guildId: String, channelId: String): VoiceChannel? = this.getGuildById(guildId)?.getVoiceChannelById(channelId)
 
 /**
  * Retrieves a message from a guild's text channel.
@@ -120,7 +118,7 @@ fun ShardManager.getGuildVoiceChannel(guildId: String, channelId: String): Voice
  * @param messageId The ID of the message to retrieve.
  * @return The retrieved message, or null if it was not found.
  */
-fun ShardManager.getGuildMessage(guildId: String, channelId: String, messageId: String): Message? =
+public fun ShardManager.getGuildMessage(guildId: String, channelId: String, messageId: String): Message? =
     this.getGuildTextChannel(guildId, channelId)?.retrieveMessageById(messageId)?.complete()
 
 /**
@@ -129,7 +127,7 @@ fun ShardManager.getGuildMessage(guildId: String, channelId: String, messageId: 
  * @param userId The ID of the user.
  * @return The MessageChannel object representing the private channel, or null if not found.
  */
-fun ShardManager.getPrivateChannelByUser(userId: String): MessageChannel? = this.retrieveUserById(userId).complete()?.openPrivateChannel()?.complete()
+public fun ShardManager.getPrivateChannelByUser(userId: String): MessageChannel? = this.retrieveUserById(userId).complete()?.openPrivateChannel()?.complete()
 
 /**
  * Retrieves a private message by user ID and message ID.
@@ -138,7 +136,7 @@ fun ShardManager.getPrivateChannelByUser(userId: String): MessageChannel? = this
  * @param messageId the ID of the message
  * @return the private message with the given ID, or null if not found or an exception occurs
  */
-fun ShardManager.getPrivateMessageByUser(userId: String, messageId: String): Message? = try {
+public fun ShardManager.getPrivateMessageByUser(userId: String, messageId: String): Message? = try {
     getPrivateChannelByUser(userId)?.retrieveMessageById(messageId)?.complete()
 } catch (e: Exception) {
     null
@@ -151,7 +149,7 @@ fun ShardManager.getPrivateMessageByUser(userId: String, messageId: String): Mes
  * @param messageId the ID of the message to retrieve
  * @return the retrieved Message object, or null if the message cannot be retrieved
  */
-fun ShardManager.getPrivateMessage(channelId: String, messageId: String): Message? = try {
+public fun ShardManager.getPrivateMessage(channelId: String, messageId: String): Message? = try {
     getPrivateChannelById(channelId)?.retrieveMessageById(messageId)?.complete()
 } catch (e: Exception) {
     null

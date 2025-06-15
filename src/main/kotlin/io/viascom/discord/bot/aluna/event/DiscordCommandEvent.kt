@@ -37,5 +37,12 @@ import org.springframework.context.ApplicationEvent
  * @param commandPath path of the command
  * @param commandHandler command itself
  */
-class DiscordCommandEvent(source: Any, val user: User, val channel: Channel, val guild: Guild?, val commandPath: String, val commandHandler: DiscordCommandHandler) :
+public class DiscordCommandEvent(
+    source: Any,
+    public val user: User,
+    public val channel: Channel,
+    public val guild: Guild?,
+    public val commandPath: String,
+    public val commandHandler: DiscordCommandHandler
+) :
     ApplicationEvent(source)

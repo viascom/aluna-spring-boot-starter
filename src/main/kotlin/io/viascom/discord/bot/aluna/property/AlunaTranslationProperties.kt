@@ -23,22 +23,22 @@ package io.viascom.discord.bot.aluna.property
 
 import net.dv8tion.jda.api.interactions.DiscordLocale
 
-class AlunaTranslationProperties {
+public class AlunaTranslationProperties {
 
     /**
      * Enable Translation
      */
-    var enabled: Boolean = false
+    public var enabled: Boolean = false
 
     /**
      * Translation path for interaction localization
      *
      * If not set, Aluna will fall back to `18n/messages`
      */
-    var basePath: String? = null
+    public var basePath: String? = null
 
     /**
      * Supported discord locals
      */
-    var supportedDiscordLocals: List<DiscordLocale> = arrayListOf()
+    public var supportedDiscordLocals: List<DiscordLocale> = arrayListOf()
 }

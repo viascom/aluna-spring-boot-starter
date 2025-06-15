@@ -43,7 +43,7 @@ import java.awt.Color
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class TimeMarksControlProvider(
+public class TimeMarksControlProvider(
     private val alunaProperties: AlunaProperties,
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : SystemCommandDataProvider(

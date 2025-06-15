@@ -11,6 +11,7 @@ plugins {
     id "org.jetbrains.kotlin.kapt" version "2.1.21"
     id "org.springframework.boot" version "3.5.0"
     id "io.spring.dependency-management" version "1.1.7"
+    id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
     id "de.undercouch.download" version "5.6.0"
     id "org.jetbrains.dokka" version "2.0.0"
 }
@@ -18,7 +19,7 @@ plugins {
 ext {
     major = 1
     minor = 3
-    patch = 4
+    patch = 5
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
@@ -130,6 +131,10 @@ tasks.withType(KotlinCompile).configureEach {
     kotlinOptions.freeCompilerArgs = ["-Xjvm-default=all"]
 }
 
+kotlin {
+    explicitApi = 'strict'
+}
+
 //Wait for files from processResources and bootBuildInfo
 compileKotlin.inputs.files(processResources, bootBuildInfo)
 
@@ -166,21 +171,6 @@ task verifyBeautifyJsFile(type: Verify, dependsOn: downloadBeautifyJsFile) {
 processResources.dependsOn verifyBeautifyJsFile
 
 publishing {
-    repositories {
-        maven {
-            def releaseRepo = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotRepo = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-
-            name = "OSSRH"
-            url = isCiServer ? releaseRepo : snapshotRepo
-
-            credentials {
-                username = findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
-                password = findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
-            }
-        }
-    }
-
     publications {
         mavenJava(MavenPublication) {
             from components.java
@@ -224,6 +214,17 @@ publishing {
     }
 }
 
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+            username.set(project.findProperty("sonatypeUsername") ?: System.getenv("OSSRH_USERNAME"))
+            password.set(project.findProperty("sonatypePassword") ?: System.getenv("OSSRH_PASSWORD"))
+        }
+    }
+}
+
 signing {
     sign publishing.publications.mavenJava
 }
@@ -256,3 +257,4 @@ tasks.withType(DokkaTask).configureEach {
         }
     }
 }
+

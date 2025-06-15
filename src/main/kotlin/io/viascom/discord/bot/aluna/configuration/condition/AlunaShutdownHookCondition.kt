@@ -26,8 +26,8 @@ import org.springframework.context.annotation.Condition
 import org.springframework.context.annotation.ConditionContext
 import org.springframework.core.type.AnnotatedTypeMetadata
 
-class AlunaShutdownHookCondition : Condition {
-    override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata) =
+public class AlunaShutdownHookCondition : Condition {
+    override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata): Boolean =
         (context.environment.getProperty("aluna.discord.shutdown-hook", AlunaDiscordProperties.ShutdownHook::class.java)
             ?: AlunaDiscordProperties.ShutdownHook.JDA) == AlunaDiscordProperties.ShutdownHook.ALUNA
 }

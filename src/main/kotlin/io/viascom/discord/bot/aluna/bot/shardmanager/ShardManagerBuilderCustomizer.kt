@@ -27,12 +27,12 @@ import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder
  * Shard manager builder customizer can be used to change properties before building a new instance.
  * The order of the customizers is not guaranteed. If you need to have a specific oder, use @Order
  */
-fun interface ShardManagerBuilderCustomizer {
+public fun interface ShardManagerBuilderCustomizer {
 
     /**
      * Customize the ShardManagerBuilder.
      * @param shardManagerBuilder the DefaultShardManagerBuilder to customize
      */
-    fun customize(shardManagerBuilder: DefaultShardManagerBuilder)
+    public fun customize(shardManagerBuilder: DefaultShardManagerBuilder)
 
 }

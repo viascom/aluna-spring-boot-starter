@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service
 @Service
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class SystemCommandFeatureOverviewPrinter : ApplicationListener<ApplicationStartedEvent> {
+public class SystemCommandFeatureOverviewPrinter : ApplicationListener<ApplicationStartedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 

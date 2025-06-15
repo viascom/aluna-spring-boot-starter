@@ -37,7 +37,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
  * @param roleId The ID of the role to check.
  * @return `true` if the member has the role, `false` otherwise.
  */
-fun Member.hasRole(roleId: String): Boolean = this.roles.any { it.id == roleId }
+public fun Member.hasRole(roleId: String): Boolean = this.roles.any { it.id == roleId }
 
 /**
  * Checks if the bot has the given permission in the guild.
@@ -45,7 +45,7 @@ fun Member.hasRole(roleId: String): Boolean = this.roles.any { it.id == roleId }
  * @param permission The permission to check for.
  * @return `true` if the bot has the permission, `false` otherwise.
  */
-fun Guild.doesBotHavePermission(permission: Permission): Boolean = this.selfMember.hasPermission(permission)
+public fun Guild.doesBotHavePermission(permission: Permission): Boolean = this.selfMember.hasPermission(permission)
 
 /**
  * Checks whether the bot has the specified permissions in the guild.
@@ -55,7 +55,7 @@ fun Guild.doesBotHavePermission(permission: Permission): Boolean = this.selfMemb
  *                 Default is `true`.
  * @return `true` if the bot has the specified permissions, `false` otherwise
  */
-fun Guild.doesBotHavePermission(permissions: ArrayList<Permission>, needsAll: Boolean = true): Boolean = if (needsAll) {
+public fun Guild.doesBotHavePermission(permissions: ArrayList<Permission>, needsAll: Boolean = true): Boolean = if (needsAll) {
     this.selfMember.permissions.containsAll(permissions)
 } else {
     this.selfMember.permissions.any { it in permissions }
@@ -68,7 +68,7 @@ fun Guild.doesBotHavePermission(permissions: ArrayList<Permission>, needsAll: Bo
  * @param permission The permission to check.
  * @return `true` if the member has the permission for the category, `false` otherwise.
  */
-fun Member.hasCategoryPermission(category: Category, permission: Permission): Boolean = this.getPermissions(category).contains(permission)
+public fun Member.hasCategoryPermission(category: Category, permission: Permission): Boolean = this.getPermissions(category).contains(permission)
 
 /**
  * Checks if the member has the specified category permissions.
@@ -80,7 +80,7 @@ fun Member.hasCategoryPermission(category: Category, permission: Permission): Bo
  *
  * @return `true` if the member has the specified category permissions, otherwise `false`.
  */
-fun Member.hasCategoryPermission(category: Category, permissions: ArrayList<Permission>, needsAll: Boolean = true): Boolean = if (needsAll) {
+public fun Member.hasCategoryPermission(category: Category, permissions: ArrayList<Permission>, needsAll: Boolean = true): Boolean = if (needsAll) {
     this.getPermissions(category).containsAll(permissions)
 } else {
     this.getPermissions(category).any { it in permissions }
@@ -93,7 +93,7 @@ fun Member.hasCategoryPermission(category: Category, permissions: ArrayList<Perm
  * @param permission The permission to check for.
  * @return `true` if the member has the specified permission for the channel, `false` otherwise.
  */
-fun Member.hasChannelPermission(channel: GuildChannel, permission: Permission): Boolean = this.getPermissions(channel).contains(permission)
+public fun Member.hasChannelPermission(channel: GuildChannel, permission: Permission): Boolean = this.getPermissions(channel).contains(permission)
 
 /**
  * Checks if the member has the specified channel permissions.
@@ -104,7 +104,7 @@ fun Member.hasChannelPermission(channel: GuildChannel, permission: Permission): 
  *                 Default is `true`.
  * @return `true` if the member has the specified channel permissions, `false` otherwise.
  */
-fun Member.hasChannelPermission(channel: GuildChannel, permissions: ArrayList<Permission>, needsAll: Boolean = true): Boolean = if (needsAll) {
+public fun Member.hasChannelPermission(channel: GuildChannel, permissions: ArrayList<Permission>, needsAll: Boolean = true): Boolean = if (needsAll) {
     this.getPermissions(channel).containsAll(permissions)
 } else {
     this.getPermissions(channel).any { it in permissions }
@@ -117,7 +117,7 @@ fun Member.hasChannelPermission(channel: GuildChannel, permissions: ArrayList<Pe
  * @param permission The permission to check.
  * @return `true` if the member has permission override, otherwise `false`.
  */
-fun Member.hasPermissionOverride(channel: GuildChannel, permission: Permission): Boolean =
+public fun Member.hasPermissionOverride(channel: GuildChannel, permission: Permission): Boolean =
     channel.permissionContainer.permissionOverrides.any { it.allowed.contains(permission) && it.member?.id == this.id }
 
 /**
@@ -128,7 +128,7 @@ fun Member.hasPermissionOverride(channel: GuildChannel, permission: Permission):
  * @return `true` if the member has permission overrides that allow all the specified permissions
  *         in the given guild channel, `false` otherwise.
  */
-fun Member.hasPermissionOverrides(channel: GuildChannel, permissions: List<Permission>): Boolean =
+public fun Member.hasPermissionOverrides(channel: GuildChannel, permissions: List<Permission>): Boolean =
     channel.permissionContainer.permissionOverrides.any { it.allowed.containsAll(permissions) && it.member?.id == this.id }
 
 /**
@@ -138,7 +138,7 @@ fun Member.hasPermissionOverrides(channel: GuildChannel, permissions: List<Permi
  * @param permission The permission to check.
  * @return `true` if the Role has the permission for the category, `false` otherwise.
  */
-fun Role.hasCategoryPermission(category: Category, permission: Permission): Boolean = this.getPermissions(category).contains(permission)
+public fun Role.hasCategoryPermission(category: Category, permission: Permission): Boolean = this.getPermissions(category).contains(permission)
 
 /**
  * Checks if the role has the specified permissions for a particular category.
@@ -150,7 +150,7 @@ fun Role.hasCategoryPermission(category: Category, permission: Permission): Bool
  *
  * @return `true` if the role has the required permissions, `false` otherwise.
  */
-fun Role.hasCategoryPermission(category: Category, permissions: ArrayList<Permission>, needsAll: Boolean = true): Boolean = if (needsAll) {
+public fun Role.hasCategoryPermission(category: Category, permissions: ArrayList<Permission>, needsAll: Boolean = true): Boolean = if (needsAll) {
     this.getPermissions(category).containsAll(permissions)
 } else {
     this.getPermissions(category).any { it in permissions }
@@ -163,7 +163,7 @@ fun Role.hasCategoryPermission(category: Category, permissions: ArrayList<Permis
  * @param permission The permission to check.
  * @return `true` if the role has the specified permission for the channel, `false` otherwise.
  */
-fun Role.hasChannelPermission(channel: GuildChannel, permission: Permission): Boolean = this.getPermissions(channel).contains(permission)
+public fun Role.hasChannelPermission(channel: GuildChannel, permission: Permission): Boolean = this.getPermissions(channel).contains(permission)
 
 /**
  * Checks if the role has the specified channel permissions.
@@ -174,7 +174,7 @@ fun Role.hasChannelPermission(channel: GuildChannel, permission: Permission): Bo
  *                 Default is `true`.
  * @return  `true` if the role has the specified permission for the channel, `false` otherwise.
  */
-fun Role.hasChannelPermission(channel: GuildChannel, permissions: ArrayList<Permission>, needsAll: Boolean = true): Boolean = if (needsAll) {
+public fun Role.hasChannelPermission(channel: GuildChannel, permissions: ArrayList<Permission>, needsAll: Boolean = true): Boolean = if (needsAll) {
     this.getPermissions(channel).containsAll(permissions)
 } else {
     this.getPermissions(channel).any { it in permissions }

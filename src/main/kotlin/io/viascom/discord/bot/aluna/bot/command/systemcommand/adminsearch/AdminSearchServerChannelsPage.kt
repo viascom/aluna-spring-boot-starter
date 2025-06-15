@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class AdminSearchServerChannelsPage(
+public class AdminSearchServerChannelsPage(
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : AdminSearchPageDataProvider(
     "CHANNELS",

@@ -44,7 +44,7 @@ import java.awt.Color
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 @ConditionalOnFastMutualGuildCacheEnabled
-class FastMutualMemberCacheProvider(
+public class FastMutualMemberCacheProvider(
     private val fastMutualGuildsCache: FastMutualGuildsCache,
     private val shardManager: ShardManager
 ) : SystemCommandDataProvider(
@@ -56,7 +56,7 @@ class FastMutualMemberCacheProvider(
     false
 ) {
 
-    var replyHook: InteractionHook? = null
+    private var replyHook: InteractionHook? = null
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
         val builder = EmbedBuilder()
@@ -139,7 +139,7 @@ class FastMutualMemberCacheProvider(
         return true
     }
 
-    fun <T> getWithTiming(userId: Long, call: (Long) -> Collection<T>): Pair<Collection<T>, Long> {
+    private fun <T> getWithTiming(userId: Long, call: (Long) -> Collection<T>): Pair<Collection<T>, Long> {
         val startTime = System.nanoTime()
         val result = call(userId)
         val endTime = System.nanoTime()
@@ -147,7 +147,7 @@ class FastMutualMemberCacheProvider(
         return result to timeTaken
     }
 
-    fun calculateAverageExecutionTime(userId: Long, call: (Long) -> Pair<Collection<Any>, Long>): Double {
+    private fun calculateAverageExecutionTime(userId: Long, call: (Long) -> Pair<Collection<Any>, Long>): Double {
         var totalExecutionTime = 0L
         val iterations = 100
 

@@ -29,7 +29,7 @@ import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 
 @Service
-class CoroutineContextCreation : ApplicationListener<ApplicationContextInitializedEvent> {
+public class CoroutineContextCreation : ApplicationListener<ApplicationContextInitializedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(CoroutineContextCreation::class.java)
 

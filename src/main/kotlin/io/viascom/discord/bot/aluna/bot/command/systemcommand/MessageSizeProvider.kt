@@ -44,7 +44,7 @@ import java.awt.Color
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class MessageSizeProvider(
+public class MessageSizeProvider(
     private val shardManager: ShardManager,
     private val objectMapper: ObjectMapper
 ) : SystemCommandDataProvider(

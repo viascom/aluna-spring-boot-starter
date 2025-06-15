@@ -29,7 +29,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent
 
-interface DiscordInteractionAdditionalConditions {
+public interface DiscordInteractionAdditionalConditions {
 
     /**
      * Check for additional requirements.
@@ -39,7 +39,7 @@ interface DiscordInteractionAdditionalConditions {
      * @param event Slash command event
      * @return AdditionalRequirements
      */
-    fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent): AdditionalRequirements
+    public fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent): AdditionalRequirements
 
     /**
      * Check for additional requirements.
@@ -49,7 +49,7 @@ interface DiscordInteractionAdditionalConditions {
      * @param event component event
      * @return AdditionalRequirements
      */
-    fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: GenericComponentInteractionCreateEvent): AdditionalRequirements
+    public fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: GenericComponentInteractionCreateEvent): AdditionalRequirements
 
     /**
      * Check for additional requirements.
@@ -59,7 +59,7 @@ interface DiscordInteractionAdditionalConditions {
      * @param event modal event
      * @return AdditionalRequirements
      */
-    fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: ModalInteractionEvent): AdditionalRequirements
+    public fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: ModalInteractionEvent): AdditionalRequirements
 
     /**
      * Check for additional requirements.
@@ -69,7 +69,7 @@ interface DiscordInteractionAdditionalConditions {
      * @param event Auto complete event
      * @return AdditionalRequirements
      */
-    fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: CommandAutoCompleteInteractionEvent): AdditionalRequirements
+    public fun checkForAdditionalCommandRequirements(discordCommandHandler: DiscordCommandHandler, event: CommandAutoCompleteInteractionEvent): AdditionalRequirements
 
     /**
      * Check for additional requirements.
@@ -79,7 +79,7 @@ interface DiscordInteractionAdditionalConditions {
      * @param event User context menu event
      * @return AdditionalRequirements
      */
-    fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenuHandler, event: UserContextInteractionEvent): AdditionalRequirements
+    public fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenuHandler, event: UserContextInteractionEvent): AdditionalRequirements
 
 
     /**
@@ -90,5 +90,5 @@ interface DiscordInteractionAdditionalConditions {
      * @param event Message context menu event
      * @return AdditionalRequirements
      */
-    fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenuHandler, event: MessageContextInteractionEvent): AdditionalRequirements
+    public fun checkForAdditionalContextRequirements(contextMenu: DiscordContextMenuHandler, event: MessageContextInteractionEvent): AdditionalRequirements
 }

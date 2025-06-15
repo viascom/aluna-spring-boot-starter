@@ -48,10 +48,10 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @EnableConfigurationProperties(AlunaProperties::class)
 @EnableScheduling
 @ComponentScan(basePackages = ["io.viascom.discord.bot.aluna.*"])
-open class AlunaAutoConfiguration {
+public open class AlunaAutoConfiguration {
 
     @Autowired(required = false)
-    lateinit var discordBot: DiscordBot
+    public lateinit var discordBot: DiscordBot
 
     //Has to be AlunaAutoConfiguration::class.java as otherwise it is shown as SpringProxy!
     private val logger: Logger = LoggerFactory.getLogger(AlunaAutoConfiguration::class.java)
@@ -77,7 +77,7 @@ open class AlunaAutoConfiguration {
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean(ShardManagerBuilder::class)
-    open fun defaultShardManagerBuilder(
+    public open fun defaultShardManagerBuilder(
         interactionEventListener: InteractionEventListener,
         genericAutoCompleteListener: GenericInteractionListener,
         interactionComponentEventListener: InteractionComponentEventListener,
@@ -135,7 +135,7 @@ open class AlunaAutoConfiguration {
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnBean(ShardManagerBuilder::class)
-    open fun customShardManagerBuilder(shardManagerBuilder: ShardManagerBuilder, alunaProperties: AlunaProperties): ShardManager {
+    public open fun customShardManagerBuilder(shardManagerBuilder: ShardManagerBuilder, alunaProperties: AlunaProperties): ShardManager {
         logger.debug("Enable custom ShardManagerBuilder: ${shardManagerBuilder.javaClass.name}")
         discordBot.shardManager = shardManagerBuilder.build()
         discordBot.latchCount = shardManagerBuilder.getLatchCount()
@@ -159,7 +159,7 @@ open class AlunaAutoConfiguration {
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
-    open fun defaultDiscordInteractionConditions(): DiscordInteractionConditions {
+    public open fun defaultDiscordInteractionConditions(): DiscordInteractionConditions {
         logger.debug("Enable DefaultDiscordInteractionConditions")
         return DefaultDiscordInteractionConditions()
     }
@@ -172,7 +172,7 @@ open class AlunaAutoConfiguration {
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
-    open fun defaultDiscordInteractionAdditionalConditions(): DiscordInteractionAdditionalConditions {
+    public open fun defaultDiscordInteractionAdditionalConditions(): DiscordInteractionAdditionalConditions {
         logger.debug("Enable DefaultDiscordInteractionAdditionalConditions")
         return DefaultDiscordInteractionAdditionalConditions()
     }
@@ -189,7 +189,7 @@ open class AlunaAutoConfiguration {
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
     @ConditionalOnAlunaShutdownHook
-    open fun defaultBotShutdownHook(shardManager: ShardManager, alunaProperties: AlunaProperties, discordBot: DiscordBot): BotShutdownHook {
+    public open fun defaultBotShutdownHook(shardManager: ShardManager, alunaProperties: AlunaProperties, discordBot: DiscordBot): BotShutdownHook {
         logger.debug("Enable DefaultBotShutdownHook")
         return DefaultBotShutdownHook(shardManager, alunaProperties)
     }
@@ -202,7 +202,7 @@ open class AlunaAutoConfiguration {
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
-    open fun discordInteractionLoadAdditionalData(): DiscordInteractionLoadAdditionalData {
+    public open fun discordInteractionLoadAdditionalData(): DiscordInteractionLoadAdditionalData {
         logger.debug("Enable DefaultDiscordInteractionLoadAdditionalData")
         return DefaultDiscordInteractionLoadAdditionalData()
     }
@@ -215,7 +215,7 @@ open class AlunaAutoConfiguration {
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
-    open fun discordInteractionMetaDataHandler(): DiscordInteractionMetaDataHandler {
+    public open fun discordInteractionMetaDataHandler(): DiscordInteractionMetaDataHandler {
         logger.debug("Enable DefaultDiscordInteractionMetaDataHandler")
         return DefaultDiscordInteractionMetaDataHandler()
     }
@@ -228,7 +228,7 @@ open class AlunaAutoConfiguration {
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
-    open fun ownerIdProvider(alunaProperties: AlunaProperties): OwnerIdProvider {
+    public open fun ownerIdProvider(alunaProperties: AlunaProperties): OwnerIdProvider {
         logger.debug("Enable DefaultOwnerIdProvider")
         return DefaultOwnerIdProvider(alunaProperties)
     }
@@ -241,7 +241,7 @@ open class AlunaAutoConfiguration {
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
-    open fun moderatorIdProvider(alunaProperties: AlunaProperties): ModeratorIdProvider {
+    public open fun moderatorIdProvider(alunaProperties: AlunaProperties): ModeratorIdProvider {
         logger.debug("Enable DefaultModeratorIdProvider")
         return DefaultModeratorIdProvider(alunaProperties)
     }
@@ -255,7 +255,7 @@ open class AlunaAutoConfiguration {
     @ConditionalOnJdaEnabled
     @ConditionalOnSystemCommandEnabled
     @ConditionalOnMissingBean
-    open fun systemCommandEmojiProvider(): SystemCommandEmojiProvider {
+    public open fun systemCommandEmojiProvider(): SystemCommandEmojiProvider {
         logger.debug("Enable DefaultSystemCommandEmojiProvider")
         return DefaultSystemCommandEmojiProvider()
     }
@@ -269,7 +269,7 @@ open class AlunaAutoConfiguration {
     @ConditionalOnJdaEnabled
     @ConditionalOnTranslationEnabled
     @ConditionalOnMissingBean
-    open fun defaultLocalizationProvider(alunaProperties: AlunaProperties): DiscordInteractionLocalization {
+    public open fun defaultLocalizationProvider(alunaProperties: AlunaProperties): DiscordInteractionLocalization {
         logger.debug("Enable DefaultDiscordInteractionLocalization")
         return DefaultDiscordInteractionLocalization(alunaProperties)
     }
@@ -282,7 +282,7 @@ open class AlunaAutoConfiguration {
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnMissingBean
-    open fun defaultInteractionInitializerCondition(): InteractionInitializerCondition {
+    public open fun defaultInteractionInitializerCondition(): InteractionInitializerCondition {
         logger.debug("Enable DefaultInteractionInitializerCondition")
         return DefaultInteractionInitializerCondition()
     }
@@ -296,7 +296,7 @@ open class AlunaAutoConfiguration {
     @ConditionalOnJdaEnabled
     @ConditionalOnFastMutualGuildCacheEnabled
     @ConditionalOnMissingBean(FastMutualGuildsCache::class)
-    open fun defaultFastMutualGuildsCache(shardManager: ShardManager, alunaProperties: AlunaProperties): FastMutualGuildsCache {
+    public open fun defaultFastMutualGuildsCache(shardManager: ShardManager, alunaProperties: AlunaProperties): FastMutualGuildsCache {
         logger.debug("Enable DefaultFastMutualGuildsCache")
         return DefaultFastMutualGuildsCache(shardManager, alunaProperties)
     }

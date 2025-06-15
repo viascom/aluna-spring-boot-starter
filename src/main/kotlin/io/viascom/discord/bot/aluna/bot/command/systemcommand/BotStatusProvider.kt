@@ -45,7 +45,7 @@ import java.util.function.Consumer
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class BotStatusProvider(
+public class BotStatusProvider(
     private val alunaProperties: AlunaProperties,
     private val configurableListableBeanFactory: ConfigurableListableBeanFactory
 ) : SystemCommandDataProvider(
@@ -98,7 +98,7 @@ class BotStatusProvider(
     }
 
 
-    fun formatShardStatuses(shards: Collection<JDA>): String? {
+    public fun formatShardStatuses(shards: Collection<JDA>): String? {
         val map: HashMap<JDA.Status, String> = HashMap()
         shards.forEach(Consumer { jda: JDA -> map[jda.status] = map.getOrDefault(jda.status, "") + " " + jda.shardInfo.shardId })
         val sb = StringBuilder("```diff")

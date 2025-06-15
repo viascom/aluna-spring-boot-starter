@@ -28,7 +28,7 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 /**
  * Interface to implement if you need to load additional data before the interaction gets executed.
  */
-interface DiscordInteractionLoadAdditionalData {
+public interface DiscordInteractionLoadAdditionalData {
 
     /**
      * This method get called before the command is executed.
@@ -37,7 +37,7 @@ interface DiscordInteractionLoadAdditionalData {
      * @param discordCommandHandler The Discord command handler where the command is being executed
      * @param event A Generic Interaction command event provided by JDA
      */
-    fun loadData(discordCommandHandler: DiscordCommandHandler, event: GenericInteractionCreateEvent)
+    public fun loadData(discordCommandHandler: DiscordCommandHandler, event: GenericInteractionCreateEvent)
 
     /**
      * This method get called before the additional requirements are checked.
@@ -46,7 +46,7 @@ interface DiscordInteractionLoadAdditionalData {
      * @param discordCommandHandler The Discord command handler where the command is being executed
      * @param event A Generic Interaction command event provided by JDA
      */
-    fun loadDataBeforeAdditionalRequirements(discordCommandHandler: DiscordCommandHandler, event: GenericInteractionCreateEvent)
+    public fun loadDataBeforeAdditionalRequirements(discordCommandHandler: DiscordCommandHandler, event: GenericInteractionCreateEvent)
 
 //    /**
 //     * This method get called before the command is executed.
@@ -73,7 +73,7 @@ interface DiscordInteractionLoadAdditionalData {
      * @param discordCommandHandler Discord command handler instance
      * @param event Auto complete interaction event
      */
-    fun loadData(discordCommandHandler: DiscordCommandHandler, event: CommandAutoCompleteInteractionEvent)
+    public fun loadData(discordCommandHandler: DiscordCommandHandler, event: CommandAutoCompleteInteractionEvent)
 
     /**
      * This method get called before the additional requirements are checked.
@@ -82,7 +82,7 @@ interface DiscordInteractionLoadAdditionalData {
      * @param discordCommandHandler Discord command handler instance
      * @param event Slash command event
      */
-    fun loadDataBeforeAdditionalRequirements(discordCommandHandler: DiscordCommandHandler, event: CommandAutoCompleteInteractionEvent)
+    public fun loadDataBeforeAdditionalRequirements(discordCommandHandler: DiscordCommandHandler, event: CommandAutoCompleteInteractionEvent)
 
     /**
      * This method get called before the auto-complete is executed.
@@ -90,7 +90,7 @@ interface DiscordInteractionLoadAdditionalData {
      *
      * @param event Auto complete interaction event
      */
-    fun loadData(event: CommandAutoCompleteInteractionEvent)
+    public fun loadData(event: CommandAutoCompleteInteractionEvent)
 
     /**
      * This method get called before the context menu is executed.
@@ -99,7 +99,7 @@ interface DiscordInteractionLoadAdditionalData {
      * @param contextMenu Discord context menu instance
      * @param event Discord context menu event
      */
-    fun loadData(contextMenu: DiscordContextMenuHandler, event: GenericCommandInteractionEvent)
+    public fun loadData(contextMenu: DiscordContextMenuHandler, event: GenericCommandInteractionEvent)
 
     /**
      * This method get called before the additional requirements are checked.
@@ -108,6 +108,6 @@ interface DiscordInteractionLoadAdditionalData {
      * @param discordContextMenuHandler Discord context menu instance
      * @param event Slash command event
      */
-    fun loadDataBeforeAdditionalRequirements(discordContextMenuHandler: DiscordContextMenuHandler, event: GenericCommandInteractionEvent)
+    public fun loadDataBeforeAdditionalRequirements(discordContextMenuHandler: DiscordContextMenuHandler, event: GenericCommandInteractionEvent)
 
 }

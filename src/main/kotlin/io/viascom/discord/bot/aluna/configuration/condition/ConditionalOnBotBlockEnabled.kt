@@ -26,4 +26,4 @@ import java.lang.annotation.Inherited
 
 @ConditionalOnProperty(name = ["bot-stats.bot-block.enabled"], prefix = "aluna", matchIfMissing = false)
 @Inherited
-annotation class ConditionalOnBotBlockEnabled()
+public annotation class ConditionalOnBotBlockEnabled()

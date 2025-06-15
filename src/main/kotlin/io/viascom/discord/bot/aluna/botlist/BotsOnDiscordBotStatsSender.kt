@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit
 
 @Component
 @ConditionalOnJdaEnabled
-class BotsOnDiscordBotStatsSender(
+public class BotsOnDiscordBotStatsSender(
     private val alunaProperties: AlunaProperties,
     private val shardManager: ShardManager
 ) : BotStatsSender {

@@ -29,7 +29,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
-enum class TimestampFormat(val format: String) {
+public enum class TimestampFormat(public val format: String) {
     SHORT_TIME("t"),
     LONG_TIME("T"),
     SHORT_DATE("d"),
@@ -45,7 +45,7 @@ enum class TimestampFormat(val format: String) {
  * @param format Format of the timestamp
  * @return Discord timestamp
  */
-fun LocalDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String = "<t:${this.toUnixTimestamp()}:${format.format}>"
+public fun LocalDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String = "<t:${this.toUnixTimestamp()}:${format.format}>"
 
 /**
  * Convert to discord timestamp.
@@ -53,7 +53,7 @@ fun LocalDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.S
  * @param format Format of the timestamp
  * @return Discord timestamp
  */
-fun OffsetDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String = "<t:${this.toEpochSecond()}:${format.format}>"
+public fun OffsetDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String = "<t:${this.toEpochSecond()}:${format.format}>"
 
 /**
  * Convert to discord timestamp.
@@ -61,11 +61,11 @@ fun OffsetDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.
  * @param format Format of the timestamp
  * @return Discord timestamp
  */
-fun ZonedDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String = "<t:${this.toEpochSecond()}:${format.format}>"
+public fun ZonedDateTime.toDiscordTimestamp(format: TimestampFormat = TimestampFormat.SHORT_DATE_TIME): String = "<t:${this.toEpochSecond()}:${format.format}>"
 
 /**
  * Convert to unix timestamp. This method will use the LocalDateTime at UTC.
  *
  * @return Epoch Seconds
  */
-fun LocalDateTime.toUnixTimestamp(): Long = this.toEpochSecond(ZoneOffset.UTC)
+public fun LocalDateTime.toUnixTimestamp(): Long = this.toEpochSecond(ZoneOffset.UTC)

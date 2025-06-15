@@ -34,11 +34,11 @@ import net.dv8tion.jda.api.interactions.commands.Command.Choice
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 
-interface CommandOption<T>
+public interface CommandOption<T>
 
-class OptionRange<T : Any>(val min: T, val max: T)
+public class OptionRange<T : Any>(public val min: T, public val max: T)
 
-class StringOption @JvmOverloads constructor(
+public class StringOption @JvmOverloads constructor(
     name: String,
     description: String,
     isRequired: Boolean = false,
@@ -51,7 +51,7 @@ class StringOption @JvmOverloads constructor(
     }
 }
 
-class IntegerOption @JvmOverloads constructor(
+public class IntegerOption @JvmOverloads constructor(
     name: String,
     description: String,
     isRequired: Boolean = false,
@@ -66,7 +66,7 @@ class IntegerOption @JvmOverloads constructor(
     }
 }
 
-class LongOption @JvmOverloads constructor(
+public class LongOption @JvmOverloads constructor(
     name: String,
     description: String,
     isRequired: Boolean = false,
@@ -81,7 +81,7 @@ class LongOption @JvmOverloads constructor(
     }
 }
 
-class DoubleOption @JvmOverloads constructor(
+public class DoubleOption @JvmOverloads constructor(
     name: String,
     description: String,
     isRequired: Boolean = false,
@@ -95,18 +95,18 @@ class DoubleOption @JvmOverloads constructor(
         requiredRange?.let { this.setRequiredRange(requiredRange.min, requiredRange.max) }
     }
 }
-typealias NumberOption = DoubleOption
+public typealias NumberOption = DoubleOption
 
-class BooleanOption @JvmOverloads constructor(name: String, description: String, isRequired: Boolean = false) :
+public class BooleanOption @JvmOverloads constructor(name: String, description: String, isRequired: Boolean = false) :
     OptionData(OptionType.BOOLEAN, name, description, isRequired), CommandOption<Boolean?>
 
-class UserOption @JvmOverloads constructor(name: String, description: String, isRequired: Boolean = false) :
+public class UserOption @JvmOverloads constructor(name: String, description: String, isRequired: Boolean = false) :
     OptionData(OptionType.USER, name, description, isRequired), CommandOption<User?>
 
-class RoleOption @JvmOverloads constructor(name: String, description: String, isRequired: Boolean = false) :
+public class RoleOption @JvmOverloads constructor(name: String, description: String, isRequired: Boolean = false) :
     OptionData(OptionType.ROLE, name, description, isRequired), CommandOption<Role?>
 
-class ChannelOption @JvmOverloads constructor(name: String, description: String, isRequired: Boolean = false, channelTypes: List<ChannelType>? = null) :
+public class ChannelOption @JvmOverloads constructor(name: String, description: String, isRequired: Boolean = false, channelTypes: List<ChannelType>? = null) :
     OptionData(OptionType.CHANNEL, name, description, isRequired), CommandOption<Channel?> {
     init {
         if (channelTypes != null) {
@@ -115,10 +115,10 @@ class ChannelOption @JvmOverloads constructor(name: String, description: String,
     }
 }
 
-class MentionableOption @JvmOverloads constructor(name: String, description: String, isRequired: Boolean = false) :
+public class MentionableOption @JvmOverloads constructor(name: String, description: String, isRequired: Boolean = false) :
     OptionData(OptionType.MENTIONABLE, name, description, isRequired), CommandOption<IMentionable?>
 
-class AttachmentOption @JvmOverloads constructor(name: String, description: String, isRequired: Boolean = false) :
+public class AttachmentOption @JvmOverloads constructor(name: String, description: String, isRequired: Boolean = false) :
     OptionData(OptionType.ATTACHMENT, name, description, isRequired), CommandOption<Attachment?>
 
-typealias FileOption = AttachmentOption
+public typealias FileOption = AttachmentOption

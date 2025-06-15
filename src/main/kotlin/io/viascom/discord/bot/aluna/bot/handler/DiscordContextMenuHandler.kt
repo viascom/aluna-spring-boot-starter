@@ -31,6 +31,7 @@ import io.viascom.discord.bot.aluna.model.*
 import io.viascom.discord.bot.aluna.model.TimeMarkStep.EXIT_COMMAND
 import io.viascom.discord.bot.aluna.property.AlunaDebugProperties
 import io.viascom.discord.bot.aluna.property.AlunaProperties
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.Permission
@@ -61,33 +62,33 @@ import java.util.*
 import kotlin.properties.Delegates
 import kotlin.time.TimeSource.Monotonic.markNow
 
-abstract class DiscordContextMenuHandler(
+public abstract class DiscordContextMenuHandler(
     type: Command.Type,
     name: String,
 
     /**
      * Define a [LocalizationFunction] for this command. If set no null, Aluna will take the implementation of [DiscordInteractionLocalization].
      */
-    var localizations: LocalizationFunction? = null
+    public var localizations: LocalizationFunction? = null
 ) : CommandDataImpl(type, name), InteractionScopedObject, DiscordInteractionHandler {
 
     @Autowired
-    lateinit var alunaProperties: AlunaProperties
+    public lateinit var alunaProperties: AlunaProperties
 
     @Autowired
-    lateinit var discordInteractionConditions: DiscordInteractionConditions
+    public lateinit var discordInteractionConditions: DiscordInteractionConditions
 
     @Autowired
-    lateinit var discordInteractionAdditionalConditions: DiscordInteractionAdditionalConditions
+    public lateinit var discordInteractionAdditionalConditions: DiscordInteractionAdditionalConditions
 
     @Autowired
-    lateinit var discordInteractionLoadAdditionalData: DiscordInteractionLoadAdditionalData
+    public lateinit var discordInteractionLoadAdditionalData: DiscordInteractionLoadAdditionalData
 
     @Autowired
-    lateinit var discordInteractionMetaDataHandler: DiscordInteractionMetaDataHandler
+    public lateinit var discordInteractionMetaDataHandler: DiscordInteractionMetaDataHandler
 
     @Autowired
-    lateinit var eventPublisher: EventPublisher
+    public lateinit var eventPublisher: EventPublisher
 
     @Autowired
     override lateinit var discordBot: DiscordBot
@@ -96,9 +97,9 @@ abstract class DiscordContextMenuHandler(
     private lateinit var configurableListableBeanFactory: ConfigurableListableBeanFactory
 
     @Autowired(required = false)
-    lateinit var localizationProvider: DiscordInteractionLocalization
+    public lateinit var localizationProvider: DiscordInteractionLocalization
 
-    val logger: Logger = LoggerFactory.getLogger(javaClass)
+    public val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     /**
      * This gets set by the CommandContext automatically and should not be changed
@@ -109,9 +110,9 @@ abstract class DiscordContextMenuHandler(
      * If true, this command is only seen by users with the administrator permission on the server by default!
      * Aluna will set `this.defaultPermissions = DefaultMemberPermissions.DISABLED` if true.
      */
-    var isAdministratorOnlyCommand = false
+    public var isAdministratorOnlyCommand: Boolean = false
 
-    var interactionDevelopmentStatus = DevelopmentStatus.LIVE
+    public var interactionDevelopmentStatus: DevelopmentStatus = DevelopmentStatus.LIVE
 
     /**
      * Defines the use scope of this command.
@@ -119,13 +120,13 @@ abstract class DiscordContextMenuHandler(
      * *This gets mapped to [isGuildOnly] if set to [UseScope.GUILD_ONLY].*
      */
     @Deprecated("Use setContexts instead", level = DeprecationLevel.ERROR)
-    var useScope = UseScope.GLOBAL
+    public var useScope: UseScope = UseScope.GLOBAL
 
     /**
      * Restrict this command to specific servers. If null, the command is available in all servers. When enabled, make sure to also enable 'alunaProperties.command.enableServerSpecificCommands' in your configuration.
      */
     @set:Experimental("This is an experimental feature and my not always work as expected. Please report any issues you find.")
-    var specificServers: ArrayList<String>? = null
+    public var specificServers: ArrayList<String>? = null
 
     override var beanTimoutDelay: Duration = Duration.ofMinutes(14)
     override var beanUseAutoCompleteBean: Boolean = false
@@ -137,24 +138,24 @@ abstract class DiscordContextMenuHandler(
     /**
      * Discord representation of this interaction
      */
-    lateinit var discordRepresentation: Command
+    public lateinit var discordRepresentation: Command
 
     /**
      * Any [Permission]s a Member must have to use this command.
      * <br></br>These are only checked in a [Guild] environment.
      */
-    var userPermissions = arrayListOf<Permission>()
+    public var userPermissions: ArrayList<Permission> = arrayListOf()
 
     /**
      * Any [Permission]s the bot must have to use a command.
      * <br></br>These are only checked in a [Guild] environment.
      */
-    var botPermissions = arrayListOf<Permission>()
+    public var botPermissions: ArrayList<Permission> = arrayListOf()
 
     /**
      * [Channel] in which the command was used in.
      */
-    var channel: Channel? = null
+    public var channel: Channel? = null
 
     /**
      * [Author][User] of the command
@@ -164,49 +165,49 @@ abstract class DiscordContextMenuHandler(
     /**
      * [Guild] in which the command was used in. Can be null if the command was used in direct messages.
      */
-    var guild: Guild? = null
+    public var guild: Guild? = null
 
     /**
      * [GuildChannel] in which the command was used in. Can be null if the command was used in direct messages.
      */
-    var guildChannel: GuildChannel? = null
+    public var guildChannel: GuildChannel? = null
 
     /**
      * [Member] which used the command. Can be null if the command was used in direct messages.
      */
-    var member: Member? = null
+    public var member: Member? = null
 
     /**
      * User [Locale]
      *
      * *This is set by Aluna based on the information provided by Discord*
      */
-    var userLocale: DiscordLocale = DiscordLocale.ENGLISH_US
+    public var userLocale: DiscordLocale = DiscordLocale.ENGLISH_US
 
     /**
      * Guild [Locale]
      *
      * *This is set by Aluna based on the information provided by Discord*
      */
-    var guildLocale: DiscordLocale = DiscordLocale.ENGLISH_US
+    public var guildLocale: DiscordLocale = DiscordLocale.ENGLISH_US
 
     /**
      * TimeMarks used if enabled by properties
      */
     @set:JvmSynthetic
-    var timeMarks: ArrayList<TimeMarkRecord>? = null
+    public var timeMarks: ArrayList<TimeMarkRecord>? = null
         internal set
 
     @set:JvmSynthetic
-    var isUserIntegration by Delegates.notNull<Boolean>()
+    public var isUserIntegration: Boolean by Delegates.notNull()
         internal set
 
     @set:JvmSynthetic
-    var isGuildIntegration by Delegates.notNull<Boolean>()
+    public var isGuildIntegration: Boolean by Delegates.notNull()
         internal set
 
     @set:JvmSynthetic
-    var isInBotDM by Delegates.notNull<Boolean>()
+    public var isInBotDM: Boolean by Delegates.notNull()
         internal set
 
     @JvmSynthetic
@@ -233,7 +234,7 @@ abstract class DiscordContextMenuHandler(
     @JvmSynthetic
     internal abstract suspend fun runOnModalInteractionTimeout()
 
-    fun prepareInteraction() {
+    public fun prepareInteraction() {
         if (isAdministratorOnlyCommand) {
             this.defaultPermissions = DefaultMemberPermissions.DISABLED
         }
@@ -251,7 +252,7 @@ abstract class DiscordContextMenuHandler(
         }
     }
 
-    fun prepareLocalization() {
+    public fun prepareLocalization() {
         if (alunaProperties.translation.enabled) {
             if (localizations == null) {
                 localizations = localizationProvider.getLocalizationFunction()
@@ -261,7 +262,7 @@ abstract class DiscordContextMenuHandler(
         }
     }
 
-    open fun onMissingUserPermission(event: GenericCommandInteractionEvent, missingPermissions: MissingPermissions) {
+    public open fun onMissingUserPermission(event: GenericCommandInteractionEvent, missingPermissions: MissingPermissions) {
         val textChannelPermissions = missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" }
         val voiceChannelPermissions = missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" }
         val guildPermissions = missingPermissions.guild.joinToString("\n") { "└ ${it.getName()}" }
@@ -273,7 +274,7 @@ abstract class DiscordContextMenuHandler(
         ).queue()
     }
 
-    open fun onMissingBotPermission(event: GenericCommandInteractionEvent, missingPermissions: MissingPermissions) {
+    public open fun onMissingBotPermission(event: GenericCommandInteractionEvent, missingPermissions: MissingPermissions) {
         when {
             missingPermissions.notInVoice -> {
                 event.deferReply(true)
@@ -282,7 +283,8 @@ abstract class DiscordContextMenuHandler(
             }
 
             (missingPermissions.hasMissingPermissions) -> {
-                event.deferReply(true).setContent("⛔ I'm missing the following permission to execute this interaction:\n" +
+                event.deferReply(true).setContent(
+                    "⛔ I'm missing the following permission to execute this interaction:\n" +
                         missingPermissions.textChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
                         missingPermissions.voiceChannel.joinToString("\n") { "└ ${it.getName()}" } + "\n" +
                         missingPermissions.guild.joinToString("\n") { "└ ${it.getName()}" }
@@ -291,11 +293,11 @@ abstract class DiscordContextMenuHandler(
         }
     }
 
-    open fun onFailedAdditionalRequirements(event: GenericCommandInteractionEvent, additionalRequirements: AdditionalRequirements) {
+    public open fun onFailedAdditionalRequirements(event: GenericCommandInteractionEvent, additionalRequirements: AdditionalRequirements) {
         event.deferReply(true).setContent("⛔ Additional requirements for this interaction failed.").queue()
     }
 
-    open fun onExecutionException(event: GenericCommandInteractionEvent, exception: Exception) {
+    public open fun onExecutionException(event: GenericCommandInteractionEvent, exception: Exception) {
         throw exception
     }
 
@@ -368,7 +370,7 @@ abstract class DiscordContextMenuHandler(
         }
     }
 
-    fun updateMessageIdForScope(messageId: String) {
+    public fun updateMessageIdForScope(messageId: String) {
         val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
         interactionScope.setMessageIdForInstance(uniqueId, messageId)
     }
@@ -384,7 +386,7 @@ abstract class DiscordContextMenuHandler(
      * @param callEntitySelectTimeout Call onEntitySelectInteractionTimeout of this bean
      * @param callModalTimeout Call onModalInteractionTimeout of this bean
      */
-    suspend fun destroyThisInstance(
+    public suspend fun destroyThisInstance(
         removeObservers: Boolean = true,
         removeObserverTimeouts: Boolean = true,
         callOnDestroy: Boolean = false,
@@ -392,7 +394,7 @@ abstract class DiscordContextMenuHandler(
         callStringSelectTimeout: Boolean = false,
         callEntitySelectTimeout: Boolean = false,
         callModalTimeout: Boolean = false
-    ) = withContext(AlunaDispatchers.Interaction) {
+    ): Job = withContext(AlunaDispatchers.Interaction) {
         val interactionScope = configurableListableBeanFactory.getRegisteredScope("interaction") as InteractionScope
         interactionScope.removeByUniqueId(uniqueId)
 
@@ -423,11 +425,11 @@ abstract class DiscordContextMenuHandler(
     }
 
     override suspend fun handleOnButtonInteraction(event: ButtonInteractionEvent): Boolean = runOnButtonInteraction(event)
-    override suspend fun handleOnButtonInteractionTimeout() = runOnButtonInteractionTimeout()
-    override suspend fun handleOnStringSelectInteraction(event: StringSelectInteractionEvent) = runOnStringSelectInteraction(event)
-    override suspend fun handleOnStringSelectInteractionTimeout() = runOnStringSelectInteractionTimeout()
-    override suspend fun handleOnEntitySelectInteraction(event: EntitySelectInteractionEvent) = runOnEntitySelectInteraction(event)
-    override suspend fun handleOnEntitySelectInteractionTimeout() = runOnEntitySelectInteractionTimeout()
-    override suspend fun handleOnModalInteraction(event: ModalInteractionEvent) = runOnModalInteraction(event)
-    override suspend fun handleOnModalInteractionTimeout() = runOnModalInteractionTimeout()
+    override suspend fun handleOnButtonInteractionTimeout(): Unit = runOnButtonInteractionTimeout()
+    override suspend fun handleOnStringSelectInteraction(event: StringSelectInteractionEvent): Boolean = runOnStringSelectInteraction(event)
+    override suspend fun handleOnStringSelectInteractionTimeout(): Unit = runOnStringSelectInteractionTimeout()
+    override suspend fun handleOnEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean = runOnEntitySelectInteraction(event)
+    override suspend fun handleOnEntitySelectInteractionTimeout(): Unit = runOnEntitySelectInteractionTimeout()
+    override suspend fun handleOnModalInteraction(event: ModalInteractionEvent): Boolean = runOnModalInteraction(event)
+    override suspend fun handleOnModalInteractionTimeout(): Unit = runOnModalInteractionTimeout()
 }

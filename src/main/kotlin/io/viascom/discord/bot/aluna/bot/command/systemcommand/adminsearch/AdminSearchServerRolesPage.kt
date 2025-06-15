@@ -32,8 +32,7 @@ import org.springframework.stereotype.Component
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class AdminSearchServerRolesPage(
-) : AdminSearchPageDataProvider(
+public class AdminSearchServerRolesPage : AdminSearchPageDataProvider(
     "ROLES",
     "Roles",
     arrayListOf(AdminSearchDataProvider.AdminSearchType.SERVER)

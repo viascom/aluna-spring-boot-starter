@@ -44,7 +44,7 @@ import kotlin.system.exitProcess
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class ShutdownProvider(
+public class ShutdownProvider(
     private val shardManager: ShardManager,
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider
 ) : SystemCommandDataProvider(

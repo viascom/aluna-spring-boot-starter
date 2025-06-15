@@ -21,4 +21,4 @@
 
 package io.viascom.discord.bot.aluna.bot.handler
 
-abstract class DiscordSubCommandGroup(name: String, description: String) : DiscordSubCommandGroupHandler(name, description)
+public abstract class DiscordSubCommandGroup(name: String, description: String) : DiscordSubCommandGroupHandler(name, description)

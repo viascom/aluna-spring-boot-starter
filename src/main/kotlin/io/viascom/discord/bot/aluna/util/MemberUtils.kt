@@ -40,7 +40,7 @@ import java.time.Duration
  *
  * @return probable Locale
  */
-fun User.probableLocale(): DiscordLocale? = mutualGuilds.groupBy { it.locale }.maxByOrNull { it.value.size }?.value?.firstOrNull()?.locale
+public fun User.probableLocale(): DiscordLocale? = mutualGuilds.groupBy { it.locale }.maxByOrNull { it.value.size }?.value?.firstOrNull()?.locale
 
 /**
  * Get the probable locale of a user based on the most common locale of the mutual servers.
@@ -49,21 +49,21 @@ fun User.probableLocale(): DiscordLocale? = mutualGuilds.groupBy { it.locale }.m
  *
  * @return probable Locale
  */
-fun Member.probableLocale(): DiscordLocale? = user.probableLocale()
+public fun Member.probableLocale(): DiscordLocale? = user.probableLocale()
 
 /**
  * Returns if this member have administrator permission in this guild
  *
  * @return Is administrator
  */
-fun Member.isAdministrator(): Boolean = this.hasPermission(Permission.ADMINISTRATOR)
+public fun Member.isAdministrator(): Boolean = this.hasPermission(Permission.ADMINISTRATOR)
 
 /**
  * Returns if this member have administrator permission or is the owner of this guild
  *
  * @return Is administrator or owner
  */
-fun Member.isAdministratorOrOwner(): Boolean = this.hasPermission(Permission.ADMINISTRATOR) || this.isOwner
+public fun Member.isAdministratorOrOwner(): Boolean = this.hasPermission(Permission.ADMINISTRATOR) || this.isOwner
 
 /**
  * Returns if this member is rejoining the guild
@@ -72,21 +72,21 @@ fun Member.isAdministratorOrOwner(): Boolean = this.hasPermission(Permission.ADM
  *
  * @return is rejoining
  */
-fun Member.isRejoining(): Boolean = this.flags.contains(Member.MemberFlag.DID_REJOIN)
+public fun Member.isRejoining(): Boolean = this.flags.contains(Member.MemberFlag.DID_REJOIN)
 
 /**
  * Return if this member has completed the onboarding process
  *
  * @return is onboarding completed
  */
-fun Member.hasCompletedOnboarding(): Boolean = this.flags.contains(Member.MemberFlag.COMPLETED_ONBOARDING)
+public fun Member.hasCompletedOnboarding(): Boolean = this.flags.contains(Member.MemberFlag.COMPLETED_ONBOARDING)
 
 /**
  * Return if this member has started the onboarding process
  *
  * @return is onboarding started
  */
-fun Member.hasStartedOnboarding(): Boolean = this.flags.contains(Member.MemberFlag.STARTED_ONBOARDING)
+public fun Member.hasStartedOnboarding(): Boolean = this.flags.contains(Member.MemberFlag.STARTED_ONBOARDING)
 
 /**
  * Retrieves the Name displayed in the official Discord Client.
@@ -94,7 +94,7 @@ fun Member.hasStartedOnboarding(): Boolean = this.flags.contains(Member.MemberFl
  *
  * @return The guild nickname of this Member or the {@link User#getEffectiveName() effective user name} if no guild nickname is present. The returned name is escaped and will not contain any markdown.
  */
-fun Member.effectiveNameEscaped(): String = MarkdownSanitizer.sanitize(escapeMarkdownLinks(this.effectiveName), MarkdownSanitizer.SanitizationStrategy.ESCAPE)
+public fun Member.effectiveNameEscaped(): String = MarkdownSanitizer.sanitize(escapeMarkdownLinks(this.effectiveName), MarkdownSanitizer.SanitizationStrategy.ESCAPE)
 
 /**
  * Puts this Member in time out in this {@link net.dv8tion.jda.api.entities.Guild Guild} for a specific amount of time.
@@ -105,7 +105,7 @@ fun Member.effectiveNameEscaped(): String = MarkdownSanitizer.sanitize(escapeMar
  * @see Member.timeoutFor timeoutFor
  */
 //This needs no @JvmOverloads as there is already a timeoutFor(duration: Duration) method
-fun Member.timeoutFor(duration: Duration, reason: String? = null): AuditableRestAction<Void> {
+public fun Member.timeoutFor(duration: Duration, reason: String? = null): AuditableRestAction<Void> {
     val action = this.timeoutFor(duration)
     return if (reason != null) action.reason(reason) else action
 }
@@ -117,7 +117,7 @@ fun Member.timeoutFor(duration: Duration, reason: String? = null): AuditableRest
  * @param message the message to send
  * @param then the runnable to be executed after the DM is sent
  */
-fun User.tryToSendDM(message: String, then: Runnable) {
+public fun User.tryToSendDM(message: String, then: Runnable) {
     try {
         this.openPrivateChannel().queue({ pc -> pc.sendMessage(message).queue({ then.run() }) { then.run() } }) { then.run() }
     } catch (ignore: Exception) {
@@ -131,4 +131,4 @@ fun User.tryToSendDM(message: String, then: Runnable) {
  * @param userId The ID of the member to retrieve.
  * @return The Member if found, or null if the guild or member was not found.
  */
-fun ShardManager.getMemberById(guildId: String, userId: String): Member? = this.getGuildById(guildId)?.getMemberById(userId)
+public fun ShardManager.getMemberById(guildId: String, userId: String): Member? = this.getGuildById(guildId)?.getMemberById(userId)

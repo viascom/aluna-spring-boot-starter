@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service
 @Service
 @ConditionalOnJdaEnabled
 @ConditionalOnAlunaShutdownHook
-class ShutdownHookRegistration(private val botShutdownHook: BotShutdownHook) : ApplicationListener<ApplicationStartedEvent> {
+public class ShutdownHookRegistration(private val botShutdownHook: BotShutdownHook) : ApplicationListener<ApplicationStartedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 

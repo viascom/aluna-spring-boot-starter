@@ -48,7 +48,7 @@ import java.awt.Color
 @Component
 @ConditionalOnJdaEnabled
 @Conditional(SendServerNotificationCondition::class)
-open class ServerNotificationEvent(
+public open class ServerNotificationEvent(
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties,
     private val additionalInformation: List<AdditionalServerJoinLeaveInformation>

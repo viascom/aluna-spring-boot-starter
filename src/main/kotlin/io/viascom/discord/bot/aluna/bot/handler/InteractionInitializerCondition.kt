@@ -24,13 +24,13 @@ package io.viascom.discord.bot.aluna.bot.handler
 /**
  * Interface to implement if you want to control if the interaction initializer should be called.
  */
-interface InteractionInitializerCondition {
+public interface InteractionInitializerCondition {
 
     /**
      * Returns true if the interaction initializer should be called. If false, the interaction loader will be called.
      *
      * @return true if the interaction initializer should be called
      */
-    fun isInitializeNeeded(): Boolean
+    public fun isInitializeNeeded(): Boolean
 
 }

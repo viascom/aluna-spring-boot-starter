@@ -26,7 +26,7 @@ import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.sharding.ShardManager
 
-class DefaultBotShutdownHook(
+public class DefaultBotShutdownHook(
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties
 ) : BotShutdownHook() {

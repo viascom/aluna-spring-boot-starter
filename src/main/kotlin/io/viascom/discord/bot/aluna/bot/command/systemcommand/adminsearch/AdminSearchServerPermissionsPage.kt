@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class AdminSearchServerPermissionsPage(
+public class AdminSearchServerPermissionsPage(
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties,
     private val systemCommandEmojiProvider: SystemCommandEmojiProvider

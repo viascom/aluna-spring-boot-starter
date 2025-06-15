@@ -27,9 +27,9 @@ import kotlinx.coroutines.withContext
 import kotlin.time.Duration
 import kotlin.time.TimeSource.Monotonic.ValueTimeMark
 
-data class TimeMarkRecord(val step: TimeMarkStep, val mark: ValueTimeMark)
+public data class TimeMarkRecord(val step: TimeMarkStep, val mark: ValueTimeMark)
 
-enum class TimeMarkStep {
+public enum class TimeMarkStep {
     START,
     INITIALIZED,
     OWNER_CHECKED,
@@ -55,9 +55,9 @@ enum class TimeMarkStep {
     EXIT_COMMAND
 }
 
-infix fun TimeMarkStep.at(mark: ValueTimeMark) = TimeMarkRecord(this, mark)
+public infix fun TimeMarkStep.at(mark: ValueTimeMark): TimeMarkRecord = TimeMarkRecord(this, mark)
 
-suspend fun ArrayList<TimeMarkRecord>.printTimeMarks(name: String): String = withContext(AlunaDispatchers.Detached) {
+public suspend fun ArrayList<TimeMarkRecord>.printTimeMarks(name: String): String = withContext(AlunaDispatchers.Detached) {
     var result = "\n"
     result += "$name\n"
     result += "===================================\n"
@@ -73,10 +73,10 @@ suspend fun ArrayList<TimeMarkRecord>.printTimeMarks(name: String): String = wit
     return@withContext result
 }
 
-fun ArrayList<TimeMarkRecord>.getDuration(): Duration =
+public fun ArrayList<TimeMarkRecord>.getDuration(): Duration =
     this@getDuration.last().mark - this@getDuration.first().mark
 
-fun ArrayList<TimeMarkRecord>.getDuration(possibleStartMarks: List<TimeMarkStep>, possibleEndMarks: List<TimeMarkStep>): Duration? {
+public fun ArrayList<TimeMarkRecord>.getDuration(possibleStartMarks: List<TimeMarkStep>, possibleEndMarks: List<TimeMarkStep>): Duration? {
     val start = this@getDuration.lastOrNull { it.step in possibleStartMarks }?.mark ?: return null
     val end = this@getDuration.lastOrNull { it.step in possibleEndMarks }?.mark ?: return null
     return end - start

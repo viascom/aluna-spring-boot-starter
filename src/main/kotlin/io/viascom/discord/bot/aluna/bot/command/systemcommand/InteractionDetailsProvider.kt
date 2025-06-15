@@ -48,7 +48,7 @@ import java.awt.Color
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class InteractionDetailsProvider(
+public class InteractionDetailsProvider(
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
     private val defaultSystemCommandEmojiProvider: DefaultSystemCommandEmojiProvider

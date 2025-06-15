@@ -27,10 +27,10 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-open class ScopeConfig {
+public open class ScopeConfig {
 
     @Bean
-    open fun beanFactoryPostProcessor(context: ConfigurableApplicationContext): BeanFactoryPostProcessor {
+    public open fun beanFactoryPostProcessor(context: ConfigurableApplicationContext): BeanFactoryPostProcessor {
         return ScopeBeanFactoryPostProcessor(context)
     }
 

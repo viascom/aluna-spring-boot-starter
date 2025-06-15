@@ -41,7 +41,7 @@ import java.awt.Color
 @Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-class ServerListProvider(
+public class ServerListProvider(
     private val shardManager: ShardManager,
     private val eventWaiter: EventWaiter
 ) : SystemCommandDataProvider(

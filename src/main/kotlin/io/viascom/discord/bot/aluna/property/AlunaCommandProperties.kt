@@ -25,142 +25,142 @@ import net.dv8tion.jda.api.interactions.IntegrationType
 import net.dv8tion.jda.api.interactions.InteractionContextType
 import org.springframework.boot.context.properties.NestedConfigurationProperty
 
-class AlunaCommandProperties {
+public class AlunaCommandProperties {
 
     /**
      * Enable logic to manage server specific commands
      * Using this on bigger bots can lead to longer startup times as Aluna has to check all the servers if their commands are available.
      */
-    var enableServerSpecificCommands: Boolean = false
+    public var enableServerSpecificCommands: Boolean = false
 
     /**
      * Print all defined arguments of a used command in the log
      */
-    var printArgs: Boolean = false
+    public var printArgs: Boolean = false
 
     @NestedConfigurationProperty
-    var systemCommand: SystemCommandProperties = SystemCommandProperties()
+    public var systemCommand: SystemCommandProperties = SystemCommandProperties()
 
     @NestedConfigurationProperty
-    var helpCommand: HelpCommandProperties = HelpCommandProperties()
+    public var helpCommand: HelpCommandProperties = HelpCommandProperties()
 }
 
-class SystemCommandProperties {
+public class SystemCommandProperties {
     /**
      * Enable /system-command
      */
-    var enabled: Boolean = false
+    public var enabled: Boolean = false
 
     /**
      * Represents where commands can be used.
      */
-    var contexts: List<InteractionContextType> = listOf(InteractionContextType.GUILD, InteractionContextType.BOT_DM)
+    public var contexts: List<InteractionContextType> = listOf(InteractionContextType.GUILD, InteractionContextType.BOT_DM)
 
     /**
      * Represents how an app was installed, or where a command can be used.
      */
-    var integrationTypes: List<IntegrationType> = listOf(IntegrationType.GUILD_INSTALL)
+    public var integrationTypes: List<IntegrationType> = listOf(IntegrationType.GUILD_INSTALL)
 
     /**
      * Server id on which this command can be used.
      * If set to 0 the command will be removed completely.
      * If set to null, the command can be used on every server and in DMs.
      */
-    var servers: ArrayList<String>? = null
+    public var servers: ArrayList<String>? = null
 
     /**
      * Define which system command features should be enabled. If not defined, all implementations of SystemCommandDataProvider are available.
      * Functions: admin_search, extract_message, evaluate_kotlin, leave_server, purge_messages, send_message
      */
-    var enabledFunctions: ArrayList<String>? = null
+    public var enabledFunctions: ArrayList<String>? = null
 
     /**
      * Define which system command features are allowed for moderators. If not defined, Aluna will use what is defined in the feature or the default which is false
      */
-    var allowedForModeratorsFunctions: ArrayList<String>? = null
+    public var allowedForModeratorsFunctions: ArrayList<String>? = null
 
     /**
      * Enable kotlin script evaluation feature. If this is enabled, you need to run your application with a JDK.
      */
-    var enableKotlinScriptEvaluate: Boolean = false
+    public var enableKotlinScriptEvaluate: Boolean = false
 
     /**
      * Execute load additional data on system-command interaction
      */
-    var executeLoadAdditionalData: Boolean = false
+    public var executeLoadAdditionalData: Boolean = false
 
     /**
      * Check additional conditions on system-command interaction
      */
-    var checkAdditionalConditions: Boolean = false
+    public var checkAdditionalConditions: Boolean = false
 
     @NestedConfigurationProperty
-    var releaseNotes: ReleaseNoteProperties = ReleaseNoteProperties()
+    public var releaseNotes: ReleaseNoteProperties = ReleaseNoteProperties()
 }
 
-class ReleaseNoteProperties {
+public class ReleaseNoteProperties {
     /**
      * Channel where the bot should post release notes by default.
      */
-    var channel: String? = null
+    public var channel: String? = null
 
-    var newCommandEmote: String = "⌨️"
-    var newFeatureEmote: String = "\uD83E\uDDE9"
-    var bugFixEmote: String = "\uD83D\uDC1B"
-    var internalChangeEmote: String = "⚙️"
+    public var newCommandEmote: String = "⌨️"
+    public var newFeatureEmote: String = "\uD83E\uDDE9"
+    public var bugFixEmote: String = "\uD83D\uDC1B"
+    public var internalChangeEmote: String = "⚙️"
 }
 
-class HelpCommandProperties {
+public class HelpCommandProperties {
     /**
      * Enable /help
      */
-    var enabled: Boolean = false
+    public var enabled: Boolean = false
 
     /**
      * Represents where commands can be used.
      */
-    var contexts: List<InteractionContextType> = InteractionContextType.ALL.toList()
+    public var contexts: List<InteractionContextType> = InteractionContextType.ALL.toList()
 
     /**
      * Represents how an app was installed, or where a command can be used.
      */
-    var integrationTypes: List<IntegrationType> = listOf(IntegrationType.GUILD_INSTALL, IntegrationType.USER_INSTALL)
+    public var integrationTypes: List<IntegrationType> = listOf(IntegrationType.GUILD_INSTALL, IntegrationType.USER_INSTALL)
 
     /**
      * Title used in the command
      */
-    var title: String = "Help"
+    public var title: String = "Help"
 
     /**
      * Title used in the command
      */
-    var description: String = ""
+    public var description: String = ""
 
     /**
      * Color of the embed
      */
-    var embedColor: String = "#03a66a"
+    public var embedColor: String = "#03a66a"
 
     @NestedConfigurationProperty
-    var fields: ArrayList<HelpField> = arrayListOf()
+    public var fields: ArrayList<HelpField> = arrayListOf()
 
     @NestedConfigurationProperty
-    var inviteButton: InviteButton = InviteButton()
+    public var inviteButton: InviteButton = InviteButton()
 
     @NestedConfigurationProperty
-    var websiteButton: HelpButton = HelpButton().apply {
+    public var websiteButton: HelpButton = HelpButton().apply {
         label = "Visit our Website"
         emote = "🌐"
     }
 
     @NestedConfigurationProperty
-    var joinSupportServerButton: HelpButton = HelpButton().apply {
+    public var joinSupportServerButton: HelpButton = HelpButton().apply {
         label = "Join our Discord"
         emote = "👋"
     }
 
     @NestedConfigurationProperty
-    var supportButton: HelpButton = HelpButton().apply {
+    public var supportButton: HelpButton = HelpButton().apply {
         label = "Support Us"
         emote = "❤️"
     }
@@ -168,35 +168,35 @@ class HelpCommandProperties {
     /**
      * Execute load additional data on help interaction
      */
-    var executeLoadAdditionalData: Boolean = false
+    public var executeLoadAdditionalData: Boolean = false
 
     /**
      * Check additional conditions on help interaction
      */
-    var checkAdditionalConditions: Boolean = false
+    public var checkAdditionalConditions: Boolean = false
 }
 
 
-class InviteButton {
-    var enabled: Boolean = false
-    var label: String = "Invite Me"
-    var emote: String? = "📩"
+public class InviteButton {
+    public var enabled: Boolean = false
+    public var label: String = "Invite Me"
+    public var emote: String? = "📩"
 
     /**
      * If this is set, the bot will use this link instead of the default one based on your configuration.
      */
-    var link: String? = null
+    public var link: String? = null
 }
 
-class HelpButton {
-    var enabled: Boolean = false
-    var label: String = "Help"
-    var emote: String? = null
-    var link: String = ""
+public class HelpButton {
+    public var enabled: Boolean = false
+    public var label: String = "Help"
+    public var emote: String? = null
+    public var link: String = ""
 }
 
-class HelpField {
-    var name: String = ""
-    var value: String = ""
-    var inline: Boolean = false
+public class HelpField {
+    public var name: String = ""
+    public var value: String = ""
+    public var inline: Boolean = false
 }

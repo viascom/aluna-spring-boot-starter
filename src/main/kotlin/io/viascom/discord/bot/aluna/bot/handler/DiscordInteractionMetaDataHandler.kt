@@ -28,7 +28,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 /**
  * Interface to implement if you want to execute actions on certain points during interaction execution.
  */
-interface DiscordInteractionMetaDataHandler {
+public interface DiscordInteractionMetaDataHandler {
 
     /**
      * Gets called asynchronously before the command is executed.
@@ -36,7 +36,7 @@ interface DiscordInteractionMetaDataHandler {
      * @param discordCommandHandler Discord command instance
      * @param event
      */
-    fun onCommandExecution(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent)
+    public fun onCommandExecution(discordCommandHandler: DiscordCommandHandler, event: SlashCommandInteractionEvent)
 
     /**
      * Gets called asynchronously before the context menu is executed.
@@ -44,7 +44,7 @@ interface DiscordInteractionMetaDataHandler {
      * @param contextMenu Discord context menu instance
      * @param event
      */
-    fun onContextMenuExecution(contextMenu: DiscordContextMenuHandler, event: GenericCommandInteractionEvent)
+    public fun onContextMenuExecution(contextMenu: DiscordContextMenuHandler, event: GenericCommandInteractionEvent)
 
     /**
      * Gets called asynchronously after the command is executed.
@@ -54,7 +54,7 @@ interface DiscordInteractionMetaDataHandler {
      * @param timeMarks TimeMarks if enabled
      * @param event Slash command event
      */
-    fun onExitInteraction(discordCommandHandler: DiscordCommandHandler, timeMarks: List<TimeMarkRecord>?, event: SlashCommandInteractionEvent)
+    public fun onExitInteraction(discordCommandHandler: DiscordCommandHandler, timeMarks: List<TimeMarkRecord>?, event: SlashCommandInteractionEvent)
 
     /**
      * Gets called asynchronously after the context menu is executed.
@@ -64,7 +64,7 @@ interface DiscordInteractionMetaDataHandler {
      * @param timeMarks TimeMarks if enabled
      * @param event Slash command event
      */
-    fun onExitInteraction(contextMenu: DiscordContextMenuHandler, timeMarks: List<TimeMarkRecord>?, event: GenericCommandInteractionEvent)
+    public fun onExitInteraction(contextMenu: DiscordContextMenuHandler, timeMarks: List<TimeMarkRecord>?, event: GenericCommandInteractionEvent)
 
     /**
      * Gets called if the command defined onExecutionException throws an exception.
@@ -74,7 +74,7 @@ interface DiscordInteractionMetaDataHandler {
      * @param exceptionOfSpecificHandler exception thrown by onExecutionException
      * @param event Slash command event
      */
-    fun onGenericExecutionException(
+    public fun onGenericExecutionException(
         discordCommandHandler: DiscordCommandHandler,
         throwableOfExecution: Exception,
         exceptionOfSpecificHandler: Exception,
@@ -89,7 +89,7 @@ interface DiscordInteractionMetaDataHandler {
      * @param exceptionOfSpecificHandler exception thrown by onExecutionException
      * @param event Slash command event
      */
-    fun onGenericExecutionException(
+    public fun onGenericExecutionException(
         contextMenu: DiscordContextMenuHandler,
         throwableOfExecution: Exception,
         exceptionOfSpecificHandler: Exception,

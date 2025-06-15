@@ -32,4 +32,4 @@ import org.springframework.context.ApplicationEvent
  * @property shardManager
  *
  */
-class DiscordFirstShardConnectedEvent(source: Any, val jdaEvent: ReadyEvent, val shardManager: ShardManager) : ApplicationEvent(source)
+public class DiscordFirstShardConnectedEvent(source: Any, public val jdaEvent: ReadyEvent, public val shardManager: ShardManager) : ApplicationEvent(source)

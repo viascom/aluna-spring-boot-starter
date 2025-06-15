@@ -28,21 +28,21 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 
-interface DiscordInteractionHandler {
+public interface DiscordInteractionHandler {
 
-    var uniqueId: String
-    var author: User
-    var discordBot: DiscordBot
+    public var uniqueId: String
+    public var author: User
+    public var discordBot: DiscordBot
 
-    suspend fun handleOnButtonInteraction(event: ButtonInteractionEvent): Boolean
-    suspend fun handleOnButtonInteractionTimeout()
+    public suspend fun handleOnButtonInteraction(event: ButtonInteractionEvent): Boolean
+    public suspend fun handleOnButtonInteractionTimeout()
 
-    suspend fun handleOnStringSelectInteraction(event: StringSelectInteractionEvent): Boolean
-    suspend fun handleOnStringSelectInteractionTimeout()
+    public suspend fun handleOnStringSelectInteraction(event: StringSelectInteractionEvent): Boolean
+    public suspend fun handleOnStringSelectInteractionTimeout()
 
-    suspend fun handleOnEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean
-    suspend fun handleOnEntitySelectInteractionTimeout()
+    public suspend fun handleOnEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean
+    public suspend fun handleOnEntitySelectInteractionTimeout()
 
-    suspend fun handleOnModalInteraction(event: ModalInteractionEvent): Boolean
-    suspend fun handleOnModalInteractionTimeout()
+    public suspend fun handleOnModalInteraction(event: ModalInteractionEvent): Boolean
+    public suspend fun handleOnModalInteractionTimeout()
 }

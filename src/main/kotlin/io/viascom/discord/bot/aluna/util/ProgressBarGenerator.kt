@@ -1,9 +1,9 @@
 package io.viascom.discord.bot.aluna.util
 
-object ProgressBarGenerator {
+public object ProgressBarGenerator {
 
     @JvmStatic
-    fun generate(value: Double, max: Int, progressElements: ArrayList<String> = arrayListOf(" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█")): String {
+    public fun generate(value: Double, max: Int, progressElements: ArrayList<String> = arrayListOf(" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█")): String {
         var bar = ""
 
         val percent: Double = value / max.toDouble() * 100

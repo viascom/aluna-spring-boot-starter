@@ -23,8 +23,8 @@ package io.viascom.discord.bot.aluna.bot.command.systemcommand.adminsearch
 
 import net.dv8tion.jda.api.interactions.commands.Command
 
-abstract class AdminSearchArgsProvider {
+public abstract class AdminSearchArgsProvider {
 
-    abstract fun onArgsRequest(args: String): HashMap<Command.Choice, Double>
+    public abstract fun onArgsRequest(args: String): HashMap<Command.Choice, Double>
 
 }

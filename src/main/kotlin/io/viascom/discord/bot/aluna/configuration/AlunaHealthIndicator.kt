@@ -53,7 +53,7 @@ import java.util.concurrent.ThreadPoolExecutor
 @ConditionalOnClass(HealthIndicator::class)
 @ConditionalOnJdaEnabled
 @ConditionalOnProperty(name = ["enable-actuator-health-indicator"], prefix = "aluna", matchIfMissing = true)
-class AlunaHealthIndicator(
+public class AlunaHealthIndicator(
     private val shardManager: ShardManager,
     private val discordBot: DiscordBot,
     private val eventWaiter: EventWaiter,
@@ -153,17 +153,17 @@ class AlunaHealthIndicator(
         )
     }
 
-    class ThreadPoolDetail(
-        val poolSize: Int,
-        val activeCount: Int,
-        val corePoolSize: Int,
-        val largestPoolSize: Int,
-        val maximumPoolSize: Int,
-        val taskCount: Long,
-        val completedTaskCount: Long,
-        val isTerminating: Boolean,
-        val isTerminated: Boolean,
-        val isShutdown: Boolean
+    public class ThreadPoolDetail(
+        public val poolSize: Int,
+        public val activeCount: Int,
+        public val corePoolSize: Int,
+        public val largestPoolSize: Int,
+        public val maximumPoolSize: Int,
+        public val taskCount: Long,
+        public val completedTaskCount: Long,
+        public val isTerminating: Boolean,
+        public val isTerminated: Boolean,
+        public val isShutdown: Boolean
     )
 
     private fun getSharding(shardManager: ShardManager, alunaProperties: AlunaProperties): Sharding {
@@ -194,26 +194,26 @@ class AlunaHealthIndicator(
         )
     }
 
-    class Sharding(
-        val total: Int,
-        val queued: Int,
-        val running: Int,
-        val type: AlunaDiscordProperties.Sharding.Type,
-        val from: Int,
-        val to: Int,
-        val shards: ArrayList<ShardDetail>
+    public class Sharding(
+        public val total: Int,
+        public val queued: Int,
+        public val running: Int,
+        public val type: AlunaDiscordProperties.Sharding.Type,
+        public val from: Int,
+        public val to: Int,
+        public val shards: ArrayList<ShardDetail>
     )
 
-    inner class Versions(
-        val aluna: String = alunaVersion,
-        val jda: String = jdaVersion,
-        val spring: String = SpringVersion.getVersion() ?: "n/a",
-        val springBoot: String = SpringBootVersion.getVersion() ?: "n/a",
+    public inner class Versions(
+        public val aluna: String = alunaVersion,
+        public val jda: String = jdaVersion,
+        public val spring: String = SpringVersion.getVersion() ?: "n/a",
+        public val springBoot: String = SpringBootVersion.getVersion() ?: "n/a",
     )
 
-    class ShardDetail(
-        val id: Int,
-        val status: JDA.Status,
-        val serverCount: Int
+    public class ShardDetail(
+        public val id: Int,
+        public val status: JDA.Status,
+        public val serverCount: Int
     )
 }

@@ -21,18 +21,18 @@
 
 package io.viascom.discord.bot.aluna.botlist
 
-interface BotStatsSender {
+public interface BotStatsSender {
 
-    fun onProductionModeOnly(): Boolean
+    public fun onProductionModeOnly(): Boolean
 
-    fun isEnabled(): Boolean
+    public fun isEnabled(): Boolean
 
-    fun getName(): String
+    public fun getName(): String
 
-    fun isValid(): Boolean
+    public fun isValid(): Boolean
 
-    fun getValidationErrors(): List<String>
+    public fun getValidationErrors(): List<String>
 
-    fun sendStats(totalServer: Int, totalShards: Int)
+    public fun sendStats(totalServer: Int, totalShards: Int)
 
 }

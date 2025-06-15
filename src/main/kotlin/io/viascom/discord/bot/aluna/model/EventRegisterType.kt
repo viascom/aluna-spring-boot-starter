@@ -21,6 +21,6 @@
 
 package io.viascom.discord.bot.aluna.model
 
-enum class EventRegisterType {
+public enum class EventRegisterType {
     BUTTON, STRING_SELECT, ENTITY_SELECT, MODAL
 }

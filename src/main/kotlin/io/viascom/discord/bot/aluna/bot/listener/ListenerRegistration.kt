@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service
 
 @Service
 @ConditionalOnJdaEnabled
-class ListenerRegistration(
+public class ListenerRegistration(
     private val coroutineListeners: List<CoroutineEventListener>,
     private val listeners: List<ListenerAdapter>,
     private val shardManager: ShardManager,

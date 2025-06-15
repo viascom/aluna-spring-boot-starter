@@ -41,13 +41,13 @@ import net.dv8tion.jda.api.utils.messages.MessageEditData
 import java.time.OffsetDateTime
 
 @JsonInclude(Include.NON_NULL)
-data class Webhook(
+public data class Webhook(
     var content: String?,
     var embeds: List<Embed>? = arrayListOf()
 ) {
 
     @JsonInclude(Include.NON_NULL)
-    data class Embed(
+    public data class Embed(
         var author: Author?,
         var color: Int?,
         var description: String?,
@@ -60,9 +60,9 @@ data class Webhook(
         var url: String?
     ) {
 
-        fun fromEmbedBuilder(embedBuilder: EmbedBuilder) = fromMessageEmbed(embedBuilder.build())
+        public fun fromEmbedBuilder(embedBuilder: EmbedBuilder): Unit = fromMessageEmbed(embedBuilder.build())
 
-        fun fromMessageEmbed(messageEmbed: MessageEmbed) {
+        public fun fromMessageEmbed(messageEmbed: MessageEmbed) {
             messageEmbed.toData().toJson().let { json ->
                 ObjectMapper().readValue(json, Embed::class.java).let { embed ->
                     this.author = embed.author
@@ -79,10 +79,10 @@ data class Webhook(
             }
         }
 
-        fun toEmbedBuilder() = EmbedBuilder.fromData(DataObject.fromJson(ObjectMapper().writeValueAsBytes(this)))
-        fun toMessageEmbed() = this.toEmbedBuilder().build()
+        public fun toEmbedBuilder(): EmbedBuilder = EmbedBuilder.fromData(DataObject.fromJson(ObjectMapper().writeValueAsBytes(this)))
+        public fun toMessageEmbed(): MessageEmbed = this.toEmbedBuilder().build()
 
-        fun getSize(): Int {
+        public fun getSize(): Int {
             return (title?.length ?: 0) + (description?.length ?: 0) +
                     (fields?.sumOf { it.name.length + it.value.length } ?: 0) +
                     (author?.name?.length ?: 0) + (author?.iconUrl?.length ?: 0) +
@@ -92,14 +92,14 @@ data class Webhook(
     }
 
     @JsonInclude(Include.NON_NULL)
-    data class Field(
+    public data class Field(
         var `inline`: Boolean = true,
         var name: String,
         var value: String
     )
 
     @JsonInclude(Include.NON_NULL)
-    data class Author(
+    public data class Author(
         @JsonProperty("icon_url")
         @SerializedName("icon_url")
         var iconUrl: String?,
@@ -108,24 +108,24 @@ data class Webhook(
     )
 
     @JsonInclude(Include.NON_NULL)
-    data class Thumbnail(
+    public data class Thumbnail(
         var url: String? = null
     )
 
     @JsonInclude(Include.NON_NULL)
-    data class Image(
+    public data class Image(
         var url: String? = null
     )
 
     @JsonInclude(Include.NON_NULL)
-    data class Footer(
+    public data class Footer(
         @JsonProperty("icon_url")
         @SerializedName("icon_url")
         var iconUrl: String?,
         var text: String
     )
 
-    fun toMessageCreateData(): MessageCreateData {
+    public fun toMessageCreateData(): MessageCreateData {
         val message = MessageCreateBuilder()
         content?.let { message.setContent(it) } ?: message.setContent("")
 
@@ -151,14 +151,14 @@ data class Webhook(
         return message.build()
     }
 
-    fun toMessageEditData(): MessageEditData = toMessageCreateData().toEditData()
+    public fun toMessageEditData(): MessageEditData = toMessageCreateData().toEditData()
 
-    fun getSize(): Int {
+    public fun getSize(): Int {
         return (content?.length ?: 0) + (embeds?.sumOf(Embed::getSize) ?: 0)
     }
 
-    companion object {
-        fun fromMessage(message: MessageData): Webhook {
+    public companion object {
+        public fun fromMessage(message: MessageData): Webhook {
             val embeds = message.embeds.map { embed ->
                 val author = embed.author?.let { Author(it.iconUrl, it.name, it.url) }
                 val fields = embed.fields.ifEmpty { null }?.map { Field(it.isInline, it.name ?: "", it.value ?: "") }
@@ -172,7 +172,7 @@ data class Webhook(
             return Webhook(message.content.ifEmpty { null }, embeds)
         }
 
-        fun fromMessageLink(messageLink: String, user: User, shardManager: ShardManager): Webhook? {
+        public fun fromMessageLink(messageLink: String, user: User, shardManager: ShardManager): Webhook? {
             val elements = messageLink.split("/")
             val serverId = elements[4]
             val channelId = elements[5]
@@ -196,7 +196,7 @@ data class Webhook(
                 return null
             }
 
-            return Webhook.fromMessage(MessageEditData.fromMessage(message))
+            return fromMessage(MessageEditData.fromMessage(message))
         }
     }
 

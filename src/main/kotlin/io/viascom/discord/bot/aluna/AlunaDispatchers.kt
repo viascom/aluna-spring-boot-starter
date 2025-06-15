@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
 
-object AlunaDispatchers {
+public object AlunaDispatchers {
 
     @JvmSynthetic
     internal lateinit var interactionScope: CoroutineScope
@@ -74,43 +74,44 @@ object AlunaDispatchers {
     internal val InternalScope: CoroutineScope
         get() = getScope("Aluna-Internal", Dispatchers.Default, cancelParent = true)
 
-    val Interaction: CoroutineContext
+    public val Interaction: CoroutineContext
         get() {
             ensureScopesInitialized()
             return InteractionScope.coroutineContext
         }
 
-    val InteractionScope: CoroutineScope
+    public val InteractionScope: CoroutineScope
         get() {
             ensureScopesInitialized()
             return interactionScope
         }
 
-    val Event: CoroutineContext
+    public val Event: CoroutineContext
         get() {
             ensureScopesInitialized()
             return EventScope.coroutineContext
         }
 
-    val EventScope: CoroutineScope
+    public val EventScope: CoroutineScope
         get() {
             ensureScopesInitialized()
             return eventScope
         }
 
-    val Detached: CoroutineContext
+    public val Detached: CoroutineContext
         get() {
             ensureScopesInitialized()
             return DetachedScope.coroutineContext
         }
 
-    val DetachedScope: CoroutineScope
+    public val DetachedScope: CoroutineScope
         get() {
             ensureScopesInitialized()
             return detachedScope
         }
 
-    val Dispatchers.VT: CoroutineDispatcher
+    @Suppress("Since15")
+    private val Dispatchers.VT: CoroutineDispatcher
         get() = if (isJava21OrHigher()) {
             Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("AlunaVirtualDispatcher-worker-", 0L).factory()).asCoroutineDispatcher()
         } else {

@@ -26,4 +26,4 @@ import java.lang.annotation.Inherited
 
 @ConditionalOnProperty(name = ["command.help-command.enabled"], prefix = "aluna", matchIfMissing = false)
 @Inherited
-annotation class ConditionalOnDefaultHelpCommandEnabled()
+public annotation class ConditionalOnDefaultHelpCommandEnabled()

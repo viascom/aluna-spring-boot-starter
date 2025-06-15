@@ -37,17 +37,17 @@ import net.dv8tion.jda.api.entities.emoji.Emoji
  *
  */
 @JvmDefaultWithCompatibility
-interface DiscordEmoji {
-    val id: String
-    val emojiName: String
-    val animated: Boolean
+public interface DiscordEmoji {
+    public val id: String
+    public val emojiName: String
+    public val animated: Boolean
 
     /**
      * Get emoji as mention
      *
      * @return Emoji as mention (<[a]:name:12345>)
      */
-    fun formatted(): String {
+    public fun formatted(): String {
         val animatedSuffix = if (animated) "a" else ""
         return "<$animatedSuffix:$emojiName:$id>"
     }
@@ -59,7 +59,7 @@ interface DiscordEmoji {
      * @param spaceAfter Add addition space after the emoji
      * @return Emoji as mention without name (<[a]:e:12345>)
      */
-    fun toStringShort(spaceAfter: Boolean = false): String {
+    public fun toStringShort(spaceAfter: Boolean = false): String {
         val animatedSuffix = if (animated) "a" else ""
         return "<$animatedSuffix:e:$id>" + if (spaceAfter) " " else ""
     }
@@ -69,7 +69,7 @@ interface DiscordEmoji {
      *
      * @return Reaction code of the Emote
      */
-    fun toReactionCode(): String {
+    public fun toReactionCode(): String {
         return "$emojiName:$id"
     }
 
@@ -78,7 +78,7 @@ interface DiscordEmoji {
      *
      * @return Emoji.
      */
-    fun toEmoji(): Emoji {
+    public fun toEmoji(): Emoji {
         return Emoji.fromCustom(emojiName, id.toLong(), animated)
     }
 }

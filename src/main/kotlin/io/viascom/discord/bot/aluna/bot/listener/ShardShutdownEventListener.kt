@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @ConditionalOnJdaEnabled
-class ShardShutdownEventListener(private val discordBot: DiscordBot) : CoroutineEventListener {
+public class ShardShutdownEventListener(private val discordBot: DiscordBot) : CoroutineEventListener {
 
     override suspend fun onEvent(event: GenericEvent) {
         when (event) {

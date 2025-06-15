@@ -25,7 +25,7 @@ import io.viascom.discord.bot.aluna.model.MissingPermissions
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 
-open class DefaultDiscordInteractionConditions : DiscordInteractionConditions {
+public open class DefaultDiscordInteractionConditions : DiscordInteractionConditions {
 
     override fun checkForNeededUserPermissions(
         discordCommandHandler: DiscordCommandHandler,
@@ -51,7 +51,7 @@ open class DefaultDiscordInteractionConditions : DiscordInteractionConditions {
         event: GenericCommandInteractionEvent
     ): MissingPermissions = checkForNeededBotPermissionsGeneric(botPermissions, event)
 
-    fun checkForNeededUserPermissionsGeneric(
+    public fun checkForNeededUserPermissionsGeneric(
         userPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
     ): MissingPermissions {
@@ -77,7 +77,7 @@ open class DefaultDiscordInteractionConditions : DiscordInteractionConditions {
         return missingPermissions
     }
 
-    fun checkForNeededBotPermissionsGeneric(
+    public fun checkForNeededBotPermissionsGeneric(
         botPermissions: ArrayList<Permission>,
         event: GenericCommandInteractionEvent
     ): MissingPermissions {

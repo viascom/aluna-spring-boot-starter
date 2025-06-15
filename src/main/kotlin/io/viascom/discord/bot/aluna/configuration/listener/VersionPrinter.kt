@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service
 
 @Service
 @ConditionalOnJdaEnabled
-class VersionPrinter : ApplicationListener<ApplicationPreparedEvent> {
+public class VersionPrinter : ApplicationListener<ApplicationPreparedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(AlunaAutoConfiguration::class.java)
 

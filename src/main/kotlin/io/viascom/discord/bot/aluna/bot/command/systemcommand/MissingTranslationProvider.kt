@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
 @ConditionalOnTranslationEnabled
-class MissingTranslationProvider(
+public class MissingTranslationProvider(
     private val discordInteractionLocalization: DiscordInteractionLocalization,
     private val objectMapper: ObjectMapper
 ) : SystemCommandDataProvider(
