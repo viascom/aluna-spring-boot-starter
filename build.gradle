@@ -27,7 +27,7 @@ ext {
     retrofitVersion = "2.9.0"
     jacksonSpringBootVersion = "3.5.0"
     jacksonVersion = "2.19.0"
-    jemojiVersion = "1.7.3"
+    jemojiVersion = "1.7.4"
     gsonVersion = "2.13.1"
     javabotblockapiVersion = "6.7.4_347"
     nanoidVersion = "1.0.1"
