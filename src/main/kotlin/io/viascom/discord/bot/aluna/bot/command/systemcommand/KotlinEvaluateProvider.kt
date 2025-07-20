@@ -28,10 +28,10 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemC
 import io.viascom.discord.bot.aluna.scriptengine.KotlinScriptV2Service
 import io.viascom.discord.bot.aluna.util.addTextField
 import io.viascom.discord.bot.aluna.util.getValueAsString
+import net.dv8tion.jda.api.components.textinput.TextInputStyle
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.utils.FileUpload
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty

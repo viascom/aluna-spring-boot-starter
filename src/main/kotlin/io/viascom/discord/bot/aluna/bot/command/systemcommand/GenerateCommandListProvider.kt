@@ -31,14 +31,14 @@ import io.viascom.discord.bot.aluna.model.EventRegisterType
 import io.viascom.discord.bot.aluna.util.*
 import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent
+import net.dv8tion.jda.api.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.components.ActionRow
-import net.dv8tion.jda.api.interactions.components.ItemComponent
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.api.utils.FileUpload
 import org.springframework.context.ConfigurableApplicationContext
@@ -90,7 +90,7 @@ public class GenerateCommandListProvider(
     private fun getActionRow(): ArrayList<ActionRow> {
         val rows = arrayListOf<ActionRow>()
 
-        val row2 = arrayListOf<ItemComponent>()
+        val row2 = arrayListOf<ActionRowChildComponent>()
         row2.add(
             StringSelectMenu.create("type")
                 .addOption("HTML", "html", isDefault = selectedType == "html")
@@ -99,7 +99,7 @@ public class GenerateCommandListProvider(
         )
         rows.add(ActionRow.of(row2))
 
-        val row3 = arrayListOf<ItemComponent>()
+        val row3 = arrayListOf<ActionRowChildComponent>()
         row3.add(dangerButton("cancel", "Cancel"))
         row3.add(successButton("generate", "Generate File"))
         rows.add(ActionRow.of(row3))

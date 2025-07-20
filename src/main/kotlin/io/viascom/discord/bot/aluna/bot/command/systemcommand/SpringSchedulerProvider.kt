@@ -28,12 +28,13 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemC
 import io.viascom.discord.bot.aluna.util.getTypedOption
 import io.viascom.discord.bot.aluna.util.removeComponents
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.buttons.Button
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command.Choice
-import net.dv8tion.jda.api.interactions.components.buttons.Button
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
@@ -120,7 +121,7 @@ public class SpringSchedulerProvider(
             .addField("", "Do you want to trigger this scheduler?", false)
 
         hook!!.editOriginalEmbeds(embedMessage!!.build())
-            .setActionRow(confirmButton, cancelButton)
+            .setComponents(ActionRow.of(confirmButton, cancelButton))
             .queueAndRegisterInteraction(hook, command)
     }
 

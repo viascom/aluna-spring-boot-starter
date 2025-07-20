@@ -28,14 +28,14 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemC
 import io.viascom.discord.bot.aluna.model.EventRegisterType
 import io.viascom.discord.bot.aluna.util.*
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent
+import net.dv8tion.jda.api.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.components.ActionRow
-import net.dv8tion.jda.api.interactions.components.ItemComponent
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.api.utils.FileUpload
@@ -92,7 +92,7 @@ public class GenerateStickerEnumProvider(
 
     private fun getRemoveActionRow(): ArrayList<ActionRow> {
         val rows = arrayListOf<ActionRow>()
-        val row1 = arrayListOf<ItemComponent>()
+        val row1 = arrayListOf<ActionRowChildComponent>()
         val serverList = StringSelectMenu.create("serverList")
 
         selectedServerIds.mapNotNull { shardManager.getGuildById(it) }.forEach {
@@ -102,7 +102,7 @@ public class GenerateStickerEnumProvider(
         row1.add(serverList.build())
         rows.add(ActionRow.of(row1))
 
-        val row2 = arrayListOf<ItemComponent>()
+        val row2 = arrayListOf<ActionRowChildComponent>()
         row2.add(dangerButton("cancel-remove", "Cancel"))
         rows.add(ActionRow.of(row2))
 
@@ -112,12 +112,12 @@ public class GenerateStickerEnumProvider(
     private fun getComponents(): ArrayList<ActionRow> {
         val rows = arrayListOf<ActionRow>()
 
-        val row1 = arrayListOf<ItemComponent>()
+        val row1 = arrayListOf<ActionRowChildComponent>()
         row1.add(primaryButton("add", "Add Server"))
         row1.add(dangerButton("remove", "Remove Server", disabled = selectedServerIds.isEmpty()))
         rows.add(ActionRow.of(row1))
 
-        val row2 = arrayListOf<ItemComponent>()
+        val row2 = arrayListOf<ActionRowChildComponent>()
         row2.add(
             StringSelectMenu.create("type")
                 .addOption("Kotlin", "kotlin", isDefault = selectedType == "kotlin")
@@ -127,7 +127,7 @@ public class GenerateStickerEnumProvider(
         )
         rows.add(ActionRow.of(row2))
 
-        val row3 = arrayListOf<ItemComponent>()
+        val row3 = arrayListOf<ActionRowChildComponent>()
         row3.add(dangerButton("cancel", "Cancel"))
         row3.add(successButton("generate", "Generate File"))
         rows.add(ActionRow.of(row3))

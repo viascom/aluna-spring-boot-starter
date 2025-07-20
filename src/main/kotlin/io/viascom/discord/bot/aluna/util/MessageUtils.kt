@@ -26,6 +26,8 @@ package io.viascom.discord.bot.aluna.util
 
 import io.viascom.discord.bot.aluna.model.DiscordSticker
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.components.container.Container
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.User
@@ -307,6 +309,12 @@ public fun MessageEmbed.toJson(): ByteArray = this.toData().toJson()
  */
 public fun MessageEmbed.toJsonString(): String = this.toJson().toString(Charset.defaultCharset())
 
+/**
+ * Applies the given accent color to the container.
+ *
+ * @param hexColor A string representing the color in hexadecimal format (e.g., "#FF5733").
+ */
+public fun Container.withAccentColor(hexColor: String) = this.withAccentColor(Color.decode(hexColor))
 
 /**
  * Retrieves a message with the given message ID in the user's private channel.
@@ -327,6 +335,21 @@ public fun User.getMessage(messageId: String): Message? = try {
  * @return An EmbedBuilder object representing the Discord embed with the specified title and content.
  */
 public fun String.toDiscordEmbed(title: String? = null): EmbedBuilder = EmbedBuilder().setTitle(title).setDescription(this).setColor("#2c2d31")
+
+/**
+ * Converts the string into a Discord-styled `Container` component, optionally including a title.
+ *
+ * @param title An optional title to display above the string content. Defaults to null.
+ * @return A `Container` containing the string content and optionally a title, styled with a Discord-themed accent color.
+ */
+public fun String.toDiscordComponent(title: String? = null): Container {
+    return Container.of(buildList {
+        if (title != null) {
+            add(TextDisplay.of(title))
+        }
+        add(TextDisplay.of(this@toDiscordComponent))
+    }).withAccentColor("#2c2d31")
+}
 
 /**
  * Create a new {@link FileUpload} for a string.

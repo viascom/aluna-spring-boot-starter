@@ -31,6 +31,9 @@ import io.viascom.discord.bot.aluna.model.EventRegisterType
 import io.viascom.discord.bot.aluna.util.*
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent
+import net.dv8tion.jda.api.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
@@ -38,9 +41,6 @@ import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.OptionType
-import net.dv8tion.jda.api.interactions.components.ActionRow
-import net.dv8tion.jda.api.interactions.components.ItemComponent
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.springframework.stereotype.Component
 import java.awt.Color
@@ -265,7 +265,7 @@ public class InteractionDetailsProvider(
     private fun getActionRow(): ArrayList<ActionRow> {
         val rows = arrayListOf<ActionRow>()
 
-        val row1 = arrayListOf<ItemComponent>()
+        val row1 = arrayListOf<ActionRowChildComponent>()
         val pageSelection = StringSelectMenu.create("page-selection")
         pageSelection.addOption("Overview", "overview")
 
@@ -281,7 +281,7 @@ public class InteractionDetailsProvider(
         rows.add(ActionRow.of(row1))
 
         if (selectedPage == "options") {
-            val row2 = arrayListOf<ItemComponent>()
+            val row2 = arrayListOf<ActionRowChildComponent>()
             val optionSelection = StringSelectMenu.create("option-selection")
             selectedInteraction.options.forEach { option ->
                 optionSelection.addOption(option.name, option.name)
@@ -293,7 +293,7 @@ public class InteractionDetailsProvider(
         }
 
         if (selectedPage == "subcommands") {
-            val row2 = arrayListOf<ItemComponent>()
+            val row2 = arrayListOf<ActionRowChildComponent>()
             val subcommandSelection = StringSelectMenu.create("subcommand-selection")
 
             selectedInteraction.subcommands.forEach { subcommand ->
@@ -316,7 +316,7 @@ public class InteractionDetailsProvider(
                 ?: arrayListOf())
 
             if (options.isNotEmpty()) {
-                val row3 = arrayListOf<ItemComponent>()
+                val row3 = arrayListOf<ActionRowChildComponent>()
                 val optionSelection = StringSelectMenu.create("option-selection")
                 optionSelection.addOption("Overview", "overview")
 

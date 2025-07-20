@@ -26,6 +26,7 @@ import io.viascom.discord.bot.aluna.bot.handler.AutoComplete
 import io.viascom.discord.bot.aluna.bot.handler.AutoCompleteHandler
 import io.viascom.discord.bot.aluna.bot.interaction.SetPreferredAnimalCommand
 import io.viascom.discord.bot.aluna.util.getOptionAsString
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
@@ -69,6 +70,7 @@ class AnimalAutocompleteHandler : AutoCompleteHandler(SetPreferredAnimalCommand:
         tempFlow.update { event }
     }
 
+    @OptIn(FlowPreview::class)
     suspend fun handleInput() {
         tempFlow.debounce {
             if (data != null) return@debounce 0.toDuration(DurationUnit.SECONDS)

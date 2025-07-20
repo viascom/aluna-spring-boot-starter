@@ -26,6 +26,11 @@ import io.viascom.discord.bot.aluna.util.getSelection
 import io.viascom.discord.bot.aluna.util.removeComponents
 import io.viascom.nanoid.NanoId
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent
+import net.dv8tion.jda.api.components.buttons.Button
+import net.dv8tion.jda.api.components.selections.SelectOption
+import net.dv8tion.jda.api.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed.Field
 import net.dv8tion.jda.api.entities.User
@@ -33,11 +38,6 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.components.ActionRow
-import net.dv8tion.jda.api.interactions.components.ItemComponent
-import net.dv8tion.jda.api.interactions.components.buttons.Button
-import net.dv8tion.jda.api.interactions.components.selections.SelectOption
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.requests.FluentRestAction
 import net.dv8tion.jda.api.utils.messages.*
 import java.awt.Color
@@ -269,7 +269,7 @@ public class AlunaPaginator(
             rows.add(ActionRow.of(selection.build()))
         }
 
-        val actions = ArrayList<ItemComponent>()
+        val actions = ArrayList<ActionRowChildComponent>()
         if (showButtons) {
             if (bulkSkipNumber > 1 && showBulkSkipButtons) {
                 actions.add(bulkLeftButton)
@@ -321,7 +321,7 @@ public class AlunaPaginator(
                 val hook = event.deferEdit().complete()
                 var newPageNum = currentPageNumber
                 when (event.componentId) {
-                    leftButton.id -> {
+                    leftButton.customId -> {
                         if (newPageNum == 1 && wrapPageEnds) {
                             newPageNum = totalPages + 1
                         }
@@ -330,7 +330,7 @@ public class AlunaPaginator(
                         }
                     }
 
-                    rightButton.id -> {
+                    rightButton.customId -> {
                         if (newPageNum == totalPages && wrapPageEnds) {
                             newPageNum = 0
                         }
@@ -339,7 +339,7 @@ public class AlunaPaginator(
                         }
                     }
 
-                    bulkLeftButton.id -> if (newPageNum > 1 || wrapPageEnds) {
+                    bulkLeftButton.customId -> if (newPageNum > 1 || wrapPageEnds) {
                         var i = 1
                         while ((newPageNum > 1 || wrapPageEnds) && i < bulkSkipNumber) {
                             if (newPageNum == 1 && wrapPageEnds) {
@@ -350,7 +350,7 @@ public class AlunaPaginator(
                         }
                     }
 
-                    bulkRightButton.id -> if (newPageNum < totalPages || wrapPageEnds) {
+                    bulkRightButton.customId -> if (newPageNum < totalPages || wrapPageEnds) {
                         var i = 1
                         while ((newPageNum < totalPages || wrapPageEnds) && i < bulkSkipNumber) {
                             if (newPageNum == totalPages && wrapPageEnds) {
@@ -361,7 +361,7 @@ public class AlunaPaginator(
                         }
                     }
 
-                    cancelButton.id -> {
+                    cancelButton.customId -> {
                         cancelAction.accept(message)
                         eventWaiter.removeWaiter(eventWaiterId, false)
                         return@waitForInteraction

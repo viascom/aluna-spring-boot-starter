@@ -24,10 +24,11 @@ package io.viascom.discord.bot.aluna.bot.interaction
 import io.viascom.discord.bot.aluna.bot.CoroutineDiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.coQueue
-import io.viascom.discord.bot.aluna.util.toDiscordEmbed
+import io.viascom.discord.bot.aluna.util.toDiscordComponent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.IntegrationType
 import net.dv8tion.jda.api.interactions.InteractionContextType
+import java.awt.Color
 
 @Interaction
 class PingCommand : CoroutineDiscordCommand("ping", "Send a ping") {
@@ -40,10 +41,14 @@ class PingCommand : CoroutineDiscordCommand("ping", "Send a ping") {
     override suspend fun execute(event: SlashCommandInteractionEvent) {
         val startTime = System.currentTimeMillis()
 
-        //Send a reply and acknowledge the event with it
-        event.replyEmbeds("↔\uFE0F Ping ...".toDiscordEmbed().build()).setEphemeral(true).coQueue {
-            //As soon as it got successfully sent, we edit the message with the duration between now and the first message.
-            it.editOriginalEmbeds("↔\uFE0F Pong: ${System.currentTimeMillis() - startTime}ms".toDiscordEmbed().build()).queue()
-        }
+        event.replyComponents("↔\uFE0F Ping ...".toDiscordComponent())
+            .useComponentsV2()
+            .setEphemeral(true)
+            .coQueue {
+                //As soon as it got successfully sent, we edit the message with the duration between now and the first message.
+                it.editOriginalComponents("↔\uFE0F Pong: ${System.currentTimeMillis() - startTime}ms".toDiscordComponent().withAccentColor(Color.GREEN))
+                    .useComponentsV2()
+                    .queue()
+            }
     }
 }

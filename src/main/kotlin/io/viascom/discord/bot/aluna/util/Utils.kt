@@ -25,6 +25,13 @@
 package io.viascom.discord.bot.aluna.util
 
 import io.viascom.discord.bot.aluna.model.CommandOption
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.buttons.Button
+import net.dv8tion.jda.api.components.buttons.ButtonStyle
+import net.dv8tion.jda.api.components.selections.SelectOption
+import net.dv8tion.jda.api.components.selections.StringSelectMenu
+import net.dv8tion.jda.api.components.textinput.TextInput
+import net.dv8tion.jda.api.components.textinput.TextInputStyle
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.entities.Message.Attachment
 import net.dv8tion.jda.api.entities.channel.Channel
@@ -41,12 +48,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
-import net.dv8tion.jda.api.interactions.components.buttons.Button
-import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
-import net.dv8tion.jda.api.interactions.components.selections.SelectOption
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
-import net.dv8tion.jda.api.interactions.components.text.TextInput
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.interactions.modals.ModalInteraction
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction
@@ -453,7 +454,7 @@ public fun Modal.Builder.addTextField(
     max: Int = -1,
     value: String? = null,
     required: Boolean = true
-): Modal.Builder = this.addActionRow(textInput(id, label, style, placeholder, min, max, value, required))
+): Modal.Builder = this.addComponents(ActionRow.of(textInput(id, label, style, placeholder, min, max, value, required)))
 
 /**
  * Retrieves the value associated with the given [name] as a [String], or returns the provided [default] value if not found.

@@ -32,6 +32,10 @@ import io.viascom.discord.bot.aluna.model.ReleaseNotes
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.*
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent
+import net.dv8tion.jda.api.components.selections.EntitySelectMenu
+import net.dv8tion.jda.api.components.textinput.TextInputStyle
 import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -39,10 +43,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.components.ActionRow
-import net.dv8tion.jda.api.interactions.components.ItemComponent
-import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder
 import org.springframework.stereotype.Component
@@ -170,12 +170,12 @@ public class ReleaseNotesProvider(
     private fun getActionRow(): ArrayList<ActionRow> {
         val rows = arrayListOf<ActionRow>()
 
-        val row1 = arrayListOf<ItemComponent>()
+        val row1 = arrayListOf<ActionRowChildComponent>()
         row1.add(primaryButton("set-json", "Set JSON"))
         row1.add(primaryButton("set-channel", "Set Channel"))
         rows.add(ActionRow.of(row1))
 
-        val row2 = arrayListOf<ItemComponent>()
+        val row2 = arrayListOf<ActionRowChildComponent>()
         row2.add(dangerButton("cancel", "Cancel"))
         row2.add(successButton("send", "Send Release Notes", disabled = channelId == null))
         rows.add(ActionRow.of(row2))
@@ -186,7 +186,7 @@ public class ReleaseNotesProvider(
     private fun getSetChannelActionRow(): ArrayList<ActionRow> {
         val rows = arrayListOf<ActionRow>()
 
-        val row1 = arrayListOf<ItemComponent>()
+        val row1 = arrayListOf<ActionRowChildComponent>()
         val channelSelect = EntitySelectMenu.create("channel-select", EntitySelectMenu.SelectTarget.CHANNEL)
         channelSelect.setChannelTypes(ChannelType.TEXT, ChannelType.NEWS)
         channelSelect.maxValues = 1
@@ -194,7 +194,7 @@ public class ReleaseNotesProvider(
         row1.add(channelSelect.build())
         rows.add(ActionRow.of(row1))
 
-        val row2 = arrayListOf<ItemComponent>()
+        val row2 = arrayListOf<ActionRowChildComponent>()
         row2.add(dangerButton("back", "Back"))
         row2.add(successButton("select", "Set Channel"))
         rows.add(ActionRow.of(row2))

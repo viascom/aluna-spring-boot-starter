@@ -148,14 +148,6 @@ public abstract class DiscordCommandHandler(
     override var uniqueId: String = ""
 
     /**
-     * Defines the use scope of this command.
-     *
-     * *This gets mapped to [isGuildOnly] if set to [UseScope.GUILD_ONLY].*
-     */
-    @Deprecated("Use setContexts instead", level = DeprecationLevel.ERROR)
-    public var useScope: UseScope = UseScope.GLOBAL
-
-    /**
      * Restrict this command to specific servers. If null, the command is available in all servers. When enabled, make sure to also enable 'alunaProperties.command.enableServerSpecificCommands' in your configuration.
      */
     @set:Experimental("This is an experimental feature and my not always work as expected. Please report any issues you find.")
@@ -622,10 +614,16 @@ public abstract class DiscordCommandHandler(
         }
 
         if (!alunaProperties.productionMode) {
-            if ((isAdministratorOnlyCommand || this@DiscordCommandHandler.defaultPermissions == DefaultMemberPermissions.DISABLED) && !this@DiscordCommandHandler.isGuildOnly) {
+            if ((isAdministratorOnlyCommand || this@DiscordCommandHandler.defaultPermissions == DefaultMemberPermissions.DISABLED) && !this@DiscordCommandHandler.contexts.contains(
+                    InteractionContextType.GUILD
+                )
+            ) {
                 logger.warn("The interaction '$name' has a default permission for administrator only but is not restricted to guild only. All users will be able to use this interaction in DMs with your bot!")
             }
-            if (this@DiscordCommandHandler.defaultPermissions != DefaultMemberPermissions.ENABLED && this@DiscordCommandHandler.defaultPermissions != DefaultMemberPermissions.DISABLED && !this@DiscordCommandHandler.isGuildOnly) {
+            if (this@DiscordCommandHandler.defaultPermissions != DefaultMemberPermissions.ENABLED && this@DiscordCommandHandler.defaultPermissions != DefaultMemberPermissions.DISABLED && !this@DiscordCommandHandler.contexts.contains(
+                    InteractionContextType.GUILD
+                )
+            ) {
                 logger.warn("The interaction '$name' has a default permission restriction for a specific user permission but is not restricted to guild only. All users will be able to use this interaction in DMs with your bot!")
             }
         }

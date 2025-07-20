@@ -30,11 +30,11 @@ import io.viascom.discord.bot.aluna.util.primaryButton
 import io.viascom.discord.bot.aluna.util.removeComponents
 import io.viascom.discord.bot.aluna.util.sendOrEditMessage
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.components.ActionRow
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
 import java.time.LocalDateTime
 import java.time.ZoneOffset

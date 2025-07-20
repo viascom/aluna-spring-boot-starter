@@ -30,13 +30,13 @@ import io.viascom.discord.bot.aluna.property.AlunaDebugProperties
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.*
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent
+import net.dv8tion.jda.api.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.components.ActionComponent
-import net.dv8tion.jda.api.interactions.components.ActionRow
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
 import org.springframework.stereotype.Component
 import java.awt.Color
 
@@ -136,14 +136,14 @@ public class TimeMarksControlProvider(
 
     private fun getComponents(): ArrayList<ActionRow> {
         val rows = arrayListOf<ActionRow>()
-        val row = arrayListOf<ActionComponent>()
+        val row = arrayListOf<ActionRowChildComponent>()
         if (alunaProperties.debug.useTimeMarks) {
             row.add(dangerButton("disable_time_marks", "Disable Time Marks"))
         } else {
             row.add(successButton("enable_time_marks", "Enable Time Marks"))
         }
 
-        val selectRow = arrayListOf<ActionComponent>()
+        val selectRow = arrayListOf<ActionRowChildComponent>()
         val select = StringSelectMenu.create("show_detailed_time_marks")
             .addOption(
                 "Disable",
