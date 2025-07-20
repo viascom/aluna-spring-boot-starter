@@ -39,8 +39,10 @@ public class ShardStartListener(public val eventPublisher: EventPublisher) : Cor
 
     override suspend fun onEvent(event: GenericEvent) {
         if (event is ReadyEvent) {
-            event.getJDA().shardManager ?: throw AssertionError()
+            event.jda.shardManager ?: throw AssertionError()
             latch.countDown()
+
+            eventPublisher.publishDiscordShardReadyEvent(event, event.jda.shardManager!!)
 
             //If main shard (0) is connected, trigger interaction update
             if (!mainShardLoaded && event.jda.shardInfo.shardId == 0) {

@@ -62,6 +62,12 @@ public class AlunaProperties {
     public var command: AlunaCommandProperties = AlunaCommandProperties()
 
     /**
+     * Emoji settings
+     */
+    @NestedConfigurationProperty
+    public var emoji: AlunaEmojiProperties = AlunaEmojiProperties()
+
+    /**
      * Is in production mode
      */
     public var productionMode: Boolean = false

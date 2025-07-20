@@ -48,7 +48,6 @@ internal open class InteractionLoader(
     private val discordBot: DiscordBot,
     private val eventPublisher: EventPublisher,
     private val alunaProperties: AlunaProperties,
-    private val interactionInitializer: InteractionInitializer
 ) : ApplicationListener<DiscordFirstShardConnectedEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -89,8 +88,6 @@ internal open class InteractionLoader(
                         logger.error("Could not add context menu '${filteredCommand.name}' to available commands")
                     }
                 }
-
-                interactionInitializer.initServerSpecificCommands(interactionInitializer.getFilteredCommands(), interactionInitializer.getFilteredContext())
 
                 AlunaDispatchers.InternalScope.launch {
                     eventPublisher.publishDiscordSlashCommandInitializedEvent(arrayListOf(), arrayListOf(), arrayListOf())

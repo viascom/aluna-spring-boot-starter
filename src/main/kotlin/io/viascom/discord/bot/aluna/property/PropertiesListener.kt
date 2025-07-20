@@ -50,6 +50,7 @@ public class PropertiesListener : ApplicationListener<ApplicationContextInitiali
     private val memberCachePolicyPath = "aluna.discord.member-cache-policy"
     private val chunkingFilterPath = "aluna.discord.chunking-filter"
     private val discordShardingPath = "aluna.discord.sharding"
+    private val emojiEnabledPath = "aluna.emoji.enabled"
 
     override fun onApplicationEvent(event: ApplicationContextInitializedEvent) {
 
@@ -89,6 +90,19 @@ public class PropertiesListener : ApplicationListener<ApplicationContextInitiali
                     applicationIdPath,
                     "",
                     "If help-command.invite-button.enabled is true, you need to set set aluna.discord.application-id to generate a link automatically or a valid invite link."
+                )
+            }
+        }
+
+        //If emoji management is enabled and application id is not set
+        if (event.applicationContext.environment.getProperty(emojiEnabledPath, Boolean::class.java) == true) {
+            val applicationId = event.applicationContext.environment.getProperty(applicationIdPath) ?: ""
+            if (applicationId.isEmpty()) {
+                throw AlunaPropertiesException(
+                    "Aluna configuration is missing a needed parameter",
+                    applicationIdPath,
+                    "",
+                    "If emoji management is enabled, you need to set set aluna.discord.application-id to manage emojis."
                 )
             }
         }

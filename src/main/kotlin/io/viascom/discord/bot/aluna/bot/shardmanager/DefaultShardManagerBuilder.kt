@@ -225,7 +225,7 @@ public open class DefaultShardManagerBuilder(
                     }
                 }
 
-                shardManagerBuilder.disableCache(cacheFlags)
+                shardManagerBuilder.enableCache(cacheFlags)
             }
 
             if (alunaProperties.discord.gatewayIntents.isNotEmpty()) {

@@ -24,6 +24,6 @@ package io.viascom.discord.bot.aluna.configuration.condition
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import java.lang.annotation.Inherited
 
-@ConditionalOnProperty(name = ["discord.fast-mutual-guild-cache.enabled"], prefix = "aluna", matchIfMissing = false)
+@ConditionalOnProperty(name = ["discord.fast-mutual-guild-cache.enabled"], prefix = "aluna", havingValue = "true", matchIfMissing = false)
 @Inherited
 public annotation class ConditionalOnFastMutualGuildCacheEnabled

@@ -19,11 +19,19 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.configuration.condition
+package io.viascom.discord.bot.aluna.bot.emoji
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import java.lang.annotation.Inherited
+import io.viascom.discord.bot.aluna.model.ApplicationEmojiData
+import io.viascom.discord.bot.aluna.model.DiscordEmojiMetaData
+import io.viascom.discord.bot.aluna.model.DiscordEmojiMetaDataWithImage
 
-@ConditionalOnProperty(name = ["bot-stats.bot-block.enabled"], prefix = "aluna", havingValue = "true", matchIfMissing = false)
-@Inherited
-public annotation class ConditionalOnBotBlockEnabled()
+public interface EmojiCache {
+
+    public fun getEmojiCache(): MutableMap<String, ApplicationEmojiData>
+    public fun isEmojisLoaded(): Boolean
+
+    public fun getEmojiMetaDataFromStorage(): List<DiscordEmojiMetaData>
+    public fun findEmojiFromStorageById(id: String): DiscordEmojiMetaDataWithImage?
+
+    public fun getFallbackEmoji(): String
+}

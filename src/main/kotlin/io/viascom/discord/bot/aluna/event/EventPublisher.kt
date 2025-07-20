@@ -59,6 +59,15 @@ public class EventPublisher(
     internal val eventThreadPool = AlunaThreadPool.getDynamicThreadPool(0, alunaProperties.thread.eventThreadPool, java.time.Duration.ofMinutes(1), true, "Aluna-Event-Pool-%d")
 
     @JvmSynthetic
+    internal suspend fun publishDiscordShardReadyEvent(jdaEvent: ReadyEvent, shardManager: ShardManager) = withContext(AlunaDispatchers.Internal) {
+        launch {
+            logger.debug("Publishing DiscordShardReadyEvent")
+            val discordShardReadyEvent = DiscordShardReadyEvent(this, jdaEvent, shardManager)
+            applicationEventPublisher.publishEvent(discordShardReadyEvent)
+        }
+    }
+
+    @JvmSynthetic
     internal suspend fun publishDiscordNodeReadyEvent(jdaEvent: ReadyEvent, shardManager: ShardManager) = withContext(AlunaDispatchers.Internal) {
         launch {
             logger.debug("Publishing DiscordNodeReadyEvent")

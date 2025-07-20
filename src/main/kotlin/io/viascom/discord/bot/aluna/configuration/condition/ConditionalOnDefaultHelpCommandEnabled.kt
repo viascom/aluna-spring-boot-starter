@@ -24,6 +24,6 @@ package io.viascom.discord.bot.aluna.configuration.condition
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import java.lang.annotation.Inherited
 
-@ConditionalOnProperty(name = ["command.help-command.enabled"], prefix = "aluna", matchIfMissing = false)
+@ConditionalOnProperty(name = ["command.help-command.enabled"], prefix = "aluna", havingValue = "true", matchIfMissing = false)
 @Inherited
 public annotation class ConditionalOnDefaultHelpCommandEnabled()

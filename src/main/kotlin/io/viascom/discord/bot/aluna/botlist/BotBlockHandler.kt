@@ -23,7 +23,7 @@ package io.viascom.discord.bot.aluna.botlist
 
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnBotBlockEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
-import io.viascom.discord.bot.aluna.event.DiscordAllShardsReadyEvent
+import io.viascom.discord.bot.aluna.event.DiscordNodeReadyEvent
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.botblock.javabotblockapi.core.BotBlockAPI
@@ -39,11 +39,11 @@ import org.springframework.stereotype.Service
 public class BotBlockHandler(
     private val shardManager: ShardManager,
     private val alunaProperties: AlunaProperties,
-) : ApplicationListener<DiscordAllShardsReadyEvent> {
+) : ApplicationListener<DiscordNodeReadyEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onApplicationEvent(event: DiscordAllShardsReadyEvent) {
+    override fun onApplicationEvent(event: DiscordNodeReadyEvent) {
         val delay = alunaProperties.botStats.botBlock.updateDelay.toMinutes().toInt()
 
         val api = BotBlockAPI.Builder()

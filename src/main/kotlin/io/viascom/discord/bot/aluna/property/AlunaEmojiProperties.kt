@@ -19,11 +19,35 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.configuration.condition
+package io.viascom.discord.bot.aluna.property
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import java.lang.annotation.Inherited
+/**
+ * Properties for emoji management
+ */
+public class AlunaEmojiProperties {
 
-@ConditionalOnProperty(name = ["bot-stats.bot-block.enabled"], prefix = "aluna", havingValue = "true", matchIfMissing = false)
-@Inherited
-public annotation class ConditionalOnBotBlockEnabled()
+    /**
+     * Whether to enable emoji management
+     */
+    public var enabled: Boolean = false
+
+    /**
+     * Whether to update emojis on change
+     */
+    public var updateOnChange: Boolean = false
+
+    /**
+     * Whether to automatically upload missing emojis to Discord
+     */
+    public var uploadMissingEmojis: Boolean = false
+
+    /**
+     * Whether to automatically delete emojis from Discord that are not in the local database
+     */
+    public var deleteMissingEmojis: Boolean = false
+
+    /**
+     * Fallback string to use if an emoji is not found
+     */
+    public var fallbackEmoji: String = ""
+}

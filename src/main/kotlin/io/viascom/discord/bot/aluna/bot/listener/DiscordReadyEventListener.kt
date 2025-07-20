@@ -25,7 +25,7 @@ import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.handler.FastMutualGuildsCache
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
-import io.viascom.discord.bot.aluna.event.DiscordAllShardsReadyEvent
+import io.viascom.discord.bot.aluna.event.DiscordNodeReadyEvent
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.getGuildTextChannel
 import kotlinx.coroutines.launch
@@ -52,11 +52,11 @@ internal open class DiscordReadyEventListener(
     private val alunaProperties: AlunaProperties,
     private val taskScheduler: TaskScheduler,
     private val context: ConfigurableApplicationContext
-) : ApplicationListener<DiscordAllShardsReadyEvent> {
+) : ApplicationListener<DiscordNodeReadyEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onApplicationEvent(event: DiscordAllShardsReadyEvent) {
+    override fun onApplicationEvent(event: DiscordNodeReadyEvent) {
         AlunaDispatchers.InternalScope.launch {
             if (alunaProperties.discord.setStatusToOnlineWhenReady) {
                 try {
@@ -84,7 +84,7 @@ internal open class DiscordReadyEventListener(
                     )
 
                     if (channel == null) {
-                        logger.warn("Aluna was not able to send a DiscordAllShardsReadyEvent to the defined channel.")
+                        logger.warn("Aluna was not able to send a DiscordNodeReadyEvent to the defined channel.")
                         return@launch
                     }
 

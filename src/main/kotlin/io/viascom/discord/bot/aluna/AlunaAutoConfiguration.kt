@@ -25,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.DefaultSystemCommandEmojiProvider
 import io.viascom.discord.bot.aluna.bot.command.systemcommand.SystemCommandEmojiProvider
+import io.viascom.discord.bot.aluna.bot.emoji.DefaultEmojiCache
+import io.viascom.discord.bot.aluna.bot.emoji.EmojiCache
 import io.viascom.discord.bot.aluna.bot.handler.*
 import io.viascom.discord.bot.aluna.bot.listener.*
 import io.viascom.discord.bot.aluna.bot.shardmanager.*
@@ -295,10 +297,24 @@ public open class AlunaAutoConfiguration {
     @Bean
     @ConditionalOnJdaEnabled
     @ConditionalOnFastMutualGuildCacheEnabled
-    @ConditionalOnMissingBean(FastMutualGuildsCache::class)
+    @ConditionalOnMissingBean
     public open fun defaultFastMutualGuildsCache(shardManager: ShardManager, alunaProperties: AlunaProperties): FastMutualGuildsCache {
         logger.debug("Enable DefaultFastMutualGuildsCache")
         return DefaultFastMutualGuildsCache(shardManager, alunaProperties)
+    }
+
+    /**
+     * Returns the default implementation of the EmojiCache interface.
+     *
+     * @return the created instance of DefaultEmojiCache
+     */
+    @Bean
+    @ConditionalOnJdaEnabled
+    @ConditionalOnEmojiManagementEnabled
+    @ConditionalOnMissingBean
+    public open fun defaultEmojiCache(alunaProperties: AlunaProperties): EmojiCache {
+        logger.debug("Enable DefaultEmojiCache")
+        return DefaultEmojiCache(alunaProperties)
     }
 
 }

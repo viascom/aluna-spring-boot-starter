@@ -19,7 +19,7 @@ plugins {
 ext {
     major = 1
     minor = 3
-    patch = 5
+    patch = 6
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
@@ -86,6 +86,15 @@ dependencies {
 
     //====== JDA ======
     api "net.dv8tion:JDA:$jdaVersion"
+
+    //====== Ktor ======
+    implementation 'io.ktor:ktor-client-core:3.2.1'
+    implementation 'io.ktor:ktor-client-cio:3.2.1'
+    implementation 'io.ktor:ktor-client-content-negotiation:3.2.1'
+    implementation 'io.ktor:ktor-serialization-jackson:3.2.1'
+
+    //====== OkHttp ======
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 
     //====== Jackson ======
     implementation "org.springframework.boot:spring-boot-starter-json:$jacksonSpringBootVersion"

@@ -90,6 +90,10 @@ public open class DiscordBot(
     public var interactionsInitialized: Boolean = false
         internal set
 
+    @set:JvmSynthetic
+    public var interactionsServerSpecificInitialized: Boolean = false
+        internal set
+
     @get:JvmSynthetic
     internal val discordRepresentations = hashMapOf<InteractionId, Command>()
 
@@ -927,6 +931,7 @@ public val JDA.scope: CoroutineScope get() = (eventManager as? CoroutineEventMan
  */
 public val ShardManager.scope: CoroutineScope get() = (shardCache.firstOrNull()?.eventManager as? CoroutineEventManager) ?: AlunaDispatchers.InternalScope
 
+internal typealias ShardId = Int
 internal typealias InteractionId = String
 internal typealias OptionName = String
 internal typealias CooldownKey = String

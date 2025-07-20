@@ -19,11 +19,17 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.configuration.condition
+package io.viascom.discord.bot.aluna.event
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import java.lang.annotation.Inherited
+import net.dv8tion.jda.api.events.session.ReadyEvent
+import net.dv8tion.jda.api.sharding.ShardManager
+import org.springframework.context.ApplicationEvent
 
-@ConditionalOnProperty(name = ["bot-stats.bot-block.enabled"], prefix = "aluna", havingValue = "true", matchIfMissing = false)
-@Inherited
-public annotation class ConditionalOnBotBlockEnabled()
+/**
+ * Discord shard ready event. This gets triggered, as soon as a shard is ready.
+ *
+ * @property jdaEvent
+ * @property shardManager
+ *
+ */
+public class DiscordShardReadyEvent(source: Any, public val jdaEvent: ReadyEvent, public val shardManager: ShardManager) : ApplicationEvent(source)

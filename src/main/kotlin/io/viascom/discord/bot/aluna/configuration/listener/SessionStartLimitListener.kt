@@ -24,7 +24,7 @@ package io.viascom.discord.bot.aluna.configuration.listener
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
-import io.viascom.discord.bot.aluna.event.DiscordAllShardsReadyEvent
+import io.viascom.discord.bot.aluna.event.DiscordNodeReadyEvent
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,11 +37,11 @@ import java.time.ZoneOffset
 @ConditionalOnJdaEnabled
 public class SessionStartLimitListener(
     private val discordBot: DiscordBot,
-) : ApplicationListener<DiscordAllShardsReadyEvent> {
+) : ApplicationListener<DiscordNodeReadyEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onApplicationEvent(event: DiscordAllShardsReadyEvent) {
+    override fun onApplicationEvent(event: DiscordNodeReadyEvent) {
         AlunaDispatchers.InternalScope.launch {
             //Show session info, if remaining is below 300
             if (discordBot.sessionStartLimits?.remaining != null && discordBot.sessionStartLimits!!.remaining < 300) {

@@ -27,11 +27,8 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty
 
 public class AlunaCommandProperties {
 
-    /**
-     * Enable logic to manage server specific commands
-     * Using this on bigger bots can lead to longer startup times as Aluna has to check all the servers if their commands are available.
-     */
-    public var enableServerSpecificCommands: Boolean = false
+    @NestedConfigurationProperty
+    public var serverSpecific: ServerSpecificInteractionProperties = ServerSpecificInteractionProperties()
 
     /**
      * Print all defined arguments of a used command in the log
@@ -176,6 +173,18 @@ public class HelpCommandProperties {
     public var checkAdditionalConditions: Boolean = false
 }
 
+public class ServerSpecificInteractionProperties {
+    /**
+     * Enable logic to manage server-specific interactions
+     */
+    public var enabled: Boolean = false
+
+    /**
+     * Remove all server-specific interactions that are not available on the server anymore.
+     * Using this on bigger bots can lead to longer startup times as Aluna has to check all the servers if their commands are available.
+     */
+    public var removeOutdatedInteractionsOnStartup: Boolean = false
+}
 
 public class InviteButton {
     public var enabled: Boolean = false

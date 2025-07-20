@@ -19,11 +19,24 @@
  * under the License.
  */
 
-package io.viascom.discord.bot.aluna.configuration.condition
+package io.viascom.discord.bot.aluna.bot.emoji
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import java.lang.annotation.Inherited
+import io.viascom.discord.bot.aluna.model.ApplicationEmojiData
 
-@ConditionalOnProperty(name = ["bot-stats.bot-block.enabled"], prefix = "aluna", havingValue = "true", matchIfMissing = false)
-@Inherited
-public annotation class ConditionalOnBotBlockEnabled()
+/**
+ * Cache for application emojis
+ *
+ * This object stores application emojis and their loading status.
+ * It is used by the ApplicationEmoji interface to retrieve emoji information.
+ */
+public object StaticEmojiCache {
+    /**
+     * Map of emoji name to emoji data
+     */
+    public val emojis: MutableMap<String, ApplicationEmojiData> = hashMapOf()
+
+    /**
+     * Whether emojis have been loaded
+     */
+    public var emojisLoaded: Boolean = false
+}

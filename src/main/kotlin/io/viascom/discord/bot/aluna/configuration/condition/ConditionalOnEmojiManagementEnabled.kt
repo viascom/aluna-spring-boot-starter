@@ -24,6 +24,6 @@ package io.viascom.discord.bot.aluna.configuration.condition
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import java.lang.annotation.Inherited
 
-@ConditionalOnProperty(name = ["bot-stats.bot-block.enabled"], prefix = "aluna", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = ["emoji.enabled"], prefix = "aluna", havingValue = "true", matchIfMissing = false)
 @Inherited
-public annotation class ConditionalOnBotBlockEnabled()
+public annotation class ConditionalOnEmojiManagementEnabled
