@@ -88,10 +88,10 @@ dependencies {
     api "net.dv8tion:JDA:$jdaVersion"
 
     //====== Ktor ======
-    implementation 'io.ktor:ktor-client-core:3.2.1'
-    implementation 'io.ktor:ktor-client-cio:3.2.1'
-    implementation 'io.ktor:ktor-client-content-negotiation:3.2.1'
-    implementation 'io.ktor:ktor-serialization-jackson:3.2.1'
+    implementation 'io.ktor:ktor-client-core:3.3.0'
+    implementation 'io.ktor:ktor-client-cio:3.3.0'
+    implementation 'io.ktor:ktor-client-content-negotiation:3.3.0'
+    implementation 'io.ktor:ktor-serialization-jackson:3.3.0'
 
     //====== OkHttp ======
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
