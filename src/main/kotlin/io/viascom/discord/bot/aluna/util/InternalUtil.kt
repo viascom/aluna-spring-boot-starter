@@ -24,6 +24,7 @@ package io.viascom.discord.bot.aluna.util
 import io.viascom.discord.bot.aluna.bot.DiscordSubCommandElement
 import io.viascom.discord.bot.aluna.bot.InteractionScopedObject
 import io.viascom.discord.bot.aluna.bot.SubCommandElement
+import org.jetbrains.kotlin.metadata.deserialization.returnType
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
@@ -35,8 +36,8 @@ import kotlin.reflect.full.primaryConstructor
 internal object InternalUtil {
 
     @JvmSynthetic
-    internal fun <T : InteractionScopedObject> getSubCommandElements(clazz: T): List<KProperty1<out T, *>> {
-        val fields = arrayListOf<KProperty1<out T, *>>()
+    internal fun <T : InteractionScopedObject> getSubCommandElements(clazz: T): List<KProperty1<T, *>> {
+        val fields = arrayListOf<KProperty1<T, *>>()
 
         //Search in constructor
         (clazz::class.primaryConstructor ?: clazz::class.constructors.first()).parameters.forEach {
@@ -45,7 +46,8 @@ internal object InternalUtil {
             ) {
                 val field = clazz::class.memberProperties.firstOrNull { member -> member.name == it.name }
                     ?: throw IllegalArgumentException("Couldn't access ${it.name} parameter because it is not a property. To fix this, make sure that your parameter is defined as property.")
-                fields.add(field)
+                @Suppress("UNCHECKED_CAST")
+                fields.add(field as KProperty1<T, *>)
             }
         }
 
@@ -53,7 +55,8 @@ internal object InternalUtil {
         clazz::class.memberProperties.filter {
             it.findAnnotation<SubCommandElement>() != null && (it.returnType.classifier as KClass<*>).isSubclassOf(DiscordSubCommandElement::class)
         }.forEach {
-            fields.add(it)
+            @Suppress("UNCHECKED_CAST")
+            fields.add(it as KProperty1<T, *>)
         }
 
         return fields.distinctBy { it.name }

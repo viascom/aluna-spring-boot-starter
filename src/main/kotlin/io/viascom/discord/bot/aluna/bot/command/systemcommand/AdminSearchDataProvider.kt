@@ -34,6 +34,8 @@ import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.components.selections.SelectOption
 import net.dv8tion.jda.api.components.selections.StringSelectMenu
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay
+import net.dv8tion.jda.api.components.tree.ModalComponentTree
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Role
 import net.dv8tion.jda.api.entities.User
@@ -46,7 +48,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
 import net.dv8tion.jda.api.interactions.commands.Command
-import net.dv8tion.jda.api.interactions.modals.Modal
+import net.dv8tion.jda.api.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.springframework.stereotype.Component
 import java.awt.Color
@@ -86,9 +88,12 @@ public class AdminSearchDataProvider(
         val id = event.getTypedOption(command.argsOption, "")!!
 
         if (id.isEmpty()) {
+            val modalComponents = ModalComponentTree.of(
+                TextDisplay.of("Please enter the ID you want to search."),
+                modalTextField("id", "ID to search")
+            )
             val idModal = Modal.create("admin_search_id_modal", "Admin Search")
-                .addTextField("id", "ID to search")
-                .build()
+                .addComponents(modalComponents).build()
             event.replyModal(idModal).queueAndRegisterInteraction(command, arrayListOf(EventRegisterType.MODAL))
             return
         }

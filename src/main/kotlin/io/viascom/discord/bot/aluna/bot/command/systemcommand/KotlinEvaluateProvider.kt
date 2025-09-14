@@ -26,13 +26,15 @@ import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.scriptengine.KotlinScriptV2Service
-import io.viascom.discord.bot.aluna.util.addTextField
 import io.viascom.discord.bot.aluna.util.getValueAsString
+import io.viascom.discord.bot.aluna.util.modalTextField
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import net.dv8tion.jda.api.components.textinput.TextInputStyle
+import net.dv8tion.jda.api.components.tree.ModalComponentTree
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.modals.Modal
+import net.dv8tion.jda.api.modals.Modal
 import net.dv8tion.jda.api.utils.FileUpload
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
@@ -56,9 +58,13 @@ public class KotlinEvaluateProvider(
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
         //Show modal
+        val modalComponents = ModalComponentTree.of(
+            TextDisplay.of("Please enter the Kotlin script you want to evaluate."),
+            modalTextField("script", "Kotlin Script", TextInputStyle.PARAGRAPH)
+        )
 
         val modal: Modal = Modal.create("script", "Evaluate Script")
-            .addTextField("script", "Kotlin Script", TextInputStyle.PARAGRAPH)
+            .addComponents(modalComponents)
             .build()
 
         event.replyModal(modal).queueAndRegisterInteraction(command)

@@ -26,15 +26,16 @@ import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.util.getValueAsString
-import io.viascom.discord.bot.aluna.util.textInput
+import io.viascom.discord.bot.aluna.util.modalTextField
 import net.dv8tion.jda.api.Permission
-import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import net.dv8tion.jda.api.components.textinput.TextInputStyle
+import net.dv8tion.jda.api.components.tree.ModalComponentTree
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.modals.Modal
+import net.dv8tion.jda.api.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -66,11 +67,14 @@ public class DeleteMessagesProvider(
             return
         }
 
+        val components = ModalComponentTree.of(
+            TextDisplay.of("Please enter the channel and message ID you want to delete."),
+            modalTextField("channel_id", "Channel ID (0 = current)", TextInputStyle.SHORT),
+            modalTextField("message_id", "Message ID", TextInputStyle.SHORT)
+        )
+
         event.replyModal(
-            Modal.create("delete_message", "Delete Message")
-                .addComponents(ActionRow.of(textInput("channel_id", "Channel ID (0 = current)", TextInputStyle.SHORT)))
-                .addComponents(ActionRow.of(textInput("message_id", "Message ID", TextInputStyle.SHORT)))
-                .build()
+            Modal.create("delete_message", "Delete Message").addComponents(components).build()
         ).queueAndRegisterInteraction(command)
     }
 

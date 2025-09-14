@@ -28,13 +28,11 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnab
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.Webhook
 import io.viascom.discord.bot.aluna.util.*
-import net.dv8tion.jda.api.components.actionrow.ActionRow
-import net.dv8tion.jda.api.components.textinput.TextInput
 import net.dv8tion.jda.api.components.textinput.TextInputStyle
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.modals.Modal
+import net.dv8tion.jda.api.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.springframework.stereotype.Component
 
@@ -55,14 +53,14 @@ public class SendMessageProvider(
 
     override fun execute(event: SlashCommandInteractionEvent, hook: InteractionHook?, command: SystemCommand) {
         //Show modal
-        val serverId: TextInput = textInput("serverId", "Server ID (0 = current or if DM)", TextInputStyle.SHORT)
-        val channelId: TextInput = textInput("channelId", "Channel ID (0 = current, @<id> = for DM)", TextInputStyle.SHORT)
-        val messageReferenceId: TextInput = textInput("messageReferenceId", "Message Reference ID (Only works on server)", TextInputStyle.SHORT, required = false)
-        val messageId: TextInput = textInput("messageId", "Message ID override (has to be from the bot)", TextInputStyle.SHORT, required = false)
-        val message: TextInput = textInput("message", "Message", TextInputStyle.PARAGRAPH)
+        val serverId = modalTextField("serverId", "Server ID (0 = current or if DM)", TextInputStyle.SHORT)
+        val channelId = modalTextField("channelId", "Channel ID (0 = current, @<id> = for DM)", TextInputStyle.SHORT)
+        val messageReferenceId = modalTextField("messageReferenceId", "Message Reference ID (Only works on server)", TextInputStyle.SHORT, required = false)
+        val messageId = modalTextField("messageId", "Message ID override (has to be from the bot)", TextInputStyle.SHORT, required = false)
+        val message = modalTextField("message", "Message", TextInputStyle.PARAGRAPH)
 
         val modal: Modal = Modal.create("send_message", "Send Message")
-            .addComponents(ActionRow.of(serverId), ActionRow.of(channelId), ActionRow.of(messageReferenceId), ActionRow.of(messageId), ActionRow.of(message))
+            .addComponents(serverId, channelId, messageReferenceId, messageId, message)
             .build()
 
         event.replyModal(modal).queueAndRegisterInteraction(command)

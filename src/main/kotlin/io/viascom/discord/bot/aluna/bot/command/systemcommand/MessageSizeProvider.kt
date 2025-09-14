@@ -27,15 +27,17 @@ import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.Webhook
-import io.viascom.discord.bot.aluna.util.addTextField
 import io.viascom.discord.bot.aluna.util.getTypedOption
 import io.viascom.discord.bot.aluna.util.getValueAsString
+import io.viascom.discord.bot.aluna.util.modalTextField
 import io.viascom.discord.bot.aluna.util.toDiscordEmbed
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay
+import net.dv8tion.jda.api.components.tree.ModalComponentTree
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.modals.Modal
+import net.dv8tion.jda.api.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
 import org.springframework.stereotype.Component
@@ -60,8 +62,12 @@ public class MessageSizeProvider(
         val url = event.getTypedOption(command.argsOption)
 
         if (url == null) {
+            val modalComponents = ModalComponentTree.of(
+                TextDisplay.of("Please enter the message link you want to calculate the size for."),
+                modalTextField("message_url", "Message-Link")
+            )
             val modal = Modal.create("extract_message", "Calculate Message Size")
-                .addTextField("message_url", "Message-Link")
+                .addComponents(modalComponents)
                 .build()
             event.replyModal(modal).queueAndRegisterInteraction(command)
         } else {

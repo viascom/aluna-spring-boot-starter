@@ -35,7 +35,9 @@ import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent
 import net.dv8tion.jda.api.components.selections.EntitySelectMenu
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import net.dv8tion.jda.api.components.textinput.TextInputStyle
+import net.dv8tion.jda.api.components.tree.ModalComponentTree
 import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -43,7 +45,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.modals.Modal
+import net.dv8tion.jda.api.modals.Modal
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder
 import org.springframework.stereotype.Component
 import java.awt.Color
@@ -206,9 +208,13 @@ public class ReleaseNotesProvider(
         when (event.componentId) {
             "set-json" -> {
                 wrongJson = false
+                val modalComponents = ModalComponentTree.of(
+                    TextDisplay.of("Please enter the Release Notes JSON."),
+                    modalTextField("json", "JSON", TextInputStyle.PARAGRAPH, value = objectMapper.writeValueAsString(releaseNotes))
+                )
                 event.replyModal(
                     Modal.create("set-json", "Set Release Notes JSON")
-                        .addTextField("json", "JSON", TextInputStyle.PARAGRAPH, value = objectMapper.writeValueAsString(releaseNotes))
+                        .addComponents(modalComponents)
                         .build()
                 ).queue()
             }

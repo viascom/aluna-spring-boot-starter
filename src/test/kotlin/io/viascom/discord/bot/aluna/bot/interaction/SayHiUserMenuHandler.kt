@@ -24,14 +24,14 @@ package io.viascom.discord.bot.aluna.bot.interaction
 import io.viascom.discord.bot.aluna.bot.DiscordUserContextMenu
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
-import io.viascom.discord.bot.aluna.util.addTextField
 import io.viascom.discord.bot.aluna.util.getValueAsString
+import io.viascom.discord.bot.aluna.util.modalTextField
 import net.dv8tion.jda.api.components.textinput.TextInputStyle
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionContextType
-import net.dv8tion.jda.api.interactions.modals.Modal
+import net.dv8tion.jda.api.modals.Modal
 
 @Interaction
 class SayHiUserMenuHandler : DiscordUserContextMenu(
@@ -49,8 +49,9 @@ class SayHiUserMenuHandler : DiscordUserContextMenu(
         target = event.target
 
         //Create a new modal with one text input
+        val message = modalTextField("message", "Message", TextInputStyle.PARAGRAPH, placeholder = "You can use @user to mention ${target.name}")
         val modal: Modal = Modal.create("say_hi", "Say hi")
-            .addTextField("message", "Message", TextInputStyle.PARAGRAPH, placeholder = "You can use @user to mention ${target.name}")
+            .addComponents(message)
             .build()
 
         //Show the modal to the user and register the interaction to Aluna

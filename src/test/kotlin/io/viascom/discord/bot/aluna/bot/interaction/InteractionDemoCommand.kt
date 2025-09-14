@@ -36,7 +36,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.modals.Modal
+import net.dv8tion.jda.api.modals.Modal
 import java.awt.Color
 
 @Interaction
@@ -89,15 +89,17 @@ class InteractionDemoCommand : DiscordCommand("interaction-demo", "Demo of disco
     override fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         when (event.componentId) {
             "set_text" -> {
+                val textInput = modalTextField("text", "Text", TextInputStyle.PARAGRAPH, value = latestEmbed.build().description, required = false)
                 val modal = Modal.create("set_text", "Set Image")
-                    .addTextField("text", "Text", style = TextInputStyle.PARAGRAPH, value = latestEmbed.build().description, required = false)
+                    .addComponents(textInput)
                     .build()
                 event.replyModal(modal).queue()
             }
 
             "set_image" -> {
+                val textInput = modalTextField("url", "Url", value = latestEmbed.build().image?.url)
                 val modal = Modal.create("set_image", "Set Image")
-                    .addTextField("url", "Url", value = latestEmbed.build().image?.url)
+                    .addComponents(textInput)
                     .build()
                 event.replyModal(modal).queue()
             }

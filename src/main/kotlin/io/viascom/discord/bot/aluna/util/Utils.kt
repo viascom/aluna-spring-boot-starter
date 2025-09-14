@@ -25,9 +25,9 @@
 package io.viascom.discord.bot.aluna.util
 
 import io.viascom.discord.bot.aluna.model.CommandOption
-import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.components.buttons.Button
 import net.dv8tion.jda.api.components.buttons.ButtonStyle
+import net.dv8tion.jda.api.components.label.Label
 import net.dv8tion.jda.api.components.selections.SelectOption
 import net.dv8tion.jda.api.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.components.textinput.TextInput
@@ -48,8 +48,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
-import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.interactions.modals.ModalInteraction
+import net.dv8tion.jda.api.modals.Modal
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction
 import net.dv8tion.jda.api.requests.restaction.interactions.AutoCompleteCallbackAction
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
@@ -442,10 +442,10 @@ public fun EntitySelectInteractionEvent.getRoleSelections(): List<Role?> = this.
  * @param max Maximum input length, default is -1.
  * @param value Initial value for the text field, default is null.
  * @param required Whether the text field is required, default is true.
- * @return The updated [Modal.Builder] with the added text field.
+ * @return a Lable
  */
 @JvmOverloads
-public fun Modal.Builder.addTextField(
+public fun modalTextField(
     id: String,
     label: String,
     style: TextInputStyle = TextInputStyle.SHORT,
@@ -454,7 +454,7 @@ public fun Modal.Builder.addTextField(
     max: Int = -1,
     value: String? = null,
     required: Boolean = true
-): Modal.Builder = this.addComponents(ActionRow.of(textInput(id, label, style, placeholder, min, max, value, required)))
+): Label = Label.of(label, textInput(id, style, placeholder, min, max, value, required))
 
 /**
  * Retrieves the value associated with the given [name] as a [String], or returns the provided [default] value if not found.
@@ -509,7 +509,6 @@ public fun StringSelectMenu.Builder.addOption(
  * Creates a [TextInput] with the given parameters.
  *
  * @param id The unique identifier for the text input.
- * @param label The display name of the text input.
  * @param style The style of the text input, either [TextInputStyle.SHORT] or [TextInputStyle.PARAGRAPH].
  * @param placeholder An optional placeholder text to display when the input is empty.
  * @param min The minimum allowed input length, or -1 for no minimum (default).
@@ -521,7 +520,6 @@ public fun StringSelectMenu.Builder.addOption(
 @JvmOverloads
 public fun textInput(
     id: String,
-    label: String,
     style: TextInputStyle = TextInputStyle.SHORT,
     placeholder: String? = null,
     min: Int = -1,
@@ -529,7 +527,7 @@ public fun textInput(
     value: String? = null,
     required: Boolean = true
 ): TextInput {
-    val builder = TextInput.create(id, label, style)
+    val builder = TextInput.create(id, style)
         .setPlaceholder(placeholder)
 
     if (min != -1) {

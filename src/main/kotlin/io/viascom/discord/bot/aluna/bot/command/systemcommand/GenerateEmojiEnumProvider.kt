@@ -31,12 +31,14 @@ import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.components.actionrow.ActionRowChildComponent
 import net.dv8tion.jda.api.components.selections.StringSelectMenu
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay
+import net.dv8tion.jda.api.components.tree.ModalComponentTree
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.modals.Modal
+import net.dv8tion.jda.api.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.api.utils.FileUpload
 import org.springframework.stereotype.Component
@@ -138,9 +140,13 @@ public class GenerateEmojiEnumProvider(
     override fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         when (event.componentId) {
             "add" -> {
+                val modalComponents = ModalComponentTree.of(
+                    TextDisplay.of("Please enter the server ID you want to add."),
+                    modalTextField("serverId", "Server-ID")
+                )
                 event.replyModal(
                     Modal.create("add_server", "Add Server")
-                        .addTextField("serverId", "Server-ID")
+                        .addComponents(modalComponents)
                         .build()
                 ).queue()
             }

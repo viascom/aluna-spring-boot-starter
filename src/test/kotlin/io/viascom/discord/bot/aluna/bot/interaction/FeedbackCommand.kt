@@ -24,22 +24,23 @@ package io.viascom.discord.bot.aluna.bot.interaction
 import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
-import io.viascom.discord.bot.aluna.util.addTextField
 import io.viascom.discord.bot.aluna.util.getValueAsString
+import io.viascom.discord.bot.aluna.util.modalTextField
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.components.textinput.TextInputStyle
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import net.dv8tion.jda.api.interactions.modals.Modal
+import net.dv8tion.jda.api.modals.Modal
 
 @Interaction
 class FeedbackCommand : DiscordCommand("feedback", "Add some feedback") {
 
     override fun execute(event: SlashCommandInteractionEvent) {
         //Create a new modal with two text inputs, one for the title and one for the content
+        val title = modalTextField("title", "Title", TextInputStyle.SHORT)
+        val text = modalTextField("text", "Text", TextInputStyle.PARAGRAPH)
         val modal: Modal = Modal.create("feedback", "Add your Feedback")
-            .addTextField("title", "Title", TextInputStyle.SHORT)
-            .addTextField("text", "Text", TextInputStyle.PARAGRAPH)
+            .addComponents(title, text)
             .build()
 
         //Show the modal to the user and register the interaction to Aluna

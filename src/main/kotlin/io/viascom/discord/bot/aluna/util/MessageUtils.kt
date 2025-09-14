@@ -314,7 +314,7 @@ public fun MessageEmbed.toJsonString(): String = this.toJson().toString(Charset.
  *
  * @param hexColor A string representing the color in hexadecimal format (e.g., "#FF5733").
  */
-public fun Container.withAccentColor(hexColor: String) = this.withAccentColor(Color.decode(hexColor))
+public fun Container.withAccentColor(hexColor: String): Container = this.withAccentColor(Color.decode(hexColor))
 
 /**
  * Retrieves a message with the given message ID in the user's private channel.

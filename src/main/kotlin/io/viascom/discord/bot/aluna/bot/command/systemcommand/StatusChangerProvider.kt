@@ -31,6 +31,7 @@ import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.components.selections.StringSelectMenu
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import net.dv8tion.jda.api.components.textinput.TextInputStyle
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
@@ -38,7 +39,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.modals.Modal
+import net.dv8tion.jda.api.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.springframework.stereotype.Component
 import java.awt.Color
@@ -101,11 +102,7 @@ public class StatusChangerProvider(
         lastHook.editOriginalEmbeds(lastEmbed.build()).setComponents(getComponents()).queueAndRegisterInteraction(
             lastHook,
             command,
-            arrayListOf(
-                EventRegisterType.BUTTON,
-                EventRegisterType.STRING_SELECT,
-                EventRegisterType.MODAL
-            ),
+            arrayListOf(EventRegisterType.BUTTON, EventRegisterType.STRING_SELECT, EventRegisterType.MODAL),
             true
         )
     }
@@ -131,10 +128,14 @@ public class StatusChangerProvider(
     override fun onButtonInteraction(event: ButtonInteractionEvent): Boolean {
         when (event.componentId) {
             "set_text" -> {
+                val textDisplay = TextDisplay.of("Please enter the activity text.")
+                val input = modalTextField("text", "Text", TextInputStyle.SHORT, min = 0, max = 128, value = activityText)
+                val url = modalTextField("url", "Url", TextInputStyle.SHORT, value = activityUrl)
+
                 val modal = Modal.create("set_text", "Set activity text")
-                    .addTextField("text", "Text", TextInputStyle.SHORT, min = 0, max = 128, value = activityText)
+                    .addComponents(textDisplay, input)
                 if ("streaming" == activityId) {
-                    modal.addTextField("url", "Url", TextInputStyle.SHORT, value = activityUrl)
+                    modal.addComponents(url)
                 }
                 event.replyModal(modal.build()).queue()
             }

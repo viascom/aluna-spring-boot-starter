@@ -25,105 +25,51 @@ import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.model.EventRegisterType
-import io.viascom.discord.bot.aluna.util.addTextField
-import io.viascom.discord.bot.aluna.util.getChannelSelection
-import io.viascom.discord.bot.aluna.util.getUserSelection
-import io.viascom.discord.bot.aluna.util.removeComponents
-import net.dv8tion.jda.api.EmbedBuilder
-import net.dv8tion.jda.api.components.actionrow.ActionRow
+import io.viascom.discord.bot.aluna.util.getValueAsString
+import io.viascom.discord.bot.aluna.util.modalTextField
+import net.dv8tion.jda.api.components.label.Label
 import net.dv8tion.jda.api.components.selections.EntitySelectMenu
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import net.dv8tion.jda.api.components.textinput.TextInputStyle
+import net.dv8tion.jda.api.components.tree.ModalComponentTree
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.ChannelType
-import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildChannel
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent
-import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.modals.Modal
-import java.awt.Color
+import net.dv8tion.jda.api.modals.Modal
 
 @Interaction
 class SendMessageToUserCommand : DiscordCommand("send-message-to-user", "Send a message to a user") {
-
-    //This variable holds the latest embed and because Aluna will handle the spring scope, we always get the same instance if an interaction is used.
-    private lateinit var latestEmbed: EmbedBuilder
-
-    //This variable holds the latest interaction hook, so that we can for example remove the action rows after 14 min in the onDestroy method. 14 min is the default duration, Aluna will keep this bean and connected interaction waiters active.
-    private lateinit var latestHook: InteractionHook
 
     private lateinit var selectedUser: User
     private lateinit var selectedChannel: StandardGuildMessageChannel
 
     override fun execute(event: SlashCommandInteractionEvent) {
-        latestEmbed = EmbedBuilder()
-            .setTitle("Send message to user")
-            .setColor(Color.GREEN)
-            .setDescription("Select a user")
-
         val userSelect = EntitySelectMenu.create("user_select", EntitySelectMenu.SelectTarget.USER).build()
-
-        event.replyEmbeds(latestEmbed.build())
-            .setEphemeral(true)
-            .addComponents(ActionRow.of(userSelect))
-            .queueAndRegisterInteraction(this, arrayListOf(EventRegisterType.ENTITY_SELECT)) {
-                latestHook = it
-            }
-    }
-
-    private fun showChannelSelect() {
-        latestEmbed = EmbedBuilder()
-            .setTitle("Send message to user")
-            .setColor(Color.GREEN)
-            .setDescription("Select a channel")
-
         val channelSelect = EntitySelectMenu.create("channel_select", EntitySelectMenu.SelectTarget.CHANNEL).setChannelTypes(ChannelType.TEXT).build()
 
-        latestHook.editOriginalEmbeds(latestEmbed.build())
-            .setComponents(ActionRow.of(channelSelect))
-            .queueAndRegisterInteraction(latestHook, this, arrayListOf(EventRegisterType.ENTITY_SELECT))
-    }
+        val modalComponents = ModalComponentTree.of(
+            TextDisplay.of("Send message to user."),
+            Label.of("Please select a user.", userSelect),
+            Label.of("Please select a channel.", channelSelect),
+            TextDisplay.of("Please enter the message you want to send."),
+            modalTextField("message", "Message", TextInputStyle.PARAGRAPH)
+        )
 
-    private fun showMessageModal(event: EntitySelectInteractionEvent) {
         val modal = Modal.create("message", "Message")
-        modal.addTextField("message", "Message", TextInputStyle.PARAGRAPH)
-        event.replyModal(modal.build()).queueAndRegisterInteraction(this, arrayListOf(EventRegisterType.MODAL))
-    }
+            .addComponents(modalComponents).build()
 
-    override fun onEntitySelectInteraction(event: EntitySelectInteractionEvent): Boolean {
-        when (event.componentId) {
-            "user_select" -> {
-                event.deferEdit().queue()
-                selectedUser = event.getUserSelection()!!
-                showChannelSelect()
-            }
 
-            "channel_select" -> {
-                val channel: StandardGuildChannel = event.getChannelSelection()!!
-                if (channel.type == ChannelType.TEXT) {
-                    selectedChannel = event.getChannelSelection()!!
-                    showMessageModal(event)
-                } else {
-                    event.deferEdit().queue()
-                    showChannelSelect()
-                }
-            }
-        }
-
-        return true
-    }
-
-    override fun onEntitySelectInteractionTimeout() {
-        latestHook.editOriginalEmbeds(latestEmbed.build()).removeComponents().queue()
+        event.replyModal(modal).queueAndRegisterInteraction(this, arrayListOf(EventRegisterType.MODAL))
     }
 
     override fun onModalInteraction(event: ModalInteractionEvent): Boolean {
         event.deferEdit().queue()
-        selectedChannel.sendMessage(selectedUser.asMention + " " + event.values.first().asString).queue()
-
-        //We can delete the ephemeral message as it is no longer needed
-        latestHook.deleteOriginal().queue()
+        selectedUser = event.getValue("user_select")!!.asMentions.users.first()
+        selectedChannel = event.getValue("channel_select")!!.asMentions.channels.first() as StandardGuildMessageChannel
+        val message = event.getValueAsString("message")!!
+        selectedChannel.sendMessage(selectedUser.asMention + " " + message).queue()
         return true
     }
 }

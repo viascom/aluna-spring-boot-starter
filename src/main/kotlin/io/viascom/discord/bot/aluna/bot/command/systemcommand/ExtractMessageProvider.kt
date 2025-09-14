@@ -28,11 +28,13 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnab
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.model.Webhook
 import io.viascom.discord.bot.aluna.util.*
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay
+import net.dv8tion.jda.api.components.tree.ModalComponentTree
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionHook
-import net.dv8tion.jda.api.interactions.modals.Modal
+import net.dv8tion.jda.api.modals.Modal
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.api.utils.FileUpload
 import net.dv8tion.jda.api.utils.messages.MessageEditData
@@ -57,8 +59,12 @@ public class ExtractMessageProvider(
         val elements = event.getTypedOption(command.argsOption)?.split("/")
 
         if (elements == null) {
+            val modalComponents = ModalComponentTree.of(
+                TextDisplay.of("Please enter the message link you want to extract."),
+                modalTextField("message_url", "Message-Link")
+            )
             val modal = Modal.create("extract_message", "Get Message as JSON")
-                .addTextField("message_url", "Message-Link")
+                .addComponents(modalComponents)
                 .build()
             event.replyModal(modal).queueAndRegisterInteraction(command)
         } else {
