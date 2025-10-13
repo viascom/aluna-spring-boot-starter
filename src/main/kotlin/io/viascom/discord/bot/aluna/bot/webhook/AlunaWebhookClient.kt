@@ -21,6 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.webhook
 
+import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import net.dv8tion.jda.api.entities.IncomingWebhookClient
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.WebhookClient
@@ -28,6 +29,7 @@ import net.dv8tion.jda.api.sharding.ShardManager
 import org.springframework.stereotype.Service
 
 @Service
+@ConditionalOnJdaEnabled
 public class AlunaWebhookClient(private val shardManager: ShardManager) {
 
     /**

@@ -25,19 +25,14 @@ import io.viascom.discord.bot.aluna.bot.DiscordCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.model.EventRegisterType
+import io.viascom.discord.bot.aluna.util.ModalCreate
 import io.viascom.discord.bot.aluna.util.getValueAsString
-import io.viascom.discord.bot.aluna.util.modalTextField
-import net.dv8tion.jda.api.components.label.Label
+import io.viascom.discord.bot.aluna.util.textDisplay
 import net.dv8tion.jda.api.components.selections.EntitySelectMenu
-import net.dv8tion.jda.api.components.textdisplay.TextDisplay
-import net.dv8tion.jda.api.components.textinput.TextInputStyle
-import net.dv8tion.jda.api.components.tree.ModalComponentTree
 import net.dv8tion.jda.api.entities.User
-import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import net.dv8tion.jda.api.modals.Modal
 
 @Interaction
 class SendMessageToUserCommand : DiscordCommand("send-message-to-user", "Send a message to a user") {
@@ -46,20 +41,12 @@ class SendMessageToUserCommand : DiscordCommand("send-message-to-user", "Send a 
     private lateinit var selectedChannel: StandardGuildMessageChannel
 
     override fun execute(event: SlashCommandInteractionEvent) {
-        val userSelect = EntitySelectMenu.create("user_select", EntitySelectMenu.SelectTarget.USER).build()
-        val channelSelect = EntitySelectMenu.create("channel_select", EntitySelectMenu.SelectTarget.CHANNEL).setChannelTypes(ChannelType.TEXT).build()
-
-        val modalComponents = ModalComponentTree.of(
-            TextDisplay.of("Send message to user."),
-            Label.of("Please select a user.", userSelect),
-            Label.of("Please select a channel.", channelSelect),
-            TextDisplay.of("Please enter the message you want to send."),
-            modalTextField("message", "Message", TextInputStyle.PARAGRAPH)
-        )
-
-        val modal = Modal.create("message", "Message")
-            .addComponents(modalComponents).build()
-
+        val modal = ModalCreate("message", "Message") {
+            textDisplay("Send message to user.")
+            entitySelect("user_select", EntitySelectMenu.SelectTarget.USER, label = "Please select a user.")
+            channelSelect("channel_select", label = "Please select a channel.")
+            paragraphField("message", "Message")
+        }
 
         event.replyModal(modal).queueAndRegisterInteraction(this, arrayListOf(EventRegisterType.MODAL))
     }
