@@ -97,8 +97,8 @@ dependencies {
 
     //====== Jackson ======
     implementation "org.springframework.boot:spring-boot-starter-json:$jacksonSpringBootVersion"
-    implementation "com.fasterxml.jackson.core:jackson-core:2.20.0"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.20.0"
+    implementation "com.fasterxml.jackson.core:jackson-core:2.20.1"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.20.1"
     implementation "com.fasterxml.jackson.core:jackson-annotations:2.20"
 
     //====== Gson ======
