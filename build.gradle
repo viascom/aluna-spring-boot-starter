@@ -105,7 +105,7 @@ dependencies {
     compileOnly "com.google.code.gson:gson:$gsonVersion"
 
     //====== Caching ======
-    implementation "com.github.ben-manes.caffeine:caffeine:3.2.2"
+    implementation "com.github.ben-manes.caffeine:caffeine:3.2.3"
 
     //====== Emoji Helper ======
     api "net.fellbaum:jemoji:$jemojiVersion"
