@@ -27,7 +27,7 @@ import java.time.LocalDateTime
 
 public class GatewayResponse(
     public val shards: Int,
-    @JsonProperty("session_start_limit")
+    @param:JsonProperty("session_start_limit")
     public val sessionStartLimit: SessionStartLimit
 ) {
     public class SessionStartLimit(
@@ -38,7 +38,7 @@ public class GatewayResponse(
         @get:JsonIgnore
         public var resetAfter: Int,
 
-        @JsonProperty("max_concurrency")
+        @param:JsonProperty("max_concurrency")
         public val maxConcurrency: Int
     ) {
 

@@ -81,7 +81,7 @@ public class AdminSearchOverviewPage(
             )
         }
         embedBuilder.addField(
-            "Is Bot", (if (discordUser.isBot) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted, true
+            "Is App", (if (discordUser.isBot) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted, true
         ).addField("Flags", discordUser.flags.joinToString(", ") { it.getName() }, true)
             .addField("Time Created", discordUser.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true).addField(
                 "On Support Server",
@@ -108,7 +108,8 @@ public class AdminSearchOverviewPage(
     override fun onServerRequest(discordServer: Guild, embedBuilder: EmbedBuilder) {
         embedBuilder.addField("ID", discordServer.id, true)
         embedBuilder.addField("Name", discordServer.name, true)
-        embedBuilder.addField("Owner",
+        embedBuilder.addField(
+            "Owner",
             "${discordServer.owner?.asMention} | ${discordServer.owner?.effectiveName} (`${discordServer.ownerId}`)\n" + "Owner on Support Server: " + (if (discordServer.owner?.user?.mutualGuilds?.any { it.id == alunaProperties.discord.supportServer } == true) systemCommandEmojiProvider.tickEmoji().formatted + " Yes" else systemCommandEmojiProvider.crossEmoji().formatted + " No"),
             false)
         embedBuilder.addField("Locale", discordServer.locale.languageName, true)
@@ -122,7 +123,7 @@ public class AdminSearchOverviewPage(
         }
         embedBuilder.addField("Time Created", discordServer.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
         embedBuilder.addField(
-            "Bot join-time", discordServer.selfMember.timeJoined.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true
+            "App join-time", discordServer.selfMember.timeJoined.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true
         )
         embedBuilder.addField("In-Server-Name", discordServer.selfMember.effectiveName, true)
         embedBuilder.addField("Features", discordServer.features.joinToString(" | "), false)
@@ -130,25 +131,25 @@ public class AdminSearchOverviewPage(
         if (alunaProperties.discord.gatewayIntents.any { it == GatewayIntent.GUILD_MEMBERS }) {
             val otherBots = discordServer.loadMembers().get().filter { it.user.isBot }.joinToString(", ") { it.user.name }
             if (otherBots.length > MessageEmbed.VALUE_MAX_LENGTH) {
-                embedBuilder.addField("Other Bots", "Server has ${otherBots.length} bots", false)
+                embedBuilder.addField("Other Apps", "Server has ${otherBots.length} apps", false)
             } else {
-                embedBuilder.addField("Other Bots", otherBots, false)
+                embedBuilder.addField("Other Apps", otherBots, false)
             }
         }
     }
 
     override fun onRoleRequest(discordRole: Role, embedBuilder: EmbedBuilder) {
-        embedBuilder.addField("ID", discordRole.id, true)
+        embedBuilder.addField("ID", "`${discordRole.id}`", true)
         embedBuilder.addField("Name", discordRole.name, true)
         embedBuilder.addField("Time Created", discordRole.timeCreated.toDiscordTimestamp(TimestampFormat.SHORT_DATE_TIME), true)
         embedBuilder.addField("Server", "${discordRole.guild.name} (`${discordRole.guild.id}`)", false)
         embedBuilder.addField(
-            "Is below Bot",
+            "Is below App",
             if (discordRole.positionRaw < discordRole.guild.selfMember.roles.maxByOrNull { it.positionRaw }!!.positionRaw) systemCommandEmojiProvider.tickEmoji().formatted else systemCommandEmojiProvider.crossEmoji().formatted,
             true
         )
         embedBuilder.addField(
-            "Bot can interact",
+            "App can interact",
             if (discordRole.guild.selfMember.roles.maxByOrNull { it.positionRaw }!!
                     .canInteract(discordRole)
             ) systemCommandEmojiProvider.tickEmoji().formatted else systemCommandEmojiProvider.crossEmoji().formatted,
@@ -171,10 +172,10 @@ public class AdminSearchOverviewPage(
             true
         )
         embedBuilder.addField(
-            "Is from a Bot", (if (discordRole.tags.isBot) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted, true
+            "Is from a App", (if (discordRole.tags.isBot) systemCommandEmojiProvider.tickEmoji() else systemCommandEmojiProvider.crossEmoji()).formatted, true
         )
         discordRole.tags.botId?.let {
-            embedBuilder.addField("Assigned Bot", "${shardManager.getUserById(it)?.name ?: "n/a"} (`${it}`)", true)
+            embedBuilder.addField("Assigned App", "${shardManager.getUserById(it)?.name ?: "n/a"} (`${it}`)", true)
             embedBuilder.addBlankField(true)
         }
         embedBuilder.addField(
@@ -191,7 +192,19 @@ public class AdminSearchOverviewPage(
             )
             embedBuilder.addBlankField(true)
         }
-        embedBuilder.addField("Color", (if (discordRole.color != null) "`${discordRole.color!!.toHex()}`" else "n/a"), true)
+
+        val primaryHex = (if (discordRole.colors.primary != null) "`${discordRole.colors.primary!!.toHex()}`" else "n/a")
+        val secondaryHex = (if (discordRole.colors.secondary != null) "`${discordRole.colors.secondary!!.toHex()}`" else "n/a")
+        val tertiaryHex = (if (discordRole.colors.tertiary != null) "`${discordRole.colors.tertiary!!.toHex()}`" else "n/a")
+        val type = when {
+            discordRole.colors.isDefault -> "Default"
+            discordRole.colors.isSolid -> "Solid"
+            discordRole.colors.isGradient -> "Gradient"
+            discordRole.colors.isHolographic -> "Holographic"
+            else -> "Unknown"
+        }
+        embedBuilder.addField("Color", "Type: $type\nPrimary: $primaryHex\nSecondary: $secondaryHex\nTertiary: $tertiaryHex", true)
+
         val memberCount = discordRole.guild.members.count { it.roles.contains(discordRole) }
         embedBuilder.addField(
             "Member-Count", memberCount.toString() + " (${(memberCount.toDouble() / discordRole.guild.members.size * 100).round(2)}%)", false
@@ -247,7 +260,8 @@ public class AdminSearchOverviewPage(
                     true
                 )
                 if (textChannel.threadChannels.isNotEmpty()) {
-                    embedBuilder.addField("Threads (10 newest)",
+                    embedBuilder.addField(
+                        "Threads (10 newest)",
                         textChannel.threadChannels.sortedByDescending { it.timeCreated }.take(10).joinToString("\n") { "└ ${it.name} (`${it.id}`)" },
                         false
                     )

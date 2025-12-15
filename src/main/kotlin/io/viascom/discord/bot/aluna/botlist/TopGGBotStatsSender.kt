@@ -76,9 +76,9 @@ public class TopGGBotStatsSender(
     }
 
     public class TopGGData(
-        @JsonProperty("server_count")
+        @param:JsonProperty("server_count")
         public val serverCount: List<Int>,
-        @JsonProperty("shard_count")
+        @param:JsonProperty("shard_count")
         public val shardCount: Int
     )
 }

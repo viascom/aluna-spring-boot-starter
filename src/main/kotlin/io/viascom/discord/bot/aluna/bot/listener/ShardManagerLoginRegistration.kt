@@ -22,28 +22,42 @@
 package io.viascom.discord.bot.aluna.bot.listener
 
 import io.viascom.discord.bot.aluna.AlunaDispatchers
-import io.viascom.discord.bot.aluna.bot.shardmanager.BotShutdownHook
-import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnAlunaShutdownHook
+import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import io.viascom.discord.bot.aluna.property.AlunaProperties
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.ApplicationListener
+import org.springframework.context.SmartLifecycle
 import org.springframework.stereotype.Service
 
 @Service
 @ConditionalOnJdaEnabled
-@ConditionalOnAlunaShutdownHook
-public class ShutdownHookRegistration(private val botShutdownHook: BotShutdownHook) : ApplicationListener<ApplicationReadyEvent> {
+public class ShardManagerLoginRegistration(
+    private val discordBot: DiscordBot,
+    private val alunaProperties: AlunaProperties
+) : SmartLifecycle {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onApplicationEvent(event: ApplicationReadyEvent) {
-        AlunaDispatchers.InternalScope.launch {
-            logger.debug("Register shutdown hook: ${botShutdownHook::class.qualifiedName}")
-            Runtime.getRuntime().addShutdownHook(botShutdownHook)
+    private var running = false
+
+    override fun start() {
+        if (alunaProperties.discord.autoLoginOnStartup) {
+            AlunaDispatchers.InternalScope.launch {
+                logger.debug("AutoLoginOnStartup is enabled. Awaiting for shards to connect.")
+                discordBot.login()
+            }
+        } else {
+            logger.debug("AutoLoginOnStartup is disabled. Not awaiting for shards to connect.")
         }
+        running = true
     }
+
+    override fun isRunning(): Boolean = running
+    override fun stop() {}
+    override fun isAutoStartup(): Boolean = true
+
+    override fun getPhase(): Int = 0
 
 }

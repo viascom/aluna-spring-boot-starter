@@ -115,14 +115,6 @@ public open class AlunaAutoConfiguration {
         discordBot.shardManager = shardManagerBuilder.build()
         discordBot.latchCount = shardManagerBuilder.getLatchCount()
 
-        if (alunaProperties.discord.autoLoginOnStartup) {
-            AlunaDispatchers.InternalScope.launch {
-                discordBot.login()
-            }
-        } else {
-            logger.debug("AutoLoginOnStartup is disabled. Not awaiting for shards to connect.")
-        }
-
         return discordBot.shardManager!!
     }
 

@@ -28,18 +28,18 @@ import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemC
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.boot.context.event.ApplicationStartedEvent
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 
 @Service
 @ConditionalOnJdaEnabled
 @ConditionalOnSystemCommandEnabled
-public class SystemCommandFeatureOverviewPrinter : ApplicationListener<ApplicationStartedEvent> {
+public class SystemCommandFeatureOverviewPrinter : ApplicationListener<ApplicationReadyEvent> {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onApplicationEvent(event: ApplicationStartedEvent) {
+    override fun onApplicationEvent(event: ApplicationReadyEvent) {
         AlunaDispatchers.InternalScope.launch {
             val systemCommand = event.applicationContext.environment.getProperty("aluna.command.system-command.enabled", Boolean::class.java) ?: false
             //Print enabled /system-command features

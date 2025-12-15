@@ -21,6 +21,7 @@
 
 package io.viascom.discord.bot.aluna.util
 
+import io.viascom.discord.bot.aluna.util.EmojiUtil.resolveJDAEmoji
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.entities.emoji.UnicodeEmoji
 import net.fellbaum.jemoji.EmojiManager
@@ -89,7 +90,21 @@ public object EmojiUtil {
             }
             return null
         }
-        return emoji.unicodeText
+        return emoji.emoji
+    }
+
+    /**
+     * Convert all discord style emojis like :joy: (but avoid matching the alias part of custom emojis)
+     * in the input string to their Unicode representation.
+     *
+     * @param input Input string
+     * @return Unicode string
+     */
+    public fun convertToUnicode(input: String): String {
+        val aliasPattern = Regex("(?<!<):[A-Za-z0-9_]+:(?!\\d+>)")
+        return aliasPattern.replace(input) { matchResult ->
+            resolveEmojiOrNull(matchResult.value) ?: matchResult.value
+        }
     }
 
     private fun removeColonFromAlias(alias: String): String {

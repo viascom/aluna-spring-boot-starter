@@ -100,7 +100,7 @@ public data class Webhook(
 
     @JsonInclude(Include.NON_NULL)
     public data class Author(
-        @JsonProperty("icon_url")
+        @param:JsonProperty("icon_url")
         @SerializedName("icon_url")
         var iconUrl: String?,
         var name: String?,
@@ -119,7 +119,7 @@ public data class Webhook(
 
     @JsonInclude(Include.NON_NULL)
     public data class Footer(
-        @JsonProperty("icon_url")
+        @param:JsonProperty("icon_url")
         @SerializedName("icon_url")
         var iconUrl: String?,
         var text: String

@@ -22,6 +22,7 @@
 package io.viascom.discord.bot.aluna.bot.webhook
 
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
+import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.IncomingWebhookClient
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.WebhookClient
@@ -40,6 +41,17 @@ public class AlunaWebhookClient(private val shardManager: ShardManager) {
      */
     public fun connect(url: String): IncomingWebhookClient {
         return WebhookClient<Message>.createClient(shardManager.shards.first(), url)
+    }
+
+    /**
+     * Connect to a webhook
+     *
+     * @param url Webhook url
+     * @param jda JDA instance
+     * @return Webhook client
+     */
+    public fun connect(url: String, jda: JDA): IncomingWebhookClient {
+        return WebhookClient<Message>.createClient(jda, url)
     }
 
 }

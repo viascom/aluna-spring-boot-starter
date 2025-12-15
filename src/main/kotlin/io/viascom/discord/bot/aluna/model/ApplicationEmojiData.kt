@@ -40,9 +40,9 @@ import java.time.OffsetDateTime
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public data class ApplicationEmojiData @JsonCreator constructor(
-    @JsonProperty("id") val id: String,
-    @JsonProperty("name") val name: String,
-    @JsonProperty("animated") val animated: Boolean
+    @param:JsonProperty("id") val id: String,
+    @param:JsonProperty("name") val name: String,
+    @param:JsonProperty("animated") val animated: Boolean
 ) {
     /**
      * Get the time when the emoji was created
@@ -105,5 +105,5 @@ public data class ApplicationEmojiData @JsonCreator constructor(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public data class ApplicationEmojiDataList @JsonCreator constructor(
-    @JsonProperty("items") val items: ArrayList<ApplicationEmojiData> = ArrayList()
+    @param:JsonProperty("items") val items: ArrayList<ApplicationEmojiData> = ArrayList()
 )

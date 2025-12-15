@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 @Interaction
 class AnimalsCommand(
-    @SubCommandElement
+    @param:SubCommandElement
     private val forestSubCommandGroup: ForestSubCommandGroup,
 ) : DiscordCommand("animal", "Show images of animals", handleSubCommands = true) {
 
