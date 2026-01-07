@@ -705,7 +705,9 @@ public abstract class DiscordCommandHandler(
         //Check needed user permissions for this command
         val missingUserPermissions = async(AlunaDispatchers.Detached) {
             MDC.setContextMap(mdcMap)
-            discordInteractionConditions.checkForNeededUserPermissions(this@DiscordCommandHandler, userPermissions, event)
+            val missingPermissions = discordInteractionConditions.checkForNeededUserPermissions(this@DiscordCommandHandler, userPermissions, event)
+            mdcMap.putAll(MDC.getCopyOfContextMap())
+            missingPermissions
         }.await()
         if (missingUserPermissions.hasMissingPermissions) {
             onMissingUserPermission(event, missingUserPermissions)
@@ -717,7 +719,9 @@ public abstract class DiscordCommandHandler(
         //Check needed bot permissions for this command
         val missingBotPermissions = async(AlunaDispatchers.Detached) {
             MDC.setContextMap(mdcMap)
-            discordInteractionConditions.checkForNeededBotPermissions(this@DiscordCommandHandler, botPermissions, event)
+            val missingPermissions = discordInteractionConditions.checkForNeededBotPermissions(this@DiscordCommandHandler, botPermissions, event)
+            mdcMap.putAll(MDC.getCopyOfContextMap())
+            missingPermissions
         }.await()
         if (missingBotPermissions.hasMissingPermissions) {
             onMissingBotPermission(event, missingBotPermissions)
@@ -730,6 +734,7 @@ public abstract class DiscordCommandHandler(
             async(AlunaDispatchers.Detached) {
                 MDC.setContextMap(mdcMap)
                 discordInteractionLoadAdditionalData.loadDataBeforeAdditionalRequirements(this@DiscordCommandHandler, event)
+                mdcMap.putAll(MDC.getCopyOfContextMap())
             }.await()
             timeMarks?.add(LOAD_DATA_BEFORE_ADDITIONAL_REQUIREMENTS at markNow())
         }
@@ -738,7 +743,9 @@ public abstract class DiscordCommandHandler(
         if (shouldCheckAdditionalConditions(name, alunaProperties)) {
             val additionalRequirements = async(AlunaDispatchers.Detached) {
                 MDC.setContextMap(mdcMap)
-                discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this@DiscordCommandHandler, event)
+                val requirements = discordInteractionAdditionalConditions.checkForAdditionalCommandRequirements(this@DiscordCommandHandler, event)
+                mdcMap.putAll(MDC.getCopyOfContextMap())
+                requirements
             }.await()
             timeMarks?.add(CHECK_FOR_ADDITIONAL_COMMAND_REQUIREMENTS at markNow())
             if (additionalRequirements.failed) {
@@ -765,13 +772,16 @@ public abstract class DiscordCommandHandler(
             async(AlunaDispatchers.Detached) {
                 MDC.setContextMap(mdcMap)
                 discordInteractionLoadAdditionalData.loadData(this@DiscordCommandHandler, event)
+                mdcMap.putAll(MDC.getCopyOfContextMap())
             }.await()
             timeMarks?.add(LOAD_ADDITIONAL_DATA at markNow())
         }
 
         //Run onCommandExecution in async to ensure it is not blocking the execution of the command itself
         launch(AlunaDispatchers.Detached) {
+            MDC.setContextMap(mdcMap)
             discordInteractionMetaDataHandler.onCommandExecution(this@DiscordCommandHandler, event)
+            mdcMap.putAll(MDC.getCopyOfContextMap())
         }
         launch {
             discordBot.commandHistory.emit(CommandUsage(event.fullCommandName, uniqueId, this@DiscordCommandHandler::class.java, author.id, guild?.id))
@@ -802,10 +812,16 @@ public abstract class DiscordCommandHandler(
         } catch (e: Exception) {
             endedWithException = true
             try {
-                async(AlunaDispatchers.Detached) { onExecutionException(event, e) }.await()
+                async(AlunaDispatchers.Detached) {
+                    MDC.setContextMap(mdcMap)
+                    onExecutionException(event, e)
+                }.await()
                 timeMarks?.add(ON_EXECUTION_EXCEPTION at markNow())
             } catch (exceptionError: Exception) {
-                async(AlunaDispatchers.Detached) { discordInteractionMetaDataHandler.onGenericExecutionException(this@DiscordCommandHandler, e, exceptionError, event) }.await()
+                async(AlunaDispatchers.Detached) {
+                    MDC.setContextMap(mdcMap)
+                    discordInteractionMetaDataHandler.onGenericExecutionException(this@DiscordCommandHandler, e, exceptionError, event)
+                }.await()
                 timeMarks?.add(ON_EXECUTION_EXCEPTION at markNow())
             }
         } finally {

@@ -23,6 +23,7 @@
 
 package io.viascom.discord.bot.aluna.util
 
+import net.dv8tion.jda.api.components.MessageTopLevelComponent
 import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.components.container.Container
 import net.dv8tion.jda.api.components.container.ContainerChildComponent
@@ -58,7 +59,7 @@ public fun MessageCreate(block: MessageCreateDsl.() -> Unit): MessageCreateData 
 
 @MessageDslMarker
 public class MessageCreateDsl internal constructor() {
-    private val containers: MutableList<Container> = mutableListOf()
+    private val components: MutableList<MessageTopLevelComponent> = mutableListOf()
     private var content: String? = null
     private val embeds: MutableList<MessageEmbed> = mutableListOf()
 
@@ -77,7 +78,7 @@ public class MessageCreateDsl internal constructor() {
             colorHex != null -> c.withAccentColor(colorHex)
             else -> c
         }
-        containers += c
+        components += c
     }
 
     /**
@@ -101,15 +102,80 @@ public class MessageCreateDsl internal constructor() {
         this.embeds += EmbedCreate(block)
     }
 
+
+    /**
+     * Adds a single image as a media gallery with one item.
+     */
+    @JvmOverloads
+    public fun image(url: String, spoiler: Boolean = false, description: String? = null) {
+        var item = MediaGalleryItem.fromUrl(url)
+        if (description != null) item = item.withDescription(description)
+        if (spoiler) item = item.withSpoiler(true)
+        components += MediaGallery.of(item)
+    }
+
+    /**
+     * Adds a file display component from a [FileUpload].
+     */
+    @JvmOverloads
+    public fun fileDisplay(file: FileUpload, spoiler: Boolean = false) {
+        var fd = FileDisplay.fromFile(file)
+        if (spoiler) fd = fd.withSpoiler(true)
+        components += fd
+    }
+
+    /**
+     * Builds a media gallery with multiple items.
+     */
+    public fun mediaGallery(block: MediaGalleryBlock.() -> Unit) {
+        val b = MediaGalleryBlock().apply(block)
+        if (b.items.isNotEmpty()) {
+            components += MediaGallery.of(b.items)
+        }
+    }
+
+    /**
+     * Adds a visual separator with configurable spacing. If [divider] is true, a visible divider is used, otherwise an invisible spacer.
+     */
+    @JvmOverloads
+    public fun separator(spacing: Separator.Spacing = Separator.Spacing.SMALL, divider: Boolean = false) {
+        val sep = if (divider) Separator.createDivider(spacing) else Separator.createInvisible(spacing)
+        components += sep
+    }
+
+    /**
+     * Adds a small visual separator. If [divider] is true, a stronger divider is used.
+     */
+    @JvmOverloads
+    public fun smallSeparator(divider: Boolean = false) {
+        separator(Separator.Spacing.SMALL, divider)
+    }
+
+
+    /**
+     * Adds a large visual separator. If [divider] is true, a stronger divider is used.
+     */
+    @JvmOverloads
+    public fun largeSeparator(divider: Boolean = false) {
+        separator(Separator.Spacing.LARGE, divider)
+    }
+
+    /**
+     * Adds a text display component.
+     */
+    public fun textDisplay(text: String) {
+        components += TextDisplay.of(text)
+    }
+
     internal fun build(): MessageCreateData {
         val builder = MessageCreateBuilder()
         if (content != null) builder.setContent(content)
         if (embeds.isNotEmpty()) builder.setEmbeds(embeds)
 
-        if (containers.isNotEmpty()) {
+        if (components.isNotEmpty()) {
             // Enable Components V2 when using Container components
             builder.useComponentsV2()
-            builder.setComponents(containers)
+            builder.setComponents(components)
         }
         return builder.build()
     }

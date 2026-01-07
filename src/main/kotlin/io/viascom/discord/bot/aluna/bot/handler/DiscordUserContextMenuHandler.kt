@@ -107,10 +107,18 @@ public abstract class DiscordUserContextMenuHandler(name: String, localizations:
             guildLocale = event.guildLocale
             MDC.put("discord.server_locale", guildLocale.locale)
         }
+
+        val mdcMap = MDC.getCopyOfContextMap()
+
         timeMarks?.add(INITIALIZED at markNow())
 
         val missingUserPermissions =
-            async(AlunaDispatchers.Detached) { discordInteractionConditions.checkForNeededUserPermissions(this@DiscordUserContextMenuHandler, userPermissions, event) }.await()
+            async(AlunaDispatchers.Detached) {
+                MDC.setContextMap(mdcMap)
+                val missingPermissions = discordInteractionConditions.checkForNeededUserPermissions(this@DiscordUserContextMenuHandler, userPermissions, event)
+                mdcMap.putAll(MDC.getCopyOfContextMap())
+                missingPermissions
+            }.await()
         if (missingUserPermissions.hasMissingPermissions) {
             onMissingUserPermission(event, missingUserPermissions)
             return@withContext
@@ -118,7 +126,12 @@ public abstract class DiscordUserContextMenuHandler(name: String, localizations:
         timeMarks?.add(NEEDED_USER_PERMISSIONS at markNow())
 
         val missingBotPermissions =
-            async(AlunaDispatchers.Detached) { discordInteractionConditions.checkForNeededBotPermissions(this@DiscordUserContextMenuHandler, botPermissions, event) }.await()
+            async(AlunaDispatchers.Detached) {
+                MDC.setContextMap(mdcMap)
+                val missingPermissions = discordInteractionConditions.checkForNeededBotPermissions(this@DiscordUserContextMenuHandler, botPermissions, event)
+                mdcMap.putAll(MDC.getCopyOfContextMap())
+                missingPermissions
+            }.await()
         if (missingBotPermissions.hasMissingPermissions) {
             onMissingBotPermission(event, missingBotPermissions)
             return@withContext
@@ -129,7 +142,10 @@ public abstract class DiscordUserContextMenuHandler(name: String, localizations:
         timeMarks?.add(LOAD_DATA_BEFORE_ADDITIONAL_REQUIREMENTS at markNow())
 
         val additionalRequirements = async(AlunaDispatchers.Detached) {
-            discordInteractionAdditionalConditions.checkForAdditionalContextRequirements(this@DiscordUserContextMenuHandler, event)
+            MDC.setContextMap(mdcMap)
+            val requirements = discordInteractionAdditionalConditions.checkForAdditionalContextRequirements(this@DiscordUserContextMenuHandler, event)
+            mdcMap.putAll(MDC.getCopyOfContextMap())
+            requirements
         }.await()
         if (additionalRequirements.failed) {
             onFailedAdditionalRequirements(event, additionalRequirements)
@@ -138,11 +154,19 @@ public abstract class DiscordUserContextMenuHandler(name: String, localizations:
         timeMarks?.add(CHECK_FOR_ADDITIONAL_COMMAND_REQUIREMENTS at markNow())
 
         //Load additional data for this interaction
-        async(AlunaDispatchers.Detached) { discordInteractionLoadAdditionalData.loadData(this@DiscordUserContextMenuHandler, event) }.await()
+        async(AlunaDispatchers.Detached) {
+            MDC.setContextMap(mdcMap)
+            discordInteractionLoadAdditionalData.loadData(this@DiscordUserContextMenuHandler, event)
+            mdcMap.putAll(MDC.getCopyOfContextMap())
+        }.await()
         timeMarks?.add(LOAD_ADDITIONAL_DATA at markNow())
 
         //Run onCommandExecution in asyncExecutor to ensure it is not blocking the execution of the interaction itself
-        launch(AlunaDispatchers.Detached) { discordInteractionMetaDataHandler.onContextMenuExecution(this@DiscordUserContextMenuHandler, event) }
+        launch(AlunaDispatchers.Detached) {
+            MDC.setContextMap(mdcMap)
+            discordInteractionMetaDataHandler.onContextMenuExecution(this@DiscordUserContextMenuHandler, event)
+            mdcMap.putAll(MDC.getCopyOfContextMap())
+        }
         launch(AlunaDispatchers.Detached) {
             if (alunaProperties.discord.publishDiscordContextEvent) {
                 eventPublisher.publishDiscordUserContextEvent(author, channel, guild, event.fullCommandName, this@DiscordUserContextMenuHandler)
@@ -159,10 +183,14 @@ public abstract class DiscordUserContextMenuHandler(name: String, localizations:
         } catch (e: Exception) {
             endedWithException = true
             try {
-                async(AlunaDispatchers.Detached) { onExecutionException(event, e) }.await()
+                async(AlunaDispatchers.Detached) {
+                    MDC.setContextMap(mdcMap)
+                    onExecutionException(event, e)
+                }.await()
                 timeMarks?.add(ON_EXECUTION_EXCEPTION at markNow())
             } catch (exceptionError: Exception) {
                 async(AlunaDispatchers.Detached) {
+                    MDC.setContextMap(mdcMap)
                     discordInteractionMetaDataHandler.onGenericExecutionException(
                         this@DiscordUserContextMenuHandler,
                         e,
