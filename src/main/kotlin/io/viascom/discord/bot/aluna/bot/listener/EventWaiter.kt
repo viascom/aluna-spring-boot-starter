@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
@@ -54,10 +55,10 @@ public class EventWaiter(
     alunaProperties: AlunaProperties
 ) : CoroutineEventListener {
 
-    private var logger = LoggerFactory.getLogger(javaClass)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @get:JvmSynthetic
-    internal val waitingEvents: ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, ArrayList<WaitingEvent<GenericEvent>>>> = ConcurrentHashMap()
+    internal val waitingEvents: ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, CopyOnWriteArrayList<WaitingEvent<GenericEvent>>>> = ConcurrentHashMap()
 
     @JvmSynthetic
     internal val scheduledThreadPool = AlunaThreadPool.getScheduledThreadPool(
@@ -372,6 +373,6 @@ public class EventWaiter(
 
             }, timeout.seconds, TimeUnit.SECONDS)
         }
-        @Suppress("UNCHECKED_CAST") waitingEvents.computeIfAbsent(type) { ConcurrentHashMap() }.computeIfAbsent(id) { arrayListOf() }.add(we as WaitingEvent<GenericEvent>)
+        @Suppress("UNCHECKED_CAST") waitingEvents.computeIfAbsent(type) { ConcurrentHashMap() }.computeIfAbsent(id) { CopyOnWriteArrayList() }.add(we as WaitingEvent<GenericEvent>)
     }
 }

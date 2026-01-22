@@ -22,6 +22,7 @@
 package io.viascom.discord.bot.aluna.bot.emoji
 
 import io.viascom.discord.bot.aluna.model.ApplicationEmojiData
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Cache for application emojis
@@ -33,10 +34,11 @@ public object StaticEmojiCache {
     /**
      * Map of emoji name to emoji data
      */
-    public val emojis: MutableMap<String, ApplicationEmojiData> = hashMapOf()
+    public val emojis: MutableMap<String, ApplicationEmojiData> = ConcurrentHashMap()
 
     /**
      * Whether emojis have been loaded
      */
+    @Volatile
     public var emojisLoaded: Boolean = false
 }

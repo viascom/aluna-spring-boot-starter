@@ -114,11 +114,11 @@ public abstract class DiscordSubCommandHandler(
         val cooldownKey = discordBot.getCooldownKey(cooldownScope, discordRepresentation.id, parentCommand.author.id, parentCommand.channel.id, parentCommand.guild?.id)
         if (cooldownScope != CooldownScope.NO_COOLDOWN) {
             if (discordBot.isCooldownActive(cooldownKey, cooldown)) {
-                onCooldownStillActive(event, discordBot.cooldowns[cooldownKey]!!)
+                onCooldownStillActive(event, discordBot.cooldowns.getIfPresent(cooldownKey)!!)
                 return@withContext
             }
         }
-        discordBot.cooldowns[cooldownKey] = LocalDateTime.now(ZoneOffset.UTC)
+        discordBot.cooldowns.put(cooldownKey, LocalDateTime.now(ZoneOffset.UTC))
 
         runExecute(event)
     }

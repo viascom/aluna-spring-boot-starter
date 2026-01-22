@@ -21,6 +21,8 @@
 
 package io.viascom.discord.bot.aluna.bot
 
+import com.github.benmanes.caffeine.cache.Cache
+import com.github.benmanes.caffeine.cache.Caffeine
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventManager
 import io.viascom.discord.bot.aluna.bot.handler.*
@@ -98,7 +100,9 @@ public open class DiscordBot(
     internal val discordRepresentations = hashMapOf<InteractionId, Command>()
 
     @get:JvmSynthetic
-    internal val cooldowns = hashMapOf<CooldownKey, LastUsage>()
+    internal val cooldowns: Cache<CooldownKey, LastUsage> = Caffeine.newBuilder()
+        .expireAfterWrite(Duration.ofHours(24))
+        .build()
 
     @JvmSynthetic
     internal var messagesToObserveButton: MutableMap<MessageId, ObserveInteraction> = Collections.synchronizedMap(hashMapOf<MessageId, ObserveInteraction>())
@@ -214,16 +218,13 @@ public open class DiscordBot(
      * @return `true` if the cooldown is active, `false` otherwise.
      */
     public fun isCooldownActive(key: CooldownKey, cooldown: Duration): Boolean {
-        //If not known, there is no cooldown
-        if (!cooldowns.contains(key)) {
-            return false
-        }
+        val lastUsage = cooldowns.getIfPresent(key) ?: return false
 
-        if (cooldowns[key]?.plusNanos(cooldown.toNanos())?.isAfter(LocalDateTime.now(ZoneOffset.UTC)) == true) {
+        if (lastUsage.plusNanos(cooldown.toNanos()).isAfter(LocalDateTime.now(ZoneOffset.UTC))) {
             return true
         }
 
-        cooldowns.remove(key)
+        cooldowns.invalidate(key)
 
         return false
     }
@@ -235,7 +236,7 @@ public open class DiscordBot(
      * @return The cooldown time as a LocalDateTime object, or null if the key is not found.
      */
     public fun getCooldown(key: CooldownKey): LocalDateTime? {
-        return cooldowns[key]
+        return cooldowns.getIfPresent(key)
     }
 
     /**

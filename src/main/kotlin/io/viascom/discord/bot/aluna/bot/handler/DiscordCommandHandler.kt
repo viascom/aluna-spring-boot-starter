@@ -760,10 +760,10 @@ public abstract class DiscordCommandHandler(
         if (cooldownScope != CooldownScope.NO_COOLDOWN) {
             val cooldownKey = discordBot.getCooldownKey(cooldownScope, discordRepresentation.id, author.id, channel.id, guild?.id)
             if (discordBot.isCooldownActive(cooldownKey, cooldown)) {
-                onCooldownStillActive(event, discordBot.cooldowns[cooldownKey]!!)
+                onCooldownStillActive(event, discordBot.cooldowns.getIfPresent(cooldownKey)!!)
                 return@withContext
             }
-            discordBot.cooldowns[cooldownKey] = LocalDateTime.now(ZoneOffset.UTC)
+            discordBot.cooldowns.put(cooldownKey, LocalDateTime.now(ZoneOffset.UTC))
         }
         timeMarks?.add(CHECK_COOLDOWN at markNow())
 

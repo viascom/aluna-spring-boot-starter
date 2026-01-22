@@ -40,7 +40,7 @@ import org.springframework.core.NamedInheritableThreadLocal
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -50,12 +50,12 @@ public class InteractionScope(private val context: ConfigurableApplicationContex
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @JvmSynthetic
-    internal val scopedObjects = Collections.synchronizedMap(HashMap<BeanName, HashMap<DiscordStateId, HashMap<UniqueId, ScopedObjectData>>>())
+    internal val scopedObjects = ConcurrentHashMap<BeanName, ConcurrentHashMap<DiscordStateId, ConcurrentHashMap<UniqueId, ScopedObjectData>>>()
 
     @JvmSynthetic
     internal var scopedObjectsTimeoutScheduler: ScheduledThreadPoolExecutor
 
-    private val scopedObjectsTimeoutScheduledTask = Collections.synchronizedMap(HashMap<UniqueId, ScheduledFuture<*>>())
+    private val scopedObjectsTimeoutScheduledTask = ConcurrentHashMap<UniqueId, ScheduledFuture<*>>()
 
     init {
         val scopedObjectsTimeoutScheduler = context.environment.getProperty("aluna.thread.scoped-objects-timeout-scheduler", Int::class.java, 2)
@@ -79,15 +79,15 @@ public class InteractionScope(private val context: ConfigurableApplicationContex
         }
 
         //If bean was never seen
-        val beanData = scopedObjects.getOrElse(name) { null }
+        val beanData = scopedObjects[name]
         if (beanData == null) {
-            scopedObjects[name] = hashMapOf()
+            scopedObjects[name] = ConcurrentHashMap()
         }
 
         //If discordState.id was never seen
-        val discordStateIdData = scopedObjects[name]!!.getOrElse(DiscordContext.discordState!!.id) { null }
+        val discordStateIdData = scopedObjects[name]!![DiscordContext.discordState!!.id]
         if (discordStateIdData == null) {
-            scopedObjects[name]!![DiscordContext.discordState!!.id] = hashMapOf()
+            scopedObjects[name]!![DiscordContext.discordState!!.id] = ConcurrentHashMap()
         }
 
         //If uniqueId is present we return the corresponding bean and reset the timeout

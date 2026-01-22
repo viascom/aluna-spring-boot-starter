@@ -108,6 +108,9 @@ dependencies {
     //====== Caching ======
     implementation "com.github.ben-manes.caffeine:caffeine:3.2.3"
 
+    //====== Primitive Collections ======
+    implementation "it.unimi.dsi:fastutil:8.5.15"
+
     //====== Emoji Helper ======
     api "net.fellbaum:jemoji:$jemojiVersion"
 
