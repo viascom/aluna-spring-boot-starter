@@ -1,5 +1,4 @@
-import org.jetbrains.dokka.DokkaConfiguration
-import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -33,7 +32,7 @@ ext {
     nanoidVersion = "1.0.1"
 }
 
-group "io.viascom.discord.bot"
+group = "io.viascom.discord.bot"
 version = "${major}.${minor}.${patch}${isCiServer ? "${modifier}" : "-SNAPSHOT"}"
 project.logger.lifecycle("Version of this build: ${version}")
 
@@ -57,6 +56,9 @@ springBoot {
 java {
     withSourcesJar()
     withJavadocJar()
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(19)
+    }
 }
 
 repositories {
@@ -135,12 +137,16 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-compiler-embeddable"
 }
 
-sourceCompatibility = JavaVersion.VERSION_19
-targetCompatibility = JavaVersion.VERSION_19
+tasks.withType(Test).configureEach {
+    failOnNoDiscoveredTests = false
+}
+
 
 tasks.withType(KotlinCompile).configureEach {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_19
-    kotlinOptions.freeCompilerArgs = ["-Xjvm-default=all"]
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_19
+        freeCompilerArgs.add("-Xjvm-default=all")
+    }
 }
 
 kotlin {
@@ -148,13 +154,16 @@ kotlin {
 }
 
 //Wait for files from processResources and bootBuildInfo
-compileKotlin.inputs.files(processResources, bootBuildInfo)
+tasks.named('compileKotlin').configure {
+    inputs.files(tasks.named('processResources'), tasks.named('bootBuildInfo'))
+}
 
 processResources.dependsOn "kaptKotlin"
 processResources {
+    def projectVersion = project.version.toString()
     filesMatching(["banner.txt", "version.txt"]) {
         filter {
-            it.replace("jda.version", "${jdaVersion}").replace("aluna.version", "${project.version}")
+            it.replace("jda.version", "${jdaVersion}").replace("aluna.version", projectVersion)
         }
     }
 
@@ -163,19 +172,20 @@ processResources {
 
     //Add generatePomFileForMavenJavaPublication to resources
     into("META-INF/maven/$project.group/aluna-spring-boot-starter") {
-        from { generatePomFileForMavenJavaPublication }
+        from { tasks.named("generatePomFileForMavenJavaPublication") }
         rename ".*", "pom.xml"
     }
 }
 
-task downloadBeautifyJsFile(type: Download) {
+tasks.register('downloadBeautifyJsFile', Download) {
     src "https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.5/beautify.min.js"
     dest "build/resources/main/js/lib/beautify.js"
     quiet true
     overwrite false
 }
 
-task verifyBeautifyJsFile(type: Verify, dependsOn: downloadBeautifyJsFile) {
+tasks.register('verifyBeautifyJsFile', Verify) {
+    dependsOn "downloadBeautifyJsFile"
     src new File("build/resources/main/js/lib/", "beautify.js")
     algorithm "SHA-512"
     checksum "1a8edca5b62f5354ad382c40c81789235a2e463dc936b02db346b8bb756aac62a14527f3b381b46a8ef3b57c8af60773e9cfe363df247882a097fc57a04b041d"
@@ -238,35 +248,35 @@ nexusPublishing {
 }
 
 signing {
-    sign publishing.publications.mavenJava
+    sign publishing.publications
 }
 
 tasks.withType(Sign).configureEach {
     onlyIf { isCiServer }
 }
 
-tasks.withType(DokkaTask).configureEach {
+dokka {
+    moduleName.set(project.name)
+    moduleVersion.set(project.version.toString())
+
     dokkaSourceSets.configureEach {
-        moduleName.set(project.name)
-        moduleVersion.set(project.version.toString())
-        includes.from("README.md")
+        includes.from("doc/module.md")
         jdkVersion.set(17)
 
-        sourceLink {
+        sourceLinks.add(project.objects.newInstance(org.jetbrains.dokka.gradle.engine.parameters.DokkaSourceLinkSpec, project.layout).tap {
             localDirectory.set(file("src/main/kotlin"))
-            remoteUrl.set(new URI("https://github.com/viascom/aluna-spring-boot-starter/tree/master/src/main/kotlin").toURL())
+            remoteUrl.set(new URI("https://github.com/viascom/aluna-spring-boot-starter/tree/master/src/main/kotlin"))
             remoteLineSuffix.set("#L")
-        }
+        })
 
-        externalDocumentationLink {
-            url.set(new URI("https://ci.dv8tion.net/job/JDA5/javadoc/").toURL())
-        }
+        externalDocumentationLinks.add(project.objects.newInstance(org.jetbrains.dokka.gradle.engine.parameters.DokkaExternalDocumentationLinkSpec, "jda").tap {
+            url.set(new URI("https://ci.dv8tion.net/job/JDA5/javadoc/"))
+        })
 
         perPackageOption {
             matchingRegex.set(".*")
             suppress.set(false)
-            documentedVisibilities.set([DokkaConfiguration.Visibility.PUBLIC]) // Only public elements
+            documentedVisibilities.set([org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier.Public]) // Only public elements
         }
     }
 }
-
