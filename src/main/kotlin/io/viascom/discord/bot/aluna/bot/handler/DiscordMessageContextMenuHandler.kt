@@ -113,24 +113,26 @@ public abstract class DiscordMessageContextMenuHandler(name: String, localizatio
 
         timeMarks?.add(INITIALIZED at markNow())
 
-        val missingUserPermissions = async(AlunaDispatchers.Detached) {
+        //Check needed user and bot permissions for this interaction in parallel
+        val missingUserPermissionsDeferred = async(AlunaDispatchers.Detached) {
             MDC.setContextMap(mdcMap)
-            val missingPermissions = discordInteractionConditions.checkForNeededUserPermissions(this@DiscordMessageContextMenuHandler, userPermissions, event)
-            mdcMap.putAll(MDC.getCopyOfContextMap())
-            missingPermissions
-        }.await()
+            discordInteractionConditions.checkForNeededUserPermissions(this@DiscordMessageContextMenuHandler, userPermissions, event)
+        }
+        val missingBotPermissionsDeferred = async(AlunaDispatchers.Detached) {
+            MDC.setContextMap(mdcMap)
+            discordInteractionConditions.checkForNeededBotPermissions(this@DiscordMessageContextMenuHandler, botPermissions, event)
+        }
+
+        val missingUserPermissions = missingUserPermissionsDeferred.await()
         if (missingUserPermissions.hasMissingPermissions) {
+            missingBotPermissionsDeferred.cancel()
             onMissingUserPermission(event, missingUserPermissions)
             return@withContext
         }
+
         timeMarks?.add(NEEDED_USER_PERMISSIONS at markNow())
 
-        val missingBotPermissions = async(AlunaDispatchers.Detached) {
-            MDC.setContextMap(mdcMap)
-            val missingPermissions = discordInteractionConditions.checkForNeededBotPermissions(this@DiscordMessageContextMenuHandler, botPermissions, event)
-            mdcMap.putAll(MDC.getCopyOfContextMap())
-            missingPermissions
-        }.await()
+        val missingBotPermissions = missingBotPermissionsDeferred.await()
         if (missingBotPermissions.hasMissingPermissions) {
             onMissingBotPermission(event, missingBotPermissions)
             return@withContext

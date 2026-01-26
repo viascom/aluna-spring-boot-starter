@@ -112,26 +112,26 @@ public abstract class DiscordUserContextMenuHandler(name: String, localizations:
 
         timeMarks?.add(INITIALIZED at markNow())
 
-        val missingUserPermissions =
-            async(AlunaDispatchers.Detached) {
-                MDC.setContextMap(mdcMap)
-                val missingPermissions = discordInteractionConditions.checkForNeededUserPermissions(this@DiscordUserContextMenuHandler, userPermissions, event)
-                mdcMap.putAll(MDC.getCopyOfContextMap())
-                missingPermissions
-            }.await()
+        //Check needed user and bot permissions for this interaction in parallel
+        val missingUserPermissionsDeferred = async(AlunaDispatchers.Detached) {
+            MDC.setContextMap(mdcMap)
+            discordInteractionConditions.checkForNeededUserPermissions(this@DiscordUserContextMenuHandler, userPermissions, event)
+        }
+        val missingBotPermissionsDeferred = async(AlunaDispatchers.Detached) {
+            MDC.setContextMap(mdcMap)
+            discordInteractionConditions.checkForNeededBotPermissions(this@DiscordUserContextMenuHandler, botPermissions, event)
+        }
+
+        val missingUserPermissions = missingUserPermissionsDeferred.await()
         if (missingUserPermissions.hasMissingPermissions) {
+            missingBotPermissionsDeferred.cancel()
             onMissingUserPermission(event, missingUserPermissions)
             return@withContext
         }
+
         timeMarks?.add(NEEDED_USER_PERMISSIONS at markNow())
 
-        val missingBotPermissions =
-            async(AlunaDispatchers.Detached) {
-                MDC.setContextMap(mdcMap)
-                val missingPermissions = discordInteractionConditions.checkForNeededBotPermissions(this@DiscordUserContextMenuHandler, botPermissions, event)
-                mdcMap.putAll(MDC.getCopyOfContextMap())
-                missingPermissions
-            }.await()
+        val missingBotPermissions = missingBotPermissionsDeferred.await()
         if (missingBotPermissions.hasMissingPermissions) {
             onMissingBotPermission(event, missingBotPermissions)
             return@withContext

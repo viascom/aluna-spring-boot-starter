@@ -702,27 +702,26 @@ public abstract class DiscordCommandHandler(
 
         timeMarks?.add(OWNER_CHECKED at markNow())
 
-        //Check needed user permissions for this command
-        val missingUserPermissions = async(AlunaDispatchers.Detached) {
+        //Check needed user and bot permissions for this command in parallel
+        val missingUserPermissionsDeferred = async(AlunaDispatchers.Detached) {
             MDC.setContextMap(mdcMap)
-            val missingPermissions = discordInteractionConditions.checkForNeededUserPermissions(this@DiscordCommandHandler, userPermissions, event)
-            mdcMap.putAll(MDC.getCopyOfContextMap())
-            missingPermissions
-        }.await()
+            discordInteractionConditions.checkForNeededUserPermissions(this@DiscordCommandHandler, userPermissions, event)
+        }
+        val missingBotPermissionsDeferred = async(AlunaDispatchers.Detached) {
+            MDC.setContextMap(mdcMap)
+            discordInteractionConditions.checkForNeededBotPermissions(this@DiscordCommandHandler, botPermissions, event)
+        }
+
+        val missingUserPermissions = missingUserPermissionsDeferred.await()
         if (missingUserPermissions.hasMissingPermissions) {
+            missingBotPermissionsDeferred.cancel()
             onMissingUserPermission(event, missingUserPermissions)
             return@withContext
         }
 
         timeMarks?.add(NEEDED_USER_PERMISSIONS at markNow())
 
-        //Check needed bot permissions for this command
-        val missingBotPermissions = async(AlunaDispatchers.Detached) {
-            MDC.setContextMap(mdcMap)
-            val missingPermissions = discordInteractionConditions.checkForNeededBotPermissions(this@DiscordCommandHandler, botPermissions, event)
-            mdcMap.putAll(MDC.getCopyOfContextMap())
-            missingPermissions
-        }.await()
+        val missingBotPermissions = missingBotPermissionsDeferred.await()
         if (missingBotPermissions.hasMissingPermissions) {
             onMissingBotPermission(event, missingBotPermissions)
             return@withContext
@@ -870,13 +869,12 @@ public abstract class DiscordCommandHandler(
 
                 logger.info("Command /${event.fullCommandName} (${this@DiscordCommandHandler.author.id})${if (alunaProperties.debug.showHashCode) " [${this@DiscordCommandHandler.hashCode()}]" else ""} took $duration (execute method: $executeDuration)")
 
-                val beforeDuration = kotlin.time.Duration.ZERO
-                neededUserPermissionsDuration?.let { beforeDuration.plus(it) }
-                neededUserPermissionsDuration?.let { beforeDuration.plus(it) }
-                neededBotPermissionsDuration?.let { beforeDuration.plus(it) }
-                loadDataBeforeAdditionalRequirementsDuration?.let { beforeDuration.plus(it) }
-                checkForAdditionalCommandRequirementsDuration?.let { beforeDuration.plus(it) }
-                loadAdditionalDataDuration?.let { beforeDuration.plus(it) }
+                var beforeDuration = kotlin.time.Duration.ZERO
+                neededUserPermissionsDuration?.let { beforeDuration = beforeDuration.plus(it) }
+                neededBotPermissionsDuration?.let { beforeDuration = beforeDuration.plus(it) }
+                loadDataBeforeAdditionalRequirementsDuration?.let { beforeDuration = beforeDuration.plus(it) }
+                checkForAdditionalCommandRequirementsDuration?.let { beforeDuration = beforeDuration.plus(it) }
+                loadAdditionalDataDuration?.let { beforeDuration = beforeDuration.plus(it) }
 
                 when {
                     beforeDuration.inWholeMilliseconds > 1500 -> {
@@ -936,13 +934,12 @@ public abstract class DiscordCommandHandler(
         discordRepresentation = discordBot.discordRepresentations[event.commandId]!!
 
         val firstLevel = path[1]
-        if (!subCommandElements.containsKey(firstLevel)) {
+        val firstElement = subCommandElements[firstLevel]
+        if (firstElement == null) {
             logger.debug("Command path '${event.fullCommandName}' not found in the registered elements")
             fallback.invoke(event)
             return
         }
-
-        val firstElement = subCommandElements[firstLevel]!!
         timeMarks?.add(CHECK_SUB_COMMAND_PATH at markNow())
 
         //Check if it is a SubCommand
@@ -956,16 +953,17 @@ public abstract class DiscordCommandHandler(
 
         //Check if it is a SubCommand in a SubCommandGroup
         val secondLevel = path[2]
-        if (!(firstElement as DiscordSubCommandGroupHandler).subCommands.containsKey(secondLevel)) {
+        val secondElement = (firstElement as DiscordSubCommandGroupHandler).subCommands[secondLevel]
+        if (secondElement == null) {
             logger.debug("Command path '${event.fullCommandName}' not found in the registered elements")
             fallback.invoke(event)
             return
         }
         timeMarks?.add(CHECK_SECOND_SUB_COMMAND_PATH at markNow())
 
-        firstElement.subCommands[secondLevel]!!.initialize(event.fullCommandName, this, discordRepresentation)
+        secondElement.initialize(event.fullCommandName, this, discordRepresentation)
         timeMarks?.add(SECOND_SUB_COMMAND_INITIALIZED at markNow())
-        firstElement.subCommands[secondLevel]!!.run(event)
+        secondElement.run(event)
         timeMarks?.add(SECOND_SUB_COMMAND_RUN_EXECUTE at markNow())
     }
 
@@ -975,7 +973,6 @@ public abstract class DiscordCommandHandler(
         fallback: (GenericInteractionCreateEvent?) -> (Boolean)
     ): Boolean = withContext(AlunaDispatchers.Interaction) {
         loadDynamicSubCommandElements()
-
 
         val path = currentSubFullCommandName.split(" ")
         //Check if discordRepresentation is initialized
@@ -987,30 +984,28 @@ public abstract class DiscordCommandHandler(
         }
 
         val firstLevel = path[1]
-        if (!subCommandElements.containsKey(firstLevel)) {
+        val firstElement = subCommandElements[firstLevel]
+        if (firstElement == null) {
             logger.debug("Command path '${currentSubFullCommandName}' not found in the registered elements")
             return@withContext fallback.invoke(event)
         }
-
-        val firstElement = subCommandElements[firstLevel]!!
 
         //Check if it is a SubCommand
         if (firstElement::class.isSubclassOf(DiscordSubCommandHandler::class)) {
             (firstElement as DiscordSubCommandHandler).initialize(currentSubFullCommandName, this@DiscordCommandHandler, discordRepresentation)
-            val result = function.invoke(firstElement)
-            return@withContext result
+            return@withContext function.invoke(firstElement)
         }
 
         //Check if it is a SubCommand in a SubCommandGroup
         val secondLevel = path[2]
-        if (!(firstElement as DiscordSubCommandGroup).subCommands.containsKey(secondLevel)) {
+        val secondElement = (firstElement as DiscordSubCommandGroupHandler).subCommands[secondLevel]
+        if (secondElement == null) {
             logger.debug("Command path '${currentSubFullCommandName}' not found in the registered elements")
             return@withContext fallback.invoke(event)
         }
 
-        (firstElement as DiscordSubCommandGroupHandler).subCommands[secondLevel]!!.initialize(currentSubFullCommandName, this@DiscordCommandHandler, discordRepresentation)
-        val result = function.invoke(firstElement.subCommands[secondLevel]!!)
-        return@withContext result
+        secondElement.initialize(currentSubFullCommandName, this@DiscordCommandHandler, discordRepresentation)
+        return@withContext function.invoke(secondElement)
     }
 
     public fun updateMessageIdForScope(messageId: String) {
@@ -1121,31 +1116,19 @@ public abstract class DiscordCommandHandler(
 
     @JvmSynthetic
     internal fun shouldLoadAdditionalData(name: String, properties: AlunaProperties): Boolean {
-        val isSystemCommand = name == "system-command"
-        val isHelpCommand = name == "help"
-
-        return when {
-            name !in listOf("system-command", "help") -> true
-            isSystemCommand && !properties.command.systemCommand.enabled -> true
-            isSystemCommand && properties.command.systemCommand.executeLoadAdditionalData -> true
-            isHelpCommand && !properties.command.helpCommand.enabled -> true
-            isHelpCommand && properties.command.helpCommand.executeLoadAdditionalData -> true
-            else -> false
+        return when (name) {
+            "system-command" -> !properties.command.systemCommand.enabled || properties.command.systemCommand.executeLoadAdditionalData
+            "help" -> !properties.command.helpCommand.enabled || properties.command.helpCommand.executeLoadAdditionalData
+            else -> true
         }
     }
 
     @JvmSynthetic
     internal fun shouldCheckAdditionalConditions(name: String, properties: AlunaProperties): Boolean {
-        val isSystemCommand = name == "system-command"
-        val isHelpCommand = name == "help"
-
-        return when {
-            name !in listOf("system-command", "help") -> true
-            isSystemCommand && !properties.command.systemCommand.enabled -> true
-            isSystemCommand && properties.command.systemCommand.checkAdditionalConditions -> true
-            isHelpCommand && !properties.command.helpCommand.enabled -> true
-            isHelpCommand && properties.command.helpCommand.checkAdditionalConditions -> true
-            else -> false
+        return when (name) {
+            "system-command" -> !properties.command.systemCommand.enabled || properties.command.systemCommand.checkAdditionalConditions
+            "help" -> !properties.command.helpCommand.enabled || properties.command.helpCommand.checkAdditionalConditions
+            else -> true
         }
     }
 
@@ -1172,10 +1155,8 @@ public abstract class DiscordCommandHandler(
     }
 
     public fun extractGlobalInteractionId(componentId: String): String {
-        val commandId = componentId.split(":")[0]
-        val uniqueId = componentId.split(":")[1]
-        val userId = componentId.split(":")[2]
-        return componentId.substring(commandId.length + 1 + uniqueId.length + 1 + userId.length + 1)
+        val parts = componentId.split(":", limit = 4)
+        return parts[3]
     }
 
 }
