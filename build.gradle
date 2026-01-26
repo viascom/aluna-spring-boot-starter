@@ -94,7 +94,7 @@ dependencies {
     implementation 'io.ktor:ktor-serialization-jackson:3.3.2'
 
     //====== OkHttp ======
-    implementation 'com.squareup.okhttp3:okhttp:5.3.0'
+    implementation 'com.squareup.okhttp3:okhttp:5.3.2'
 
     //====== Jackson ======
     implementation "org.springframework.boot:spring-boot-starter-json:$jacksonSpringBootVersion"
