@@ -78,10 +78,16 @@ public open class DefaultFastMutualGuildsCache(
     override operator fun get(userId: Long): Collection<GuildId> {
         val guildIds = memberCache.getIfPresent(userId)
         if (guildIds != null) {
-            // Unsynchronized read - FastUtil's LongOpenHashSet doesn't throw ConcurrentModificationException
-            // and allows safe iteration during concurrent modification. Worst case is slightly stale data,
-            // which is acceptable for a cache.
-            return LongArrayList(guildIds)
+            // Synchronized read to prevent seeing inconsistent state during concurrent modifications.
+            // FastUtil's LongOpenHashSet uses open addressing, and unsynchronized iteration during
+            // modification can expose null/zero values from the internal array.
+            // Using toLongArray() + wrap() is faster than LongArrayList(set) as it uses direct
+            // array copy instead of iterator-based copy, minimizing time under lock.
+            val snapshot: LongArray
+            synchronized(guildIds) {
+                snapshot = guildIds.toLongArray()
+            }
+            return LongArrayList.wrap(snapshot)
         }
 
         if (alunaProperties.discord.fastMutualGuildCache.useShardManagerFallback) {
