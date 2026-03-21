@@ -22,6 +22,7 @@
 package io.viascom.discord.bot.aluna.util
 
 import net.dv8tion.jda.api.components.ModalTopLevelComponent
+import net.dv8tion.jda.api.components.attachmentupload.AttachmentUpload
 import net.dv8tion.jda.api.components.label.Label
 import net.dv8tion.jda.api.components.selections.EntitySelectMenu
 import net.dv8tion.jda.api.components.selections.StringSelectMenu
@@ -48,6 +49,7 @@ internal annotation class ModalDslMarker
  *   text("Pick a user and channel")
  *   entitySelect("user_select", EntitySelectMenu.SelectTarget.USER, label = "Please select a user")
  *   channelSelect("channel_select", label = "Please select a channel")
+ *   fileUpload("screenshot", "Screenshot", required = false)
  * }
  */
 public fun ModalCreate(id: String, title: String, block: ModalBlock.() -> Unit): Modal {
@@ -187,6 +189,24 @@ public class ModalBlock internal constructor() {
             setChannelTypes(*channelTypes)
             if (configure != null) configure()
         }
+    }
+
+    /**
+     * Add a labeled file upload component to the modal.
+     */
+    @JvmOverloads
+    public fun fileUpload(
+        id: String,
+        label: String,
+        required: Boolean = true,
+        min: Int = 1,
+        max: Int = 1
+    ) {
+        val upload = AttachmentUpload.create(id)
+            .setRequired(required)
+            .setRequiredRange(min, max)
+            .build()
+        components += Label.of(label, upload)
     }
 
     internal fun build(): ModalComponentTree {
