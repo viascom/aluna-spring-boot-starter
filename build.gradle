@@ -54,11 +54,10 @@ springBoot {
 }
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
     withSourcesJar()
     withJavadocJar()
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(19)
-    }
 }
 
 repositories {
@@ -148,8 +147,8 @@ tasks.withType(Test).configureEach {
 
 tasks.withType(KotlinCompile).configureEach {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_19
-        freeCompilerArgs.add("-Xjvm-default=all")
+        jvmTarget = JvmTarget.JVM_21
+        freeCompilerArgs.add("-jvm-default=no-compatibility")
     }
 }
 
