@@ -264,11 +264,11 @@ dokka {
 
     dokkaSourceSets.configureEach {
         includes.from("doc/module.md")
-        jdkVersion.set(17)
+        jdkVersion.set(21)
 
         sourceLinks.register("kotlin") {
             localDirectory.set(file("src/main/kotlin"))
-            remoteUrl.set(new URI("https://github.com/viascom/aluna-spring-boot-starter/tree/master/src/main/kotlin"))
+            remoteUrl.set(new URI("https://github.com/viascom/aluna-spring-boot-starter/tree/main/src/main/kotlin"))
             remoteLineSuffix.set("#L")
         }
 
