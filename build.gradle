@@ -266,15 +266,15 @@ dokka {
         includes.from("doc/module.md")
         jdkVersion.set(17)
 
-        sourceLinks.add(project.objects.newInstance(org.jetbrains.dokka.gradle.engine.parameters.DokkaSourceLinkSpec, project.layout).tap {
+        sourceLinks.register("kotlin") {
             localDirectory.set(file("src/main/kotlin"))
             remoteUrl.set(new URI("https://github.com/viascom/aluna-spring-boot-starter/tree/master/src/main/kotlin"))
             remoteLineSuffix.set("#L")
-        })
+        }
 
-        externalDocumentationLinks.add(project.objects.newInstance(org.jetbrains.dokka.gradle.engine.parameters.DokkaExternalDocumentationLinkSpec, "jda").tap {
+        externalDocumentationLinks.register("jda") {
             url.set(new URI("https://ci.dv8tion.net/job/JDA5/javadoc/"))
-        })
+        }
 
         perPackageOption {
             matchingRegex.set(".*")
