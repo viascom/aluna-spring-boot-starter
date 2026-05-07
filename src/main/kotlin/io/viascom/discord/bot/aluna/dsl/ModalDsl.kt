@@ -23,7 +23,9 @@ package io.viascom.discord.bot.aluna.util
 
 import net.dv8tion.jda.api.components.ModalTopLevelComponent
 import net.dv8tion.jda.api.components.attachmentupload.AttachmentUpload
+import net.dv8tion.jda.api.components.checkboxgroup.CheckboxGroup
 import net.dv8tion.jda.api.components.label.Label
+import net.dv8tion.jda.api.components.radiogroup.RadioGroup
 import net.dv8tion.jda.api.components.selections.EntitySelectMenu
 import net.dv8tion.jda.api.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.components.textdisplay.TextDisplay
@@ -50,6 +52,13 @@ internal annotation class ModalDslMarker
  *   entitySelect("user_select", EntitySelectMenu.SelectTarget.USER, label = "Please select a user")
  *   channelSelect("channel_select", label = "Please select a channel")
  *   fileUpload("screenshot", "Screenshot", required = false)
+ *   radioGroup("source", "How did you find us?") {
+ *     addOption("A friend", "friend")
+ *     addOption("Online", "online")
+ *   }
+ *   checkboxGroup("rules", "Agree to rules", min = 1, max = 1) {
+ *     addOption("I agree", "agreed")
+ *   }
  * }
  */
 public fun ModalCreate(id: String, title: String, block: ModalBlock.() -> Unit): Modal {
@@ -207,6 +216,38 @@ public class ModalBlock internal constructor() {
             .setRequiredRange(min, max)
             .build()
         components += Label.of(label, upload)
+    }
+
+    /**
+     * Add a labeled RadioGroup to the modal.
+     */
+    @JvmOverloads
+    public fun radioGroup(
+        id: String,
+        label: String,
+        required: Boolean = true,
+        configure: (RadioGroup.Builder.() -> Unit)? = null
+    ) {
+        val builder = RadioGroup.create(id).setRequired(required)
+        if (configure != null) builder.configure()
+        components += Label.of(label, builder.build())
+    }
+
+    /**
+     * Add a labeled CheckboxGroup to the modal.
+     */
+    @JvmOverloads
+    public fun checkboxGroup(
+        id: String,
+        label: String,
+        required: Boolean = true,
+        min: Int = 1,
+        max: Int = 1,
+        configure: (CheckboxGroup.Builder.() -> Unit)? = null
+    ) {
+        val builder = CheckboxGroup.create(id).setRequired(required).setRequiredRange(min, max)
+        if (configure != null) builder.configure()
+        components += Label.of(label, builder.build())
     }
 
     internal fun build(): ModalComponentTree {
