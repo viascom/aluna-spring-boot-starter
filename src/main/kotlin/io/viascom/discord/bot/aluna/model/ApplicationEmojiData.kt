@@ -77,7 +77,7 @@ public data class ApplicationEmojiData @JsonCreator constructor(
      * @return Image URL
      */
     public fun getImageUrl(): String {
-        return String.format("https://cdn.discordapp.com/emojis/%s.%s", this.id, if (this.animated) "gif" else "png")
+        return String.format("https://cdn.discordapp.com/emojis/%s.webp", this.id)
     }
 
     public companion object {
