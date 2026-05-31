@@ -6,9 +6,9 @@ plugins {
     id "java-library"
     id "maven-publish"
     id "signing"
-    id "org.jetbrains.kotlin.jvm" version "2.3.0"
-    id "org.jetbrains.kotlin.kapt" version "2.3.0"
-    id "org.springframework.boot" version "3.5.6"
+    id "org.jetbrains.kotlin.jvm" version "2.3.20"
+    id "org.jetbrains.kotlin.kapt" version "2.3.20"
+    id "org.springframework.boot" version "4.0.6"
     id "io.spring.dependency-management" version "1.1.7"
     id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
     id "de.undercouch.download" version "5.6.0"
@@ -17,15 +17,14 @@ plugins {
 
 ext {
     major = 1
-    minor = 4
-    patch = 2
+    minor = 5
+    patch = 0
     modifier = "-SNAPSHOT"
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
     jdaVersion = "6.4.0"
     retrofitVersion = "2.9.0"
-    jacksonSpringBootVersion = "3.5.6"
     jemojiVersion = "1.7.5"
     gsonVersion = "2.13.2"
     javabotblockapiVersion = "6.7.4_347"
@@ -80,6 +79,8 @@ dependencies {
     //====== Spring ======
     compileOnly "org.springframework.boot:spring-boot-starter"
     compileOnly "org.springframework.boot:spring-boot-starter-actuator"
+    // Provides ServerProperties (org.springframework.boot.web.server.autoconfigure) used by DebugInfoPrinter; host provides it at runtime
+    compileOnly "org.springframework.boot:spring-boot-web-server"
 
     //====== Configuration Processor ======
     kapt "org.springframework.boot:spring-boot-configuration-processor"
@@ -89,19 +90,20 @@ dependencies {
     api "net.dv8tion:JDA:$jdaVersion"
 
     //====== Ktor ======
-    implementation 'io.ktor:ktor-client-core:3.3.3'
-    implementation 'io.ktor:ktor-client-cio:3.3.3'
-    implementation 'io.ktor:ktor-client-content-negotiation:3.3.3'
-    implementation 'io.ktor:ktor-serialization-jackson:3.3.3'
+    implementation 'io.ktor:ktor-client-core:3.5.0'
+    implementation 'io.ktor:ktor-client-cio:3.5.0'
+    implementation 'io.ktor:ktor-client-content-negotiation:3.5.0'
+    implementation 'io.ktor:ktor-serialization-jackson:3.5.0'
 
     //====== OkHttp ======
     implementation 'com.squareup.okhttp3:okhttp:5.3.2'
 
-    //====== Jackson ======
-    implementation "org.springframework.boot:spring-boot-starter-json:$jacksonSpringBootVersion"
-    implementation "com.fasterxml.jackson.core:jackson-core:2.20.1"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.20.1"
-    implementation "com.fasterxml.jackson.core:jackson-annotations:2.20"
+    //====== Jackson 3 (tools.jackson; versions managed by Spring Boot 4's jackson-bom = 3.1.2) ======
+    // Aluna's code uses the Jackson 3 ObjectMapper API directly; where a configured mapper is needed it
+    // injects the host's Spring Boot 4 JsonMapper bean. The Kotlin module is required for data classes
+    // whose constructor parameters are not annotated; java.time support is built into jackson-databind.
+    implementation "tools.jackson.core:jackson-databind"
+    implementation "tools.jackson.module:jackson-module-kotlin"
 
     //====== Gson ======
     compileOnly "com.google.code.gson:gson:$gsonVersion"
@@ -131,7 +133,7 @@ dependencies {
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.springframework.boot:spring-boot-starter-web"
     testImplementation "org.springframework.boot:spring-boot-starter-actuator"
-    testImplementation "io.mockk:mockk:1.13.16"
+    testImplementation "io.mockk:mockk:1.14.11"
     testImplementation "ch.tutteli.atrium:atrium-fluent:1.2.0"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1"
     testImplementation "org.jetbrains.kotlin:kotlin-script-util:1.8.22"

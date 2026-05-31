@@ -24,7 +24,7 @@ package io.viascom.discord.bot.aluna.model
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import com.google.gson.annotations.SerializedName
 import io.viascom.discord.bot.aluna.util.getGuildMessage
 import io.viascom.discord.bot.aluna.util.getMessage

@@ -24,6 +24,8 @@ package io.viascom.discord.bot.aluna.model
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 import net.dv8tion.jda.api.entities.emoji.ApplicationEmoji
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji
@@ -105,5 +107,7 @@ public data class ApplicationEmojiData @JsonCreator constructor(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public data class ApplicationEmojiDataList @JsonCreator constructor(
-    @param:JsonProperty("items") val items: ArrayList<ApplicationEmojiData> = ArrayList()
+    @param:JsonProperty("items")
+    @param:JsonSetter(nulls = Nulls.AS_EMPTY)
+    val items: ArrayList<ApplicationEmojiData>
 )

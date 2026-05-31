@@ -22,14 +22,17 @@
 package io.viascom.discord.bot.aluna.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GatewayResponse(
     public val shards: Int,
     @param:JsonProperty("session_start_limit")
     public val sessionStartLimit: SessionStartLimit
 ) {
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public class SessionStartLimit(
         public val total: Int,
         public var remaining: Int,

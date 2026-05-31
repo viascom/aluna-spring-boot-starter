@@ -38,8 +38,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.boot.SpringBootVersion
-import org.springframework.boot.actuate.health.Health
-import org.springframework.boot.actuate.health.HealthIndicator
+import org.springframework.boot.health.contributor.Health
+import org.springframework.boot.health.contributor.HealthIndicator
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
@@ -131,7 +131,7 @@ public class AlunaHealthIndicator(
             status.withDetail("averageGatewayPing", 0)
         }
         status.withDetail("sharding", getSharding(shardManager, alunaProperties))
-        status.withDetail("sessionStartLimit", discordBot.sessionStartLimits)
+        status.withDetail("sessionStartLimit", discordBot.sessionStartLimits ?: "n/a")
 
         status.withDetail("versions", Versions())
 

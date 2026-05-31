@@ -94,7 +94,7 @@ public class LogLevelProvider(
     @Suppress("UNCHECKED_CAST")
     private fun LoggersEndpoint.safeLoggers(): Set<String> {
         val loggersDescriptor = this.loggers()
-        return loggersDescriptor.loggers.keys
+        return loggersDescriptor.loggers?.keys ?: emptySet()
     }
 
     /**
@@ -317,7 +317,7 @@ public class LogLevelProvider(
 
         val filteredLoggers = if (input.isEmpty()) {
             // If no input, prioritize loggers with configured levels
-            loggers.filter { loggersEndpoint.loggerLevels(it).configuredLevel != null }
+            loggers.filter { loggersEndpoint.loggerLevels(it)?.configuredLevel != null }
                 .take(25)
         } else {
             // Filter by input
@@ -326,7 +326,7 @@ public class LogLevelProvider(
         }
 
         val options = filteredLoggers.map { loggerName ->
-            val configuredLevel = loggersEndpoint.loggerLevels(loggerName).configuredLevel
+            val configuredLevel = loggersEndpoint.loggerLevels(loggerName)?.configuredLevel
             val displayName = if (configuredLevel != null) {
                 "$loggerName [$configuredLevel]"
             } else {
