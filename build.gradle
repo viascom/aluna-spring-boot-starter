@@ -19,7 +19,7 @@ ext {
     major = 1
     minor = 5
     patch = 0
-    modifier = "-SNAPSHOT"
+    modifier = ""
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
