@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.emoji
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnEmojiManagementEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled

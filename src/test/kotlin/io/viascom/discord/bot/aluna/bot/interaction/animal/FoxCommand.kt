@@ -21,7 +21,7 @@
 
 package io.viascom.discord.bot.aluna.bot.interaction.animal
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import io.viascom.discord.bot.aluna.bot.DiscordSubCommand
 import io.viascom.discord.bot.aluna.bot.Interaction
 import io.viascom.discord.bot.aluna.model.StringOption
