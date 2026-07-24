@@ -63,6 +63,7 @@ public open class DefaultRecommendedShardsResolver(
                 if (response.isSuccessful) {
                     objectMapper.readValue(response.body.string(), GatewayResponse::class.java)
                 } else {
+                    logger.warn("Unable to fetch recommended shard count: gateway returned HTTP {}", response.code)
                     null
                 }
             }
