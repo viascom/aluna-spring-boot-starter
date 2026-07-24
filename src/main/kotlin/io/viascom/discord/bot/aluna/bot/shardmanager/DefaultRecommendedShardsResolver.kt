@@ -58,12 +58,12 @@ public open class DefaultRecommendedShardsResolver(
                 .addHeader("Content-Type", "application/json")
                 .build()
 
-            val response = httpClient.newCall(request).execute()
-            if (response.isSuccessful) {
-                response.body?.string()?.let { objectMapper.readValue(it, GatewayResponse::class.java) }
-                    ?: throw IllegalAccessError("Response was null")
-            } else {
-                null
+            httpClient.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    objectMapper.readValue(response.body.string(), GatewayResponse::class.java)
+                } else {
+                    null
+                }
             }
         } catch (e: Exception) {
             logger.error("Unable to fetch recommended shard count", e)
