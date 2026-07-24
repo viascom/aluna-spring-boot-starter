@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory
 import tools.jackson.databind.ObjectMapper
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 
 /**
  * Default [RecommendedShardsResolver]: queries the configured gateway endpoint
@@ -71,7 +72,7 @@ public open class DefaultRecommendedShardsResolver(
         }
 
         gatewayResponse?.sessionStartLimit?.let {
-            it.resetTimestamp = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(it.resetAfter / 1000L)
+            it.resetTimestamp = LocalDateTime.now(ZoneOffset.UTC).plus(it.resetAfter.toLong(), ChronoUnit.MILLIS)
         }
 
         return gatewayResponse?.let { RecommendedShards(it.shards, it.sessionStartLimit) }

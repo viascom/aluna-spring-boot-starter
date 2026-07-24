@@ -40,6 +40,9 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.ObjectMapper
 import java.io.IOException
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 
 class DefaultRecommendedShardsResolverTest {
 
@@ -72,7 +75,7 @@ class DefaultRecommendedShardsResolverTest {
         val sessionStartLimit = GatewayResponse.SessionStartLimit(
             total = 1000,
             remaining = 999,
-            resetAfter = 3_600_000,
+            resetAfter = 3_600_500,
             maxConcurrency = 1,
         )
         val gatewayResponse = GatewayResponse(shards = 4, sessionStartLimit = sessionStartLimit)
@@ -83,14 +86,20 @@ class DefaultRecommendedShardsResolverTest {
 
         val resolver = DefaultRecommendedShardsResolver(properties(), objectMapper, client)
 
+        val before = LocalDateTime.now(ZoneOffset.UTC)
         val result = resolver.resolve()
+        val after = LocalDateTime.now(ZoneOffset.UTC)
 
         expect(result != null).toEqual(true)
         val resolved = result!!
         expect(resolved.shards).toEqual(4)
         val limit = resolved.sessionStartLimit!!
         expect(limit.maxConcurrency).toEqual(1)
-        expect(limit.resetTimestamp != null).toEqual(true)
+        // reset_after is in milliseconds: the 500 ms remainder must survive (flooring to whole
+        // seconds via resetAfter / 1000 would push resetTimestamp before before + 3_600_500 ms).
+        val resetTimestamp = limit.resetTimestamp!!
+        expect(resetTimestamp >= before.plus(3_600_500L, ChronoUnit.MILLIS)).toEqual(true)
+        expect(resetTimestamp <= after.plus(3_600_500L, ChronoUnit.MILLIS)).toEqual(true)
         expect(requestSlot.captured.url.toString()).toEqual(gatewayUrl)
         expect(requestSlot.captured.header("Authorization")).toEqual("Bot test-token")
     }
