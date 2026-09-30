@@ -22,6 +22,7 @@
 package io.viascom.discord.bot.aluna.bot.handler
 
 import io.viascom.discord.bot.aluna.model.MissingPermissions
+import io.viascom.discord.bot.aluna.util.hasAccessibleChannelPermission
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent
 
@@ -99,12 +100,12 @@ public open class DefaultDiscordInteractionConditions : DiscordInteractionCondit
                         return missingPermissions
                     }
 
-                    if (!selfMember.hasPermission(voiceChannel, permission)) {
+                    if (!selfMember.hasAccessibleChannelPermission(voiceChannel, permission)) {
                         missingPermissions.voiceChannel.add(permission)
                     }
                 }
 
-                if (!selfMember.hasPermission(serverChannel, permission)) {
+                if (!selfMember.hasAccessibleChannelPermission(serverChannel, permission)) {
                     missingPermissions.textChannel.add(permission)
                 }
             } else {

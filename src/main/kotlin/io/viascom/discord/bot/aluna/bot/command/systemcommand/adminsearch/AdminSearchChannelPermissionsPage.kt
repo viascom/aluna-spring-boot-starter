@@ -76,7 +76,8 @@ public class AdminSearchChannelPermissionsPage(
     override fun onChannelRequest(discordChannel: Channel, embedBuilder: EmbedBuilder) {
         val guildChannel = discordChannel as? GuildChannel ?: return
         val selfMember = guildChannel.guild.selfMember
-        val effectivePermissions = selfMember.getPermissions(guildChannel)
+        // Obfuscated channels are cached without overrides, so JDA would report the bot's role permissions for them
+        val effectivePermissions = if (guildChannel.isObfuscated) emptySet() else selfMember.getPermissions(guildChannel)
 
         // Collect all permissions affected by channel overrides for the bot
         val overriddenPermissions = guildChannel.permissionContainer.permissionOverrides

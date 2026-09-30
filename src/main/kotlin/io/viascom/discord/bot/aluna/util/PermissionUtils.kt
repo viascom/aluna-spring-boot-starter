@@ -111,6 +111,19 @@ public fun Member.hasChannelPermission(channel: GuildChannel, permissions: Array
 }
 
 /**
+ * Checks if the member has all given permissions in the channel, treating obfuscated channels as inaccessible.
+ *
+ * JDA caches channels the bot cannot see as obfuscated channels without permission overrides, so
+ * [Member.hasPermission] falls back to the member's role permissions for them and can report access that does not exist.
+ *
+ * @param channel The guild channel to check.
+ * @param permissions The permissions that must all be present.
+ * @return `true` if the channel is not obfuscated and the member has all [permissions] in it, `false` otherwise.
+ */
+public fun Member.hasAccessibleChannelPermission(channel: GuildChannel, vararg permissions: Permission): Boolean =
+    !channel.isObfuscated && this.hasPermission(channel, *permissions)
+
+/**
  * Checks if the member has permission override for the given channel and permission.
  *
  * @param channel The guild channel to check permission override for.

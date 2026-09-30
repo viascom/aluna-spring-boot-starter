@@ -26,6 +26,7 @@ import io.viascom.discord.bot.aluna.bot.queueAndRegisterInteraction
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnJdaEnabled
 import io.viascom.discord.bot.aluna.configuration.condition.ConditionalOnSystemCommandEnabled
 import io.viascom.discord.bot.aluna.util.getValueAsString
+import io.viascom.discord.bot.aluna.util.hasAccessibleChannelPermission
 import io.viascom.discord.bot.aluna.util.modalTextField
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.components.textdisplay.TextDisplay
@@ -91,7 +92,7 @@ public class DeleteMessagesProvider(
                 return@queue
             }
 
-            if (!event.guild!!.getMember(event.jda.selfUser)!!.hasPermission(channel, Permission.MESSAGE_MANAGE)) {
+            if (!event.guild!!.getMember(event.jda.selfUser)!!.hasAccessibleChannelPermission(channel, Permission.MESSAGE_MANAGE)) {
                 hook.editOriginal("${systemCommandEmojiProvider.crossEmoji().formatted} This bot is not allowed to remove messages.").queue()
                 return@queue
             }

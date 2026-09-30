@@ -18,12 +18,12 @@ plugins {
 ext {
     major = 1
     minor = 5
-    patch = 0
+    patch = 1
     modifier = ""
 
     isCiServer = System.getenv("GITHUB_ACTIONS") != null || System.getProperty("GITHUB_ACTIONS") != null
 
-    jdaVersion = "6.4.0"
+    jdaVersion = "6.7.0"
     retrofitVersion = "2.9.0"
     jemojiVersion = "1.7.5"
     gsonVersion = "2.13.2"
