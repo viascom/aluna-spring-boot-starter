@@ -44,6 +44,14 @@ public class AlunaDiscordProperties {
     public var token: String? = null
 
     /**
+     * REST endpoint used to resolve the recommended shard count and session start limit.
+     *
+     * Point this at a protocol-faithful gateway proxy to make the proxy the source of truth for the
+     * shard topology. Defaults to Discord.
+     */
+    public var gatewayBotUrl: String = "https://discord.com/api/gateway/bot"
+
+    /**
      * Discord Bot Application-Id
      * Can be found here: https://discord.com/developers/applications
      */

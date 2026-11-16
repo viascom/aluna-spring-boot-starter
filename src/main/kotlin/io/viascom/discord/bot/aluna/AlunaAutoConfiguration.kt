@@ -59,6 +59,25 @@ public open class AlunaAutoConfiguration {
     private val logger: Logger = LoggerFactory.getLogger(AlunaAutoConfiguration::class.java)
 
     /**
+     * Returns the default implementation of the RecommendedShardsResolver.
+     * Queries the configured gateway URL (Discord by default) for the recommended shard count.
+     *
+     * @param alunaProperties the AlunaProperties dependency
+     * @param objectMapper the ObjectMapper dependency
+     * @return the created RecommendedShardsResolver instance
+     */
+    @Bean
+    @ConditionalOnJdaEnabled
+    @ConditionalOnMissingBean
+    public open fun defaultRecommendedShardsResolver(
+        alunaProperties: AlunaProperties,
+        objectMapper: ObjectMapper
+    ): RecommendedShardsResolver {
+        logger.debug("Enable DefaultRecommendedShardsResolver")
+        return DefaultRecommendedShardsResolver(alunaProperties, objectMapper)
+    }
+
+    /**
      * Creates a default ShardManager instance using the provided dependencies.
      *
      * @param interactionEventListener the InteractionEventListener dependency
@@ -72,7 +91,7 @@ public open class AlunaAutoConfiguration {
      * @param eventPublisher the EventPublisher dependency
      * @param alunaProperties the AlunaProperties dependency
      * @param customizers the list of ShardManagerBuilderCustomizer dependencies
-     * @param objectMapper the ObjectMapper dependency
+     * @param recommendedShardsResolver the RecommendedShardsResolver dependency
      * @param discordBot the DiscordBot dependency
      * @return the created ShardManager instance
      */
@@ -91,7 +110,7 @@ public open class AlunaAutoConfiguration {
         eventPublisher: EventPublisher,
         alunaProperties: AlunaProperties,
         customizers: List<ShardManagerBuilderCustomizer>,
-        objectMapper: ObjectMapper,
+        recommendedShardsResolver: RecommendedShardsResolver,
         discordBot: DiscordBot
     ): ShardManager {
         logger.debug("Enable DefaultShardManagerBuilder")
@@ -108,7 +127,7 @@ public open class AlunaAutoConfiguration {
             eventPublisher,
             alunaProperties,
             customizers,
-            objectMapper,
+            recommendedShardsResolver,
             discordBot
         )
 

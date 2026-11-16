@@ -21,13 +21,11 @@
 
 package io.viascom.discord.bot.aluna.bot.shardmanager
 
-import tools.jackson.databind.ObjectMapper
 import io.viascom.discord.bot.aluna.AlunaDispatchers
 import io.viascom.discord.bot.aluna.bot.DiscordBot
 import io.viascom.discord.bot.aluna.bot.event.CoroutineEventManager
 import io.viascom.discord.bot.aluna.bot.listener.*
 import io.viascom.discord.bot.aluna.event.EventPublisher
-import io.viascom.discord.bot.aluna.model.GatewayResponse
 import io.viascom.discord.bot.aluna.property.AlunaDiscordProperties
 import io.viascom.discord.bot.aluna.property.AlunaProperties
 import io.viascom.discord.bot.aluna.util.AlunaThreadPool
@@ -42,12 +40,8 @@ import net.dv8tion.jda.api.utils.ChunkingFilter
 import net.dv8tion.jda.api.utils.ConcurrentSessionController
 import net.dv8tion.jda.api.utils.MemberCachePolicy
 import net.dv8tion.jda.api.utils.cache.CacheFlag
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 import kotlin.system.exitProcess
 
 public open class DefaultShardManagerBuilder(
@@ -62,7 +56,7 @@ public open class DefaultShardManagerBuilder(
     private val eventPublisher: EventPublisher,
     private val alunaProperties: AlunaProperties,
     private val customizers: List<ShardManagerBuilderCustomizer>,
-    private val objectMapper: ObjectMapper,
+    private val recommendedShardsResolver: RecommendedShardsResolver,
     private val discordBot: DiscordBot,
 ) : ShardManagerBuilder {
 
@@ -109,14 +103,13 @@ public open class DefaultShardManagerBuilder(
                 .setAutoReconnect(alunaProperties.discord.autoReconnect)
 
             val recommendedShardsDeferred = async {
-                val recommendedShards = getRecommendedShards(alunaProperties.discord.token!!)
+                val recommendedShards = recommendedShardsResolver.resolve()
                 discordBot.sessionStartLimits = recommendedShards?.sessionStartLimit
                 recommendedShards
             }
 
             if (alunaProperties.discord.sharding.type == AlunaDiscordProperties.Sharding.Type.SINGLE) {
                 val recommendedShards = recommendedShardsDeferred.await()
-                shardManagerBuilder.setShardsTotal(alunaProperties.discord.sharding.totalShards)
 
                 if (alunaProperties.discord.sharding.totalShards == -1) {
 
@@ -125,10 +118,13 @@ public open class DefaultShardManagerBuilder(
                     }
 
                     logger.info("Using from discord recommended amount of ${recommendedShards.shards} shards")
+                    // JDA gets the resolved count too; with -1 it would query Discord itself and could disagree with the latch.
+                    shardManagerBuilder.setShardsTotal(recommendedShards.shards)
                     discordBot.totalShards = recommendedShards.shards
                     latchCount = recommendedShards.shards
                 } else {
                     logger.info("Using ${alunaProperties.discord.sharding.totalShards} shards as defined in the properties")
+                    shardManagerBuilder.setShardsTotal(alunaProperties.discord.sharding.totalShards)
                     discordBot.totalShards = alunaProperties.discord.sharding.totalShards
                     latchCount = alunaProperties.discord.sharding.totalShards
                 }
@@ -257,29 +253,4 @@ public open class DefaultShardManagerBuilder(
     }
 
     override fun getLatchCount(): Int = latchCount
-
-    private fun getRecommendedShards(token: String): GatewayResponse? {
-        val gatewayResponse = try {
-            val request = Request.Builder()
-                .get()
-                .url("https://discord.com/api/gateway/bot")
-                .addHeader("Authorization", "Bot $token")
-                .addHeader("Content-Type", "application/json")
-                .build()
-
-            val response = OkHttpClient().newCall(request).execute()
-            if (response.isSuccessful) {
-                response.body?.string()?.let { objectMapper.readValue(it, GatewayResponse::class.java) } ?: throw IllegalAccessError("Response was null")
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            logger.error("Unable to fetch recommended shard count", e)
-            null
-        }
-
-        gatewayResponse?.sessionStartLimit?.let { it.resetTimestamp = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(it.resetAfter / 1000L) }
-
-        return gatewayResponse
-    }
 }
