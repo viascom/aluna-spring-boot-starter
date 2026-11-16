@@ -1,0 +1,11 @@
+[extend]
+useDefault = true
+
+# Old release tags (0.0.10-0.0.17) reach these commits; the bot tokens in their
+# src/test/resources/application.yml are rotated.
+[[allowlists]]
+description = "Rotated bot tokens in old release tags"
+commits = [
+    "69b043cb1d82bd43552f3601e90bcbb88c63f809",
+    "d41b0410e1d49f461599917a7c9d5983d98afd56",
+]
