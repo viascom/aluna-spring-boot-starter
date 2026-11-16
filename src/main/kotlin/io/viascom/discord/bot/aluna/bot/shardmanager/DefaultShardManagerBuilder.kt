@@ -110,7 +110,6 @@ public open class DefaultShardManagerBuilder(
 
             if (alunaProperties.discord.sharding.type == AlunaDiscordProperties.Sharding.Type.SINGLE) {
                 val recommendedShards = recommendedShardsDeferred.await()
-                shardManagerBuilder.setShardsTotal(alunaProperties.discord.sharding.totalShards)
 
                 if (alunaProperties.discord.sharding.totalShards == -1) {
 
@@ -119,10 +118,13 @@ public open class DefaultShardManagerBuilder(
                     }
 
                     logger.info("Using from discord recommended amount of ${recommendedShards.shards} shards")
+                    // JDA gets the resolved count too; with -1 it would query Discord itself and could disagree with the latch.
+                    shardManagerBuilder.setShardsTotal(recommendedShards.shards)
                     discordBot.totalShards = recommendedShards.shards
                     latchCount = recommendedShards.shards
                 } else {
                     logger.info("Using ${alunaProperties.discord.sharding.totalShards} shards as defined in the properties")
+                    shardManagerBuilder.setShardsTotal(alunaProperties.discord.sharding.totalShards)
                     discordBot.totalShards = alunaProperties.discord.sharding.totalShards
                     latchCount = alunaProperties.discord.sharding.totalShards
                 }
